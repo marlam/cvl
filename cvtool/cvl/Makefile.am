@@ -1,0 +1,56 @@
+lib_LTLIBRARIES = libcvl.la
+
+EXTRA_DIST = \
+	cvl_assert.h \
+	cvl_msg.c \
+	cvl_math.c \
+	cvl_pixel.c \
+	cvl_vector.c \
+	cvl_field.c \
+	cvl_frame.c \
+	cvl_io.c \
+	cvl_color.c \
+	cvl_convolve.c \
+	cvl_smooth.c \
+	cvl_edge.c \
+	cvl_transform.c \
+	cvl_draw.c \
+	cvl_blend.c \
+	cvl_misc.c \
+	cvl_stereo.c \
+	cvl_opticalflow.c
+
+libcvl_la_SOURCES = cvl.c
+libcvl_la_LDFLAGS = -version-info $(LT_CURRENT):$(LT_REVISION):$(LT_AGE)
+libcvl_la_LIBADD = ../gnulib/libgnu.la ../notgnulib/libnotgnu.la
+nobase_include_HEADERS = \
+	cvl/cvl_msg.h \
+	cvl/cvl_math.h \
+	cvl/cvl_pixel.h \
+	cvl/cvl_vector.h \
+	cvl/cvl_field.h \
+	cvl/cvl_frame.h \
+	cvl/cvl_io.h \
+	cvl/cvl_color.h \
+	cvl/cvl_convolve.h \
+	cvl/cvl_smooth.h \
+	cvl/cvl_edge.h \
+	cvl/cvl_transform.h \
+	cvl/cvl_draw.h \
+	cvl/cvl_blend.h \
+	cvl/cvl_misc.h \
+	cvl/cvl_stereo.h \
+	cvl/cvl_opticalflow.h \
+	cvl/cvl.h
+
+AM_CPPFLAGS = -I$(top_srcdir)/gnulib -I$(top_srcdir)/notgnulib
+AM_CFLAGS = -DLIBRARY_NAME=\"CVL\" -DCVL_DEBUG=$(CVL_DEBUG) $(GSL_CFLAGS) -DGSL_RANGE_CHECK_OFF
+
+bin_SCRIPTS = cvl-config
+
+m4datadir = $(datadir)/aclocal
+dist_m4data_DATA = cvl.m4
+
+pkgconfigdir = $(libdir)/pkgconfig
+pkgconfig_DATA = cvl.pc
+DISTCLEANFILES = $(pkgconfig_DATA)

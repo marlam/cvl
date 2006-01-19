@@ -1,0 +1,37 @@
+Fixes:
+- More operations for "vectors" command: adding, comparing, converting
+  spherical<->cartesian, ..?
+- Rewrite grid command
+
+Missing functionality for CVL:
+- cv_draw.c: Replace existing primitive functions with more powerful
+  framework:
+  Drawing properties:
+    - line width
+    - line style
+    - pattern-fill
+    - anitalias
+  Objects to draw:
+    - ellipses
+    - bezier curves
+    - arcs using three points
+    - arrows, arrow style
+    - text
+  Maybe use an existing library like CAIRO?
+- Sharpening (Unsharp masking, Laplace, ...)
+- Segmentation
+  flexible image segmentation (?)
+- Thinning
+- Distance maps
+
+Missing commands:
+- Draw
+  line, polygon, circle, ellipse, text
+- Sharpen
+  Unsharp masking, Laplace, ...
+
+Missing documentation:
+- Complete the texinfo manual for CVL
+
+Missing preparations for 0.0.1/0.0.2:
+- solve all FIXME, TODO, XXX problems

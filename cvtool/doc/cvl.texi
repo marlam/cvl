@@ -1,0 +1,125 @@
+\input texinfo   @c -*-texinfo-*-
+@afourpaper
+@setfilename cvl.info
+@set UPDATED January 18, 2006
+@set UPDATED-MONTH January 2006
+@set EDITION 0.0.1
+@set VERSION 0.0.1
+@settitle CVL @value{VERSION}
+
+@c Define new indices: for options (op) and commands (cm)
+@defcodeindex op
+@defcodeindex cm
+
+@finalout
+@copying
+This manual was last updated @value{UPDATED} for version
+@value{VERSION} of CVL.
+
+Copyright @copyright{} 2005, 2006 Martin Lambers
+
+@quotation
+This program, including this manual, is free software; you can redistribute it
+and/or modify it under the terms of the GNU General Public License as published
+by the Free Software Foundation; either version 2 of the License, or (at your
+option) any later version.
+
+This program, including this manual, is distributed in the hope that it will be
+useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General
+Public License for more details.
+
+You should have received a copy of the GNU General Public License along with
+this program and manual; if not, write to the Free Software Foundation, Inc.,
+51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+@end quotation
+@end copying
+
+@dircategory Individual utilities
+@direntry
+* CVL: (CVL).	A computer vision library.
+@end direntry
+
+@titlepage
+@title CVL
+@subtitle A computer vision library
+@subtitle version @value{VERSION}, @value{UPDATED}
+@author Martin Lambers (@email{marlam@@marlam.de})
+@page
+@vskip 0pt plus 1filll
+@insertcopying
+@end titlepage
+
+@contents
+
+@ifnottex
+@node Top
+@top CVL
+@insertcopying
+@end ifnottex
+
+@menu
+* Using CVL::
+* Concepts and overview::
+* API reference::
+* Enhancing CVL::
+@end menu
+
+
+@node Using CVL
+@chapter Using CVL
+
+Include the header file @code{<cvl/cvl.h>} in your programs:
+@example
+#include <cvl/cvl.h>
+@end example
+
+Then compile and link your program with the appropriate flags:
+@example
+cc `cvl-config --cflags` `cvl-config --libs` -o myprog myprog.c
+@end example
+
+The @code{cvl-config} script will take care that the header files
+will be found and that your program will be linked against the 
+GNU Scientific Library, too.
+
+If your project uses the GNU autotools, you can use the following
+in @code{configure.ac} to automatically get @code{CVL_CFLAGS} 
+and @code{CVL_LIBS} and verify that the requested version or a newer
+one is used:
+@example
+AM_PATH_CVL("0.0.1")
+@end example
+
+CVL provides a pkgconfig metadata file, so you can also use
+@code{pkg-config} to get the required information:
+@example
+cc `pkg-config --cflags cvl` `pkg-config --libs cvl` -o myprog myprog.c
+@end example
+or, for @code{configure.ac}:
+@example
+PKG_PROG_PKG_CONFIG
+PKG_CHECK_MODULES(CVL, cvl >= 0.0.1, [have_cvl=yes], [have_cvl=no])
+@end example
+
+
+@node Concepts and overview
+@chapter Concepts and overview
+
+TODO
+
+
+@node API reference
+@chapter API reference
+
+The API reference is provided in HTML format in the separate directory 
+@code{cvl-reference}.
+
+
+@node Enhancing CVL
+@chapter Enhancing CVL
+
+TODO
+
+
+@bye

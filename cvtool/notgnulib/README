@@ -1,0 +1,16 @@
+This library fulfills a similar purpose as gnulib: it provides portability
+fixes for defective systems.
+
+The modules in this library are written in a way that would make inclusion
+into gnulib possible.
+
+The reason that these modules are not part of gnulib is that they are
+- not appropriate for gnulib, or
+- not good enough for gnulib, or
+- not complete, or
+- specific to cvtool and not useful for others, or
+- still in testing phase, or
+- temporary hacks.
+
+Where appropriate, modules of this library should be proposed for inclusion in
+gnulib.
