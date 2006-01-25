@@ -172,7 +172,7 @@ int cmd_version(int argc, char *argv[])
     if (argc == 1)
     {
 	cvl_msg_fmt_req("%s version %s\n"
-		"Copyright (C) 2005 Martin Lambers <%s>.\n"
+		"Copyright (C) 2005, 2006  Martin Lambers <%s>.\n"
 		"This is free software; see the source for copying conditions. There is NO "
 		"warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.",
 		PROGRAM_NAME, VERSION, PACKAGE_BUGREPORT);
