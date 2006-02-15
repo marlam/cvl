@@ -1281,12 +1281,13 @@ bool cvl_io_write(FILE *f, cvl_io_info_t *output_info, const cvl_frame_t *frame)
     }
 }
 
+
 /**
- * \param f		The stream to read the frame from, opened with mode "rb".
+ * \param f		The stream to read the frame from.
  * \param frame		The frame.
  * \return		Success or error.
  *
- * Load a frame from a stream in NetPBM format.
+ * Reads a frame from a stream in NetPBM format.
  */
 bool cvl_io_read_pnm(FILE *f, cvl_frame_t **frame)
 {
@@ -1300,13 +1301,13 @@ bool cvl_io_read_pnm(FILE *f, cvl_frame_t **frame)
 }
 
 /**
- * \param f		The stream to write the frame to, opened with mode "wb".
+ * \param f		The stream to write the frame to.
  * \param frame		The frame.
  * \return		Success or error.
  *
- * Saves a frame in NetPBM format.
+ * Writes a frame to a stream in NetPBM format.
  */
-bool cvl_io_save_pnm(FILE *f, const cvl_frame_t *frame)
+bool cvl_io_write_pnm(FILE *f, const cvl_frame_t *frame)
 {
     cvl_io_info_t *output_info;
     bool e;
@@ -1316,4 +1317,42 @@ bool cvl_io_save_pnm(FILE *f, const cvl_frame_t *frame)
     e = cvl_io_write(f, output_info, frame);
     cvl_io_info_free(output_info);
     return e;
+}
+
+/**
+ * \param filename	The file to read the frame from.
+ * \param frame		The frame.
+ * \return		Success or error.
+ *
+ * Loads a frame from a file in NetPBM format.
+ */
+bool cvl_io_load_pnm(const char *filename, cvl_frame_t **frame)
+{
+    FILE *f;
+    
+    if (!(f = fopen(filename, "r")))
+    {
+	cvl_msg_err("cannot open %s: %s", filename, strerror(errno));
+	return false;
+    }
+    return cvl_io_read_pnm(f, frame);
+}
+
+/**
+ * \param filename	The file to write the frame to.
+ * \param frame		The frame.
+ * \return		Success or error.
+ *
+ * Saves a frame to a file in NetPBM format.
+ */
+bool cvl_io_save_pnm(const char *filename, const cvl_frame_t *frame)
+{
+    FILE *f;
+    
+    if (!(f = fopen(filename, "w")))
+    {
+	cvl_msg_err("cannot open %s: %s", filename, strerror(errno));
+	return false;
+    }
+    return cvl_io_write_pnm(f, frame);    
 }

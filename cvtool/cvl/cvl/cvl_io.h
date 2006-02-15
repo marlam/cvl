@@ -91,6 +91,8 @@ bool cvl_io_read(FILE *f, cvl_io_info_t *input_info, cvl_frame_t **frame);
 bool cvl_io_write(FILE *f, cvl_io_info_t *output_info, const cvl_frame_t *frame);
 
 bool cvl_io_read_pnm(FILE *f, cvl_frame_t **frame);
-bool cvl_io_save_pnm(FILE *f, const cvl_frame_t *frame);
+bool cvl_io_write_pnm(FILE *f, const cvl_frame_t *frame);
+bool cvl_io_load_pnm(const char *filename, cvl_frame_t **frame);
+bool cvl_io_save_pnm(const char *filename, const cvl_frame_t *frame);
 
 #endif
