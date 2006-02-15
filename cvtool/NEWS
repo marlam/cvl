@@ -1,2 +1,5 @@
+Version 0.0.2:
+- CVL: New functions to more easily load and save NetPBM files.
+
 Version 0.0.1:
 - initial public release
