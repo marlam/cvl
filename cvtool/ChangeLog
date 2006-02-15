@@ -1,2 +1,6 @@
+Version 0.0.2 (not yet released):
+- CVL: cvl_dibr(), cvtool: dibr:
+  Prevent integer overflow in (width * 2) when creating stereo frames.
+
 Version 0.0.1:
 - initial public release

@@ -263,7 +263,7 @@ static int cvl_dibr_fill_hole(cvl_frame_t *frame, int offset, int *mask, int l, 
  * \param b		Virtual eye distance in pixels.
  * \param f		focal length, usually 1.
  * \param fill_technique	Technique to fill disocclusion holes.
- * \return	A stereoscopic image pair in one frame, left and right view side by side.
+ * \return		A stereoscopic image pair in one frame, left and right view side by side.
  *
  * Calculate a stereoscopic image pair from an intermediate view and a depth 
  * map. The returned frame will contain both the left and right view, side by 
@@ -272,14 +272,16 @@ static int cvl_dibr_fill_hole(cvl_frame_t *frame, int offset, int *mask, int l, 
  * intermediate view. \a zps is the zero parallax setting, it must be in [0,1]. 
  * 1 means near, 0 means far. \a b is the "eye" distance in pixels. \a f is the 
  * camera focal length; usually set to 1.0. Disocclusion holes will be filled
- * with \a fill_technique.
+ * with \a fill_technique. Make sure that left and right view fit into one frame
+ * without overflowing an int.
  */
 cvl_frame_t *cvl_dibr(const cvl_frame_t *frame, const cvl_frame_t *depthmap, 
 	double position, double zps, int b, double f, cvl_dibr_fill_technique_t fill_technique)
 {
-    cvl_assert(frame != 0 && depthmap != 0);
+    cvl_assert(frame != NULL && depthmap != NULL);
     cvl_assert(cvl_frame_pixel_type(depthmap) == CVL_PIXEL_GRAY);
     cvl_assert(cvl_frame_width(frame) == cvl_frame_width(depthmap) && cvl_frame_height(frame) == cvl_frame_height(depthmap));
+    cvl_assert(cvl_product_fits_in_int(cvl_frame_width(frame), 2));
     cvl_assert(position >= -1.0 && position <= 1.0);
     cvl_assert(zps >= 0.0 && zps <= 1.0);
     cvl_assert(b >= 0);

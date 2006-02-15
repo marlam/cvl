@@ -110,6 +110,14 @@ int cmd_dibr(int argc, char *argv[])
 	    error = true;
 	    break;
 	}
+	if (!cvl_product_fits_in_int(cvl_frame_width(frame), 2))
+	{
+	    cvl_msg_err("frame too wide");
+	    cvl_frame_free(frame);
+	    cvl_frame_free(depthmap);
+	    error = true;
+	    break;
+	}
 	cvl_frame_to_gray(depthmap);
 	stereoframe = cvl_dibr(frame, depthmap, position.value, zps.value, 
 		b.value, 1.0, hole_filling.value);
