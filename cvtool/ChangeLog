@@ -1,4 +1,5 @@
 Version 0.0.2 (not yet released):
+- CVL: Changed cvl_field_get*() functions. Added cvl_field_ref*() functions.
 - CVL: cvl_io_read_pnm(), cvl_io_write_pnm(), cvl_io_load_pnm(),
        cvl_io_save_pnm()
   Reworked i/o functions to load/save and read/write pnm files.  

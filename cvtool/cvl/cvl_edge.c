@@ -160,10 +160,8 @@ static void cvl_frame_edge_non_max_suppression(cvl_frame_t *edge_frame, const cv
 	{
 	    if (cvl_frame_get(edge_frame, x, y) > 0)
 	    {
-		double edge_dir;
-		int edge_dir_int;
-		cvl_field_get(edge_dir_field, x, y, &edge_dir);
-		edge_dir_int = cvl_iround(cvl_rad_to_deg(edge_dir));
+		const double *edge_dir = cvl_field_get(edge_dir_field, x, y);
+		int edge_dir_int = cvl_iround(cvl_rad_to_deg(*edge_dir));
 		switch ((((edge_dir_int + 22) % 360) / 45) % 4)
 		{   // Yes, that works :)
 		    case 0:

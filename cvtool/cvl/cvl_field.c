@@ -71,7 +71,9 @@ extern int errno;
  */
 cvl_field_t *cvl_field_new(size_t element_size, int width, int height)
 {
-    cvl_assert(element_size >= 1 && width > 0 && height > 0);
+    cvl_assert(element_size >= 1);
+    cvl_assert(width > 0);
+    cvl_assert(height > 0);
 
     if (!cvl_product_fits_in_int(width, height)
 	    || !cvl_product_fits_in_size_t(width * height, element_size))
@@ -115,6 +117,8 @@ void cvl_field_free(cvl_field_t *field)
  */
 inline size_t cvl_field_element_size(const cvl_field_t *field)
 {
+    cvl_assert(field != NULL);
+
     return field->_element_size;
 }
 
@@ -126,6 +130,8 @@ inline size_t cvl_field_element_size(const cvl_field_t *field)
  */
 inline int cvl_field_width(const cvl_field_t *field)
 {
+    cvl_assert(field != NULL);
+
     return field->_width;
 }
 
@@ -137,6 +143,8 @@ inline int cvl_field_width(const cvl_field_t *field)
  */
 inline int cvl_field_height(const cvl_field_t *field)
 {
+    cvl_assert(field != NULL);
+
     return field->_height;
 }
 
@@ -148,6 +156,8 @@ inline int cvl_field_height(const cvl_field_t *field)
  */
 void cvl_field_zero(cvl_field_t *field)
 {
+    cvl_assert(field != NULL);
+
     memset(field->_p, 0, cvl_field_width(field) * cvl_field_height(field) 
 	    * cvl_field_element_size(field));
 }
@@ -161,6 +171,8 @@ void cvl_field_zero(cvl_field_t *field)
  */
 void cvl_field_copy(cvl_field_t *dst, const cvl_field_t *src)
 {
+    cvl_assert(dst != NULL);
+    cvl_assert(src != NULL);
     cvl_assert(cvl_field_width(dst) == cvl_field_width(src));
     cvl_assert(cvl_field_height(dst) == cvl_field_height(src));
 
@@ -176,6 +188,8 @@ void cvl_field_copy(cvl_field_t *dst, const cvl_field_t *src)
  */
 cvl_field_t *cvl_field_clone(const cvl_field_t *field)
 {
+    cvl_assert(field != NULL);
+    
     cvl_field_t *clone = cvl_field_new(cvl_field_element_size(field),
 	    cvl_field_width(field), cvl_field_height(field));
     cvl_field_copy(clone, field);
@@ -185,60 +199,56 @@ cvl_field_t *cvl_field_clone(const cvl_field_t *field)
 /**
  * \param field		The field.
  * \param i		The index of the element.
- * \param e		The destination for the element.
+ * \return 		A pointer to the element.
  *
- * Gets an element from a field.
+ * Gets an element from a field by returning a pointer to it.
  * The index refers to all lines of the field one after another, 
  * from top to bottom and left to right.
  */
-inline void cvl_field_get_i(const cvl_field_t *field, int i, void *e)
+inline const void *cvl_field_get_i(const cvl_field_t *field, int i)
 {
     cvl_assert(field != NULL);
-    cvl_assert(e != NULL);
     cvl_assert(i >= 0);
     cvl_assert(i < cvl_field_width(field) * cvl_field_height(field));
 
-    memcpy(e, &((unsigned char *)(field->_p))[cvl_field_element_size(field) * i],
-	    cvl_field_element_size(field));
+    return &((const unsigned char *)(field->_p))[cvl_field_element_size(field) * i];
 }
 
 /**
  * \param field		The field.
  * \param x		The x coordinate.
  * \param y		The y coordinate.
- * \param e		The destination for the element.
+ * \return 		A pointer to the element.
  * 
- * Gets an element from a field.
+ * Gets an element from a field by returning a pointer to it.
  */
-inline void cvl_field_get(const cvl_field_t *field, int x, int y, void *e)
+inline const void *cvl_field_get(const cvl_field_t *field, int x, int y)
 {
     cvl_assert(field != NULL);
-    cvl_assert(e != NULL);
     cvl_assert(x >= 0);
     cvl_assert(x < cvl_field_width(field));
     cvl_assert(y >= 0);
     cvl_assert(y < cvl_field_height(field));
 
-    cvl_field_get_i(field, y * cvl_field_width(field) + x, e);
+    return cvl_field_get_i(field, y * cvl_field_width(field) + x);
 }
 
 /**
  * \param field		The field.
  * \param x		The x coordinate.
  * \param y		The y coordinate.
- * \param e		The destination for the element.
- * \return The element.
+ * \return 		A pointer to the element.
  * 
- * Gets an element from a field, with reflective indexing: arbitrary \a x
- * and \a y values are accepted.
+ * Gets an element from a field by returning a pointer to it.
+ * This function uses reflective indexing: arbitrary \a x and \a y values are accepted.
  */
-inline void cvl_field_get_r(const cvl_field_t *field, int x, int y, void *e)
+inline const void *cvl_field_get_r(const cvl_field_t *field, int x, int y)
 {
     cvl_assert(field != NULL);
 
-    cvl_field_get(field, 
+    return cvl_field_get(field, 
 	    cvl_reflect(x, cvl_field_width(field)), 
-	    cvl_reflect(y, cvl_field_height(field)), e);
+	    cvl_reflect(y, cvl_field_height(field)));
 }
 
 /**
@@ -271,8 +281,74 @@ inline void cvl_field_set_i(cvl_field_t *field, int i, const void *e)
  */
 inline void cvl_field_set(cvl_field_t *field, int x, int y, const void *e)
 {
+    cvl_assert(field != NULL);
+    cvl_assert(e != NULL);
+    cvl_assert(x >= 0);
+    cvl_assert(x < cvl_field_width(field));
+    cvl_assert(y >= 0);
+    cvl_assert(y < cvl_field_height(field));
+
     cvl_field_set_i(field, y * cvl_field_width(field) + x, e);
 }
+
+/**
+ * \param field		The field.
+ * \param i		The index of the element.
+ * \return 		A pointer to the element.
+ *
+ * Returns a pointer to an element in a field. This element can then be
+ * manipulated directly.
+ * The index refers to all lines of the field one after another, 
+ * from top to bottom and left to right.
+ */
+inline void *cvl_field_ref_i(const cvl_field_t *field, int i)
+{
+    cvl_assert(field != NULL);
+    cvl_assert(i >= 0);
+    cvl_assert(i < cvl_field_width(field) * cvl_field_height(field));
+
+    return &((unsigned char *)(field->_p))[cvl_field_element_size(field) * i];
+}
+
+/**
+ * \param field		The field.
+ * \param x		The x coordinate.
+ * \param y		The y coordinate.
+ * \return 		A pointer to the element.
+ * 
+ * Returns a pointer to an element in a field. This element can then be
+ * manipulated directly.
+ */
+inline void *cvl_field_ref(const cvl_field_t *field, int x, int y)
+{
+    cvl_assert(field != NULL);
+    cvl_assert(x >= 0);
+    cvl_assert(x < cvl_field_width(field));
+    cvl_assert(y >= 0);
+    cvl_assert(y < cvl_field_height(field));
+
+    return cvl_field_ref_i(field, y * cvl_field_width(field) + x);
+}
+
+/**
+ * \param field		The field.
+ * \param x		The x coordinate.
+ * \param y		The y coordinate.
+ * \return 		A pointer to the element.
+ * 
+ * Returns a pointer to an element in a field. This element can then be
+ * manipulated directly.
+ * This function uses reflective indexing: arbitrary \a x and \a y values are accepted.
+ */
+inline void *cvl_field_ref_r(const cvl_field_t *field, int x, int y)
+{
+    cvl_assert(field != NULL);
+
+    return cvl_field_ref(field, 
+	    cvl_reflect(x, cvl_field_width(field)), 
+	    cvl_reflect(y, cvl_field_height(field)));
+}
+
 
 /**
  * \param field		The field.

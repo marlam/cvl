@@ -377,14 +377,13 @@ void cvl_trackdepth_init_next_trackmap(cvl_field_t *trackmap,
 	for (int x = 0; x < cvl_field_width(trackmap); x++)
 	{
 	    int16_t d;
-	    cvl_vector2i_t flow_vector;
-	    cvl_field_get(flow, x, y, &flow_vector);
+	    const int *flow_vector = cvl_field_get(flow, x, y);
 	    int next_pos_x = x + flow_vector[0];
 	    int next_pos_y = y + flow_vector[1];
 	    if (next_pos_x >= 0 && next_pos_x < cvl_field_width(trackmap) 
 		    && next_pos_y >= 0 && next_pos_y < cvl_field_height(trackmap))
 	    {
-		cvl_field_get(prev_trackmap, next_pos_x, next_pos_y, &d);
+		d = *(const int16_t *)cvl_field_get(prev_trackmap, next_pos_x, next_pos_y);
 	    }
 	    else
 	    {
@@ -419,8 +418,8 @@ cvl_frame_t *cvl_trackdepth(int N, int req, const cvl_field_t *trackmap_A, const
     depthmap = cvl_frame_new(CVL_PIXEL_GRAY, cvl_field_width(trackmap_A), cvl_field_height(trackmap_A));
     for (int i = 0; i < cvl_field_width(trackmap_A) * cvl_field_height(trackmap_A); i++)
     {
-	cvl_field_get_i(trackmap_A, i, &dA);
-	cvl_field_get_i(trackmap_O, i, &dO);
+	dA = *(const int16_t *)cvl_field_get_i(trackmap_A, i);
+	dO = *(const int16_t *)cvl_field_get_i(trackmap_O, i);
 	if (dA == -1 && dO == -1)
 	{
 	    depth = 0x00;
