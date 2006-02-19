@@ -45,22 +45,6 @@ extern int errno;
 
 
 /**
- * \typedef cvl_vector2i_t
- * A vector with two integer components.
- */
-
-/**
- * \typedef cvl_vector2_t
- * A vector with two floating point components.
- */
-
-/**
- * \typedef cvl_vector3_t
- * A vector with three floating point components.
- */
-
-
-/**
  * \param s		String buffer.
  * \param s_size	The size of \a s.
  * \param v		The vector.
@@ -68,7 +52,7 @@ extern int errno;
  *
  * Converts \a v into a string. May fail if \a s is too short.
  */
-bool cvl_vector2i_to_string(char *s, size_t s_size, cvl_vector2i_t v)
+bool cvl_vector2i_to_string(char *s, size_t s_size, const int *v)
 {
     return (snprintf(s, s_size, "%d %d", v[0], v[1]) < (int)s_size);
 }
@@ -81,7 +65,7 @@ bool cvl_vector2i_to_string(char *s, size_t s_size, cvl_vector2i_t v)
  * Converts the string \a s into a vector \a v. May fail if \a s is not a valid
  * representation of the given vector type.
  */
-bool cvl_vector2i_from_string(const char *s, cvl_vector2i_t v)
+bool cvl_vector2i_from_string(const char *s, int *v)
 {
     long val;
     char *p;
@@ -107,7 +91,7 @@ bool cvl_vector2i_from_string(const char *s, cvl_vector2i_t v)
  *
  * Copies a vector from \a src to \a dst.
  */
-inline void cvl_vector2i_copy(cvl_vector2i_t dst, const cvl_vector2i_t src)
+inline void cvl_vector2i_copy(int *dst, const int *src)
 {
     dst[0] = src[0];
     dst[1] = src[1];
@@ -118,33 +102,33 @@ inline void cvl_vector2i_copy(cvl_vector2i_t dst, const cvl_vector2i_t src)
  *
  * Zeroes a vector.
  */
-inline void cvl_vector2i_zero(cvl_vector2i_t v)
+inline void cvl_vector2i_zero(int *v)
 {
     v[0] = 0;
     v[1] = 0;
 }
 
 /**
+ * \param result	The result.
  * \param a		A vector.
  * \param b		A vector.
- * \param result	The result.
  *
  * Adds two vectors.
  */
-inline void cvl_vector2i_add(const cvl_vector2i_t a, const cvl_vector2i_t b, cvl_vector2i_t result)
+inline void cvl_vector2i_add(int *result, const int *a, const int *b)
 {
     result[0] = a[0] + b[0];
     result[1] = a[1] + b[1];
 }
 
 /**
+ * \param result	The result.
  * \param a		A vector.
  * \param b		A vector.
- * \param result	The result.
  *
  * Subracts two vectors.
  */
-inline void cvl_vector2i_sub(const cvl_vector2i_t a, const cvl_vector2i_t b, cvl_vector2i_t result)
+inline void cvl_vector2i_sub(int *result, const int *a, const int *b)
 {
     result[0] = a[0] - b[0];
     result[1] = a[1] - b[1];
@@ -156,7 +140,7 @@ inline void cvl_vector2i_sub(const cvl_vector2i_t a, const cvl_vector2i_t b, cvl
  *
  * Scales a vector.
  */
-inline void cvl_vector2i_scale(cvl_vector2i_t v, double lambda)
+inline void cvl_vector2i_scale(int *v, double lambda)
 {
     v[0] = cvl_iround(v[0] * lambda);
     v[1] = cvl_iround(v[1] * lambda);
@@ -169,7 +153,7 @@ inline void cvl_vector2i_scale(cvl_vector2i_t v, double lambda)
  *
  * Multiplies two vectors.
  */
-inline int cvl_vector2i_mul(const cvl_vector2i_t a, const cvl_vector2i_t b)
+inline int cvl_vector2i_mul(const int *a, const int *b)
 {
     return (a[0] * b[0] + a[1] * b[1]);
 }
@@ -180,7 +164,7 @@ inline int cvl_vector2i_mul(const cvl_vector2i_t a, const cvl_vector2i_t b)
  *
  * Computes the euclidean norm of a vector.
  */
-inline double cvl_vector2i_norm_euc(const cvl_vector2i_t v)
+inline double cvl_vector2i_norm_euc(const int *v)
 {
     return sqrt(cvl_vector2i_mul(v, v));
 }
@@ -192,7 +176,7 @@ inline double cvl_vector2i_norm_euc(const cvl_vector2i_t v)
  *
  * Computes the geodesic distance between two vectors.
  */
-inline double cvl_vector2i_dist_arc(const cvl_vector2i_t a, const cvl_vector2i_t b)
+inline double cvl_vector2i_dist_arc(const int *a, const int *b)
 {
     double x = (double)cvl_vector2i_mul(a, b) / (cvl_vector2i_norm_euc(a) * cvl_vector2i_norm_euc(b));
     if (x < -1.0)
@@ -213,10 +197,10 @@ inline double cvl_vector2i_dist_arc(const cvl_vector2i_t a, const cvl_vector2i_t
  *
  * Computes the euclidean distance between two vectors.
  */
-inline double cvl_vector2i_dist_euc(const cvl_vector2i_t a, const cvl_vector2i_t b)
+inline double cvl_vector2i_dist_euc(const int *a, const int *b)
 {
-    cvl_vector2i_t d;
-    cvl_vector2i_sub(a, b, d);
+    int d[2];
+    cvl_vector2i_sub(d, a, b);
     return cvl_vector2i_norm_euc(d);
 }
 
@@ -247,10 +231,9 @@ cvl_frame_t *cvl_vector2i_visualize(const cvl_field_t *field,
     {
 	for (int x = 0; x < cvl_field_width(field); x += sample_x)
 	{
-	    cvl_vector2i_t v;
+	    const int *v = cvl_field_get(field, x, y);
 	    int needle_pos_x = x / sample_x * dist_x;
 	    int needle_pos_y = y / sample_y * dist_y;
-	    cvl_field_get(field, x, y, &v);
 	    int delta_x = cvl_iround((double)(v[0]) * factor);
 	    int delta_y = cvl_iround((double)(v[1]) * factor);
 	    cvl_draw_circle(vis, cvl_pixel_gray(160), needle_pos_x, needle_pos_y, 1);
@@ -269,7 +252,7 @@ cvl_frame_t *cvl_vector2i_visualize(const cvl_field_t *field,
  *
  * Converts \a v into a string. May fail if \a s is too short.
  */
-bool cvl_vector2_to_string(char *s, size_t s_size, cvl_vector2_t v)
+bool cvl_vector2_to_string(char *s, size_t s_size, const double *v)
 {
     return (snprintf(s, s_size, "%.20g %.20g", v[0], v[1]) < (int)s_size);
 }
@@ -282,7 +265,7 @@ bool cvl_vector2_to_string(char *s, size_t s_size, cvl_vector2_t v)
  * Converts the string \a s into a vector \a v. May fail if \a s is not a valid
  * representation of the given vector type.
  */
-bool cvl_vector2_from_string(const char *s, cvl_vector2_t v)
+bool cvl_vector2_from_string(const char *s, double *v)
 {
     char *p;
 
@@ -305,7 +288,7 @@ bool cvl_vector2_from_string(const char *s, cvl_vector2_t v)
  *
  * Copies a vector from \a src to \a dst.
  */
-inline void cvl_vector2_copy(cvl_vector2_t dst, const cvl_vector2_t src)
+inline void cvl_vector2_copy(double *dst, const double *src)
 {
     dst[0] = src[0];
     dst[1] = src[1];
@@ -316,7 +299,7 @@ inline void cvl_vector2_copy(cvl_vector2_t dst, const cvl_vector2_t src)
  *
  * Zeroes a vector.
  */
-inline void cvl_vector2_zero(cvl_vector2_t v)
+inline void cvl_vector2_zero(double *v)
 {
     v[0] = 0.0;
     v[1] = 0.0;
@@ -329,32 +312,32 @@ inline void cvl_vector2_zero(cvl_vector2_t v)
  *
  * Tests if two vectors are equal, with a given tolerance.
  */
-inline bool cvl_vector2_equal(const cvl_vector2_t a, const cvl_vector2_t b, double epsilon)
+inline bool cvl_vector2_equal(const double *a, const double *b, double epsilon)
 {
     return (fabs(a[0] - b[0]) < epsilon && fabs(a[1] - b[1]) < epsilon);
 }
 
 /**
+ * \param result	The result.
  * \param a		A vector.
  * \param b		A vector.
- * \param result	The result.
  *
  * Adds two vectors.
  */
-inline void cvl_vector2_add(const cvl_vector2_t a, const cvl_vector2_t b, cvl_vector2_t result)
+inline void cvl_vector2_add(double *result, const double *a, const double *b)
 {
     result[0] = a[0] + b[0];
     result[1] = a[1] + b[1];
 }
 
 /**
+ * \param result	The result.
  * \param a		A vector.
  * \param b		A vector.
- * \param result	The result.
  *
  * Subracts two vectors.
  */
-inline void cvl_vector2_sub(const cvl_vector2_t a, const cvl_vector2_t b, cvl_vector2_t result)
+inline void cvl_vector2_sub(double *result, const double *a, const double *b)
 {
     result[0] = a[0] - b[0];
     result[1] = a[1] - b[1];
@@ -366,7 +349,7 @@ inline void cvl_vector2_sub(const cvl_vector2_t a, const cvl_vector2_t b, cvl_ve
  *
  * Scales a vector.
  */
-inline void cvl_vector2_scale(cvl_vector2_t v, double lambda)
+inline void cvl_vector2_scale(double *v, double lambda)
 {
     v[0] *= lambda;
     v[1] *= lambda;
@@ -379,7 +362,7 @@ inline void cvl_vector2_scale(cvl_vector2_t v, double lambda)
  *
  * Multiplies two vectors.
  */
-inline double cvl_vector2_mul(const cvl_vector2_t a, const cvl_vector2_t b)
+inline double cvl_vector2_mul(const double *a, const double *b)
 {
     return (a[0] * b[0] + a[1] * b[1]);
 }
@@ -390,7 +373,7 @@ inline double cvl_vector2_mul(const cvl_vector2_t a, const cvl_vector2_t b)
  *
  * Computes the euclidean norm of a vector.
  */
-inline double cvl_vector2_norm_euc(const cvl_vector2_t v)
+inline double cvl_vector2_norm_euc(const double *v)
 {
     return sqrt(cvl_vector2_mul(v, v));
 }
@@ -400,7 +383,7 @@ inline double cvl_vector2_norm_euc(const cvl_vector2_t v)
  * 
  * Scales a vector to length 1.
  */
-inline void cvl_vector2_normalize(cvl_vector2_t v)
+inline void cvl_vector2_normalize(double *v)
 {
     cvl_vector2_scale(v, 1.0 / cvl_vector2_norm_euc(v));
 }
@@ -412,7 +395,7 @@ inline void cvl_vector2_normalize(cvl_vector2_t v)
  *
  * Computes the geodesic distance between two vectors.
  */
-inline double cvl_vector2_dist_arc(const cvl_vector2_t a, const cvl_vector2_t b)
+inline double cvl_vector2_dist_arc(const double *a, const double *b)
 {
     double x = cvl_vector2_mul(a, b) / (cvl_vector2_norm_euc(a) * cvl_vector2_norm_euc(b));
     if (x < -1.0)
@@ -433,39 +416,11 @@ inline double cvl_vector2_dist_arc(const cvl_vector2_t a, const cvl_vector2_t b)
  *
  * Computes the euclidean distance between two vectors.
  */
-inline double cvl_vector2_dist_euc(const cvl_vector2_t a, const cvl_vector2_t b)
+inline double cvl_vector2_dist_euc(const double *a, const double *b)
 {
-    cvl_vector2_t d;
-    cvl_vector2_sub(a, b, d);
+    double d[2];
+    cvl_vector2_sub(d, a, b);
     return cvl_vector2_norm_euc(d);
-}
-
-/**
- * \param vectors	The vectors.
- * \param n		The number of vectors.
- * \param result	The result.
- *
- * Computes an average of the given vectors, using the given method.
- */
-void cvl_vector2_avg_bary(const cvl_vector2_t *vectors, int n, cvl_vector2_t result)
-{
-    double lensum = 0.0;
-    cvl_vector2_zero(result);
-    for (int i = 0; i < n; i++)
-    {
-	cvl_vector2_t tmp;
-	double len;		
-	cvl_vector2_copy(tmp, vectors[i]);
-	len = cvl_vector2_norm_euc(tmp);
-	if (len > 0.001)
-	{
-	    cvl_vector2_scale(tmp, 1.0 / len);
-	    cvl_vector2_add(result, tmp, result);
-	    lensum += len;
-	}
-    }
-    cvl_vector2_normalize(result);
-    cvl_vector2_scale(result, lensum / (double)n);
 }
 
 /**
@@ -495,10 +450,9 @@ cvl_frame_t *cvl_vector2_visualize(const cvl_field_t *field,
     {
 	for (int x = 0; x < cvl_field_width(field); x += sample_x)
 	{
-	    cvl_vector2_t v;
+	    const double *v = cvl_field_get(field, x, y);
 	    int needle_pos_x = x / sample_x * dist_x;
 	    int needle_pos_y = y / sample_y * dist_y;
-	    cvl_field_get(field, x, y, &v);
 	    int delta_x = cvl_iround(v[0] * factor);
 	    int delta_y = cvl_iround(v[1] * factor);
 	    cvl_draw_circle(vis, cvl_pixel_gray(160), needle_pos_x, needle_pos_y, 1);
@@ -517,7 +471,7 @@ cvl_frame_t *cvl_vector2_visualize(const cvl_field_t *field,
  *
  * Converts \a v into a string. May fail if \a s is too short.
  */
-bool cvl_vector3_to_string(char *s, size_t s_size, cvl_vector3_t v)
+bool cvl_vector3_to_string(char *s, size_t s_size, const double *v)
 {
     return (snprintf(s, s_size, "%.20g %.20g %.20g", v[0], v[1], v[2]) < (int)s_size);
 }
@@ -530,7 +484,7 @@ bool cvl_vector3_to_string(char *s, size_t s_size, cvl_vector3_t v)
  * Converts the string \a s into a vector \a v. May fail if \a s is not a valid
  * representation of the given vector type.
  */
-bool cvl_vector3_from_string(const char *s, cvl_vector3_t v)
+bool cvl_vector3_from_string(const char *s, double *v)
 {
     char *p;
 
@@ -553,7 +507,7 @@ bool cvl_vector3_from_string(const char *s, cvl_vector3_t v)
  *
  * Copies a vector from \a src to \a dst.
  */
-inline void cvl_vector3_copy(cvl_vector3_t dst, const cvl_vector3_t src)
+inline void cvl_vector3_copy(double *dst, const double *src)
 {
     dst[0] = src[0];
     dst[1] = src[1];
@@ -565,7 +519,7 @@ inline void cvl_vector3_copy(cvl_vector3_t dst, const cvl_vector3_t src)
  *
  * Zeroes a vector.
  */
-inline void cvl_vector3_zero(cvl_vector3_t v)
+inline void cvl_vector3_zero(double *v)
 {
     v[0] = 0.0;
     v[1] = 0.0;
@@ -579,19 +533,19 @@ inline void cvl_vector3_zero(cvl_vector3_t v)
  *
  * Tests if two vectors are equal, with a given tolerance.
  */
-inline bool cvl_vector3_equal(const cvl_vector3_t a, const cvl_vector3_t b, double epsilon)
+inline bool cvl_vector3_equal(const double *a, const double *b, double epsilon)
 {
     return (fabs(a[0] - b[0]) < epsilon && fabs(a[1] - b[1]) < epsilon && fabs(a[2] - b[2]) < epsilon);
 }
 
 /**
+ * \param result	The result.
  * \param a		A vector.
  * \param b		A vector.
- * \param result	The result.
  *
  * Adds two vectors.
  */
-inline void cvl_vector3_add(const cvl_vector3_t a, const cvl_vector3_t b, cvl_vector3_t result)
+inline void cvl_vector3_add(double *result, const double *a, const double *b)
 {
     result[0] = a[0] + b[0];
     result[1] = a[1] + b[1];
@@ -599,13 +553,13 @@ inline void cvl_vector3_add(const cvl_vector3_t a, const cvl_vector3_t b, cvl_ve
 }
 
 /**
+ * \param result	The result.
  * \param a		A vector.
  * \param b		A vector.
- * \param result	The result.
  *
  * Subracts two vectors.
  */
-inline void cvl_vector3_sub(const cvl_vector3_t a, const cvl_vector3_t b, cvl_vector3_t result)
+inline void cvl_vector3_sub(double *result, const double *a, const double *b)
 {
     result[0] = a[0] - b[0];
     result[1] = a[1] - b[1];
@@ -618,7 +572,7 @@ inline void cvl_vector3_sub(const cvl_vector3_t a, const cvl_vector3_t b, cvl_ve
  *
  * Scales a vector.
  */
-inline void cvl_vector3_scale(cvl_vector3_t v, double lambda)
+inline void cvl_vector3_scale(double *v, double lambda)
 {
     v[0] *= lambda;
     v[1] *= lambda;
@@ -632,19 +586,19 @@ inline void cvl_vector3_scale(cvl_vector3_t v, double lambda)
  *
  * Multiplies two vectors.
  */
-inline double cvl_vector3_mul(const cvl_vector3_t a, const cvl_vector3_t b)
+inline double cvl_vector3_mul(const double *a, const double *b)
 {
     return (a[0] * b[0] + a[1] * b[1] + a[2] * b[2]);
 }
 
 /**
+ * \param result	The result.
  * \param a		A vector.
  * \param b		A vector.
- * \param result	The result.
  *
  * Computes the cross product of two vectors.
  */
-inline void cvl_vector3_crossproduct(const cvl_vector3_t a, const cvl_vector3_t b, cvl_vector3_t result)
+inline void cvl_vector3_crossproduct(double *result, const double *a, const double *b)
 {
     result[0] = a[1] * b[2] - a[2] * b[1];
     result[1] = a[2] * b[0] - a[0] * b[2];
@@ -657,7 +611,7 @@ inline void cvl_vector3_crossproduct(const cvl_vector3_t a, const cvl_vector3_t 
  *
  * Computes the euclidean norm of a vector.
  */
-inline double cvl_vector3_norm_euc(const cvl_vector3_t v)
+inline double cvl_vector3_norm_euc(const double *v)
 {
     return sqrt(cvl_vector3_mul(v, v));
 }
@@ -667,7 +621,7 @@ inline double cvl_vector3_norm_euc(const cvl_vector3_t v)
  * 
  * Scales a vector to length 1.
  */
-inline void cvl_vector3_normalize(cvl_vector3_t v)
+inline void cvl_vector3_normalize(double *v)
 {
     cvl_vector3_scale(v, 1.0 / cvl_vector3_norm_euc(v));
 }
@@ -679,7 +633,7 @@ inline void cvl_vector3_normalize(cvl_vector3_t v)
  *
  * Computes the geodesic distance between two vectors.
  */
-inline double cvl_vector3_dist_arc(const cvl_vector3_t a, const cvl_vector3_t b)
+inline double cvl_vector3_dist_arc(const double *a, const double *b)
 {
     double x = cvl_vector3_mul(a, b) / (cvl_vector3_norm_euc(a) * cvl_vector3_norm_euc(b));
     if (x < -1.0)
@@ -700,10 +654,10 @@ inline double cvl_vector3_dist_arc(const cvl_vector3_t a, const cvl_vector3_t b)
  *
  * Computes the euclidean distance between two vectors.
  */
-inline double cvl_vector3_dist_euc(const cvl_vector3_t a, const cvl_vector3_t b)
+inline double cvl_vector3_dist_euc(const double *a, const double *b)
 {
-    cvl_vector3_t d;
-    cvl_vector3_sub(a, b, d);
+    double d[3];
+    cvl_vector3_sub(d, a, b);
     return cvl_vector3_norm_euc(d);
 }
 
@@ -734,10 +688,9 @@ cvl_frame_t *cvl_vector3_visualize(const cvl_field_t *field,
     {
 	for (int x = 0; x < cvl_field_width(field); x += sample_x)
 	{
-	    cvl_vector3_t v;
+	    const double *v = cvl_field_get(field, x, y);
 	    int needle_pos_x = x / sample_x * dist_x;
 	    int needle_pos_y = y / sample_y * dist_y;
-	    cvl_field_get(field, x, y, &v);
 	    double n = cvl_vector3_norm_euc(v);
 	    double alpha = (isfinite(v[2] / n) ? (M_PI_2 - acos(v[2] / cvl_vector3_norm_euc(v))) : 0.0);
 	    int delta_x = cvl_iround(v[0] * factor * cos(alpha));

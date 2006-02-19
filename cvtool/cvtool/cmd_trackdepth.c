@@ -319,7 +319,7 @@ int cmd_trackdepth(int argc, char *argv[])
 	    {
 		/* read forward flow field */
 	    	if (cvl_field_stream_eof(flow_fw_file.value) 
-    			|| !cvl_field_read(flow_fw_file.value, &flow_fw, sizeof(cvl_vector2i_t),
+    			|| !cvl_field_read(flow_fw_file.value, &flow_fw, 2 * sizeof(int),
 			    (bool (*)(const char *, void *))cvl_vector2i_from_string))
 		{
 		    cvl_msg_err("cannot read forward flow");
@@ -376,12 +376,12 @@ int cmd_trackdepth(int argc, char *argv[])
 	    {
 		cvl_field_copy(dO_prev_field, dO_field);
 		/* read forward flow field */
-		if (!cvl_field_seek_raw(tmp_flow_file, sizeof(cvl_vector2i_t), width, height, i))
+		if (!cvl_field_seek_raw(tmp_flow_file, 2 * sizeof(int), width, height, i))
 		{
 		    error = true;
 		    goto exit;
 		}
-		flow_fw = cvl_field_new(sizeof(cvl_vector2i_t), width, height);
+		flow_fw = cvl_field_new(2 * sizeof(int), width, height);
 		if (!cvl_field_read_raw(tmp_flow_file, flow_fw))
 		{
 		    error = true;
@@ -445,7 +445,7 @@ int cmd_trackdepth(int argc, char *argv[])
 		cvl_field_copy(dA_prev_field, dA_field);
 		/* read backward flow field */
 	    	if (cvl_field_stream_eof(flow_bw_file.value) 
-    			|| !cvl_field_read(flow_bw_file.value, &flow_bw, sizeof(cvl_vector2i_t),
+    			|| !cvl_field_read(flow_bw_file.value, &flow_bw, 2 * sizeof(int),
 			    (bool (*)(const char *, void *))cvl_vector2i_from_string))
 		{
 		    error = true;

@@ -90,7 +90,7 @@ static inline void cvl_opticalflow_differentiate(
  * \param f2		The frame at t = 1. Must be graylevel.
  * \param lambda	The lambda parameter of the Horn/Schunck algorithm. Try 10.0.
  * \param iterations	Number of iterations. Try 100.
- * \return		The optical flow in a field of cvl_vector2i_t elements.
+ * \return		The optical flow in a field of int[2] elements.
  *
  * Computes the optical flow between to equally big frames. This function
  * implements the Horn/Schunck algorithm.
@@ -106,7 +106,7 @@ cvl_field_t *cvl_opticalflow_hs(const cvl_frame_t *f1, const cvl_frame_t *f2,
     cvl_field_t *Ex = cvl_field_new(sizeof(double), w, h);
     cvl_field_t *Ey = cvl_field_new(sizeof(double), w, h);
     cvl_field_t *Et = cvl_field_new(sizeof(double), w, h);
-    cvl_field_t *flowtmp = cvl_field_new(sizeof(cvl_vector2_t), w, h);
+    cvl_field_t *flowtmp = cvl_field_new(2 * sizeof(double), w, h);
     cvl_frame_t *f1_gray, *f2_gray;
     
     f1_gray = cvl_frame_clone(f1);
@@ -122,7 +122,7 @@ cvl_field_t *cvl_opticalflow_hs(const cvl_frame_t *f1, const cvl_frame_t *f2,
 	    cvl_field_set(Ex, x, y, &ex);
 	    cvl_field_set(Ey, x, y, &ey);
 	    cvl_field_set(Et, x, y, &et);
-	    const cvl_vector2_t nullvector = { 0.0, 0.0 };
+	    const double nullvector[2] = { 0.0, 0.0 };
 	    cvl_field_set(flowtmp, x, y, &nullvector);
 	}
     }
@@ -135,17 +135,15 @@ cvl_field_t *cvl_opticalflow_hs(const cvl_frame_t *f1, const cvl_frame_t *f2,
 	{
 	    for (int x = 0; x < w; x++)
 	    {
-		double ex, ey, et;
-		cvl_vector2_t flow;
-		cvl_field_get(flowtmp, x, y, &flow);
-		cvl_field_get(Ex, x, y, &ex);
-		cvl_field_get(Ey, x, y, &ey);
-		cvl_field_get(Et, x, y, &et);
+		double *flow = cvl_field_ref(flowtmp, x, y);
+		double ex = *(const double *)cvl_field_get(Ex, x, y);
+		double ey = *(const double *)cvl_field_get(Ey, x, y);
+		double et = *(const double *)cvl_field_get(Et, x, y);
 		double frac = (ex * flow[0] + ey * flow[1] + et) 
 		    / (1.0 + lambda * (ex * ex + ey * ey));
 		flow[0] -= ex * frac;
 		flow[1] -= ey * frac;
-		cvl_field_set(flowtmp, x, y, &flow);
+		cvl_field_set(flowtmp, x, y, flow);
 	    }
 	}
     }
@@ -153,14 +151,13 @@ cvl_field_t *cvl_opticalflow_hs(const cvl_frame_t *f1, const cvl_frame_t *f2,
     cvl_field_free(Ey);
     cvl_field_free(Et);
 
-    cvl_field_t *flowfield = cvl_field_new(sizeof(cvl_vector2i_t), w, h);
+    cvl_field_t *flowfield = cvl_field_new(2 * sizeof(int), w, h);
     for (int y = 0; y < h; y++)
     {
 	for (int x = 0; x < w; x++)
 	{
-	    cvl_vector2_t flow;
-	    cvl_vector2i_t flowi;
-	    cvl_field_get(flowtmp, x, y, &flow);
+	    int flowi[2];
+	    const double *flow = cvl_field_get(flowtmp, x, y);
 	    flowi[0] = cvl_iround(flow[0]);
     	    flowi[1] = cvl_iround(flow[1]);
 	    cvl_field_set(flowfield, x, y, &flowi);
@@ -174,7 +171,7 @@ cvl_field_t *cvl_opticalflow_hs(const cvl_frame_t *f1, const cvl_frame_t *f2,
  * \param f1		The frame at t = 0. Must be graylevel.
  * \param f2		The frame at t = 1. Must be graylevel.
  * \param k		The size of the neighborhood (2k+1 x 2k+1).
- * \return		The optical flow in a field of cvl_vector2i_t elements.
+ * \return		The optical flow in a field of int[2] elements.
  *
  * Computes the optical flow between to equally big frames. This function
  * implements the Lucas/Kanade algorithm. The frames should be smoothed with a
@@ -191,7 +188,7 @@ cvl_field_t *cvl_opticalflow_lk(const cvl_frame_t *f1, const cvl_frame_t *f2, in
     cvl_field_t *Ex = cvl_field_new(sizeof(double), w, h);
     cvl_field_t *Ey = cvl_field_new(sizeof(double), w, h);
     cvl_field_t *Et = cvl_field_new(sizeof(double), w, h);
-    cvl_field_t *flowfield = cvl_field_new(sizeof(cvl_vector2i_t), w, h);
+    cvl_field_t *flowfield = cvl_field_new(2 * sizeof(int), w, h);
     cvl_frame_t *f1_gray, *f2_gray;
 
     /* Compute the approximations of the derivatives */
@@ -248,7 +245,6 @@ cvl_field_t *cvl_opticalflow_lk(const cvl_frame_t *f1, const cvl_frame_t *f2, in
     {
 	for (int x = 0; x < w; x++)
 	{
-	    cvl_vector2i_t flow;
 	    /*      (Sum(weight*fx*fx)  Sum(weight*fx*fy))
 	     * A := (                                    )
 	     *      (Sum(weight*fx*fy)  Sum(weight*fy*fy))
@@ -266,13 +262,12 @@ cvl_field_t *cvl_opticalflow_lk(const cvl_frame_t *f1, const cvl_frame_t *f2, in
 	    {
 		for (int c = -k; c <= k; c++)
 		{
-		    double fx, fy, ft;
 		    int yy = cvl_reflect(y + r, h);
 		    int xx = cvl_reflect(x + c, w);
 		    double ww = (double)weight[r + k][c + k] / (double)weight_sum;
-		    cvl_field_get(Ex, xx, yy, &fx);
-		    cvl_field_get(Ey, xx, yy, &fy);
-		    cvl_field_get(Et, xx, yy, &ft);
+		    double fx = *(const double *)cvl_field_get(Ex, xx, yy);
+		    double fy = *(const double *)cvl_field_get(Ey, xx, yy);
+		    double ft = *(const double *)cvl_field_get(Et, xx, yy);
 		    sum_wfxfx += ww * fx * fx;
 		    sum_wfxfy += ww * fx * fy;
 		    sum_wfxft += ww * fx * ft;
@@ -281,6 +276,7 @@ cvl_field_t *cvl_opticalflow_lk(const cvl_frame_t *f1, const cvl_frame_t *f2, in
 		}
 	    }
 	    double det = sum_wfxfx * sum_wfyfy - sum_wfxfy * sum_wfxfy;
+	    int *flow = cvl_field_ref(flowfield, x, y);
 	    if (fabs(det) > DBL_MIN)
 	    {
 		double invdet = 1.0 / det;
@@ -292,7 +288,6 @@ cvl_field_t *cvl_opticalflow_lk(const cvl_frame_t *f1, const cvl_frame_t *f2, in
 		flow[0] = 0;
 		flow[1] = 0;
 	    }
-	    cvl_field_set(flowfield, x, y, &flow);
 	}
     }	
     cvl_field_free(Ex);
@@ -307,7 +302,7 @@ cvl_field_t *cvl_opticalflow_lk(const cvl_frame_t *f1, const cvl_frame_t *f2, in
  * \param lambda	The lambda parameter of the Horn/Schunck algorithm. Try 10.0.
  * \param omega		The relaxation parameter, from (0,2). Try 1.95.
  * \param iterations	Number of iterations. Try 100.
- * \return		The optical flow in a field of cvl_vector2i_t elements.
+ * \return		The optical flow in a field of int[2] elements.
  *
  * Computes the optical flow between to equally big frames. This function
  * implements the combined local/global approach suggested by Weickert/Schnoerr
@@ -330,7 +325,7 @@ cvl_field_t *cvl_opticalflow_clg(const cvl_frame_t *f1, const cvl_frame_t *f2,
     cvl_field_t *J23 = cvl_field_new(sizeof(double), w, h);
     cvl_field_t *divisor1 = cvl_field_new(sizeof(double), w, h);
     cvl_field_t *divisor2 = cvl_field_new(sizeof(double), w, h);
-    cvl_field_t *flowtmp = cvl_field_new(sizeof(cvl_vector2_t), w, h);
+    cvl_field_t *flowtmp = cvl_field_new(2 * sizeof(double), w, h);
     const int weight[3][3] = { { 1, 2, 1 }, { 2, 4, 2 }, { 1, 2, 1 } };
     const int weight_sum = 16;
     cvl_frame_t *f1_gray, *f2_gray;
@@ -364,7 +359,7 @@ cvl_field_t *cvl_opticalflow_clg(const cvl_frame_t *f1, const cvl_frame_t *f2,
 	    tmp = 4.0 + factor * J22;
 	    cvl_field_set(divisor2, x, y, &tmp);
 
-	    const cvl_vector2_t nullvector = { 0.0, 0.0 };
+	    const double nullvector[2] = { 0.0, 0.0 };
 	    cvl_field_set(flowtmp, x, y, &nullvector);
 	}
     }
@@ -378,33 +373,30 @@ cvl_field_t *cvl_opticalflow_clg(const cvl_frame_t *f1, const cvl_frame_t *f2,
 	{
 	    for (int x = 0; x < w; x++)
 	    {
-		cvl_vector2_t flow;
-		double j12, j13, j21, j23, d1, d2;
-		cvl_vector2_t neighborsum;
-		cvl_vector2_t neighborflow;
+		double j12 = *(const double *)cvl_field_get(J12, x, y);
+		double j13 = *(const double *)cvl_field_get(J13, x, y);
+		double j21 = *(const double *)cvl_field_get(J21, x, y);
+		double j23 = *(const double *)cvl_field_get(J23, x, y);
+		double d1 = *(const double *)cvl_field_get(divisor1, x, y);
+		double d2 = *(const double *)cvl_field_get(divisor2, x, y);
+		const double *neighborflow;
+		double neighborsum[2];
 
-		cvl_field_get(flowtmp, x, y, &flow);
-		cvl_field_get(J12, x, y, &j12);
-		cvl_field_get(J13, x, y, &j13);
-		cvl_field_get(J21, x, y, &j21);
-		cvl_field_get(J23, x, y, &j23);
-		cvl_field_get(divisor1, x, y, &d1);
-		cvl_field_get(divisor2, x, y, &d2);
 		cvl_vector2_zero(neighborsum);
-		cvl_field_get_r(flowtmp, x, y - 1, &neighborflow);
+		neighborflow = cvl_field_get_r(flowtmp, x, y - 1);
 		cvl_vector2_add(neighborsum, neighborflow, neighborsum);
-		cvl_field_get_r(flowtmp, x, y + 1, &neighborflow);
+		neighborflow = cvl_field_get_r(flowtmp, x, y + 1);
 		cvl_vector2_add(neighborsum, neighborflow, neighborsum);
-		cvl_field_get_r(flowtmp, x - 1, y, &neighborflow);
+		neighborflow = cvl_field_get_r(flowtmp, x - 1, y);
 		cvl_vector2_add(neighborsum, neighborflow, neighborsum);
-		cvl_field_get_r(flowtmp, x + 1, y, &neighborflow);
+		neighborflow = cvl_field_get_r(flowtmp, x + 1, y);
 		cvl_vector2_add(neighborsum, neighborflow, neighborsum);
 		
+		int *flow = cvl_field_ref(flowtmp, x, y);
 		flow[0] = (1.0 - omega) * flow[0] 
 		    + omega * (neighborsum[0] - factor * (j12 * flow[1] + j13)) / d1;
 	    	flow[1] = (1.0 - omega) * flow[1] 
 		    + omega * (neighborsum[1] - factor * (j21 * flow[0] + j23)) / d2;
-		cvl_field_set(flowtmp, x, y, &flow);
 	    }
 	}
     }
@@ -415,14 +407,13 @@ cvl_field_t *cvl_opticalflow_clg(const cvl_frame_t *f1, const cvl_frame_t *f2,
     cvl_field_free(divisor1);
     cvl_field_free(divisor2);
 
-    cvl_field_t *flowfield = cvl_field_new(sizeof(cvl_vector2i_t), w, h);
+    cvl_field_t *flowfield = cvl_field_new(2 * sizeof(int), w, h);
     for (int y = 0; y < h; y++)
     {
 	for (int x = 0; x < w; x++)
 	{
-	    cvl_vector2_t flow;
-	    cvl_vector2i_t flowi;
-	    cvl_field_get(flowtmp, x, y, &flow);
+	    int flowi[2];
+	    const double *flow = cvl_field_get(flowtmp, x, y);
 	    flowi[0] = cvl_iround(flow[0]);
     	    flowi[1] = cvl_iround(flow[1]);
 	    cvl_field_set(flowfield, x, y, &flowi);
@@ -439,7 +430,7 @@ cvl_field_t *cvl_opticalflow_clg(const cvl_frame_t *f1, const cvl_frame_t *f2,
  * \param maxdist	The maximum movement distance.
  * \param distweight	Weight of the distance when calculating block costs.
  * \param lumweight	Weight of the luminance when calculating pixel costs.
- * \return		The optical flow in a field of cvl_vector2i_t elements.
+ * \return		The optical flow in a field of int[2] elements.
  *
  * Computes the optical flow between to equally big frames. This function
  * implements a naive block matching algorithm.
@@ -458,8 +449,8 @@ cvl_field_t *cvl_opticalflow_bm_sad(const cvl_frame_t *f1, const cvl_frame_t *f2
 
     int width = cvl_frame_width(f1);
     int height = cvl_frame_height(f1);
-    cvl_vector2i_t testflow[(2 * maxdist + 1) * (2 * maxdist + 1)];
-    cvl_field_t *flowfield = cvl_field_new(sizeof(cvl_vector2i_t), width, height);
+    int testflow[(2 * maxdist + 1) * (2 * maxdist + 1)][2];
+    cvl_field_t *flowfield = cvl_field_new(2 * sizeof(int), width, height);
     cvl_frame_t *f1yuv = cvl_frame_clone(f1);
     cvl_frame_t *f2yuv = cvl_frame_clone(f2);
     
@@ -513,7 +504,7 @@ cvl_field_t *cvl_opticalflow_bm_sad(const cvl_frame_t *f1, const cvl_frame_t *f2
 	for (int x = 0; x < width; x++)
 	{
 	    double mincost = DBL_MAX;
-	    cvl_vector2i_t minflow = { 0, 0 };
+	    int minflow[2] = { 0, 0 };
 	    for (int i = 0; i < (2 * maxdist + 1) * (2 * maxdist + 1); i++)
 	    {
 		double cost = distweight * ((double)cvl_maxi(abs(testflow[i][0]), 
@@ -563,7 +554,7 @@ cvl_field_t *cvl_opticalflow_bm_sad(const cvl_frame_t *f1, const cvl_frame_t *f2
  * \param maxdist	The maximum movement distance.
  * \param gamma_c	Parameter for weight computation. Try 7.
  * \param gamma_p	Parameter for weight computation. Try 38.
- * \return		The optical flow in a field of cvl_vector2i_t elements.
+ * \return		The optical flow in a field of int[2] elements.
  *
  * Computes the optical flow between to equally big frames. This function
  * implements a block matching algorithm with cost computation as described in
@@ -580,11 +571,11 @@ cvl_field_t *cvl_opticalflow_bm_asw(const cvl_frame_t *f1, const cvl_frame_t *f2
 
     int width = cvl_frame_width(f1);
     int height = cvl_frame_height(f1);
-    cvl_field_t *f1_cielab = cvl_field_new(sizeof(cvl_vector3_t), width, height);
-    cvl_field_t *f2_cielab = cvl_field_new(sizeof(cvl_vector3_t), width, height);
+    cvl_field_t *f1_cielab = cvl_field_new(3 * sizeof(double), width, height);
+    cvl_field_t *f2_cielab = cvl_field_new(3 * sizeof(double), width, height);
     cvl_frame_t *f1_yuv = cvl_frame_clone(f1);
     cvl_frame_t *f2_yuv = cvl_frame_clone(f2);
-    cvl_field_t *flowfield = cvl_field_new(sizeof(cvl_vector2i_t), width, height);
+    cvl_field_t *flowfield = cvl_field_new(2 * sizeof(int), width, height);
     int pyramid_steps;
 
     cvl_msg_dbg("computing RGB and CIE Lab representations...");
@@ -592,7 +583,7 @@ cvl_field_t *cvl_opticalflow_bm_asw(const cvl_frame_t *f1, const cvl_frame_t *f2
     cvl_frame_to_yuv(f2_yuv);
     for (int i = 0; i < width * height; i++)
     {
-	cvl_vector3_t Lab;
+	double Lab[3];
 	cvl_pixel_t p;
 	
 	p = cvl_frame_get_i(f1, i);
@@ -605,7 +596,7 @@ cvl_field_t *cvl_opticalflow_bm_asw(const cvl_frame_t *f1, const cvl_frame_t *f2
 	    p = cvl_pixel_yuv_to_rgb(p);
 	}	
 	cvl_srgb_to_cielab(p, &(Lab[0]), &(Lab[1]), &(Lab[2]));
-	cvl_field_set_i(f1_cielab, i, &Lab);
+	cvl_field_set_i(f1_cielab, i, Lab);
 	
 	p = cvl_frame_get_i(f2, i);
 	if (cvl_frame_pixel_type(f2) == CVL_PIXEL_GRAY)
@@ -617,7 +608,7 @@ cvl_field_t *cvl_opticalflow_bm_asw(const cvl_frame_t *f1, const cvl_frame_t *f2
 	    p = cvl_pixel_yuv_to_rgb(p);
 	}	
 	cvl_srgb_to_cielab(p, &(Lab[0]), &(Lab[1]), &(Lab[2]));
-	cvl_field_set_i(f2_cielab, i, &Lab);
+	cvl_field_set_i(f2_cielab, i, Lab);
     }
 
     cvl_msg_dbg("determining number of pyramid steps...");
@@ -633,7 +624,7 @@ cvl_field_t *cvl_opticalflow_bm_asw(const cvl_frame_t *f1, const cvl_frame_t *f2
     for (int i = pyramid_steps - 1; i >= 0; i--)
     {
 	int step_maxdist = (i == pyramid_steps - 1) ? (maxdist / (1 << i) + 1) : 1;
-	cvl_vector2i_t testflow[(2 * step_maxdist + 1) * (2 * step_maxdist + 1)];
+	int testflow[(2 * step_maxdist + 1) * (2 * step_maxdist + 1)][2];
 	// Test flow vectors in a good order: nearest first, according to city-block
 	// distance. This way, we don't have to assign cost to distance, because
 	// later test vectprs must be *better* than earlier test vectors.
@@ -682,11 +673,10 @@ cvl_field_t *cvl_opticalflow_bm_asw(const cvl_frame_t *f1, const cvl_frame_t *f2
 	{
 	    for (int x = 0; x < width / (1 << i); x++)
 	    {
-		cvl_vector3_t p_lab;
-		cvl_field_get(f1_cielab, x * (1 << i), y * (1 << i), &p_lab);
+		const double *p_lab = cvl_field_get(f1_cielab, x * (1 << i), y * (1 << i));
 		double mincost = DBL_MAX;
-		cvl_vector2i_t minflow = { 0, 0 };
-		cvl_vector2i_t baseflow;
+		int minflow[2] = { 0, 0 };
+		int baseflow[2];
 		if (i == pyramid_steps - 1)
 		{
 		    baseflow[0] = 0;
@@ -694,19 +684,16 @@ cvl_field_t *cvl_opticalflow_bm_asw(const cvl_frame_t *f1, const cvl_frame_t *f2
 		}
 		else
 		{
-		    cvl_vector2i_t prev_flow;
-		    cvl_field_get(flowfield, x * (1 << i), y * (1 << i), &prev_flow);
+		    const int *prev_flow = cvl_field_get(flowfield, x * (1 << i), y * (1 << i));
 		    baseflow[0] = 2 * prev_flow[0];
 		    baseflow[1] = 2 * prev_flow[1];
 		}
 		for (int t = 0; t < (2 * step_maxdist + 1) * (2 * step_maxdist + 1); t++)
 		{
 		    double cost = 0.0;
-		    cvl_vector3_t ps_lab;
-		    cvl_field_get_r(f2_cielab, 
-			    (x + baseflow[0] + testflow[t][0]) * (1 << i), 
-			    (y + baseflow[1] + testflow[t][1]) * (1 << i), 
-			    &ps_lab);
+		    const double *ps_lab = cvl_field_get_r(f2_cielab, 
+			(x + baseflow[0] + testflow[t][0]) * (1 << i), 
+			(y + baseflow[1] + testflow[t][1]) * (1 << i));
 		    double wsum = 0.0;
 		    for (int r = -k; r <= k; r++)
 		    {
@@ -730,13 +717,12 @@ cvl_field_t *cvl_opticalflow_bm_asw(const cvl_frame_t *f1, const cvl_frame_t *f2
 				(double)(2 * abs((int)cvl_pixel_yuv_to_y(q_yuv) - (int)cvl_pixel_yuv_to_y(qs_yuv))
 					 + abs((int)cvl_pixel_yuv_to_u(q_yuv) - (int)cvl_pixel_yuv_to_u(qs_yuv))
 					 + abs((int)cvl_pixel_yuv_to_v(q_yuv) - (int)cvl_pixel_yuv_to_v(qs_yuv)));
-			    cvl_vector3_t q_lab, qs_lab;
-			    cvl_field_get_r(f1_cielab, 
+			    const double *q_lab = cvl_field_get_r(f1_cielab, 
 				    (x + c) * (1 << i), 
-				    (y + r) * (1 << i), &q_lab);
-			    cvl_field_get_r(f2_cielab, 
+				    (y + r) * (1 << i));
+			    const double *qs_lab = cvl_field_get_r(f2_cielab, 
 				    (x + baseflow[0] + testflow[t][0] + c) * (1 << i), 
-				    (y + baseflow[1] + testflow[t][1] + r) * (1 << i), &qs_lab);
+				    (y + baseflow[1] + testflow[t][1] + r) * (1 << i));
 			    double wpq = exp(- (cvl_vector3_dist_euc(p_lab, q_lab) / gamma_c 
 					+ eucdist / gamma_p));
 			    double wpsqs = exp(- (cvl_vector3_dist_euc(ps_lab, qs_lab) / gamma_c 
@@ -757,7 +743,7 @@ cvl_field_t *cvl_opticalflow_bm_asw(const cvl_frame_t *f1, const cvl_frame_t *f2
 		    }
 		}
 		cvl_vector2i_add(minflow, baseflow, minflow);
-		cvl_field_fill_rect(flowfield, x * (1 << i), y * (1 << i), (1 << i), (1 << i), &minflow);
+		cvl_field_fill_rect(flowfield, x * (1 << i), y * (1 << i), (1 << i), (1 << i), minflow);
 	    }
 	}
     }
@@ -811,16 +797,14 @@ cvl_field_t *cvl_opticalflow_cc(const cvl_field_t *fw, const cvl_field_t *bw,
     {
 	for (int x = 0; x < w; x++)
 	{
-	    cvl_vector2i_t f;
-	    cvl_field_get(fw, x, y, &f);
+	    const int *f = cvl_field_get(fw, x, y);
 	    int xf = x + f[0];
 	    int yf = y + f[1];
 	    if (xf >= 0 && xf < w && yf >= 0 && yf < h)
 	    {
-		cvl_vector2i_t d;
-		cvl_vector2i_t b;
-		cvl_field_get(bw, xf, yf, &b);
-		cvl_vector2i_add(f, b, d);
+		int d[2];
+		const int *b = cvl_field_get(bw, xf, yf);
+		cvl_vector2i_add(d, f, b);
 		if (abs(d[0]) + abs(d[1]) <= threshold)
 		{
 		    good[y * w + x] = true;
@@ -898,7 +882,7 @@ cvl_field_t *cvl_opticalflow_cc(const cvl_field_t *fw, const cvl_field_t *bw,
 	    {
 		// This can only happen if there is not a single reliable vector
 		// in the source flow field.
-		cvl_vector2i_t nullflow = { 0, 0 };
+		const int nullflow[2] = { 0, 0 };
 		cvl_field_set(newflow, x, y, &nullflow);
 	    }
 	    else
@@ -917,17 +901,15 @@ cvl_field_t *cvl_opticalflow_cc(const cvl_field_t *fw, const cvl_field_t *bw,
 			int yy = cvl_reflect(y + r, h);
 			if (good[yy * w + xx])
 			{
-			    cvl_vector2i_t f;
-			    cvl_field_get(newflow, xx, yy, &f);
+			    const int *f = cvl_field_get(newflow, xx, yy);
 			    x_sum += f[0];
 			    y_sum += f[1];
 			}
 		    }
 		}
-		cvl_vector2i_t f;
+		int *f = cvl_field_ref(newflow, x, y);
 		f[0] = cvl_iround((double)x_sum / (double)curmax);
 		f[1] = cvl_iround((double)y_sum / (double)curmax);
-		cvl_field_set(newflow, x, y, &f);
 	    }
 	    // Update
 	    good[y * w + x] = true;

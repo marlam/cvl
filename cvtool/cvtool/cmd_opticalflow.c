@@ -195,12 +195,12 @@ int cmd_opticalflow(int argc, char *argv[])
 	{
 	    double fraction;
 
-	    if (!cvl_field_read(stdin, &field1, sizeof(cvl_vector2i_t),
+	    if (!cvl_field_read(stdin, &field1, 2 * sizeof(int),
 			(bool (*)(const char *, void *))cvl_vector2i_from_string))
 	    {
 		break;
 	    }
-	    if (!cvl_field_read(verificationflow.value, &field2, sizeof(cvl_vector2i_t),
+	    if (!cvl_field_read(verificationflow.value, &field2, 2 * sizeof(int),
 			(bool (*)(const char *, void *))cvl_vector2i_from_string))
 	    {
 		cvl_field_free(field1);
