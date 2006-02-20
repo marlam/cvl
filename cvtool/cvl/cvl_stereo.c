@@ -354,11 +354,10 @@ cvl_frame_t *cvl_dibr(const cvl_frame_t *frame, const cvl_frame_t *depthmap,
  */
 void cvl_trackdepth_init_first_trackmap(cvl_field_t *trackmap, const cvl_frame_t *depth)
 {
-    int16_t d;
     for (int i = 0; i < cvl_field_width(trackmap) * cvl_field_height(trackmap); i++)
     {
-	d = (depth ? (int16_t)cvl_frame_get_i(depth, i) : -1);
-	cvl_field_set_i(trackmap, i, &d);
+	int16_t *d = cvl_field_ref_i(trackmap, i);
+	*d = (depth ? (int16_t)cvl_frame_get_i(depth, i) : -1);
     }
 }
 
@@ -376,20 +375,19 @@ void cvl_trackdepth_init_next_trackmap(cvl_field_t *trackmap,
     {
 	for (int x = 0; x < cvl_field_width(trackmap); x++)
 	{
-	    int16_t d;
+	    int16_t *d = cvl_field_ref(trackmap, x, y);
 	    const int *flow_vector = cvl_field_get(flow, x, y);
 	    int next_pos_x = x + flow_vector[0];
 	    int next_pos_y = y + flow_vector[1];
 	    if (next_pos_x >= 0 && next_pos_x < cvl_field_width(trackmap) 
 		    && next_pos_y >= 0 && next_pos_y < cvl_field_height(trackmap))
 	    {
-		d = *(const int16_t *)cvl_field_get(prev_trackmap, next_pos_x, next_pos_y);
+		*d = *(const int16_t *)cvl_field_get(prev_trackmap, next_pos_x, next_pos_y);
 	    }
 	    else
 	    {
-		d = -1;
+		*d = -1;
 	    }
-	    cvl_field_set(trackmap, x, y, &d);
 	}
     }
 }

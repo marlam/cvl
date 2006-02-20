@@ -132,8 +132,8 @@ cvl_frame_t *cvl_edge_sobel(const cvl_frame_t *frame, cvl_field_t *edge_dir_fiel
 	    cvl_frame_set(edge_frame, x, y, g);
 	    if (edge_dir_field)
 	    {
-		double edge_dir = (g > 0) ? atan2(fx, fy) : 0.0;
-		cvl_field_set(edge_dir_field, x, y, &edge_dir);
+		double *edge_dir = cvl_field_ref(edge_dir_field, x, y);
+		*edge_dir = (g > 0) ? atan2(fx, fy) : 0.0;
 	    }
 	}
     }
