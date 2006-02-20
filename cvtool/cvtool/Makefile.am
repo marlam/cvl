@@ -39,7 +39,8 @@ cvtool_LDADD = \
 	$(top_srcdir)/gnulib/libgnu.la \
 	$(top_srcdir)/notgnulib/libnotgnu.la \
 	$(top_srcdir)/cvl/libcvl.la \
-	$(GSL_LIBS)
+	$(GSL_LIBS) \
+	$(CAIRO_LIBS)
 
-AM_CPPFLAGS = -I$(top_srcdir)/gnulib -I$(top_srcdir)/notgnulib -I$(top_srcdir)/cvl $(GSL_CFLAGS)
-AM_CFLAGS = -DPROGRAM_NAME=\"cvtool\"
+AM_CPPFLAGS = -I$(top_srcdir)/gnulib -I$(top_srcdir)/notgnulib -I$(top_srcdir)/cvl
+AM_CFLAGS = -DPROGRAM_NAME=\"cvtool\" $(GSL_CFLAGS) $(CAIRO_CFLAGS)

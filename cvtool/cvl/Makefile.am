@@ -10,6 +10,7 @@ EXTRA_DIST = \
 	cvl_frame.c \
 	cvl_io.c \
 	cvl_color.c \
+	cvl_cairo.c \
 	cvl_convolve.c \
 	cvl_smooth.c \
 	cvl_edge.c \
@@ -32,6 +33,7 @@ nobase_include_HEADERS = \
 	cvl/cvl_frame.h \
 	cvl/cvl_io.h \
 	cvl/cvl_color.h \
+	cvl/cvl_cairo.h \
 	cvl/cvl_convolve.h \
 	cvl/cvl_smooth.h \
 	cvl/cvl_edge.h \
@@ -44,7 +46,7 @@ nobase_include_HEADERS = \
 	cvl/cvl.h
 
 AM_CPPFLAGS = -I$(top_srcdir)/gnulib -I$(top_srcdir)/notgnulib
-AM_CFLAGS = -DLIBRARY_NAME=\"CVL\" -DCVL_DEBUG=$(CVL_DEBUG) $(GSL_CFLAGS) -DGSL_RANGE_CHECK_OFF
+AM_CFLAGS = -DLIBRARY_NAME=\"CVL\" -DCVL_DEBUG=$(CVL_DEBUG) $(GSL_CFLAGS) -DGSL_RANGE_CHECK_OFF $(CAIRO_CFLAGS)
 
 bin_SCRIPTS = cvl-config
 

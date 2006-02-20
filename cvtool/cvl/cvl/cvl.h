@@ -39,6 +39,7 @@
 #include "cvl_frame.h"
 #include "cvl_io.h"
 #include "cvl_color.h"
+#include "cvl_cairo.h"
 #include "cvl_convolve.h"
 #include "cvl_smooth.h"
 #include "cvl_edge.h"
