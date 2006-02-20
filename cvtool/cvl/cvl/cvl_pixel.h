@@ -25,7 +25,7 @@
 
 #include <stdint.h>
 
-typedef uint_fast32_t cvl_pixel_t;
+typedef uint32_t cvl_pixel_t;
 
 typedef enum 
 { 
