@@ -44,14 +44,14 @@ void cvl_field_zero(cvl_field_t *field);
 void cvl_field_copy(cvl_field_t *dst, const cvl_field_t *src);
 cvl_field_t *cvl_field_clone(const cvl_field_t *field);
 
+inline void *cvl_field_ref_i(const cvl_field_t *field, int i);
+inline void *cvl_field_ref(const cvl_field_t *field, int x, int y);
+inline void *cvl_field_ref_r(const cvl_field_t *field, int x, int y);
 inline const void *cvl_field_get_i(const cvl_field_t *field, int i);
 inline const void *cvl_field_get(const cvl_field_t *field, int x, int y);
 inline const void *cvl_field_get_r(const cvl_field_t *field, int x, int y);
 inline void cvl_field_set_i(cvl_field_t *field, int i, const void *e);
 inline void cvl_field_set(cvl_field_t *field, int x, int y, const void *e);
-inline void *cvl_field_ref_i(const cvl_field_t *field, int i);
-inline void *cvl_field_ref(const cvl_field_t *field, int x, int y);
-inline void *cvl_field_ref_r(const cvl_field_t *field, int x, int y);
 
 void cvl_field_fill_rect(cvl_field_t *field, int x, int y, int w, int h, const void *e);
 void cvl_field_copy_rect(cvl_field_t *dst, int dst_x, int dst_y, 
