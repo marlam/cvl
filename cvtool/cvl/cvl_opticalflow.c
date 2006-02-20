@@ -117,13 +117,13 @@ cvl_field_t *cvl_opticalflow_hs(const cvl_frame_t *f1, const cvl_frame_t *f2,
     {
 	for (int x = 0; x < w; x++)
 	{
-	    double ex, ey, et;
-	    cvl_opticalflow_differentiate(f1_gray, f2_gray, x, y, &ex, &ey, &et);
-	    cvl_field_set(Ex, x, y, &ex);
-	    cvl_field_set(Ey, x, y, &ey);
-	    cvl_field_set(Et, x, y, &et);
-	    const double nullvector[2] = { 0.0, 0.0 };
-	    cvl_field_set(flowtmp, x, y, &nullvector);
+	    cvl_opticalflow_differentiate(f1_gray, f2_gray, x, y, 
+		    cvl_field_ref(Ex, x, y),
+		    cvl_field_ref(Ey, x, y),
+		    cvl_field_ref(Et, x, y));
+	    double *flow = cvl_field_ref(flowtmp, x, y);
+	    flow[0] = 0.0;
+	    flow[1] = 0.0;
 	}
     }
     cvl_frame_free(f1_gray);
@@ -143,7 +143,6 @@ cvl_field_t *cvl_opticalflow_hs(const cvl_frame_t *f1, const cvl_frame_t *f2,
 		    / (1.0 + lambda * (ex * ex + ey * ey));
 		flow[0] -= ex * frac;
 		flow[1] -= ey * frac;
-		cvl_field_set(flowtmp, x, y, flow);
 	    }
 	}
     }
@@ -156,11 +155,10 @@ cvl_field_t *cvl_opticalflow_hs(const cvl_frame_t *f1, const cvl_frame_t *f2,
     {
 	for (int x = 0; x < w; x++)
 	{
-	    int flowi[2];
 	    const double *flow = cvl_field_get(flowtmp, x, y);
+	    int *flowi = cvl_field_ref(flowfield, x, y);
 	    flowi[0] = cvl_iround(flow[0]);
     	    flowi[1] = cvl_iround(flow[1]);
-	    cvl_field_set(flowfield, x, y, &flowi);
 	}
     }
     cvl_field_free(flowtmp);
@@ -200,11 +198,10 @@ cvl_field_t *cvl_opticalflow_lk(const cvl_frame_t *f1, const cvl_frame_t *f2, in
     {
 	for (int x = 0; x < w; x++)
 	{
-	    double ex, ey, et;
-	    cvl_opticalflow_differentiate(f1_gray, f2_gray, x, y, &ex, &ey, &et);
-	    cvl_field_set(Ex, x, y, &ex);
-	    cvl_field_set(Ey, x, y, &ey);
-	    cvl_field_set(Et, x, y, &et);
+	    cvl_opticalflow_differentiate(f1_gray, f2_gray, x, y, 
+		    cvl_field_ref(Ex, x, y),
+		    cvl_field_ref(Ey, x, y),
+		    cvl_field_ref(Et, x, y));
 	}
     }
     cvl_frame_free(f1_gray);
@@ -340,27 +337,21 @@ cvl_field_t *cvl_opticalflow_clg(const cvl_frame_t *f1, const cvl_frame_t *f2,
     {
 	for (int x = 0; x < w; x++)
 	{
-	    double tmp, fx, fy, ft;
-	    double J11, J22;
+	    double fx, fy, ft, J11, J22;
 	    
 	    cvl_opticalflow_differentiate(f1_gray, f2_gray, x, y, &fx, &fy, &ft);
-	    tmp = fx * fy * ((double)weight[0][1] / (double)weight_sum);
-	    cvl_field_set(J12, x, y, &tmp);
-	    tmp = fx * ft * ((double)weight[0][2] / (double)weight_sum);
-	    cvl_field_set(J13, x, y, &tmp);
-	    //tmp = fy * fy * ((double)weight[1][0] / (double)weight_sum);
-	    //cvl_field_set(J21, x, y, &tmp);
-	    tmp = fy * ft * ((double)weight[1][2] / (double)weight_sum);
-	    cvl_field_set(J23, x, y, &tmp);
+	    *(double *)cvl_field_ref(J12, x, y) = fx * fy * ((double)weight[0][1] / (double)weight_sum);
+	    *(double *)cvl_field_ref(J13, x, y) = fx * ft * ((double)weight[0][2] / (double)weight_sum);
+	    //*(double *)cvl_field_ref(J21, x, y) = fy * fx * ((double)weight[1][0] / (double)weight_sum);
+	    *(double *)cvl_field_ref(J23, x, y) = fy * ft * ((double)weight[1][2] / (double)weight_sum);
 	    J11 = fx * fx * ((double)weight[0][0] / (double)weight_sum);
 	    J22 = fy * fy * ((double)weight[1][1] / (double)weight_sum);
-	    tmp = 4.0 + factor * J11;
-	    cvl_field_set(divisor1, x, y, &tmp);
-	    tmp = 4.0 + factor * J22;
-	    cvl_field_set(divisor2, x, y, &tmp);
+	    *(double *)cvl_field_ref(divisor1, x, y) = 4.0 + factor * J11;
+	    *(double *)cvl_field_ref(divisor2, x, y) = 4.0 + factor * J22;
 
-	    const double nullvector[2] = { 0.0, 0.0 };
-	    cvl_field_set(flowtmp, x, y, &nullvector);
+	    double *flow = cvl_field_ref(flowtmp, x, y);
+	    flow[0] = 0.0;
+	    flow[1] = 0.0;
 	}
     }
     cvl_frame_free(f1_gray);
@@ -412,11 +403,10 @@ cvl_field_t *cvl_opticalflow_clg(const cvl_frame_t *f1, const cvl_frame_t *f2,
     {
 	for (int x = 0; x < w; x++)
 	{
-	    int flowi[2];
 	    const double *flow = cvl_field_get(flowtmp, x, y);
+	    int *flowi = cvl_field_ref(flowfield, x, y);
 	    flowi[0] = cvl_iround(flow[0]);
     	    flowi[1] = cvl_iround(flow[1]);
-	    cvl_field_set(flowfield, x, y, &flowi);
 	}
     }
     cvl_field_free(flowtmp);
@@ -538,7 +528,7 @@ cvl_field_t *cvl_opticalflow_bm_sad(const cvl_frame_t *f1, const cvl_frame_t *f2
 		    minflow[1] = testflow[i][1];
 		}
 	    }
-	    cvl_field_set(flowfield, x, y, &minflow);
+	    cvl_field_set(flowfield, x, y, minflow);
 	}
     }
 
@@ -583,7 +573,7 @@ cvl_field_t *cvl_opticalflow_bm_asw(const cvl_frame_t *f1, const cvl_frame_t *f2
     cvl_frame_to_yuv(f2_yuv);
     for (int i = 0; i < width * height; i++)
     {
-	double Lab[3];
+	double *Lab;
 	cvl_pixel_t p;
 	
 	p = cvl_frame_get_i(f1, i);
@@ -594,9 +584,9 @@ cvl_field_t *cvl_opticalflow_bm_asw(const cvl_frame_t *f1, const cvl_frame_t *f2
 	else if (cvl_frame_pixel_type(f1) == CVL_PIXEL_YUV)
 	{
 	    p = cvl_pixel_yuv_to_rgb(p);
-	}	
+	}
+	Lab = cvl_field_ref_i(f1_cielab, i);
 	cvl_srgb_to_cielab(p, &(Lab[0]), &(Lab[1]), &(Lab[2]));
-	cvl_field_set_i(f1_cielab, i, Lab);
 	
 	p = cvl_frame_get_i(f2, i);
 	if (cvl_frame_pixel_type(f2) == CVL_PIXEL_GRAY)
@@ -607,8 +597,8 @@ cvl_field_t *cvl_opticalflow_bm_asw(const cvl_frame_t *f1, const cvl_frame_t *f2
 	{
 	    p = cvl_pixel_yuv_to_rgb(p);
 	}	
+	Lab = cvl_field_ref_i(f2_cielab, i);
 	cvl_srgb_to_cielab(p, &(Lab[0]), &(Lab[1]), &(Lab[2]));
-	cvl_field_set_i(f2_cielab, i, Lab);
     }
 
     cvl_msg_dbg("determining number of pyramid steps...");
@@ -882,8 +872,9 @@ cvl_field_t *cvl_opticalflow_cc(const cvl_field_t *fw, const cvl_field_t *bw,
 	    {
 		// This can only happen if there is not a single reliable vector
 		// in the source flow field.
-		const int nullflow[2] = { 0, 0 };
-		cvl_field_set(newflow, x, y, &nullflow);
+		int *flow = cvl_field_ref(newflow, x, y);
+		flow[0] = 0;
+		flow[1] = 0;
 	    }
 	    else
 	    {
