@@ -105,7 +105,7 @@ void cvl_cairo_stop(cvl_frame_t *frame, cairo_surface_t *surface, cairo_t *cr,
  *
  * Shortcut to set the CAIRO drawing color to a CVL color.
  */
-inline void cvl_draw_set_cairo_color(cairo_t *cr, cvl_color_t color)
+inline void cvl_cairo_set_color(cairo_t *cr, cvl_color_t color)
 {
     cvl_pixel_t rgb = cvl_color_to_pixel(color, CVL_PIXEL_RGB);
     cairo_set_source_rgb(cr, 

@@ -32,6 +32,6 @@ void cvl_cairo_start(cvl_frame_t *frame, cairo_surface_t **surface, cairo_t **cr
 	cvl_pixel_type_t *original_pixel_type);
 void cvl_cairo_stop(cvl_frame_t *frame, cairo_surface_t *surface, cairo_t *cr,
 	cvl_pixel_type_t original_pixel_type);
-inline void cvl_draw_set_cairo_color(cairo_t *cr, cvl_color_t color);
+inline void cvl_cairo_set_cairo(cairo_t *cr, cvl_color_t color);
 
 #endif
