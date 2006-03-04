@@ -214,7 +214,6 @@ int cmd_foreach(int argc, char *argv[])
 	    }
 	    if (!cvl_io_read(stdin, input_info, &frame))
 	    {
-		frame = NULL;
 		error = true;
 		break;
 	    }
@@ -225,11 +224,11 @@ int cmd_foreach(int argc, char *argv[])
 	    }
 	    if (!cvl_io_write(pipe_input, pipe_input_info, frame))
 	    {
+		cvl_frame_free(frame);
 		error = true;
 		break;
 	    }
 	    cvl_frame_free(frame);
-	    frame = NULL;
 	    i++;
 	}
 	cvl_io_info_free(pipe_input_info);
@@ -282,11 +281,11 @@ int cmd_foreach(int argc, char *argv[])
 	    cvl_io_info_set_height(output_info, cvl_frame_height(frame));
 	    if (!cvl_io_write(stdout, output_info, frame))
 	    {
+		cvl_frame_free(frame);
 		error = true;
 		break;
 	    }
 	    cvl_frame_free(frame);
-	    frame = NULL;
 	}
 	if (error)
 	{

@@ -126,10 +126,8 @@ int cmd_color(int argc, char *argv[])
     cvl_io_info_link_output_to_input(output_info, input_info);
 
     error = false;
-    frame = NULL;
     while (!cvl_io_eof(stdin, input_info))
     {
-	cvl_frame_free(frame);
 	if (!cvl_io_read(stdin, input_info, &frame))
 	{
 	    error = true;
@@ -152,12 +150,13 @@ int cmd_color(int argc, char *argv[])
 	}
 	if (!cvl_io_write(stdout, output_info, frame))
 	{
+	    cvl_frame_free(frame);
 	    error = true;
 	    break;
 	}
+	cvl_frame_free(frame);
     }
 
-    cvl_frame_free(frame);
     cvl_io_info_free(input_info);
     cvl_io_info_free(output_info);
     return error ? 1 : 0;

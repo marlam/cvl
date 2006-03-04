@@ -101,12 +101,11 @@ int cmd_split(int argc, char *argv[])
     while (!cvl_io_eof(stdin, input_info))
     {
 	FILE *outfile = NULL;
-	cvl_frame_t *frame = NULL;
+	cvl_frame_t *frame;
 	cvl_io_info_t *output_info = NULL;
 
 	for (int i = 0; i < n.value && !cvl_io_eof(stdin, input_info); i++)
 	{
-	    cvl_frame_free(frame);
 	    if (!cvl_io_read(stdin, input_info, &frame))
 	    {
 		error = true;
@@ -136,6 +135,7 @@ int cmd_split(int argc, char *argv[])
 		{
 		    cvl_msg_err("input frame %d: output frame number %d is negative", 
 			    cvl_io_info_frame_counter(input_info) - 1, frame_number);
+		    cvl_frame_free(frame);
 		    error = true;
 		    break;
 		}
@@ -156,6 +156,7 @@ int cmd_split(int argc, char *argv[])
 		{
 		    cvl_msg_err("cannot open %s: %s", outfile_name, strerror(errno));
 		    free(outfile_name);
+		    cvl_frame_free(frame);
 		    error = true;
 		    break;
 		}
@@ -165,11 +166,12 @@ int cmd_split(int argc, char *argv[])
 	    }
 	    if (!cvl_io_write(outfile, output_info, frame))
 	    {
+		cvl_frame_free(frame);
 		error = true;
 		break;
 	    }
+	    cvl_frame_free(frame);
 	}
-	cvl_frame_free(frame);
 	if (error)
 	{
 	    break;
