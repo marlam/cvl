@@ -449,6 +449,8 @@ bool cvtool_getopt(int argc, char *argv[], option_t *options,
 	    int number_of_values;
 	    char *p, *q;
 	    
+    	    free(option_struct->value);
+	    option_struct->value = NULL;
 	    error = !cvtool_getopt_parse_array_info(optarg,
 		    &p, &number_of_values,
 		    &(option_struct->dimensions),
@@ -484,6 +486,8 @@ bool cvtool_getopt(int argc, char *argv[], option_t *options,
 	    int number_of_values;
 	    char *p, *q;
 	    
+	    free(option_struct->value);
+    	    option_struct->value = NULL;
 	    error = !cvtool_getopt_parse_array_info(optarg,
 		    &p, &number_of_values,
 		    &(option_struct->dimensions),
