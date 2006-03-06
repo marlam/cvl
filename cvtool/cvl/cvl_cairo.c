@@ -33,6 +33,7 @@
 
 #include <cairo.h>
 
+#include "cvl/cvl_pixel.h"
 #include "cvl/cvl_frame.h"
 #include "cvl/cvl_color.h"
 #include "cvl/cvl_cairo.h"
@@ -41,59 +42,56 @@
 
 /**
  * \param frame		The frame.
- * \param surface	The CAIRO surface to be initialized.
- * \param cr		The CAIRO drawing context to be initialized.
+ * \param cr		The CAIRO drawing context.
  * \param original_pixel_type	Storage space for the original pixel type of \a frame.
  *
- * Initializes a CAIRO surface and drawing context for the given frame.
+ * Initializes a CAIRO drawing context for the given frame.
  * The idea is to call this function, then use CAIRO to work on \a cr, and then call
  * cvl_cairo_stop() when finished.
  * Do not use CVL functions on the frame while in CAIRO mode.
  */
-void cvl_cairo_start(cvl_frame_t *frame, cairo_surface_t **surface, cairo_t **cr,
-	cvl_pixel_type_t *original_pixel_type)
+void cvl_cairo_start(cvl_frame_t *frame, cairo_t **cr, cvl_pixel_type_t *original_pixel_type)
 {
     cvl_assert(frame != NULL);
-    cvl_assert(surface != NULL);
     cvl_assert(cr != NULL);
 
-    *surface = cairo_image_surface_create_for_data(
-	    (void *)(frame->_p), CAIRO_FORMAT_RGB24, 
-	    cvl_frame_width(frame), cvl_frame_height(frame),
-	    sizeof(cvl_pixel_t) * cvl_frame_width(frame));    
-    if (cairo_surface_status(*surface) != CAIRO_STATUS_SUCCESS)
-    {
-	cvl_msg_err("cannot create cairo_surface_t from frame");
-	abort();
-    }
-
-    *cr = cairo_create(*surface);
-    if (cairo_status(*cr) != CAIRO_STATUS_SUCCESS)
-    {
-	cvl_msg_err("cannot create cairo_t from frame");
-	abort();
-    }
+    cairo_surface_t *surface;
 
     *original_pixel_type = cvl_frame_pixel_type(frame);
     cvl_frame_convert(frame, CVL_PIXEL_RGB);
+    surface = cairo_image_surface_create_for_data(
+	    (void *)(frame->_p), CAIRO_FORMAT_RGB24, 
+	    cvl_frame_width(frame), cvl_frame_height(frame),
+	    sizeof(cvl_pixel_t) * cvl_frame_width(frame));    
+    if (cairo_surface_status(surface) != CAIRO_STATUS_SUCCESS)
+    {
+	cvl_msg_err("cannot create CAIRO surface");
+	abort();
+    }
+    *cr = cairo_create(surface);
+    if (cairo_status(*cr) != CAIRO_STATUS_SUCCESS)
+    {
+	cvl_msg_err("cannot create CAIRO context");
+	abort();
+    }
 }
 
 /**
  * \param frame		The frame.
- * \param surface	The CAIRO surface to be initialized.
- * \param cr		The CAIRO drawing context to be initialized.
+ * \param cr		The CAIRO drawing context.
  * \param original_pixel_type	The original pixel type of \a frame.
  *
- * Destroys \a surface and \a cr and converts the frame data back to the
- * original pixel type. See also cvl_cairo_start().
+ * Destroys \a cr and converts the frame data back to the original pixel type.
+ * See also cvl_cairo_start().
  */
-void cvl_cairo_stop(cvl_frame_t *frame, cairo_surface_t *surface, cairo_t *cr,
-	cvl_pixel_type_t original_pixel_type)
+void cvl_cairo_stop(cvl_frame_t *frame, cairo_t *cr, cvl_pixel_type_t original_pixel_type)
 {
     cvl_assert(frame != NULL);
-    cvl_assert(surface != NULL);
     cvl_assert(cr != NULL);
 
+    cairo_surface_t *surface;
+
+    surface = cairo_get_target(cr);
     cairo_destroy(cr);
     cairo_surface_destroy(surface);
     cvl_frame_convert(frame, original_pixel_type);
@@ -103,9 +101,9 @@ void cvl_cairo_stop(cvl_frame_t *frame, cairo_surface_t *surface, cairo_t *cr,
  * \param cr		CAIRO drawing context.
  * \param color		CVL color.
  *
- * Shortcut to set the CAIRO drawing color to a CVL color.
+ * Shortcut to call cairo_set_source_rgb() with a CVL color.
  */
-inline void cvl_cairo_set_color(cairo_t *cr, cvl_color_t color)
+inline void cvl_cairo_set_source_rgb(cairo_t *cr, cvl_color_t color)
 {
     cvl_pixel_t rgb = cvl_color_to_pixel(color, CVL_PIXEL_RGB);
     cairo_set_source_rgb(cr, 
