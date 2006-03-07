@@ -1,7 +1,5 @@
-/* Report a memory allocation failure and exit.
-
-   Copyright (C) 1997, 1998, 1999, 2000, 2002, 2003, 2004, 2006 Free
-   Software Foundation, Inc.
+/* Duplicate a size-bounded string.
+   Copyright (C) 2003 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -17,28 +15,16 @@
    along with this program; if not, write to the Free Software Foundation,
    Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.  */
 
-#ifdef HAVE_CONFIG_H
-# include <config.h>
+#if HAVE_STRNDUP
+
+/* Get strndup() declaration.  */
+#include <string.h>
+
+#else
+
+#include <stddef.h>
+
+/* Return a newly allocated copy of at most N bytes of STRING.  */
+extern char *strndup (const char *string, size_t n);
+
 #endif
-
-#include "xalloc.h"
-
-#include <stdlib.h>
-
-#include "error.h"
-#include "exitfail.h"
-
-#include "gettext.h"
-#define _(msgid) gettext (msgid)
-
-void
-xalloc_die (void)
-{
-  error (exit_failure, 0, "%s", _("memory exhausted"));
-
-  /* The `noreturn' cannot be given to error, since it may return if
-     its first argument is 0.  To help compilers understand the
-     xalloc_die does not return, call abort.  Also, the abort is a
-     safety feature if exit_failure is 0 (which shouldn't happen).  */
-  abort ();
-}

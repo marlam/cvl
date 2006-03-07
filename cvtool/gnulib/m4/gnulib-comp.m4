@@ -37,13 +37,17 @@ AC_DEFUN([gl_INIT],
   gl_SIZE_MAX
   AM_STDBOOL_H
   gl_STDINT_H
+  gl_FUNC_STRNDUP
+  gl_FUNC_STRNLEN
   gl_FUNC_STRPBRK
   gl_FUNC_STRVERSCMP
+  gl_HEADER_UNISTD
   gl_FUNC_VASNPRINTF
   gl_FUNC_VASPRINTF
   gl_WAIT_PROCESS
   gl_XALLOC
   gl_XSIZE
+  gl_XSTRNDUP
 ])
 
 # This macro records the list of files which have been installed by
@@ -78,11 +82,16 @@ AC_DEFUN([gl_FILE_LIST], [
   lib/size_max.h
   lib/stdbool_.h
   lib/stdint_.h
+  lib/strndup.c
+  lib/strndup.h
+  lib/strnlen.c
+  lib/strnlen.h
   lib/strpbrk.c
   lib/strpbrk.h
   lib/strverscmp.c
   lib/strverscmp.h
   lib/umaxtostr.c
+  lib/unistd_.h
   lib/vasnprintf.c
   lib/vasnprintf.h
   lib/vasprintf.c
@@ -95,6 +104,8 @@ AC_DEFUN([gl_FILE_LIST], [
   lib/xasprintf.c
   lib/xmalloc.c
   lib/xsize.h
+  lib/xstrndup.c
+  lib/xstrndup.h
   lib/xvasprintf.c
   lib/xvasprintf.h
   m4/alloca.m4
@@ -119,10 +130,13 @@ AC_DEFUN([gl_FILE_LIST], [
   m4/stdint.m4
   m4/stdint_h.m4
   m4/strerror_r.m4
+  m4/strndup.m4
+  m4/strnlen.m4
   m4/strpbrk.m4
   m4/strverscmp.m4
   m4/uintmax_t.m4
   m4/ulonglong.m4
+  m4/unistd_h.m4
   m4/vasnprintf.m4
   m4/vasprintf.m4
   m4/wait-process.m4
@@ -130,4 +144,5 @@ AC_DEFUN([gl_FILE_LIST], [
   m4/wint_t.m4
   m4/xalloc.m4
   m4/xsize.m4
+  m4/xstrndup.m4
 ])

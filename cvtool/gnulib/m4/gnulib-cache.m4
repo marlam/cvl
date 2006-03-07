@@ -14,10 +14,10 @@
 
 
 # Specification in the form of a command-line invocation:
-#   gnulib-tool --import --dir=. --lib=libgnu --source-base=gnulib --m4-base=gnulib/m4 --aux-dir=. --libtool --macro-prefix=gl getopt inttostr pipe size_max stdint strverscmp wait-process xalloc xvasprintf
+#   gnulib-tool --import --dir=. --lib=libgnu --source-base=gnulib --m4-base=gnulib/m4 --aux-dir=. --libtool --macro-prefix=gl getopt inttostr pipe size_max stdint strverscmp wait-process xalloc xstrndup xvasprintf
 
 # Specification in the form of a few gnulib-tool.m4 macro invocations:
-gl_MODULES([getopt inttostr pipe size_max stdint strverscmp wait-process xalloc xvasprintf])
+gl_MODULES([getopt inttostr pipe size_max stdint strverscmp wait-process xalloc xstrndup xvasprintf])
 gl_AVOID([])
 gl_SOURCE_BASE([gnulib])
 gl_M4_BASE([gnulib/m4])
