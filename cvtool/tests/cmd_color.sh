@@ -14,7 +14,7 @@ $CVTOOL color -h 240 < r.pnm > xb.pnm
 cmp b.pnm xb.pnm 
 
 # 2. Saturation
-$CVTOOL create -t rgb -n 1 -w 9 -h 9 -c 127,127,127 > s.pnm 
+$CVTOOL create -t rgb -n 1 -w 9 -h 9 -c r127g127b127 > s.pnm 
 $CVTOOL color -s -1 < r.pnm > xs.pnm 
 cmp s.pnm xs.pnm 
 

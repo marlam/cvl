@@ -2,9 +2,9 @@
 
 . cmd_tests_common.sh
 
-$CVTOOL create -t gray -n 1 -w 9 -h 9 -c 000,000,000 > 000.pgm
-$CVTOOL create -t gray -n 1 -w 9 -h 9 -c 127,127,127 > 127.pgm
-$CVTOOL create -t gray -n 1 -w 9 -h 9 -c 255,255,255 > 255.pgm
+$CVTOOL create -t gray -n 1 -w 9 -h 9 -c r000g000b000 > 000.pgm
+$CVTOOL create -t gray -n 1 -w 9 -h 9 -c b127g127r127 > 127.pgm
+$CVTOOL create -t gray -n 1 -w 9 -h 9 -c g255r255b255 > 255.pgm
 
 $CVTOOL binarize global -t 0 < 000.pgm > x255.pgm
 cmp 255.pgm x255.pgm

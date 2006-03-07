@@ -212,15 +212,18 @@ Examples:
 Colors can be given in one of three forms:
 @enumerate
 @item X11 color names@*
-X11 comes with a file rgb.txt that defines names for lots of colors.
-Cvtool accepts each of these names, case insensitively.
-The full list can be found here: @url{http://cvs.freedesktop.org/*checkout*/xorg/xc/programs/rgb/rgb.txt}.
+X11 comes with a file rgb.txt that defines names for lots of colors.  Cvtool
+accepts each of these names, case insensitively.  The full list can be found
+here: @url{http://cvs.freedesktop.org/*checkout*/xorg/xc/programs/rgb/rgb.txt}.
 @item Hex triplets@*
-The RGB components of a color can be specified directly as a hex triplet: 0xrrggbb.
-For example, 0xffffff is white and 0x000000 is black.
-@item Triplet of decimal values@*
-The RGB components of a color can be specified directly as a triplet of decimal values: rrr,ggg,bbb.
-For example, 255,255,255 is white and 0,0,0 is black.
+The RGB components of a color can be specified directly as a hex triplet:
+@code{0xrrggbb}.  For example, @code{0x00ff00} is green, @code{0xffffff} is
+white, and @code{0x000000} is black.
+@item Decimal values@*
+The RGB components of a color can be specified as decimal values, prepended
+with r, g, or b.  For example, @code{g255} is green (the red and blue
+components default to zero), @code{r255g255b255} is white, and @code{r0g0b0} is
+black.
 @end enumerate
 
 @section Environment

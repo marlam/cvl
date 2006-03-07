@@ -2182,7 +2182,7 @@ static int cvl_color_from_string_cmp(const cvl_color_table_entry_t *e1, const cv
  *
  * Converts a color string into a color value.
  * Valid strings are X11 color names, RGB values in the form 0xrrggbb,
- * and RGB values in the form rrr,ggg,bbb (decimal values).
+ * and decimal values prepended with r, g, or b, for example r127g64b12.
  */
 bool cvl_color_from_string(const char *s, cvl_color_t *color)
 {
@@ -2208,36 +2208,83 @@ bool cvl_color_from_string(const char *s, cvl_color_t *color)
 	// possibilities
 	return false;
     }
-    // rrr,ggg,bbb
-    if (len <= 11 && strspn(s, "0123456789,") == len)
+    // r<val>g<val>b<val>
+    if (len >= 1 && strspn(s, "rgb0123456789") == len)
     {
-	int r, g, b;
-	char *ptr;
-	long l;
+	typedef enum { RGB_LETTER, RGB_VALUE_R, RGB_VALUE_G, RGB_VALUE_B } state_t;
+	state_t state = RGB_LETTER;
+	int r = 0;
+	int g = 0;
+	int b = 0;
+	int i = 0;
+	bool error = false;
 	
-	errno = 0;
-	l = strtol(s, &ptr, 10);
-	if (errno != ERANGE && *ptr == ',' && l >= 0 && l <= 255)
+	while (!error)
 	{
-	    r = l;
-	    errno = 0;
-	    l = strtol(ptr + 1, &ptr, 10);
-	    if (errno != ERANGE && *ptr == ',' && l >= 0 && l <= 255)
+	    if (state == RGB_LETTER)
 	    {
-		g = l;
-		errno = 0;
-		l = strtol(ptr + 1, &ptr, 10);
-		if (errno != ERANGE && *ptr == '\0' && l >= 0 && l <= 255)
+    		if (s[i] == 'r')
 		{
-		    b = l;
-		    *color = (cvl_color_t)cvl_pixel_rgb(r, g, b);
-		    return true;
+		    state = RGB_VALUE_R;
+		    i++;
+		}
+		else if (s[i] == 'g')
+		{
+		    state = RGB_VALUE_G;
+		    i++;
+		}
+		else if (s[i] == 'b')
+		{
+		    state = RGB_VALUE_B;
+		    i++;
+		}
+		else if (s[i] == '\0')
+		{
+		    break;
+		}
+		else
+		{
+		    error = true;
+		}
+	    }
+	    else
+	    {
+		char *ptr;
+		long l;
+
+    		errno = 0;
+		l = strtol(s + i, &ptr, 10);
+		if (ptr != s + i && errno != ERANGE && l >= 0 && l <= 255)
+		{
+		    if (state == RGB_VALUE_R)
+		    {
+			r = l;
+		    }
+		    else if (state == RGB_VALUE_G)
+		    {
+			g = l;
+		    }
+		    else // state == RGB_VALUE_B
+		    {
+			b = l;
+		    }
+		    state = RGB_LETTER;
+		    i = ptr - s;
+		}
+		else
+		{
+		    error = true;
 		}
 	    }
 	}
-	// no need to check for a X11 color, because none of those is of
-	// the form rrr,ggg,bbb
-	return false;
+	if (!error)
+	{
+	    *color = cvl_pixel_rgb(r, g, b);
+	    return true;
+	}
+	// no need to check for a X11 color, because for none of those is 
+	// (strspn(s, "rgb0123456789") == len) true.
+	return !error;
     }
     // X11 color name
     if ((entry = bsearch(&key, cvl_color_table, cvl_color_table_len, sizeof(cvl_color_table_entry_t), 
