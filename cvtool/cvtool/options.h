@@ -123,7 +123,8 @@ typedef struct
 typedef struct
 {
     char *value;
-    bool (*is_valid)(const char *s);	/* function to check whether the argument is valid */
+    bool (*is_valid)(const char *s);	/* Function to check whether the argument is valid. 
+					   If this is NULL, then no check will be performed. */
 } option_string_t;
  
 typedef struct

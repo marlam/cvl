@@ -68,16 +68,6 @@ void cmd_foreach_print_help(void)
 
 
 /*
- * Helper: test if the command is valid. Needed for OPTION_STRING.
- */
-
-bool bogus_string_check(const char *s UNUSED)
-{
-    return true;
-}
-
-
-/*
  * string_replace()
  *
  * Replace all occurences of 's' in the string 'str' with 'r'.
@@ -111,7 +101,7 @@ char *string_replace(char *str, const char *s, const char *r)
 
 int cmd_foreach(int argc, char *argv[])
 {
-    option_string_t shell = { NULL, bogus_string_check };
+    option_string_t shell = { NULL, NULL };
     option_int_t n = { 1, 1, INT_MAX };
     option_t options[] =
     {

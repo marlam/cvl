@@ -545,7 +545,7 @@ bool cvtool_getopt(int argc, char *argv[], option_t *options,
 	else if (options[optval].type == OPTION_STRING)
 	{
 	    option_string_t *option_struct = options[optval].option_struct;
-	    if (!option_struct->is_valid(optarg))
+	    if (option_struct->is_valid && !option_struct->is_valid(optarg))
 	    {
 		cvtool_getopt_msg_invalid_arg(options, optval, option_shortname);
 		error = true;
