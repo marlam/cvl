@@ -91,7 +91,6 @@ AC_DEFUN([gl_FILE_LIST], [
   lib/strverscmp.c
   lib/strverscmp.h
   lib/umaxtostr.c
-  lib/unistd_.h
   lib/vasnprintf.c
   lib/vasnprintf.h
   lib/vasprintf.c
