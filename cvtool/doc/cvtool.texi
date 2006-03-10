@@ -297,14 +297,19 @@ Print version information.
 @code{info [-o|--output=@var{file}]}
 
 @noindent
-Print information about the first frame in a stream to stderr or to the given
-file ('-' means stdout).@*
-The following information will be printed: @code{STREAMTYPE} (@samp{y4m} or @samp{pnm}), 
-@code{PIXELTYPE} (@samp{yuv} for @samp{y4m} streams, @samp{rgb} or @samp{gray} for @samp{pnm} streams),
-@code{WIDTH}, @code{HEIGHT}, and, if @code{STREAMTYPE} is @samp{y4m}, @code{CHROMA}, 
-@code{INTERLACING}, @code{FRAMERATE}, @code{ASPECTRATIO}.@*
-In a @samp{y4m} stream, all frames are of the same type, and the information thus applies to 
-the whole stream. This is not true for @samp{pnm} streams!
+Print information about the first frame in a stream.
+
+The information is printed to stderr or to the given file ('-' means stdout).
+
+The following information will be printed: @code{STREAMTYPE} (@samp{y4m} or
+@samp{pnm}), @code{PIXELTYPE} (@samp{yuv} for @samp{y4m} streams, @samp{rgb} or
+@samp{gray} for @samp{pnm} streams), @code{WIDTH}, @code{HEIGHT}, and, if
+@code{STREAMTYPE} is @samp{y4m}, @code{CHROMA}, @code{INTERLACING},
+@code{FRAMERATE}, @code{ASPECTRATIO}.
+
+In a @samp{y4m} stream, all frames are of the same type, and the information
+thus applies to the whole stream. This is not true for @samp{pnm} streams!
+
 @example
 $ cvtool info < file.pnm
 cvtool: [INF] info: STREAMTYPE=pnm PIXELTYPE=rgb WIDTH=352 HEIGHT=240
@@ -325,12 +330,14 @@ $ echo $WIDTH
 @var{file@dots{}}}
 
 @noindent
-Combine the given files by placing the frames side by side
-(@samp{leftright}) or one below the other (@samp{topbottom}). The default
-is @samp{leftright}. If the frames have different sizes, then the
-smaller ones have to be aligned with the biggest one. The
-default is to center them. The remaining space will be
-filled with the given color; the default is black.
+Combine the given files by placing the frames side by side (@samp{leftright})
+or one below the other (@samp{topbottom}).
+
+The default is @samp{leftright}. If the frames have different sizes, then the
+smaller ones have to be aligned with the biggest one. The default is to center
+them. The remaining space will be filled with the given color; the default is
+black.
+
 @example
 $ cvtool combine left.pnm right.pnm > lr.pnm
 $ cvtool combine -m tb \
@@ -345,15 +352,19 @@ $ cvtool combine -m tb \
 [-F|--framerate=@var{f1:f2}] [-A|--aspect-ratio=@var{a1:a2}]}
 
 @noindent
-Convert input to @samp{pnm} or @samp{y4m} format. The default is to keep the input
-format.@*
+Convert input to @samp{pnm} or @samp{y4m} format. 
+
+The default is to keep the input format.
+
 The @option{--gray} option converts each frame to graylevels. For the @samp{pnm}
 output type, this is the only option that has any effect; the others are
-silently ignored.@*
+silently ignored.
+
 For @samp{y4m}, the chroma subsampling, frame rate, and aspect ratio can be
 given. The default is to incur them from the input stream. If the input 
 stream is not a @samp{y4m} stream, the defaults are @samp{0:0} ("unknown") 
 for frame rate and aspect ratio, and @samp{420jpeg} for chroma subsampling.
+
 @example
 $ cvtool convert -C 444 < in.y4m > out.y4m 
 $ cvtool convert -o pnm < video.y4m > video.pnm
@@ -366,13 +377,17 @@ $ cvtool convert -o pnm < video.y4m > video.pnm
 [-F|--framerate=@var{f1:f2}] [-A|--aspect-ratio=@var{a1:a2}]}
 
 @noindent
-Create @var{n} (default 1) frames of pixel type @samp{gray}, 
-@samp{rgb} or @samp{yuv} (default @samp{rgb}), with the given width and height, filled
-with the given color (default black). The resulting stream
-type will be @samp{pnm} for @samp{gray} and @samp{rgb} frames, and @samp{y4m}
-for @samp{yuv} frames. The chroma subsampling, frame rate, and
-aspect ratio information is only relevant for the @samp{yuv} type;
-it will be silently ignored for the other types.
+Create a stream of frames.
+
+@var{n} (default 1) frames of pixel type @samp{gray}, @samp{rgb} or @samp{yuv}
+(default @samp{rgb}) are created with the given width and height and filled
+with the given color (default black). 
+
+The resulting stream type will be @samp{pnm} for @samp{gray} and @samp{rgb}
+frames, and @samp{y4m} for @samp{yuv} frames. The chroma subsampling, frame
+rate, and aspect ratio information is only relevant for the @samp{yuv} type; it
+will be silently ignored for the other types.
+
 @example
 $ cvtool create -t yuv -F 25:1 -w 720 -h 576 -n 250 > 10-seconds-PAL.y4m
 $ cvtool create -t rgb -w 720 -h 576 -c green > green.pgm
@@ -383,28 +398,25 @@ $ cvtool create -t rgb -w 720 -h 576 -c green > green.pgm
 @code{foreach [-s|--shell=@var{shell}] [-n|--n=@var{n}] @var{cmd}}
 
 @noindent
-Execute the given command for every frame. The command is
-expected to read @var{n} frames from standard input (default is @var{n}=1), 
-and write an arbitrary number (including zero) of
-frames to standard output. The original frame(s) that were
-given to the command are replaced by the output of the
-command. The frames that the command produces are converted
-to the format of the original frames. The foreach command
-replaces the following special strings in the command @var{cmd} 
-before executing the command: @code{%N} (replaced with frame
-number), @code{%W} (replaced with frame width), and @code{%H} (replaced
-with frame height). If @var{n} is greater than 1, these values
-refer to the first frame that is piped to the command.
-The command @var{cmd} is executed by passing it to the system shell.
-The default is @samp{/bin/sh -c} on most systems. This can be
-overridden with the @option{--shell} option. It
-expects a string with zero or one spaces: The first part of
-the string is the shell, the second part (if any) is the
-first option to the shell. The next option will then be the
-command to execute.
+Execute the given command for every frame. 
+
+The command is expected to read @var{n} frames from standard input (default is
+@var{n}=1), and write an arbitrary number (including zero) of frames to
+standard output. The original frame(s) that were given to the command are
+replaced by the output of the command. The frames that the command produces are
+converted to the format of the original frames. The foreach command replaces
+the following special strings in the command @var{cmd} before executing the
+command: @code{%N} (replaced with frame number), @code{%W} (replaced with frame
+width), and @code{%H} (replaced with frame height). If @var{n} is greater than
+1, these values refer to the first frame that is piped to the command.  The
+command @var{cmd} is executed by passing it to the system shell.  The default
+is @samp{/bin/sh -c} on most systems. This can be overridden with the
+@option{--shell} option. It expects a string with zero or one spaces: The first
+part of the string is the shell, the second part (if any) is the first option
+to the shell. The next option will then be the command to execute.
+
 @example
 $ cvtool foreach 'cvtool info' < many-images.pnm
-
 # Rotate a video. Use chroma 444 to allow odd width/height. Resize after 
 # rotation to keep the original dimensions.
 $ cvtool convert -C 444 < video.y4m \
@@ -418,11 +430,12 @@ $ cvtool convert -C 444 < video.y4m \
 @code{merge [-s|--shuffle] [-o|--output=@var{file}] @var{file@dots{}}}
 
 @noindent
-Merges files into one stream, in the given order. If
-@code{--shuffle} is used, the order will be randomized. The file
-names will be printed to stderr in the order they are
-merged. If @code{--output} is used, the file names will be written
-to the given file instead.
+Merges files into one stream, in the given order.
+
+If @code{--shuffle} is used, the order will be randomized. The file names will
+be printed to stderr in the order they are merged. If @code{--output} is used,
+the file names will be written to the given file instead.
+
 @example
 $ ls
 frame000.pnm frame001.pnm frame002.pnm
@@ -435,7 +448,10 @@ $ cvtool merge * | cvtool convert -o y4m > video.y4m
 
 @noindent
 Reverses the order of the frames in the stream.
-This requires a temporary file that is big enough to hold the complete input stream.
+
+This requires a temporary file that is big enough to hold the complete input
+stream.
+
 @example
 $ cvtool reverse < video.y4m > oediv.y4m
 @end example
@@ -445,8 +461,11 @@ $ cvtool reverse < video.y4m > oediv.y4m
 @code{select [-d|--drop] @var{range@dots{}}}
 
 @noindent
-Selects frames from a stream. By default, frames in the given ranges are kept and all others 
-dropped. With @code{--drop}, frames in the given ranges are dropped and all others kept.@*
+Selects frames from a stream.
+
+By default, frames in the given ranges are kept and all others dropped. With
+@code{--drop}, frames in the given ranges are dropped and all others kept.
+
 A range must be of the following form: @var{l}-@var{h} (from @var{l} to
 @var{h}), -@var{h} (from beginning to @var{h}), @var{l}- (from @var{l} to end),
 @var{l} (only @var{l}), or - (everything).  Each start and end point can be a
@@ -456,6 +475,7 @@ time. Time ranges can only be used for YUV4MPEG2 streams with known frame rate.
 IMPORTANT: If you use frame number ranges, the high frame number is inclusive:
 the frame with this number will be dropped/kept. If you use time ranges, the
 high time is exclusive and marks the first frame that will not be dropped/kept.
+
 @example
 # Drop the frames 0 to 124 from the stream (with a framerate of 25 fps,
 # these are the first five seconds).
@@ -478,20 +498,20 @@ $ cvtool select --drop -5:00 10:00- < in.y4m > out.y4m
 [-s|--start=@var{i}]}
 
 @noindent
-Split the input stream into multiple files, each containing
-@var{n} frames (default is @var{n}=1). The filename will be generated
-from the template: the template must contain exactly one
-appearance of the character @code{%}. This character must be
-followed by one of the digits @code{1} through @code{9}. The digit must be
-followed by the uppercase character @code{N}. This special string
-@code{%xN} will be replaced by the number of the first frame of the
-stream contained in this file. The number will be
-left-padded with zeros until its width is at least @code{x}
-characters. The default template is @samp{frame-%6N}.
-A start number i for the first frame can be given, and the
-frames can be counted backwards. If the frames are counted
-backwards, a start number is required, because negative
+Split the input stream into multiple files.
+
+Each new files contains @var{n} frames (default is @var{n}=1). The filename
+will be generated from the template: the template must contain exactly one
+appearance of the character @code{%}. This character must be followed by one of
+the digits @code{1} through @code{9}. The digit must be followed by the
+uppercase character @code{N}. This special string @code{%xN} will be replaced
+by the number of the first frame of the stream contained in this file. The
+number will be left-padded with zeros until its width is at least @code{x}
+characters. The default template is @samp{frame-%6N}.  A start number i for the
+first frame can be given, and the frames can be counted backwards. If the
+frames are counted backwards, a start number is required, because negative
 frame numbers are not accepted.
+
 @example
 $ cvtool split -t frame%3N.pnm < ../video.y4m
 $ ls
@@ -510,13 +530,14 @@ img99.pnm img98.pnm img97.pnm
 [-y|--y-offset=@var{y}] [-c|--color=@var{color}]}
 
 @noindent
-Resize the frames to the given new width and height. Place
-the original frame contents at the position (@var{x},@var{y}) relative
-to the new frame (these offsets may be negative). If no or
-an incomplete position is given, compute the missing part(s)
-so that the old contents are centered on the new frame. Fill
-holes that might result with the given color (default is
+Resize the frames to the given new width and height.
+
+Place the original frame contents at the position (@var{x},@var{y}) relative to
+the new frame (these offsets may be negative). If no or an incomplete position
+is given, compute the missing part(s) so that the old contents are centered on
+the new frame. Fill holes that might result with the given color (default is
 black).
+
 @example
 $ cvtool info < img.pnm
 cvtool: [INF] info: STREAMTYPE=pnm PIXELTYPE=rgb WIDTH=352 HEIGHT=240
@@ -531,6 +552,7 @@ $ cvtool resize -w 372 -h 260 -c green < img.pnm > img2.pnm
 
 @noindent
 Only let the given rectangle through; cut the rest of each frame.
+
 @example
 $ cvtool cut -l 0 -t 0 -w 10 -h 10 < in.pnm > out.pnm
 @end example
@@ -545,12 +567,12 @@ $ cvtool cut -l 0 -t 0 -w 10 -h 10 < in.pnm > out.pnm
 [-i|--interpolation=none|bilinear]}
 
 @noindent
-Apply the affine tranformation defined by the given matrix
-(4 floating point values separated by commas) to the frames.
-The frame dimensions will be adapted so that the resulting
-image will fit. Possible holes will be filled with the given
-color; the default is black. The default interpolation type
-is bilinear.
+Apply the affine tranformation defined by the given matrix (4 floating point
+values separated by commas) to the frames.  The frame dimensions will be
+adapted so that the resulting image will fit. Possible holes will be filled
+with the given color; the default is black. The default interpolation type is
+bilinear.
+
 @example
 $ cvtool affine -m 2.0,0.1,0.75,1.0 < in.pnm > out.pnm
 @end example
@@ -561,6 +583,7 @@ $ cvtool affine -m 2.0,0.1,0.75,1.0 < in.pnm > out.pnm
 
 @noindent
 Flip frames (left/right).
+
 @example
 $ cvtool flip < in.pnm > out.pnm
 @end example
@@ -571,6 +594,7 @@ $ cvtool flip < in.pnm > out.pnm
 
 @noindent
 Flop frames (top/bottom).
+
 @example
 $ cvtool flop < in.pnm > out.pnm
 @end example
@@ -581,12 +605,13 @@ $ cvtool flop < in.pnm > out.pnm
 [-i|--interpolation=none|bilinear]}
 
 @noindent
-Rotate frames with the given angle (in degrees),
-counterclockwise. The dimensions of the rotated frame will
-be big enough to hold all informations from the source.
-"Holes" will be filled with the given color; the default is
-black. The default interpolation type is bilinear (simple
-rotations (90, 180, or 270) do not need interpolation).
+Rotate frames with the given angle (in degrees), counterclockwise.
+
+The dimensions of the rotated frame will be big enough to hold all informations
+from the source.  "Holes" will be filled with the given color; the default is
+black. The default interpolation type is bilinear (simple rotations (90, 180,
+or 270) do not need interpolation).
+
 @example
 $ cvtool rotate -a -45 < in.pnm > out.pnm
 @end example
@@ -600,11 +625,17 @@ $ cvtool rotate -a -45 < in.pnm > out.pnm
 @code{scale -f|--factor=@var{factor} [-i|--interpolation=none|bilinear]}
 
 @noindent
-Scale frames to new size. The default interpolation type is bilinear.@*
+Scale frames to new size. 
+
+The default interpolation type is bilinear.
+
 First form: Give new width and/or height. If one value is missing, it is
-computed from the other so that the aspect ratio remains the same.@*
-Second form: Give scale factors for width and height.@*
+computed from the other so that the aspect ratio remains the same.
+
+Second form: Give scale factors for width and height.
+
 Third form: Give one scale factor for both width and height.
+
 @example
 $ cvtool info < in.pnm
 cvtool: [INF] info: STREAMTYPE=pnm PIXELTYPE=rgb WIDTH=400 HEIGHT=200
@@ -616,13 +647,16 @@ $ cvtool scale -f 0.25         < in.pnm > out.pnm
 
 @cmindex shear
 @subsection shear
-@code{shear [-x|--shear-x=@var{angle-x}] [-y|--shear-y=@var{angle-y}] [-c|--color=@var{color}] 
-[-i|--interpolation=none|bilinear]}
+@code{shear [-x|--shear-x=@var{angle-x}] [-y|--shear-y=@var{angle-y}]
+[-c|--color=@var{color}] [-i|--interpolation=none|bilinear]}
 
 @noindent
-Shear frames in horizontal and/or vertical direction, with the given angle(s)
-from (-90,90). Negative angles shear clockwise. "Holes" will be filled with the
-given color; the default is black. The default interpolation type is bilinear.
+Shear frames in horizontal and/or vertical direction.
+
+The frames are sheared with the given angle(s) from (-90,90).  Negative angles
+shear clockwise. "Holes" will be filled with the given color; the default is
+black. The default interpolation type is bilinear.
+
 @example
 $ cvtool shear -x 20 -y 10 < in.pnm > out.pnm
 @end example
@@ -634,24 +668,29 @@ $ cvtool shear -x 20 -y 10 < in.pnm > out.pnm
 @cmindex smooth
 @subsection smooth
 @code{smooth average [-3|--3d] -k|--k=@var{k}}@*
-@code{smooth average [-3|--3d] -x|--k-x=@var{kx} -y|--k-y=@var{ky} [-t|--k-t=@var{kt}]}@*
+@code{smooth average [-3|--3d] -x|--k-x=@var{kx} -y|--k-y=@var{ky}
+[-t|--k-t=@var{kt}]}@*
 @code{smooth median [-3|--3d] -k|--k=@var{k}}@*
-@code{smooth median [-3|--3d] -x|--k-x=@var{kx} -y|--k-y=@var{ky} [-t|--k-t=@var{kt}]}@*
+@code{smooth median [-3|--3d] -x|--k-x=@var{kx} -y|--k-y=@var{ky}
+[-t|--k-t=@var{kt}]}@*
 @code{smooth gauss [-3|--3d] -k|--k=@var{k}}@*
-@code{smooth gauss [-3|--3d] -x|--k-x=@var{kx} -y|--k-y=@var{ky} [-t|--k-t=@var{kt}]}@*
+@code{smooth gauss [-3|--3d] -x|--k-x=@var{kx} -y|--k-y=@var{ky}
+[-t|--k-t=@var{kt}]}@*
 @code{smooth gauss [-3|--3d] [-k|--k=@var{k}] [-x|--k-x=@var{kx}]
 [-y|--k-y=@var{ky}] [-t|--k-t=@var{kt}] [-s|--sigma=@var{s}]
 [--sigma-x=@var{sx}] [--sigma-y=@var{sy}] [--sigma-t=@var{st}]}
 
 @noindent
 Smooth frames, in 2D or 3D (with the third dimension being the
-time). The kernel size can be given for each dimension, or
-once for all. It will be (2@var{kx}+1)x(2@var{ky}+1)[x(2@var{kt}+1)]. Different
-values for each direction lead to asymmetric smoothing. The
-gauss filter can be specified by the sigma value(s): the
-mask size will be computed so that roughly 95% of the mass
-lies within the resulting mask. It is also possible to
-specify both @var{sigma} and @var{k}.
+time).
+
+The kernel size can be given for each dimension, or once for all. It will be
+(2@var{kx}+1)x(2@var{ky}+1)[x(2@var{kt}+1)]. Different values for each
+direction lead to asymmetric smoothing. The gauss filter can be specified by
+the sigma value(s): the mask size will be computed so that roughly 95% of the
+mass lies within the resulting mask. It is also possible to specify both
+@var{sigma} and @var{k}.
+
 @example
 $ cvtool smooth gauss --3d -k 3 < video.y4m > smoothed-video.y4m
 @end example
@@ -659,15 +698,17 @@ $ cvtool smooth gauss --3d -k 3 < video.y4m > smoothed-video.y4m
 @cmindex convolve
 @subsection convolve
 @code{convolve -K|--kernel=@var{K}}@*
-@code{convolve -X|--vector-x=@var{X} -Y|--vector-y=@var{Y} [-T|--vector-t=@var{T}]}
+@code{convolve -X|--vector-x=@var{X} -Y|--vector-y=@var{Y}
+[-T|--vector-t=@var{T}]}
 
 @noindent
-Convolve frames with the given convolution kernel. Both 2D
-and 3D kernels are accepted (the third dimension is the
-time). If the kernel is separable, the vectors that generate
-it can be given instead, to reduce computation costs. All
-kernel elements must be integers. The size of the kernel
-must be an odd number in each dimension.
+Convolve frames with the given convolution kernel.
+
+Both 2D and 3D kernels are accepted (the third dimension is the time). If the
+kernel is separable, the vectors that generate it can be given instead, to
+reduce computation costs. All kernel elements must be integers. The size of the
+kernel must be an odd number in each dimension.
+
 @example
 # Both commands are equivalent to 2D smoothing with the 
 # average filter with k=1:
@@ -685,26 +726,30 @@ $ cvtool convolve -X 3:1,1,1 -Y 3:1,1,1    < in.pnm > out.pnm
 @code{binarize iterative}@*
 @code{binarize otsu}@*
 @code{binarize hysterese -l|--low=@var{l} -h|--high=@var{h}}@*
-@code{binarize local -T|--type=mean|median|minmax -k|--k=@var{k} -C|--constant=@var{C}}
+@code{binarize local -T|--type=mean|median|minmax -k|--k=@var{k}
+-C|--constant=@var{C}}
 
 @noindent
-Convert input to grayscale (if necessary), then binarize it
-using the given method.@*
-The global method turns every pixel to black whose value is
-lower than the given threshold; all over pixels are turned
-to white. The threshold must be from [0,256].@*
-The iterative and otsu methods are global methods, too, but
-they compute the threshold automatically.@*
-The hysterese method is not adequate for general images; it
-is mainly used by the Canny edge detector. It uses a low and
-a high threshold; both must be in [0,255], and should be
-chosen so that 2@var{l} <= @var{h} <= 4@var{l}.@*
-The local method uses a local threshold (@var{T}-@var{C}) for a
-neighborhood of size (2@var{k}+1)x(2@var{k}+1), where @var{T} is the mean of all
-pixel values in the neighborhood, the median of the pixel
-values, or the mean of the minimum and maximum of the pixel
-values. @var{C} can be negative. The mean type is much faster than
-median and minmax.
+Convert input to grayscale (if necessary), then binarize it using the given
+method.
+
+The global method turns every pixel to black whose value is lower than the
+given threshold; all over pixels are turned to white. The threshold must be
+from [0,256].
+
+The iterative and otsu methods are global methods, too, but they compute the
+threshold automatically.
+
+The hysterese method is not adequate for general images; it is mainly used by
+the Canny edge detector. It uses a low and a high threshold; both must be in
+[0,255], and should be chosen so that 2@var{l} <= @var{h} <= 4@var{l}.
+
+The local method uses a local threshold (@var{T}-@var{C}) for a neighborhood of
+size (2@var{k}+1)x(2@var{k}+1), where @var{T} is the mean of all pixel values
+in the neighborhood, the median of the pixel values, or the mean of the minimum
+and maximum of the pixel values. @var{C} can be negative. The mean type is much
+faster than median and minmax.
+
 @example
 $ cvtool binarize local -T median -k 5 -C 20 < gray.pgm > bw.pgm
 @end example
@@ -715,6 +760,7 @@ $ cvtool binarize local -T median -k 5 -C 20 < gray.pgm > bw.pgm
 
 @noindent
 Pick the given channel from the input.
+
 @example
 $ cvtool channel -c r < colored.pnm > red.pnm
 @end example
@@ -722,22 +768,22 @@ $ cvtool channel -c r < colored.pnm > red.pnm
 @cmindex color
 @subsection color
 @code{color [-h|--hue=@var{h}] [-s|--saturation=@var{s}]
-[-l|--lightness=@var{l}] [-c|--contrast=@var{c}] 
+[-l|--lightness=@var{l}] [-c|--contrast=@var{c}]
 [-g|--gamma=(@var{g}|@var{gr},@var{gg},@var{gb})]}
 
 @noindent
-Color adjustment.@*
-Hue, saturation, lightness, and constrast are manipulated in
-the HSL (Hue, Saturation, Lightness) color space. @var{h} is an
-additive constant to the hue angle, in degrees. @var{s}, @var{l}, @var{c}
-measure the relative change in saturation, lightness,
-contrast: -1 means the result will be zero, 0 means the
-result will be the same as the original, and +1 means that
-the result will be two times as high as the original. Values
-greater than +1 are possible. For example, s = -1 will
-convert the input images to graylevels. See the 
-@url{http://en.wikipedia.org/wiki/HLS_color_space,Wikipedia entry for HSL color space}
-for more information.@*
+Color adjustment.
+
+Hue, saturation, lightness, and constrast are manipulated in the HSL (Hue,
+Saturation, Lightness) color space. @var{h} is an additive constant to the hue
+angle, in degrees. @var{s}, @var{l}, @var{c} measure the relative change in
+saturation, lightness, contrast: -1 means the result will be zero, 0 means the
+result will be the same as the original, and +1 means that the result will be
+two times as high as the original. Values greater than +1 are possible. For
+example, s = -1 will convert the input images to graylevels. See the
+@url{http://en.wikipedia.org/wiki/HLS_color_space,Wikipedia entry for HSL color
+space} for more information.
+
 Gamma correction (option @option{--gamma} is applied to the gray channel for
 @samp{gray} frames, to the Y channel for @samp{yuv} frames, and to the R,G,B
 channels for @samp{rgb} frames.  If three gamma values are given, the frames
@@ -745,6 +791,7 @@ are always converted to @samp{rgb}, then gamma corrected for each channel
 separately, and then converted back to their original type. All gamma values
 must be greater than zero. Values greater than 1.0 lighten the image, values
 smaller than 1.0 darken them.
+
 @example
 $ cvtool color -h 120 < red.pnm > green.pnm
 $ cvtool color -h 120 < green.pnm > blue.pnm
@@ -759,8 +806,10 @@ $ cvtool color --gamma 1.4 < dark.pnm > light.pnm
 @code{equalize}
 
 @noindent
-Equalize Histogram. Color images are equalized in the Y part
-of the YUV color space.
+Equalize Histogram. 
+
+Color images are equalized in the Y part of the YUV color space.
+
 @example
 $ cvtool equalize < in.pnm > out.pnm
 @end example
@@ -771,6 +820,7 @@ $ cvtool equalize < in.pnm > out.pnm
 
 @noindent
 Invert input frames.
+
 @example
 $ cvtool invert < in.pnm > out.pnm
 @end example
@@ -785,10 +835,15 @@ $ cvtool invert < in.pnm > out.pnm
 @code{edge canny -s|--sigma=@var{sigma} -l|--low=@var{l} -h|--high=@var{h}}
 
 @noindent
-Detect edges.@*
-Sobel will generate graylevel images: the brighter a point, the stronger the edge.@*
-Canny will generate binary images. The @var{sigma} parameter is for Gauss smoothing.
-@var{l} and @var{h} are used for Hysterese thresholding; both must be from [0,255].
+Detect edges.
+
+Sobel will generate graylevel images: the brighter a point, the stronger the
+edge.
+
+Canny will generate binary images. The @var{sigma} parameter is for Gauss
+smoothing.  @var{l} and @var{h} are used for Hysterese thresholding; both must
+be from [0,255].
+
 @example
 $ cvtool edge sobel < in.pgm > gray-edges.pgm
 $ cvtool edge canny -s 1.2 -l 4 -h 8 < in.pgm > bw-edges.pgm
@@ -810,42 +865,55 @@ $ cvtool edge canny -s 1.2 -l 4 -h 8 < in.pgm > bw-edges.pgm
 [-o|--output=@var{file}] -f|--verification-flow=@var{file}}
 
 @noindent
-Compute the optical flow between frames. For @var{n} input frames, this command will
-produce @var{n}-1 fields of optical flow vectors, in plain text format: the first will contain
-the optical flow between the input frames 0 and 1, the second that between 1 and 2, and so forth@*
-If the @code{--backwards} option is used, then the optical flow is computed in the opposite direction:
-the first flow field will contain the optical flow between frames 1 and 0, the second that between 2 and 1, 
-and so forth.@*
-The @emph{hs} (Horn/Schunck) method needs a regularisation parameter lambda (try
-10.0), and the number of iterations (try 50).@*
-The @emph{lk} (Lukas/Kanade) method needs the neighborhood size (2@var{k}+1)x(2@var{k}+1) as a
-parameter.@*
-The @emph{clg} (Combined Local/Global) method needs a regularization parameter lambda
-(try 10.0), a relaxation parameter omega for the iterative SOR method (try
-1.95; the value must be between 0 and 2), and the number of iterations (try
-50).@*
-The @emph{bm-sad} (block matching with sum of absoulte differences) method needs the
-block size (2@var{k}+1)x(2@var{k}+1) as a parameter, and the maximum distance that matching
-blocks will be searched in. The cost of a block are (dw \cdot distance + (1 - dw) \cdot
-average_pixel_difference). The maximum norm distance is used here. Each pixel
-difference is calculated with (lw * difference_in_luminance + (1 - lw) *
-difference_in_chrominance. The block with the lowest cost is the match; it
-determines the optical flow in a given point.  Warning: This method is VERY
-SLOW!@*
-The @emph{bm-asw} (block matching using adaptive support weights) method is a block
-matching variant that uses special support weights for cost computation. Try 12
-for @var{k}, 7 for @var{gc} and 36 for @var{gp}. This implementation uses a resolution
-pyramid to speed the process up and reduce uncertainty in correspondence search.
-Warning: This method is SLOW!@*
-The @emph{cc} (consistency check) method does not compute optical flow from images.
-Instead, it offers the verification step that improves existing optical flow fields:
-the flow fields from @code{stdin} are compared against those from the given file. 
-Each flow vector in the first set of fields must match its corresponding flow vector in the
-second set of fields with the given tolerance. Vector pairs that differ by more than the 
-given tolerance are marked as unreliable, and are replaced by interpolations of neighboring 
-reliable vectors. If a warning level between 0 and 1 is given and the fraction of unreliable
-vectors is greater than or equal to this level, then a warning is issued for the current flow field pair.
-These warnings can be redirected to a separate file with the @code{--output} option.
+Compute the optical flow between frames. 
+
+For @var{n} input frames, this command will produce @var{n}-1 fields of optical
+flow vectors, in plain text format: the first will contain the optical flow
+between the input frames 0 and 1, the second that between 1 and 2, and so
+forth.
+
+If the @code{--backwards} option is used, then the optical flow is computed in
+the opposite direction: the first flow field will contain the optical flow
+between frames 1 and 0, the second that between 2 and 1, and so forth.
+
+The @emph{hs} (Horn/Schunck) method needs a regularisation parameter lambda
+(try 10.0), and the number of iterations (try 50).
+
+The @emph{lk} (Lukas/Kanade) method needs the neighborhood size
+(2@var{k}+1)x(2@var{k}+1) as a parameter.
+
+The @emph{clg} (Combined Local/Global) method needs a regularization parameter
+lambda (try 10.0), a relaxation parameter omega for the iterative SOR method
+(try 1.95; the value must be between 0 and 2), and the number of iterations
+(try 50).
+
+The @emph{bm-sad} (block matching with sum of absoulte differences) method
+needs the block size (2@var{k}+1)x(2@var{k}+1) as a parameter, and the maximum
+distance that matching blocks will be searched in. The cost of a block are (dw
+\cdot distance + (1 - dw) \cdot average_pixel_difference). The maximum norm
+distance is used here. Each pixel difference is calculated with (lw *
+difference_in_luminance + (1 - lw) * difference_in_chrominance. The block with
+the lowest cost is the match; it determines the optical flow in a given point.
+Warning: This method is VERY SLOW!
+
+The @emph{bm-asw} (block matching using adaptive support weights) method is a
+block matching variant that uses special support weights for cost computation.
+Try 12 for @var{k}, 7 for @var{gc} and 36 for @var{gp}. This implementation
+uses a resolution pyramid to speed the process up and reduce uncertainty in
+correspondence search.  Warning: This method is SLOW!
+
+The @emph{cc} (consistency check) method does not compute optical flow from
+images.  Instead, it offers the verification step that improves existing
+optical flow fields: the flow fields from @code{stdin} are compared against
+those from the given file.  Each flow vector in the first set of fields must
+match its corresponding flow vector in the second set of fields with the given
+tolerance. Vector pairs that differ by more than the given tolerance are marked
+as unreliable, and are replaced by interpolations of neighboring reliable
+vectors. If a warning level between 0 and 1 is given and the fraction of
+unreliable vectors is greater than or equal to this level, then a warning is
+issued for the current flow field pair.  These warnings can be redirected to a
+separate file with the @code{--output} option.
+
 @example
 $ cvtool opticalflow bm-sad    -k 8 -M 5 -D 0.01 -L 0.5 \
   < video.y4m > flow-fw.txt
@@ -856,6 +924,7 @@ $ cvtool opticalflow cc -t 2 -f flow-bw.txt \
 $ cvtool opticalflow cc -t 2 -f flow-fw.txt \
   < flow-bw.txt > flow-bw-improved.txt
 @end example
+
 @noindent 
 See also:
 @itemize @asis
@@ -888,19 +957,22 @@ San Diego, CA, USA, June 2005.
 @code{diff [-o|--output=@var{file}] @var{file-1} @var{file-2}}
 
 @noindent
-Shows the differences between the two sources. The sources must have the same
-pixel type, width, and height. This command produces frames of the same
-dimensions and of the same pixel type. Each pixel will be the absolute value of
-the difference of the corresponding pixels in the two sources. The difference
-is computed separated by color channels. Example: p1 = (r11, g12, b13), 
-p2 = (r3, g11, b13) => (r8, g1, b0).@*
+Shows the differences between the two sources.
+
+The sources must have the same pixel type, width, and height. This command
+produces frames of the same dimensions and of the same pixel type. Each pixel
+will be the absolute value of the difference of the corresponding pixels in the
+two sources. The difference is computed separated by color channels. Example:
+p1 = (r11, g12, b13), p2 = (r3, g11, b13) => (r8, g1, b0).
+
 In addition to the difference frames, the command will compute the sum of the
 absolute differences of all pixel values, divided by the number of pixels. The
-value will be printed to stderr, unless the output is redirected with the @option{--output}
-option. If the output is redirected to @code{stdout} (-), then only the difference values
-and no frames will be written to @code{stdout}.
+value will be printed to stderr, unless the output is redirected with the
+@option{--output} option. If the output is redirected to @code{stdout} (-),
+then only the difference values and no frames will be written to @code{stdout}.
 @samp{rgb} and @samp{yuv} frames produce three error values (one per channel),
 printed on a single line.
+
 @example 
 $ cvtool create -w 10 -h 10 -c 255,0,0 > red.pnm
 $ cvtool create -w 10 -h 10 -c 0,255,0 > green.pnm
@@ -918,17 +990,19 @@ cvtool: [REQ] diff: 255 255 0
 [-z|--zps=@var{z}] [-h|--hole-filling=none|average|near|far|linear]}
 
 @noindent
-Builds stereo images from a source view and corresponding
-depth maps. @var{b} is the "eye" distance in pixels. The position
-of the source view must be in [-1,+1], where -1 means left
-view, +1 means right view, and 0 means intermediate view
-(this is the default). @var{zps} is the zero parallax setting. It
-must be in [0,1]; the default is 0. The hole filling method
-can be none, average color (default), color of
-nearer/farther neighbor pixel, or linear color gradient.
+Builds stereo images from a source view and corresponding depth maps.
+
+@var{b} is the "eye" distance in pixels. The position of the source view must
+be in [-1,+1], where -1 means left view, +1 means right view, and 0 means
+intermediate view (this is the default). @var{zps} is the zero parallax
+setting. It must be in [0,1]; the default is 0. The hole filling method can be
+none, average color (default), color of nearer/farther neighbor pixel, or
+linear color gradient.
+
 @example
 $ cvtool dibr -d depth.pgm -b 20 < mono.pnm > stereo.pnm
 @end example
+
 @noindent 
 See also:
 @itemize @asis
@@ -942,24 +1016,30 @@ Images for 3D TV. @cite{IEEE Transactions on Broadcasting,} 51(2):191-199, June 
 
 @cmindex stereoview
 @subsection stereoview
-@code{stereoview anaglyph [-c|--color[=on|off]] [-g|--glasses=red-cyan|red-green|red-blue]}@*
-@code{stereoview 3d-display -f|--format=lr|tb|ci|ri [-w|--width=@var{w}] [-h|--height=@var{h}]}
+@code{stereoview anaglyph [-c|--color[=on|off]]
+[-g|--glasses=red-cyan|red-green|red-blue]}@*
+@code{stereoview 3d-display -f|--format=lr|tb|ci|ri [-w|--width=@var{w}]
+[-h|--height=@var{h}]}
 
 @noindent
-Prepares stereoscopic image pairs for a display device.@*
+Prepares stereoscopic image pairs for a display device.
+
 @code{anaglyph}: converts stereo frames (left and right view side by side) into
 anaglyph images, viewable with appropriate color 3D glasses. The default is to
-create graylevel anaglyphs for @samp{red-blue} glasses. It is advisable to lighten the images with
-gamma correction before creating anaglyph images, because the glasses absorb some
-lightness.@*
-@code{3d-display}: convert stereo frames (left and right view side by side) into a
-format that can be viewed directly on a 3D display by 
-@url{http://www.dti3d.com/,DTI}: just play the resulting video with any media player in
-fullscreen mode.  The width and height parameters should be set to the
-resolution of the 3D display; the default is 1280x1024. The formats are: @samp{lr} =
-left-right (S/S on DTI display), @samp{tb} = top-bottom (T/B on DTI display), @samp{ci} =
-column-interleaved (Fr/S on DTI display), @samp{ri} = row-interleaved (F/S on DTI
-display). If unsure, try @samp{tb}.
+create graylevel anaglyphs for @samp{red-blue} glasses. It is advisable to
+lighten the images with gamma correction before creating anaglyph images,
+because the glasses absorb some lightness.
+
+@code{3d-display}: convert stereo frames (left and right view side by side)
+into a format that can be viewed directly on an autostereoscopic 3D display,
+for example one by @url{http://www.dti3d.com/,DTI}: just play the resulting
+video with any media player in fullscreen mode.  The width and height
+parameters should be set to the resolution of the 3D display; the default is
+1280x1024. The formats are: @samp{lr} = left-right (S/S on DTI display),
+@samp{tb} = top-bottom (T/B on DTI display), @samp{ci} = column-interleaved
+(Fr/S on DTI display), @samp{ri} = row-interleaved (F/S on DTI display). If
+unsure, try @samp{tb}.
+
 @example
 $ cvtool stereoview anaglyph -c -g red-cyan < stereo.pnm > anaglyph.pnm
 $ cvtool stereoview 3d-display -f tb < stereo.pnm > dti-stereo.pnm
@@ -974,18 +1054,21 @@ $ cvtool stereoview 3d-display -f tb < stereo.pnm > dti-stereo.pnm
 @var{depthfile0} @var{depthfile1} @dots{}}
 
 @noindent
-Creates @var{n} depth maps by using depth tracking with the given
-flow information on the given list of depth maps. The depth
-map list contains the numbers of the frames for which a
-depth map is available. It must be in ascending order. It is
-not necessary to give a depth map for the first and last
-frame (0 and @var{n}-1), but it may improve the results. Exactly
-one depth map file must be given for each entry in the list.@*
+Creates @var{n} depth maps by using depth tracking with the given flow
+information on the given list of depth maps. 
+
+The depth map list contains the numbers of the frames for which a depth map is
+available. It must be in ascending order. It is not necessary to give a depth
+map for the first and last frame (0 and @var{n}-1), but it may improve the
+results. Exactly one depth map file must be given for each entry in the list.
+
 This command uses temporary files that can become quite large.
+
 @example
 $ cvtool trackdepth -n 26 -d 0,25 -f flow-fw.txt -F flow-bw.txt \
   depth00.pgm depth25.pgm < video.y4m > depth00-25.pgm
 @end example
+
 @noindent 
 See also:
 @itemize @asis
@@ -1001,14 +1084,15 @@ See also:
 [-x|--x=@var{x}] [-y|--y=@var{y}]}
 
 @noindent
-Blends the source into the image stream, using the alpha
-map a. With no alpha map, the source is simply copied into
-the images. @var{x} and @var{y} specify the position that the source
-should be copied to. The default is (0,0). Positions outside of
-the images are possible: parts of the source that do not fit
-into the images will be ignored. When @option{--single} is used, only
-the first frame of the source will be used; this frame will
-be copied into all images of the stream.
+Blends the source into the image stream, using an alpha map.
+
+With no alpha map, the source is simply copied into the images. @var{x} and
+@var{y} specify the position that the source should be copied to. The default
+is (0,0). Positions outside of the images are possible: parts of the source
+that do not fit into the images will be ignored. When @option{--single} is
+used, only the first frame of the source will be used; this frame will be
+copied into all images of the stream.
+
 @example
 $ cvtool blend --single -s logo.pnm -a logo-alpha.pgm -x 700 -y 0 \
   < video.y4m > video-with-logo.y4m
@@ -1029,18 +1113,24 @@ This command needs to be rewritten.
 
 @noindent
 Reads vector fields in plain text formats, as produced by other commands such
-as opticalflow, and visualizes them as a needle diagram. The type of the
-vectors must be known; it can be @samp{2i} for vectors with two integer components,
-@samp{2} for vectors with two floating point components, and @samp{3} for vectors with
-three floating point components.@*
-Every @var{x}-th vector in horizontal direction and every @var{y}-th vector in vertical
-direction will be represented by a needle. The needles will have a distance of
-dx pixels in horizontal and dy pixels in vertical direction. The needle length
-is the length of the vector after it was scaled with the factor @var{f}.@*
-Example: @var{x=y=1}, @var{dx=dy=5} will result in a needle diagram that is 5 times
-wider and higher than the input vector field. Every vector in it is visualized.
-For @var{x=y=5}, the needle diagram is as big as the input vector field, but only one
-of 25 vectors is visualized. The default is @var{x=y=dx=dy=10}, @var{f=1.0}.
+as opticalflow, and visualizes them as a needle diagram. 
+
+The type of the vectors must be known; it can be @samp{2i} for vectors with two
+integer components, @samp{2} for vectors with two floating point components,
+and @samp{3} for vectors with three floating point components.
+
+Every @var{x}-th vector in horizontal direction and every @var{y}-th vector in
+vertical direction will be represented by a needle. The needles will have a
+distance of dx pixels in horizontal and dy pixels in vertical direction. The
+needle length is the length of the vector after it was scaled with the factor
+@var{f}.
+
+Example: @var{x=y=1}, @var{dx=dy=5} will result in a needle diagram that is 5
+times wider and higher than the input vector field. Every vector in it is
+visualized.  For @var{x=y=5}, the needle diagram is as big as the input vector
+field, but only one of 25 vectors is visualized. The default is
+@var{x=y=dx=dy=10}, @var{f=1.0}.
+
 @example
 $ cvtool vectors visualize -t 2i < flow-fw.txt > flow-fw.pgm
 @end example
