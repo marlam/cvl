@@ -270,6 +270,7 @@ Cvtool returns @code{0} on success and @code{1} on error.
 * Smoothing and Enhancing frames::
 * Color manipulation::
 * Detecting image features::
+* Image analysis::
 * Comparing frames::
 * Stereoscopic image pairs::
 * Miscellaneous::
@@ -278,22 +279,31 @@ Cvtool returns @code{0} on success and @code{1} on error.
 @node Informational commands
 @section Informational commands
 
-@cmindex help
+@menu
+* help::
+* version::
+* info::
+@end menu
+
+@node help
 @subsection help
+@cmindex help
 @code{help [@var{command}]}
 
 @noindent
 Print general or command specific help.
 
-@cmindex version
+@node version
 @subsection version
+@cmindex version
 @code{version}
 
 @noindent
 Print version information.
 
-@cmindex info
+@node info
 @subsection info
+@cmindex info
 @code{info [-o|--output=@var{file}]}
 
 @noindent
@@ -322,9 +332,20 @@ $ echo $WIDTH
 @node Stream manipulation
 @section Stream manipulation
 
+@menu
+* combine::
+* convert::
+* create::
+* foreach::
+* merge::
+* reverse::
+* select::
+* split::
+@end menu
 
-@cmindex combine
+@node combine
 @subsection combine
+@cmindex combine
 @code{combine [-m|--method=(lr|leftright)|(tb|topbottom)]
 [-j|--justify=(left|top)|center|(right|bottom)] [-c|--color=@var{color}]
 @var{file@dots{}}}
@@ -346,8 +367,9 @@ $ cvtool combine -m tb \
   > 2x2.pnm
 @end example
 
-@cmindex convert
+@node convert
 @subsection convert
+@cmindex convert
 @code{convert [-o|--output-type=pnm|y4m] [-g|--gray] [-C|--chroma=420jpeg|444]
 [-F|--framerate=@var{f1:f2}] [-A|--aspect-ratio=@var{a1:a2}]}
 
@@ -370,8 +392,9 @@ $ cvtool convert -C 444 < in.y4m > out.y4m
 $ cvtool convert -o pnm < video.y4m > video.pnm
 @end example
 
-@cmindex create
+@node create
 @subsection create
+@cmindex create
 @code{create [-t|--type=gray|rgb|yuv] [-n|--n=@var{n}] -w|--width=@var{w}
 -h|--height=@var{h} [-c|--color=@var{color}] [-C|--chroma=420jpeg|444]
 [-F|--framerate=@var{f1:f2}] [-A|--aspect-ratio=@var{a1:a2}]}
@@ -393,8 +416,9 @@ $ cvtool create -t yuv -F 25:1 -w 720 -h 576 -n 250 > 10-seconds-PAL.y4m
 $ cvtool create -t rgb -w 720 -h 576 -c green > green.pgm
 @end example
 
-@cmindex foreach
+@node foreach
 @subsection foreach
+@cmindex foreach
 @code{foreach [-s|--shell=@var{shell}] [-n|--n=@var{n}] @var{cmd}}
 
 @noindent
@@ -425,8 +449,9 @@ $ cvtool convert -C 444 < video.y4m \
   > rotating-video.y4m
 @end example
 
-@cmindex merge
+@node merge
 @subsection merge
+@cmindex merge
 @code{merge [-s|--shuffle] [-o|--output=@var{file}] @var{file@dots{}}}
 
 @noindent
@@ -442,8 +467,9 @@ frame000.pnm frame001.pnm frame002.pnm
 $ cvtool merge * | cvtool convert -o y4m > video.y4m
 @end example
 
-@cmindex reverse
+@node reverse
 @subsection reverse
+@cmindex reverse
 @code{reverse}
 
 @noindent
@@ -456,8 +482,9 @@ stream.
 $ cvtool reverse < video.y4m > oediv.y4m
 @end example
 
-@cmindex select
+@node select
 @subsection select
+@cmindex select
 @code{select [-d|--drop] @var{range@dots{}}}
 
 @noindent
@@ -492,8 +519,9 @@ $ cvtool select 5:00-10:00 < in.y4m > out.y4m
 $ cvtool select --drop -5:00 10:00- < in.y4m > out.y4m
 @end example
 
-@cmindex split
+@node split
 @subsection split
+@cmindex split
 @code{split [-n|--n=@var{n}] [-t|--template=@var{template}] [-b|--backwards]
 [-s|--start=@var{i}]}
 
@@ -521,11 +549,18 @@ $ ls
 img99.pnm img98.pnm img97.pnm
 @end example
 
+
 @node Resizing frames
 @section Resizing frames
 
-@cmindex resize
+@menu
+* resize::
+* cut::
+@end menu
+
+@node resize
 @subsection resize
+@cmindex resize
 @code{resize -w|--width=@var{w} -h|--height=@var{h} [-x|--x-offset=@var{x}]
 [-y|--y-offset=@var{y}] [-c|--color=@var{color}]}
 
@@ -545,8 +580,9 @@ cvtool: [INF] info: STREAMTYPE=pnm PIXELTYPE=rgb WIDTH=352 HEIGHT=240
 $ cvtool resize -w 372 -h 260 -c green < img.pnm > img2.pnm
 @end example
 
-@cmindex cut
+@node cut
 @subsection cut
+@cmindex cut
 @code{cut -l|--left=@var{l} -t|--top=@var{t} -w|--width=@var{w}
 -h|--height=@var{h}}
 
@@ -561,8 +597,18 @@ $ cvtool cut -l 0 -t 0 -w 10 -h 10 < in.pnm > out.pnm
 @node Transforming frames
 @section Transforming frames
 
-@cmindex affine
+@menu
+* affine::
+* flip::
+* flop::
+* rotate::
+* scale::
+* shear::
+@end menu
+
+@node affine
 @subsection affine
+@cmindex affine
 @code{affine -m|--matrix=@var{2x2-matrix} [-c|--color=@var{color}]
 [-i|--interpolation=none|bilinear]}
 
@@ -577,8 +623,9 @@ bilinear.
 $ cvtool affine -m 2.0,0.1,0.75,1.0 < in.pnm > out.pnm
 @end example
 
-@cmindex flip
+@node flip
 @subsection flip
+@cmindex flip
 @code{flip}
 
 @noindent
@@ -588,8 +635,9 @@ Flip frames (left/right).
 $ cvtool flip < in.pnm > out.pnm
 @end example
 
-@cmindex flop
+@node flop
 @subsection flop
+@cmindex flop
 @code{flop}
 
 @noindent
@@ -599,8 +647,9 @@ Flop frames (top/bottom).
 $ cvtool flop < in.pnm > out.pnm
 @end example
 
-@cmindex rotate
+@node rotate
 @subsection rotate
+@cmindex rotate
 @code{rotate -a|--angle=@var{angle} [-c|--color=@var{color}]
 [-i|--interpolation=none|bilinear]}
 
@@ -616,8 +665,9 @@ or 270) do not need interpolation).
 $ cvtool rotate -a -45 < in.pnm > out.pnm
 @end example
 
-@cmindex scale
+@node scale
 @subsection scale
+@cmindex scale
 @code{scale [-w|--width=@var{w}] [-h|--height=@var{h}]
 [-i|--interpolation=none|bilinear]}@*
 @code{scale -x|--factor-x=@var{factor-x} -y|--factor-y=@var{factor-y}
@@ -645,8 +695,9 @@ $ cvtool scale -x 0.25 -y 0.25 < in.pnm > out.pnm
 $ cvtool scale -f 0.25         < in.pnm > out.pnm
 @end example
 
-@cmindex shear
+@node shear
 @subsection shear
+@cmindex shear
 @code{shear [-x|--shear-x=@var{angle-x}] [-y|--shear-y=@var{angle-y}]
 [-c|--color=@var{color}] [-i|--interpolation=none|bilinear]}
 
@@ -665,8 +716,14 @@ $ cvtool shear -x 20 -y 10 < in.pnm > out.pnm
 @node Smoothing and Enhancing frames
 @section Smoothing and Enhancing frames
 
-@cmindex smooth
+@menu
+* smooth::
+* convolve::
+@end menu
+
+@node smooth
 @subsection smooth
+@cmindex smooth
 @code{smooth average [-3|--3d] -k|--k=@var{k}}@*
 @code{smooth average [-3|--3d] -x|--k-x=@var{kx} -y|--k-y=@var{ky}
 [-t|--k-t=@var{kt}]}@*
@@ -695,8 +752,9 @@ mass lies within the resulting mask. It is also possible to specify both
 $ cvtool smooth gauss --3d -k 3 < video.y4m > smoothed-video.y4m
 @end example
 
-@cmindex convolve
+@node convolve
 @subsection convolve
+@cmindex convolve
 @code{convolve -K|--kernel=@var{K}}@*
 @code{convolve -X|--vector-x=@var{X} -Y|--vector-y=@var{Y}
 [-T|--vector-t=@var{T}]}
@@ -720,8 +778,17 @@ $ cvtool convolve -X 3:1,1,1 -Y 3:1,1,1    < in.pnm > out.pnm
 @node Color manipulation
 @section Color manipulation
 
-@cmindex binarize
+@menu
+* binarize::
+* channel::
+* color::
+* equalize::
+* invert::
+@end menu
+
+@node binarize
 @subsection binarize
+@cmindex binarize
 @code{binarize global -t|--threshold=@var{t}}@*
 @code{binarize iterative}@*
 @code{binarize otsu}@*
@@ -754,8 +821,9 @@ faster than median and minmax.
 $ cvtool binarize local -T median -k 5 -C 20 < gray.pgm > bw.pgm
 @end example
 
-@cmindex channel
+@node channel
 @subsection channel
+@cmindex channel
 @code{channel -c|--channel=r|g|b}
 
 @noindent
@@ -765,8 +833,9 @@ Pick the given channel from the input.
 $ cvtool channel -c r < colored.pnm > red.pnm
 @end example
 
-@cmindex color
+@node color
 @subsection color
+@cmindex color
 @code{color [-h|--hue=@var{h}] [-s|--saturation=@var{s}]
 [-l|--lightness=@var{l}] [-c|--contrast=@var{c}]
 [-g|--gamma=(@var{g}|@var{gr},@var{gg},@var{gb})]}
@@ -801,8 +870,9 @@ $ cvtool color -l +1 < dark.pnm > light.pnm
 $ cvtool color --gamma 1.4 < dark.pnm > light.pnm
 @end example
 
-@cmindex equalize
+@node equalize
 @subsection equalize
+@cmindex equalize
 @code{equalize}
 
 @noindent
@@ -814,8 +884,9 @@ Color images are equalized in the Y part of the YUV color space.
 $ cvtool equalize < in.pnm > out.pnm
 @end example
 
-@cmindex invert
+@node invert
 @subsection invert
+@cmindex invert
 @code{invert}
 
 @noindent
@@ -829,8 +900,13 @@ $ cvtool invert < in.pnm > out.pnm
 @node Detecting image features
 @section Detecting image features
 
-@cmindex edge
+@menu
+* edge::
+@end menu
+
+@node edge
 @subsection edge
+@cmindex edge
 @code{edge sobel}@*
 @code{edge canny -s|--sigma=@var{sigma} -l|--low=@var{l} -h|--high=@var{h}}
 
@@ -849,8 +925,17 @@ $ cvtool edge sobel < in.pgm > gray-edges.pgm
 $ cvtool edge canny -s 1.2 -l 4 -h 8 < in.pgm > bw-edges.pgm
 @end example
 
-@cmindex opticalflow
+
+@node Image analysis
+@section Image analysis
+
+@menu
+* opticalflow::
+@end menu
+
+@node opticalflow
 @subsection opticalflow
+@cmindex opticalflow
 @code{opticalflow hs [-b|--backwards] -l|--lambda=@var{l}
 -n|--iterations=@var{n}}@*
 @code{opticalflow lk [-b|--backwards] -k|--k=@var{k}}@*
@@ -952,8 +1037,13 @@ San Diego, CA, USA, June 2005.
 @node Comparing frames
 @section Comparing frames
 
-@cmindex diff
+@menu
+* diff::
+@end menu
+
+@node diff
 @subsection diff
+@cmindex diff
 @code{diff [-o|--output=@var{file}] @var{file-1} @var{file-2}}
 
 @noindent
@@ -984,8 +1074,15 @@ cvtool: [REQ] diff: 255 255 0
 @node Stereoscopic image pairs
 @section Stereoscopic image pairs
 
-@cmindex dibr
+@menu
+* dibr::
+* stereoview::
+* trackdepth::
+@end menu
+
+@node dibr
 @subsection dibr
+@cmindex dibr
 @code{dibr -d|--depth=@var{depthsource} -b|--b=@var{b} [-p|--position=@var{p}]
 [-z|--zps=@var{z}] [-h|--hole-filling=none|average|near|far|linear]}
 
@@ -1014,8 +1111,9 @@ Images for 3D TV. @cite{IEEE Transactions on Broadcasting,} 51(2):191-199, June 
 @item TODO
 @end itemize
 
-@cmindex stereoview
+@node stereoview
 @subsection stereoview
+@cmindex stereoview
 @code{stereoview anaglyph [-c|--color[=on|off]]
 [-g|--glasses=red-cyan|red-green|red-blue]}@*
 @code{stereoview 3d-display -f|--format=lr|tb|ci|ri [-w|--width=@var{w}]
@@ -1045,10 +1143,9 @@ $ cvtool stereoview anaglyph -c -g red-cyan < stereo.pnm > anaglyph.pnm
 $ cvtool stereoview 3d-display -f tb < stereo.pnm > dti-stereo.pnm
 @end example
 
-
-@cmindex trackdepth
+@node trackdepth
 @subsection trackdepth
-@anchor{trackdepth}
+@cmindex trackdepth
 @code{trackdepth -n|--n=@var{n} -d|--depthmap-list=@var{d0},@var{d1},@dots{}
 -f|--flow-forward=@var{flow-fw} -F|--flow-backward=@var{flow-bw}
 @var{depthfile0} @var{depthfile1} @dots{}}
@@ -1078,8 +1175,15 @@ See also:
 @node Miscellaneous
 @section Miscellaneous
 
-@cmindex blend
+@menu
+* blend::
+* grid::
+* vectors::
+@end menu
+
+@node blend
 @subsection blend
+@cmindex blend
 @code{blend -s|--source=@var{file} [-a|--alpha=@var{file}] [-S|--single]
 [-x|--x=@var{x}] [-y|--y=@var{y}]}
 
@@ -1098,15 +1202,17 @@ $ cvtool blend --single -s logo.pnm -a logo-alpha.pgm -x 700 -y 0 \
   < video.y4m > video-with-logo.y4m
 @end example
 
-@cmindex grid
+@node grid
 @subsection grid
+@cmindex grid
 @code{grid}
 
 @noindent
 This command needs to be rewritten.
 
-@cmindex vectors
+@node vectors
 @subsection vectors
+@cmindex vectors
 @code{vectors visualize -t|--type=2i|2|3 [-x|--sample-x=@var{x}]
 [-y|--sample-y=@var{y}] [-X|--dist-x=@var{dx}] [-Y|--dist-y=@var{dy}]
 [-f|--factor=@var{f}]}
