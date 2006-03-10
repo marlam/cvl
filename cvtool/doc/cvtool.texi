@@ -58,7 +58,7 @@ this program and manual; if not, write to the Free Software Foundation, Inc.,
 @end ifnottex
 
 @menu
-* Introduction::
+* Overview::
 * Commands::
 * Examples::
 * Enhancing cvtool::
@@ -66,9 +66,20 @@ this program and manual; if not, write to the Free Software Foundation, Inc.,
 @end menu
 
 
-@node Introduction
-@chapter Introduction
+@node Overview
+@chapter Overview
 
+@menu
+* Concept::
+* Supported file types::
+* Output::
+* Global options::
+* Common parameters::
+* Environment::
+* Exit codes::
+@end menu
+
+@node Concept
 @section Concept
 
 Cvtool is a filter that manipulates one or more images: it reads images from
@@ -95,7 +106,9 @@ $ cvtool cut --left 10 --top 10 --width 100 --height 100 \
 @code{cvtool help cmd} prints help for the command @code{cmd}.
 
 
+@node Supported file types
 @section Supported file types
+
 @subsection NetPBM formats: @samp{pnm}
 
 All NetPBM image formats (pbm, pgm, ppm, pam) are supported, except for their
@@ -136,6 +149,7 @@ $ cvtool convert --chroma 444 < input.y4m \
   | mpeg2enc -f4 -o video.mpg
 @end example
 
+@node Output
 @section Output
 
 Cvtool normally prints messages to @code{stderr}. It prepends messages with its
@@ -157,6 +171,7 @@ Redirecting messages to @code{stdout} is only allowed when no images are
 written to @code{stdout}.
 
 
+@node Global options
 @section Global options
 
 @table @code
@@ -170,6 +185,7 @@ with level @code{DBG}. This will include progress information in many
 cases, but much of the output is really only useful for debugging purposes.
 @end table
 
+@node Common parameters
 @section Common parameters
 
 @subsection Arrays and Matrices
@@ -226,6 +242,7 @@ components default to zero), @code{r255g255b255} is white, and @code{r0g0b0} is
 black.
 @end enumerate
 
+@node Environment
 @section Environment
 
 @table @env
@@ -236,6 +253,7 @@ Cvtool tries to format its messages so that they do not use more than the given 
 If this variable is unset, a default of 80 will be used.
 @end table
 
+@node Exit codes
 @section Exit codes
 
 Cvtool returns @code{0} on success and @code{1} on error.
@@ -244,6 +262,20 @@ Cvtool returns @code{0} on success and @code{1} on error.
 @node Commands
 @chapter Commands
 
+@menu
+* Informational commands::
+* Stream manipulation::
+* Resizing frames::
+* Transforming frames::
+* Smoothing and Enhancing frames::
+* Color manipulation::
+* Detecting image features::
+* Comparing frames::
+* Stereoscopic image pairs::
+* Miscellaneous::
+@end menu
+
+@node Informational commands
 @section Informational commands
 
 @cmindex help
@@ -282,6 +314,7 @@ $ echo $WIDTH
 @end example
 
 
+@node Stream manipulation
 @section Stream manipulation
 
 
@@ -468,6 +501,7 @@ $ ls
 img99.pnm img98.pnm img97.pnm
 @end example
 
+@node Resizing frames
 @section Resizing frames
 
 @cmindex resize
@@ -502,6 +536,7 @@ $ cvtool cut -l 0 -t 0 -w 10 -h 10 < in.pnm > out.pnm
 @end example
 
 
+@node Transforming frames
 @section Transforming frames
 
 @cmindex affine
@@ -593,6 +628,7 @@ $ cvtool shear -x 20 -y 10 < in.pnm > out.pnm
 @end example
 
 
+@node Smoothing and Enhancing frames
 @section Smoothing and Enhancing frames
 
 @cmindex smooth
@@ -640,6 +676,7 @@ $ cvtool convolve -X 3:1,1,1 -Y 3:1,1,1    < in.pnm > out.pnm
 @end example
 
 
+@node Color manipulation
 @section Color manipulation
 
 @cmindex binarize
@@ -739,6 +776,7 @@ $ cvtool invert < in.pnm > out.pnm
 @end example
 
 
+@node Detecting image features
 @section Detecting image features
 
 @cmindex edge
@@ -842,6 +880,7 @@ on Computer Vision and Pattern Recognition (CVPR),} volume 2, pages 924-931,
 San Diego, CA, USA, June 2005. 
 @end itemize
 
+@node Comparing frames
 @section Comparing frames
 
 @cmindex diff
@@ -870,6 +909,7 @@ cvtool: [REQ] diff: 255 255 0
 @end example
 
 
+@node Stereoscopic image pairs
 @section Stereoscopic image pairs
 
 @cmindex dibr
@@ -952,6 +992,7 @@ See also:
 @item TODO
 @end itemize
 
+@node Miscellaneous
 @section Miscellaneous
 
 @cmindex blend
@@ -1009,7 +1050,12 @@ $ cvtool vectors visualize -t 2i < flow-fw.txt > flow-fw.pgm
 @node Examples
 @chapter Examples
 
-@anchor{Creating a stereoscopic image from a single 2D image}
+@menu
+* Creating a stereoscopic image from a single 2D image::
+* Creating a stereoscopic video from a 2D video::
+@end menu
+
+@node Creating a stereoscopic image from a single 2D image
 @section Creating a stereoscopic image from a single 2D image
 
 @subsection Introduction 
@@ -1100,6 +1146,7 @@ $ cvtool color -g 1.4 < nasac000-stereo.ppm \
   > nasac000-stereo-redcyan.ppm
 @end example
 
+@node Creating a stereoscopic video from a 2D video
 @section Creating a stereoscopic video from a 2D video
 
 The only difference between creating stereoscopic images, as explained in the
