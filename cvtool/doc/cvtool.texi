@@ -698,9 +698,9 @@ contrast: -1 means the result will be zero, 0 means the
 result will be the same as the original, and +1 means that
 the result will be two times as high as the original. Values
 greater than +1 are possible. For example, s = -1 will
-convert the input images to graylevels. See
-@url{http://en.wikipedia.org/wiki/HLS_color_space} for more information on
-the HSL color space.@*
+convert the input images to graylevels. See the 
+@url{http://en.wikipedia.org/wiki/HLS_color_space,Wikipedia entry for HSL color space}
+for more information.@*
 Gamma correction (option @option{--gamma} is applied to the gray channel for
 @samp{gray} frames, to the Y channel for @samp{yuv} frames, and to the R,G,B
 channels for @samp{rgb} frames.  If three gamma values are given, the frames
@@ -913,8 +913,8 @@ create graylevel anaglyphs for @samp{red-blue} glasses. It is advisable to light
 gamma correction before creating anaglyph images, because the glasses absorb some
 lightness.@*
 @code{3d-display}: convert stereo frames (left and right view side by side) into a
-format that can be viewed directly on a 3D display by DTI
-(@url{http://www.dti3d.com/}): just play the resulting video with any media player in
+format that can be viewed directly on a 3D display by 
+@url{http://www.dti3d.com/,DTI}: just play the resulting video with any media player in
 fullscreen mode.  The width and height parameters should be set to the
 resolution of the 3D display; the default is 1280x1024. The formats are: @samp{lr} =
 left-right (S/S on DTI display), @samp{tb} = top-bottom (T/B on DTI display), @samp{ci} =
@@ -1090,7 +1090,7 @@ $ cvtool dibr -d nasad000-smoothed.pgm -b 8 \
 The file @code{nasac000-stereo.ppm} now contains the left and right view side by side.
 The @code{stereoview} command can be used to prepare this image pair for display on 
 different devices. Currently, anaglyph glasses (red-blue, red-green, red-cyan) and 
-autostereoscopic monitors from DTI (@url{http://www.dti3d.com/}) are supported.
+autostereoscopic monitors from @url{http://www.dti3d.com/,DTI} are supported.
 
 The following command produces a single image that can be viewed with red-cyan anaglyph
 glasses:
