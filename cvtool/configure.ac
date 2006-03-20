@@ -57,16 +57,14 @@ gl_INIT
 dnl notgnulib
 ngl_INIT
 
+dnl pkg-config
+PKG_PROG_PKG_CONFIG
+
 dnl GNU Scientific Library
-AM_PATH_GSL([1.6.0], [], [AC_MSG_ERROR(Cannot find required version of GSL)])
+AM_PATH_GSL([1.6.0], [], [AC_MSG_ERROR(could not find required version of GSL)])
 
 dnl CAIRO
-AC_LIB_HAVE_LINKFLAGS(cairo,, [#include <cairo.h>], [cairo_version();])
-if test "$ac_cv_libcairo" != yes; then
-    AC_MSG_ERROR([Cannot find CAIRO])
-else
-    LIBS="$LIBS $LIBCAIRO"
-fi
+PKG_CHECK_MODULES(CAIRO, cairo >= 1.0.2, [], [AC_MSG_ERROR(could not find required version of CAIRO)])
 
 dnl Global #defines for all source files
 AH_VERBATIM([UNUSED],
