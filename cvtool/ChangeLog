@@ -1,5 +1,6 @@
 Version 0.0.2 (not yet released):
-- Gnulib update. Added xstrndup module.
+- Gnulib update. Added the following modules:
+  xstrndup, localcharset, iconvme.
 - CVL: cvl_color_from_string()
   cvtool: All commands that accept color names as options
   Replace rrr,ggg,bbb format with <val>g<val>b<val>.

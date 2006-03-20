@@ -32,11 +32,15 @@ AC_DEFUN([gl_INIT],
   gl_EXITFAIL
   gl_FATAL_SIGNAL
   gl_GETOPT
+  AM_ICONV
+  gl_ICONVME
   gl_INTTOSTR
+  gl_LOCALCHARSET
   gl_PIPE
   gl_SIZE_MAX
   AM_STDBOOL_H
   gl_STDINT_H
+  gl_FUNC_STRDUP
   gl_FUNC_STRNDUP
   gl_FUNC_STRNLEN
   gl_FUNC_STRPBRK
@@ -53,9 +57,11 @@ AC_DEFUN([gl_INIT],
 # This macro records the list of files which have been installed by
 # gnulib-tool and may be removed by future gnulib-tool invocations.
 AC_DEFUN([gl_FILE_LIST], [
+  build-aux/config.rpath
   lib/alloca_.h
   lib/asnprintf.c
   lib/asprintf.c
+  lib/config.charset
   lib/error.c
   lib/error.h
   lib/exit.h
@@ -68,10 +74,14 @@ AC_DEFUN([gl_FILE_LIST], [
   lib/getopt_.h
   lib/getopt_int.h
   lib/gettext.h
+  lib/iconvme.c
+  lib/iconvme.h
   lib/imaxtostr.c
   lib/intprops.h
   lib/inttostr.c
   lib/inttostr.h
+  lib/localcharset.c
+  lib/localcharset.h
   lib/offtostr.c
   lib/pipe.c
   lib/pipe.h
@@ -79,9 +89,13 @@ AC_DEFUN([gl_FILE_LIST], [
   lib/printf-args.h
   lib/printf-parse.c
   lib/printf-parse.h
+  lib/ref-add.sin
+  lib/ref-del.sin
   lib/size_max.h
   lib/stdbool_.h
   lib/stdint_.h
+  lib/strdup.c
+  lib/strdup.h
   lib/strndup.c
   lib/strndup.h
   lib/strnlen.c
@@ -108,15 +122,23 @@ AC_DEFUN([gl_FILE_LIST], [
   lib/xvasprintf.c
   lib/xvasprintf.h
   m4/alloca.m4
+  m4/codeset.m4
   m4/eoverflow.m4
   m4/error.m4
   m4/exitfail.m4
   m4/fatal-signal.m4
   m4/getopt.m4
+  m4/glibc21.m4
+  m4/iconv.m4
+  m4/iconvme.m4
   m4/intmax_t.m4
   m4/inttostr.m4
   m4/inttypes.m4
   m4/inttypes_h.m4
+  m4/lib-ld.m4
+  m4/lib-link.m4
+  m4/lib-prefix.m4
+  m4/localcharset.m4
   m4/longdouble.m4
   m4/longlong.m4
   m4/onceonly_2_57.m4
@@ -128,6 +150,7 @@ AC_DEFUN([gl_FILE_LIST], [
   m4/stdbool.m4
   m4/stdint.m4
   m4/stdint_h.m4
+  m4/strdup.m4
   m4/strerror_r.m4
   m4/strndup.m4
   m4/strnlen.m4
