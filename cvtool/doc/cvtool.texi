@@ -1327,7 +1327,6 @@ See also:
 
 @menu
 * blend::
-* grid::
 * vectors::
 @end menu
 
@@ -1351,14 +1350,6 @@ copied into all images of the stream.
 $ cvtool blend --single -s logo.pnm -a logo-alpha.pgm -x 700 -y 0 \
   < video.y4m > video-with-logo.y4m
 @end example
-
-@node grid
-@subsection grid
-@cmindex grid
-@code{grid}
-
-@noindent
-This command needs to be rewritten.
 
 @node vectors
 @subsection vectors
