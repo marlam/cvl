@@ -12,20 +12,23 @@ applies three-dimensional (spatiotemporal) Gauss smoothing to the video
 video.y4m and writes the result to smoothed-video.y4m. 
 
 All the image manipulation and analysis functionality of cvtool is implemented
-in CVL, a general purpose computer vision library. CVL is currently included
-in cvtool. It is fully documented and can easily be used by other projects.
-Cvtool offers an easy-to-use interface to all CVL functionality. 
+in CVL, a computer vision library. CVL is currently included in cvtool. It is
+fully documented and can easily be used by other projects.
 
 Cvtool is free software; you can redistribute it and/or modify it under the
 terms of the GNU General Public License as published by the Free Software
 Foundation; either version 2 of the License, or (at your option) any later
 version.
 
-Cvtool is written in C99 and uses POSIX features where C99 is not sufficient.
-The included CVL is written in pure C99. Therefore, portability is not much of
-a problem. 
+Cvtool is written in C99 and uses POSIX features where pure C99 is not
+sufficient. The included CVL is written in pure C99. Therefore, portability is
+not much of a problem. 
 
-Cvtool depends on the GNU Scientific Library, version 1.6 or later. 
+Cvtool depends on the following libraries:
+- The GNU Scientific Library (GSL), version 1.6 or later, available from
+  http://www.gnu.org/software/gsl
+- The CAIRO graphics library, version 1.0.0 or later, available from
+  http://www.cairographics.org/
 
 For more information, read the documentation in the doc subdirectory, or visit
 the homepage: http://cvtool.sourceforge.net/.

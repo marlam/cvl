@@ -6,6 +6,9 @@ CVL:
 - Remove cvl_draw.h/cvl_draw.c
 
 cvtool:
+- Fix/redesign options.[ch]. Glitches:
+  Once -F 0.1 is given to draw, -F1,2 is not possible anymore, because the
+  sizes are fixed.
 - Add fieldconv command
   to convert to/from different kinds of fields, for example
   double <-> gray; double,double,double <-> RGB, 
