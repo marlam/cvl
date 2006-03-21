@@ -1,4 +1,5 @@
 Version 0.0.2 (not yet released):
+- Added string_to_utf8() module to notgnulib.
 - Gnulib update. Added the following modules:
   xstrndup, localcharset, iconvme.
 - CVL: cvl_color_from_string()
