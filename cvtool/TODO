@@ -6,8 +6,6 @@ CVL:
 - Remove cvl_draw.h/cvl_draw.c
 
 cvtool:
-- Add draw command
-  line, polygon, circle, ellipse, text
 - Add fieldconv command
   to convert to/from different kinds of fields, for example
   double <-> gray; double,double,double <-> RGB, 

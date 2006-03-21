@@ -1,10 +1,12 @@
 Version 0.0.2 (not yet released):
+- cvtool: Added draw command to draw geometric objects, lines, curves, and
+  text. The command is a frontend to the CAIRO library.
 - Added string_to_utf8() module to notgnulib.
 - Gnulib update. Added the following modules:
   xstrndup, localcharset, iconvme.
 - CVL: cvl_color_from_string()
   cvtool: All commands that accept color names as options
-  Replace rrr,ggg,bbb format with <val>g<val>b<val>.
+  Replace rrr,ggg,bbb format with r<val>g<val>b<val>.
 - CVL: Add interface to the CAIRO graphics library.
 - CVL: Always use 32bit for pixels.
 - CVL: Replaced cvl_vector*_t types with simple pointers.

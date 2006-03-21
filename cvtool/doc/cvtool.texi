@@ -1,10 +1,10 @@
 \input texinfo   @c -*-texinfo-*-
 @afourpaper
 @setfilename cvtool.info
-@set UPDATED January 18, 2006
-@set UPDATED-MONTH January 2006
-@set EDITION 0.0.1
-@set VERSION 0.0.1
+@set UPDATED March 10, 2006
+@set UPDATED-MONTH March 2006
+@set EDITION 0.0.2
+@set VERSION 0.0.2
 @settitle cvtool @value{VERSION}
 
 @c Define new index for commands
@@ -269,6 +269,7 @@ Cvtool returns @code{0} on success and @code{1} on error.
 * Transforming frames::
 * Smoothing and Enhancing frames::
 * Color manipulation::
+* Drawing::
 * Detecting image features::
 * Image analysis::
 * Comparing frames::
@@ -894,6 +895,155 @@ Invert input frames.
 
 @example
 $ cvtool invert < in.pnm > out.pnm
+@end example
+
+
+@node Drawing
+@section Drawing
+
+@menu
+* draw::
+@end menu
+
+@node draw
+@subsection draw
+@cmindex draw
+@code{draw 
+[-w|--width=@var{width}] 
+[-d|--dash=@var{dash-specification}] 
+[-l|--line-cap=butt|round|square] 
+[-L|--line-join=miter|round|bevel] 
+[-s|--border-style=none|color|pattern|multipattern|linear-gradient|radial-gradient]
+[-c|--border-color=@var{color}] 
+[-p|--border-pattern=@var{file}] 
+[-g|--border-gradient=@var{gradient-specification}] 
+[-S|--fill-style=none|color|pattern|multipattern|linear-gradient|radial-gradient]
+[-C|--fill-color=@var{color}] 
+[-P|--fill-pattern=@var{file}]
+[-G|--fill-gradient=@var{gradient-specification}]
+[-f|--font-family=@var{font}] 
+[-t|--font-slant=normal|italic|oblique] 
+[-W|--font-weight=normal|bold] 
+[-F|--font-size=@var{size}|@var{size-x},@var{size-y}] 
+[-j|--justify-x=left|right|center] 
+[-J|--justify-y=bottom|top|center] 
+[-a|--antialias] 
+[-u|--unit]
+@var{command@dots{}}}
+
+@noindent
+Draw simple geometric forms, lines and curves, and/or text.
+
+The style for the object lines and the filling can be specified separately; it
+is either @samp{none} (line/filling is not drawn), @samp{color} (solid color),
+@samp{pattern} (a pattern read from a file), @samp{multipattern} (a different
+pattern for each input frame, all read from a file), @samp{linear-gradient} (a
+linear gradient), or @samp{radial-gradient} (a radial gradient).  The default
+is the solid color black for lines and no filling.
+
+A linear gradient specification @code{x0,y0,color0,x1,y1,color1} defines a
+gradient along the line from start point @code{x0,y0} (with color @code{color0}
+to end point @code{x1,y1} (with color @code{color1}). Any number of additional
+color stops can be added by appending an offset value and its associated color
+to the gradient specification. The offsets must be between 0.0 and 1.0 and
+describe the position on the gradient line, where 0.0 is the start point and
+1.0 is the end point.
+
+A radial gradient specification @code{x0,y0,r0,color0,x1,y1,r1,color1} defines
+a gradient from the start cirlce @code{x0,y0,r0} with color @code{color0} to
+the end circle @code{x1,y1,r1} with color @code{color1}. Additional stops can
+be added in the same way as for linear gradients.
+
+The style of lines can be further adjusted with the @option{--width},
+@option{--dash}, @option{--line-cap}, and @option{--line-join} options. The
+@option{--width} option selects the line width; it is 2.0 by default. The
+@option{--dash} takes a list of values that specify alternating lengths for
+"line on" and "line off" segments of a line. If only one value is given, these
+lengths are equal.  The @option{--line-cap} option selects the style of line
+and curve ends.  The @option{--line-join} options selects the style of the
+meeting point of two line or curve segments.
+
+Antialiasing can be turned on (default) and off with @option{--antialias}.
+
+If @option{--unit} is given, then all coordinates and sizes on the command line
+refer to a frame of size 1x1. All values are then scaled so that they match the
+real frame dimensions. For example, the point (0.5,0.5) will always be in the
+middle of a frame, regardless of the frame dimensions.
+
+Text is drawn relative to the current drawing position (previously set with 
+@code{move_to}, for example). By default, the current drawing position sets the
+bottom left point of the first character of the text. This can be changed with
+the @option{--justify-x} and @option{--justify-y} options. 
+The font family, slant, weight, and size can be chosen. Note that you may not
+get an error message if @option{--font-family} fails to set the given font,
+because the underlying library may not report this error.  If you use two
+values for the font size, then the first applies to the horizontal direction
+and the second to the vertical direction, so that you can scale the font
+asymmetrically.
+
+A drawing command consists of a command name and parameter sets that define one
+or more instances of the command.
+
+Simple geometric forms:
+@itemize @asis
+@item @code{rectangle @var{topleft-x},@var{topleft-y},@var{width},@var{height} [@dots{}]}@*
+Draw a rectangle.
+@item @code{circle @var{center-x},@var{center-y},@var{radius} [@dots{}]}@*
+Draw a circle.
+@item @code{ellipse @var{rect-topleft-x},@var{rect-topleft-y},@var{width},@var{height} [@dots{}]}@*
+Draw an ellipse in the given enclosing rectangle.
+@item @code{arc @var{center-x},@var{center-y},@var{radius},@var{start-angle},@var{stop-angle}}@*
+Draw a part of a circle, from the given start angle to the given stop angle.
+@end itemize
+
+Text:
+@itemize @asis
+@item @code{text @var{string}}@*
+Print the string at the current drawing position.
+@end itemize
+
+Lines and curves:
+@itemize @asis
+@item @code{move_to @var{x},@var{y} [@dots{}]}@*
+Move current point.
+@item @code{line_to @var{x},@var{y} [@dots{}]}@*
+Draw a line from the old current point to the new current point.
+@item @code{curve_to @var{x0},@var{y0},@var{x1},@var{y1},@var{x2},@var{y2} [@dots{}]}@*
+Draw a curve from the old current point to the new current point @var{x2},@var{y2}, Using
+the control points @var{x0},@var{y0} and @var{x1},@var{y1}.
+@item @code{rel_move_to @var{dx},@var{dy} [@dots{}]}@*
+Move the current point using relative coordinates.
+@item @code{rel_line_to @var{dx},@var{dy} [@dots{}]}@*
+Draw a line using relative coordinates.
+@item @code{rel_curve_to @var{dx0},@var{dy0},@var{dx1},@var{dy1},@var{dx2},@var{dy2} [@dots{}]}@*
+Draw a curve using relative coordinates.
+@item @code{close}@*
+Close the currnet line/curve figure: draw a line from the current point to the start point of 
+the figure and combine start and end point into one point.
+@end itemize
+
+Open lines and curves will automatically be closed when drawing geometric forms or text.
+
+The draw command is only a simple interface to the excellent
+@url{http://www.cairographics.org/,CAIRO} graphics library.  Much of the
+@url{http://www.cairographics.org/documentation,CAIRO documentation} is useful
+for this command, too, especially the @url{http://www.cairographics.org/FAQ,FAQ}.
+
+@example
+# Draw two green circles with a line width of 5.
+$ cvtool draw -w 5 -c green circle 50,50,40 50,50,20 \
+  < blank.pnm > circle.pnm
+# The same, but filled with linear gradient from red to yellow to blue.
+$ cvtool draw -w 5 -S linear-gradient \
+  -G 10,50,red,90,50,blue,0.5,yellow circle 50,50,40 50,50,20 \
+  < blank.pnm > circle.pnm
+# Display one video inside another video in the form of a circle.
+$ cvtool draw -s none -S multipattern -P video2.y4m circle 50,50,40 \
+  < video1.y4m > out.y4m
+# Print a string exactly centered in the middle of blank.pnm.
+$ cvtool draw -u -f "Serif" -F 0.1,0.1 -j center -J center \
+  move_to 0.5,0.5 text "Hello world" \
+  < blank.pnm > text.pnm
 @end example
 
 
