@@ -25,4 +25,4 @@ libnotgnu_la_SOURCES += fseeko.h fseeko.c
 libnotgnu_la_SOURCES += tempfile.h tempfile.c
 
 # string_to_utf8
-libnotgnu_la_SOURCES += str_to_utf8.h str_to_utf8.c
+libnotgnu_la_SOURCES += string_to_utf8.h string_to_utf8.c
