@@ -22,6 +22,7 @@
 
 #include "config.h"
 
+#include <stdlib.h>
 #include <locale.h>
 
 #include "iconvme.h"
