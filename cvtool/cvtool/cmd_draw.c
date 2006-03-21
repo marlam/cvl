@@ -90,7 +90,7 @@ void cmd_draw_print_help(void)
 	    "rel_line_to  <dx,dy> [...]\n"
 	    "rel_curve_to <dx0,dy0,dx1,dy1,dx2,dy2> [...]\n"
 	    "close\n"
-	    "Lines and curves will implicitly be closed when drawing geometric forms.");
+	    "Lines and curves will implicitly be closed when drawing geometric forms or text.");
 }
 
 
