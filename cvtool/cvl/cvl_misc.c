@@ -35,8 +35,6 @@
 
 #include "cvl/cvl_pixel.h"
 #include "cvl/cvl_frame.h"
-#include "cvl/cvl_math.h"
-#include "cvl/cvl_draw.h"
 #include "cvl/cvl_misc.h"
 
 
@@ -111,46 +109,4 @@ cvl_frame_t *cvl_frame_diff(const cvl_frame_t *f1, const cvl_frame_t *f2)
     }
     
     return d;
-}
-
-/**
- * \param frame		A graylevel frame, interpreted as a depth map.
- * \param factor	A factor (see below).
- * \param w		The horirzontal grid distance in pixels.
- * \param h		The vertical grid distance in pixels.
- * \return		The grid.
- * 
- * Visualizes depth maps as grids: computes a grid from the input frame, 
- * which must be a graylevel frame and is interpreted as a depth map.
- * \a w and \a h are the horizontal and vertical grid distances in pixels. 
- * The minimum depth (gray value 255) will result in a vertical shift of 
- * \a factor * framewidth. The output frame will be this much higher than the 
- * input frame.
- */
-cvl_frame_t *cvl_frame_grid(const cvl_frame_t *frame, double factor, int w, int h)
-{
-    int points[8];
-    double yshift_factor = (double)cvl_frame_width(frame) * factor / 255.0;
-    int max_yshift = cvl_iround(cvl_frame_width(frame) * factor);
-    cvl_frame_t *gridframe = cvl_frame_new(CVL_PIXEL_GRAY, cvl_frame_width(frame), cvl_frame_height(frame) + max_yshift);
-        
-    cvl_frame_fill_rect(gridframe, 0, 0, cvl_frame_width(gridframe), cvl_frame_height(gridframe), cvl_pixel_gray(0xff));
-    
-    for (int y = 0; y < cvl_frame_height(frame) - h; y += h)
-    {
-	for (int x = 0; x < cvl_frame_width(frame) - w; x += w)
-	{
-	    points[0] = x;
-	    points[1] = y + max_yshift - cvl_iround(cvl_frame_get(frame, x, y) * yshift_factor);
-	    points[2] = x + w;
-	    points[3] = y + max_yshift - cvl_iround(cvl_frame_get(frame, x + w, y) * yshift_factor);
-	    points[4] = x + w;
-	    points[5] = y + h + max_yshift - cvl_iround(cvl_frame_get(frame, x + w, y + h) * yshift_factor);
-	    points[6] = x;
-	    points[7] = y + h + max_yshift - cvl_iround(cvl_frame_get(frame, x, y + h) * yshift_factor);
-	    cvl_draw_polygon_filled(gridframe, cvl_pixel_gray(0x00), cvl_pixel_gray(0xff), points, 4);
-	}
-    }
-
-    return gridframe;
 }

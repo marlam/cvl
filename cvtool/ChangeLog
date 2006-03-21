@@ -1,4 +1,6 @@
 Version 0.0.2 (not yet released):
+- CVL: Remove cvl_draw_* functions.
+- cvtool: Removed grid command.
 - cvtool: Added draw command to draw geometric objects, lines, curves, and
   text. The command is a frontend to the CAIRO library.
 - Added string_to_utf8() module to notgnulib.

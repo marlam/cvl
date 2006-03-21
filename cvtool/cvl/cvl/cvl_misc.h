@@ -29,6 +29,5 @@
 
 const char *cvl_check_version(const char *req_version);
 cvl_frame_t *cvl_frame_diff(const cvl_frame_t *f1, const cvl_frame_t *f2);
-cvl_frame_t *cvl_frame_grid(const cvl_frame_t *frame, double factor, int w, int h);
 
 #endif

@@ -33,7 +33,6 @@
 #include "cvl_smooth.c"
 #include "cvl_edge.c"
 #include "cvl_transform.c"
-#include "cvl_draw.c"
 #include "cvl_blend.c"
 #include "cvl_misc.c"
 #include "cvl_stereo.c"

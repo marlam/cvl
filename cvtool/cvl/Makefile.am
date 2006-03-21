@@ -15,7 +15,6 @@ EXTRA_DIST = \
 	cvl_smooth.c \
 	cvl_edge.c \
 	cvl_transform.c \
-	cvl_draw.c \
 	cvl_blend.c \
 	cvl_misc.c \
 	cvl_stereo.c \
@@ -38,7 +37,6 @@ nobase_include_HEADERS = \
 	cvl/cvl_smooth.h \
 	cvl/cvl_edge.h \
 	cvl/cvl_transform.h \
-	cvl/cvl_draw.h \
 	cvl/cvl_blend.h \
 	cvl/cvl_misc.h \
 	cvl/cvl_stereo.h \

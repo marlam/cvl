@@ -77,7 +77,6 @@ COMMAND_DECL(equalize)
 COMMAND_DECL(flip)
 COMMAND_DECL(flop)
 COMMAND_DECL(foreach)
-COMMAND_DECL(grid)
 COMMAND_DECL(help)
 COMMAND_DECL(info)
 COMMAND_DECL(invert)
@@ -116,7 +115,6 @@ cvtool_command_t commands[] =
     COMMAND(flip),
     COMMAND(flop),
     COMMAND(foreach),
-    COMMAND(grid),
     COMMAND(help),
     COMMAND(info),
     COMMAND(invert),

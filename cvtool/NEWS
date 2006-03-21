@@ -1,9 +1,12 @@
 Version 0.0.2:
+- cvtool: Removed grid command.
 - cvtool: Added a "draw" command to draw geometric objects, lines, curves, and
   text. The command is a frontend to the CAIRO graphics library.
 - CVL and cvtool: The color string representation rrr,ggg,bbb was replaced by
   the new representation r<val>g<val>b<val>.
 - CVL: Added an interface to the CAIRO graphics library.
+- CVL: Removed cvl_draw_* functions. They are obsoleted by the new CAIRO
+  graphics library.
 - CVL: New functions to more easily load and save NetPBM files.
 
 Version 0.0.1:

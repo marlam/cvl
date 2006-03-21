@@ -37,11 +37,14 @@
 #include <errno.h>
 extern int errno;
 
+#include <cairo.h>
+
 #include "cvl/cvl_field.h"
 #include "cvl/cvl_frame.h"
 #include "cvl/cvl_math.h"
-#include "cvl/cvl_draw.h"
+#include "cvl/cvl_cairo.h"
 #include "cvl/cvl_vector.h"
+#include "cvl/cvl_assert.h"
 
 
 /**
@@ -206,8 +209,8 @@ inline double cvl_vector2i_dist_euc(const int *a, const int *b)
 
 /**
  * \param field		The vector field.
- * \param sample_x	Visualize every sample_x -th vector in horizontal direction.
- * \param sample_y	Visualize every sample_y -th vector in vertical direction.
+ * \param sample_x	Visualize every sample_x-th vector in horizontal direction.
+ * \param sample_y	Visualize every sample_y-th vector in vertical direction.
  * \param dist_x	Horizontal needle distance.
  * \param dist_y	Vertical needle distance.
  * \param factor	Factor for the needle length.
@@ -222,11 +225,21 @@ inline double cvl_vector2i_dist_euc(const int *a, const int *b)
 cvl_frame_t *cvl_vector2i_visualize(const cvl_field_t *field, 
 	int sample_x, int sample_y, int dist_x, int dist_y, double factor)
 {
+    cvl_assert(field != NULL);
+    cvl_assert(sample_x > 0);
+    cvl_assert(sample_y > 0);
+    cvl_assert(dist_x > 0);
+    cvl_assert(dist_y > 0);
+    
     int width = cvl_field_width(field) / sample_x * dist_x;
     int height = cvl_field_height(field) / sample_y * dist_y;
     cvl_frame_t *vis = cvl_frame_new(CVL_PIXEL_GRAY, width, height);
+    cvl_pixel_type_t original_pixel_type;
+    cairo_t *cr;
+    
     cvl_frame_fill_rect(vis, 0, 0, width, height, cvl_pixel_gray(0xff));
-
+    cvl_cairo_start(vis, &cr, &original_pixel_type);
+    cairo_set_line_width(cr, 1.0);
     for (int y = 0; y < cvl_field_height(field); y += sample_y)
     {
 	for (int x = 0; x < cvl_field_width(field); x += sample_x)
@@ -236,11 +249,18 @@ cvl_frame_t *cvl_vector2i_visualize(const cvl_field_t *field,
 	    int needle_pos_y = y / sample_y * dist_y;
 	    int delta_x = cvl_iround((double)(v[0]) * factor);
 	    int delta_y = cvl_iround((double)(v[1]) * factor);
-	    cvl_draw_circle(vis, cvl_pixel_gray(160), needle_pos_x, needle_pos_y, 1);
-	    cvl_draw_line(vis, cvl_pixel_gray(0), needle_pos_x, needle_pos_y,
-		    needle_pos_x + delta_x, needle_pos_y + delta_y);
+	    cairo_arc(cr, needle_pos_x + 0.5, needle_pos_y + 0.5, 1.0, 0.0, 2.0 * M_PI);
+	    cairo_close_path(cr);
+	    cairo_set_source_rgb(cr, 0.63, 0.63, 0.63);
+	    cairo_stroke(cr);
+	    cairo_move_to(cr, needle_pos_x + 0.5, needle_pos_y + 0.5);
+	    cairo_rel_line_to(cr, delta_x + 0.5, delta_y + 0.5);
+	    cairo_close_path(cr);
+	    cairo_set_source_rgb(cr, 0.0, 0.0, 0.0);
+	    cairo_stroke(cr);
 	}
     }
+    cvl_cairo_stop(vis, cr, original_pixel_type);
     return vis;
 }
 
@@ -441,11 +461,21 @@ inline double cvl_vector2_dist_euc(const double *a, const double *b)
 cvl_frame_t *cvl_vector2_visualize(const cvl_field_t *field, 
 	int sample_x, int sample_y, int dist_x, int dist_y, double factor)
 {
+    cvl_assert(field != NULL);
+    cvl_assert(sample_x > 0);
+    cvl_assert(sample_y > 0);
+    cvl_assert(dist_x > 0);
+    cvl_assert(dist_y > 0);
+    
     int width = cvl_field_width(field) / sample_x * dist_x;
     int height = cvl_field_height(field) / sample_y * dist_y;
     cvl_frame_t *vis = cvl_frame_new(CVL_PIXEL_GRAY, width, height);
+    cvl_pixel_type_t original_pixel_type;
+    cairo_t *cr;
+    
     cvl_frame_fill_rect(vis, 0, 0, width, height, cvl_pixel_gray(0xff));
-
+    cvl_cairo_start(vis, &cr, &original_pixel_type);
+    cairo_set_line_width(cr, 1.0);
     for (int y = 0; y < cvl_field_height(field); y += sample_y)
     {
 	for (int x = 0; x < cvl_field_width(field); x += sample_x)
@@ -455,11 +485,18 @@ cvl_frame_t *cvl_vector2_visualize(const cvl_field_t *field,
 	    int needle_pos_y = y / sample_y * dist_y;
 	    int delta_x = cvl_iround(v[0] * factor);
 	    int delta_y = cvl_iround(v[1] * factor);
-	    cvl_draw_circle(vis, cvl_pixel_gray(160), needle_pos_x, needle_pos_y, 1);
-	    cvl_draw_line(vis, cvl_pixel_gray(0), needle_pos_x, needle_pos_y,
-		    needle_pos_x + delta_x, needle_pos_y + delta_y);
+	    cairo_arc(cr, needle_pos_x + 0.5, needle_pos_y + 0.5, 1.0, 0.0, 2.0 * M_PI);
+	    cairo_close_path(cr);
+	    cairo_set_source_rgb(cr, 0.63, 0.63, 0.63);
+	    cairo_stroke(cr);
+	    cairo_move_to(cr, needle_pos_x + 0.5, needle_pos_y + 0.5);
+	    cairo_rel_line_to(cr, delta_x + 0.5, delta_y + 0.5);
+	    cairo_close_path(cr);
+	    cairo_set_source_rgb(cr, 0.0, 0.0, 0.0);
+	    cairo_stroke(cr);
 	}
     }
+    cvl_cairo_stop(vis, cr, original_pixel_type);
     return vis;
 }
 
@@ -679,11 +716,21 @@ inline double cvl_vector3_dist_euc(const double *a, const double *b)
 cvl_frame_t *cvl_vector3_visualize(const cvl_field_t *field, 
 	int sample_x, int sample_y, int dist_x, int dist_y, double factor)
 {
+    cvl_assert(field != NULL);
+    cvl_assert(sample_x > 0);
+    cvl_assert(sample_y > 0);
+    cvl_assert(dist_x > 0);
+    cvl_assert(dist_y > 0);
+    
     int width = cvl_field_width(field) / sample_x * dist_x;
     int height = cvl_field_height(field) / sample_y * dist_y;
     cvl_frame_t *vis = cvl_frame_new(CVL_PIXEL_GRAY, width, height);
+    cvl_pixel_type_t original_pixel_type;
+    cairo_t *cr;
+    
     cvl_frame_fill_rect(vis, 0, 0, width, height, cvl_pixel_gray(0xff));
-
+    cvl_cairo_start(vis, &cr, &original_pixel_type);
+    cairo_set_line_width(cr, 1.0);
     for (int y = 0; y < cvl_field_height(field); y += sample_y)
     {
 	for (int x = 0; x < cvl_field_width(field); x += sample_x)
@@ -695,10 +742,17 @@ cvl_frame_t *cvl_vector3_visualize(const cvl_field_t *field,
 	    double alpha = (isfinite(v[2] / n) ? (M_PI_2 - acos(v[2] / cvl_vector3_norm_euc(v))) : 0.0);
 	    int delta_x = cvl_iround(v[0] * factor * cos(alpha));
 	    int delta_y = cvl_iround(v[1] * factor * sin(alpha));
-	    cvl_draw_circle(vis, cvl_pixel_gray(160), needle_pos_x, needle_pos_y, 1);
-	    cvl_draw_line(vis, cvl_pixel_gray(0), needle_pos_x, needle_pos_y,
-		    needle_pos_x + delta_x, needle_pos_y + delta_y);
+	    cairo_arc(cr, needle_pos_x + 0.5, needle_pos_y + 0.5, 1.0, 0.0, 2.0 * M_PI);
+	    cairo_close_path(cr);
+	    cairo_set_source_rgb(cr, 0.63, 0.63, 0.63);
+	    cairo_stroke(cr);
+	    cairo_move_to(cr, needle_pos_x + 0.5, needle_pos_y + 0.5);
+	    cairo_rel_line_to(cr, delta_x + 0.5, delta_y + 0.5);
+	    cairo_close_path(cr);
+	    cairo_set_source_rgb(cr, 0.0, 0.0, 0.0);
+	    cairo_stroke(cr);
 	}
     }
+    cvl_cairo_stop(vis, cr, original_pixel_type);
     return vis;
 }

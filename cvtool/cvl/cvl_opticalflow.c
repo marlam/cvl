@@ -43,7 +43,6 @@
 #include "cvl/cvl_field.h"
 #include "cvl/cvl_frame.h"
 #include "cvl/cvl_color.h"
-#include "cvl/cvl_draw.h"
 #include "cvl/cvl_math.h"
 #include "cvl/cvl_opticalflow.h"
 

@@ -19,7 +19,6 @@ cvtool_SOURCES = cvtool.c options.c options.h \
 	cmd_flip.c		\
 	cmd_flop.c		\
 	cmd_foreach.c		\
-	cmd_grid.c		\
 	cmd_info.c		\
 	cmd_invert.c		\
 	cmd_merge.c		\

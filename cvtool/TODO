@@ -1,10 +1,6 @@
 Changes planned for 0.0.2
 =========================
 
-CVL:
-- Use CAIRO interface instead of cvl_draw_* functions.
-- Remove cvl_draw.h/cvl_draw.c
-
 cvtool:
 - Fix/redesign options.[ch]. Glitches:
   Once -F 0.1 is given to draw, -F1,2 is not possible anymore, because the
