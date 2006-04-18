@@ -401,54 +401,6 @@ inline void cvl_frame_convert(cvl_frame_t *frame, cvl_pixel_type_t type)
 }
 
 /**
- * \param frame		The frame to be converted.
- * 
- * Converts a frame to #CVL_PIXEL_RGB and isolates the red channel.
- */
-void cvl_frame_rgb_to_r(cvl_frame_t *frame)
-{
-    cvl_assert(frame != NULL);
-
-    cvl_frame_to_rgb(frame);
-    for (int i = 0; i < cvl_frame_width(frame) * cvl_frame_height(frame); i++)
-    {
-	cvl_frame_set_i(frame, i, cvl_pixel_rgb(cvl_pixel_rgb_to_r(cvl_frame_get_i(frame, i)), 0, 0));
-    }
-}
-
-/**
- * \param frame		The frame to be converted.
- * 
- * Converts a frame to #CVL_PIXEL_RGB and isolates the green channel.
- */
-void cvl_frame_rgb_to_g(cvl_frame_t *frame)
-{
-    cvl_assert(frame != NULL);
-
-    cvl_frame_to_rgb(frame);
-    for (int i = 0; i < cvl_frame_width(frame) * cvl_frame_height(frame); i++)
-    {
-	cvl_frame_set_i(frame, i, cvl_pixel_rgb(0, cvl_pixel_rgb_to_g(cvl_frame_get_i(frame, i)), 0));
-    }
-}
-
-/**
- * \param frame		The frame to be converted.
- * 
- * Converts a frame to #CVL_PIXEL_RGB and isolates the blue channel.
- */
-void cvl_frame_rgb_to_b(cvl_frame_t *frame)
-{
-    cvl_assert(frame != NULL);
-
-    cvl_frame_to_rgb(frame);
-    for (int i = 0; i < cvl_frame_width(frame) * cvl_frame_height(frame); i++)
-    {
-	cvl_frame_set_i(frame, i, cvl_pixel_rgb(0, 0, cvl_pixel_rgb_to_b(cvl_frame_get_i(frame, i))));
-    }
-}
-
-/**
  * \param frame		The frame.
  * \param x		The x coordinate of the upper left corner of the rectangle.
  * \param y		The y coordinate of the upper left corner of the rectangle.

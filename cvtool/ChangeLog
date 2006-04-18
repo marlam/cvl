@@ -1,4 +1,6 @@
 Version 0.0.2 (not yet released):
+- CVL: Export cvl_frame_set_pixel_type()
+- CVL: Remove cvl_frame_rgb_to_?() functions
 - cvtool/CVL: Minor documentation improvements.
 - CVL: Remove cvl_draw_* functions.
 - cvtool: Removed grid command.

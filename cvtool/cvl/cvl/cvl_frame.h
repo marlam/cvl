@@ -37,6 +37,7 @@ typedef struct
 cvl_frame_t *cvl_frame_new(cvl_pixel_type_t pixel_type, int width, int height);
 void cvl_frame_free(cvl_frame_t *frame);
 
+inline void cvl_frame_set_pixel_type(cvl_frame_t *frame, cvl_pixel_type_t type);
 inline cvl_pixel_type_t cvl_frame_pixel_type(const cvl_frame_t *frame);
 inline int cvl_frame_width(const cvl_frame_t *frame);
 inline int cvl_frame_height(const cvl_frame_t *frame);
@@ -56,10 +57,6 @@ void cvl_frame_to_gray(cvl_frame_t *frame);
 void cvl_frame_to_rgb(cvl_frame_t *frame);
 void cvl_frame_to_yuv(cvl_frame_t *frame);
 inline void cvl_frame_convert(cvl_frame_t *frame, cvl_pixel_type_t type);
-
-void cvl_frame_rgb_to_r(cvl_frame_t *frame);
-void cvl_frame_rgb_to_g(cvl_frame_t *frame);
-void cvl_frame_rgb_to_b(cvl_frame_t *frame);
 
 void cvl_frame_fill_rect(cvl_frame_t *frame, int x, int y, int w, int h, cvl_pixel_t p);
 
