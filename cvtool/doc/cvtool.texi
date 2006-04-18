@@ -825,10 +825,12 @@ $ cvtool binarize local -T median -k 5 -C 20 < gray.pgm > bw.pgm
 @node channel
 @subsection channel
 @cmindex channel
-@code{channel -c|--channel=r|g|b}
+@code{channel [-g|--gray] -c|--channel=r|g|b}
 
 @noindent
-Pick the given channel from the input.
+Pick the given channel from the input. The default is to keep the color of the channel.
+If @option{--gray} is used, then the channel will be extracted into graylevel 
+frames instead.
 
 @example
 $ cvtool channel -c r < colored.pnm > red.pnm
