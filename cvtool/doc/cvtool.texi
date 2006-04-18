@@ -1177,7 +1177,7 @@ Combining Local and Global Optic Flow Methods. @cite{International Journal of
 Computer Vision,} 61(3):211-231, 2005.
 @item For the @code{bm-sad} method:@*
 X. Jiang and M. Lambers. DIBR-Based 3D Videos using Non Video Rate Range Image
-Stream. In @cite{Proceedings of the International Conference on Multimedia & Expo 
+Stream. In @cite{Proceedings of the IEEE International Conference on Multimedia & Expo 
 (ICME) 2006 (accepted for publication)}
 @c TODO
 @item For the @code{bm-asw} method:@*
@@ -1322,7 +1322,7 @@ $ cvtool trackdepth -n 26 -d 0,25 -f flow-fw.txt -F flow-bw.txt \
 See also:
 @itemize @asis
 @item X. Jiang and M. Lambers. DIBR-Based 3D Videos using Non Video Rate Range Image
-Stream. In @cite{Proceedings of the International Conference on Multimedia & Expo 
+Stream. In @cite{Proceedings of the IEEE International Conference on Multimedia & Expo 
 (ICME) 2006 (accepted for publication)}
 @c TODO
 @end itemize
