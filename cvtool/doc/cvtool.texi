@@ -1176,7 +1176,10 @@ A. Bruhn, J. Weickert, and C. Schn@"orr. Lucas/Kanade Meets Horn/Schunck:
 Combining Local and Global Optic Flow Methods. @cite{International Journal of
 Computer Vision,} 61(3):211-231, 2005.
 @item For the @code{bm-sad} method:@*
-TODO
+X. Jiang and M. Lambers. DIBR-Based 3D Videos using Non Video Rate Range Image
+Stream. In @cite{Proceedings of the International Conference on Multimedia & Expo 
+(ICME) 2006 (accepted for publication)}
+@c TODO
 @item For the @code{bm-asw} method:@*
 K.-J. Yoon and I.-S. Kweon. Locally Adaptive Support-Weight Approach
 for Visual Correspondence Search. In @cite{Proceedings of the IEEE Conference
@@ -1258,7 +1261,6 @@ System. In @cite{Proceedings of SPIE Three-Dimensional TV, Video and Display
 III,} pages 66-80, Philadelphia, PA, USA, October 2004.	
 @item L. Zhang and W. J. Tam. Stereoscopic Image Generation Based on Depth
 Images for 3D TV. @cite{IEEE Transactions on Broadcasting,} 51(2):191-199, June 2005.	  
-@item TODO
 @end itemize
 
 @node stereoview
@@ -1319,7 +1321,10 @@ $ cvtool trackdepth -n 26 -d 0,25 -f flow-fw.txt -F flow-bw.txt \
 @noindent 
 See also:
 @itemize @asis
-@item TODO
+@item X. Jiang and M. Lambers. DIBR-Based 3D Videos using Non Video Rate Range Image
+Stream. In @cite{Proceedings of the International Conference on Multimedia & Expo 
+(ICME) 2006 (accepted for publication)}
+@c TODO
 @end itemize
 
 @node Miscellaneous

@@ -1,4 +1,5 @@
 Version 0.0.2 (not yet released):
+- cvtool/CVL: Minor documentation improvements.
 - CVL: Remove cvl_draw_* functions.
 - cvtool: Removed grid command.
 - cvtool: Added draw command to draw geometric objects, lines, curves, and
