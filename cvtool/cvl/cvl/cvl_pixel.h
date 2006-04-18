@@ -59,6 +59,6 @@ inline cvl_pixel_t cvl_pixel_yuv_to_rgb(cvl_pixel_t yuv);
 inline cvl_pixel_t cvl_pixel_to_gray(cvl_pixel_t p, cvl_pixel_type_t type);
 inline cvl_pixel_t cvl_pixel_to_rgb(cvl_pixel_t p, cvl_pixel_type_t type);
 inline cvl_pixel_t cvl_pixel_to_yuv(cvl_pixel_t p, cvl_pixel_type_t type);
-inline cvl_pixel_t cvl_pixel_convert(cvl_pixel_type_t src_type, cvl_pixel_type_t dst_type, cvl_pixel_t p);
+inline cvl_pixel_t cvl_pixel_convert(cvl_pixel_type_t dst_type, cvl_pixel_t p, cvl_pixel_type_t src_type);
 
 #endif

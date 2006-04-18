@@ -308,14 +308,14 @@ inline cvl_pixel_t cvl_pixel_to_yuv(cvl_pixel_t p, cvl_pixel_type_t type)
 }
 
 /**
- * \param src_type	The source pixel type.
  * \param dst_type	The destination pixel type.
  * \param p		The pixel value.
+ * \param src_type	The source pixel type.
  * \return		The pixel value.
  *
  * Converts a pixel from one pixel type to another.
  */
-inline cvl_pixel_t cvl_pixel_convert(cvl_pixel_type_t src_type, cvl_pixel_type_t dst_type, cvl_pixel_t p)
+inline cvl_pixel_t cvl_pixel_convert(cvl_pixel_type_t dst_type, cvl_pixel_t p, cvl_pixel_type_t src_type)
 {
     return (dst_type == CVL_PIXEL_GRAY ? cvl_pixel_to_gray(p, src_type)
 	    : (dst_type == CVL_PIXEL_RGB ? cvl_pixel_to_rgb(p, src_type)

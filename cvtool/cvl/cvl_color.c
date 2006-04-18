@@ -2571,8 +2571,8 @@ void cvl_frame_color_adjust(cvl_frame_t *frame,
 	}
 
 	cvl_frame_set_i(frame, i, 
-		cvl_pixel_convert(CVL_PIXEL_RGB, cvl_frame_pixel_type(frame),
-		    cvl_hsl_to_rgb(H, S, L)));	
+		cvl_pixel_convert(cvl_frame_pixel_type(frame),
+		    cvl_hsl_to_rgb(H, S, L), CVL_PIXEL_RGB));	
     }
 }
 
