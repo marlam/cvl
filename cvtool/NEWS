@@ -1,4 +1,5 @@
 Version 0.0.2:
+- CVL: Add function cvl_sort_array_pixel().
 - cvtool: Add option to the channel command to extract a channel as a graylevel
   image
 - cvtool: Added a "draw" command to draw geometric objects, lines, curves, and

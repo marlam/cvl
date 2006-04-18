@@ -28,6 +28,7 @@
 
 #include <gsl/gsl_rng.h>
 
+#include "cvl_pixel.h"
 
 inline int cvl_iround(double x);
 
@@ -55,6 +56,7 @@ inline double cvl_angle_normalize_2(double a);
 bool cvl_product_fits_in_int(int a, int b);
 bool cvl_product_fits_in_size_t(size_t a, size_t b);
 
+void cvl_sort_array_pixel(cvl_pixel_t *a, size_t a_len);
 void cvl_sort_array_int(int *a, size_t a_len);
 void cvl_sort_array_double(double *a, size_t a_len);
 

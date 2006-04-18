@@ -279,6 +279,25 @@ inline double cvl_angle_normalize_2(double a)
     return (a * 2.0 * M_PI - M_PI);
 }
 
+/* Helper for cvl_sort_array_pixel */
+static int cvl_compare_pixels(cvl_pixel_t *p1, cvl_pixel_t *p2)
+{
+    return (*p1 < *p2 ? -1 : (*p1 > *p2 ? +1 : 0));
+}
+
+/**
+ * \param a		The array.
+ * \param a_len		The length of the array.
+ *
+ * Sorts an array of pixels.
+ * This is just a convenient wrapper around qsort.
+ */
+void cvl_sort_array_pixel(cvl_pixel_t *a, size_t a_len)
+{
+    qsort(a, a_len, sizeof(cvl_pixel_t), (int (*)(const void *, const void *))cvl_compare_pixels);
+}
+
+/* Helper for cvl_sort_array_int */
 static int cvl_compare_ints(int *x1, int *x2)
 {
     return (*x1 < *x2 ? -1 : (*x1 > *x2 ? +1 : 0));
@@ -291,11 +310,13 @@ static int cvl_compare_ints(int *x1, int *x2)
  * Sorts an array of ints.
  * This is just a convenient wrapper around qsort.
  */
+
 void cvl_sort_array_int(int *a, size_t a_len)
 {
     qsort(a, a_len, sizeof(int), (int (*)(const void *, const void *))cvl_compare_ints);
 }
 
+/* Helper for cvl_sort_array_double */
 static int cvl_compare_doubles(double *x1, double *x2)
 {
     return (*x1 < *x2 ? -1 : (*x1 > *x2 ? +1 : 0));
