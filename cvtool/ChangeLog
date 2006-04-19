@@ -1,4 +1,6 @@
 Version 0.0.2 (not yet released):
+- cvtool: Added a layer command.
+- CVL: Added cvl_frame_layer().
 - cvtool: Changed channel command: extract as graylevel, and allow reversion.
 - CVL: cvl_io_(load|save)_pnm(): close file.
 - CVL: Add function cvl_sort_array_pixel().

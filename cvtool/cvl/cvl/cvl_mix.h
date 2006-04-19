@@ -1,5 +1,5 @@
 /*
- * cvl_blend.h
+ * cvl_mix.h
  * 
  * This file is part of CVL, a computer vision library.
  *
@@ -20,12 +20,30 @@
  *   Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-#ifndef CVL_BLEND_H
-#define CVL_BLEND_H
+#ifndef CVL_MIX_H
+#define CVL_MIX_H
 
 #include "cvl_frame.h"
 
 void cvl_frame_blend(cvl_frame_t *frame, int dst_x, int dst_y,
 	const cvl_frame_t *block, const cvl_frame_t *block_alpha);
+
+typedef enum
+{
+    CVL_LAYER_MODE_MIN 		= 0,
+    CVL_LAYER_MODE_MAX 		= 1,
+    CVL_LAYER_MODE_MEDIAN	= 2,
+    CVL_LAYER_MODE_OR 		= 3,
+    CVL_LAYER_MODE_AND 		= 4,
+    CVL_LAYER_MODE_XOR 		= 5,
+    CVL_LAYER_MODE_DIFF 	= 6,
+    CVL_LAYER_MODE_ADD 		= 7,
+    CVL_LAYER_MODE_SUB 		= 8,
+    CVL_LAYER_MODE_MUL 		= 9,
+    CVL_LAYER_MODE_DIV 		= 10
+} cvl_layer_mode_t;
+
+void cvl_frame_layer(cvl_frame_t *frame, cvl_layer_mode_t mode,
+	const cvl_frame_t **layers, const int *src_x, const int *src_y, int number_of_layers);
 
 #endif

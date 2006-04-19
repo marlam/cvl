@@ -80,6 +80,7 @@ COMMAND_DECL(foreach)
 COMMAND_DECL(help)
 COMMAND_DECL(info)
 COMMAND_DECL(invert)
+COMMAND_DECL(layer)
 COMMAND_DECL(merge)
 COMMAND_DECL(opticalflow)
 COMMAND_DECL(resize)
@@ -118,6 +119,7 @@ cvtool_command_t commands[] =
     COMMAND(help),
     COMMAND(info),
     COMMAND(invert),
+    COMMAND(layer),
     COMMAND(merge),
     COMMAND(opticalflow),
     COMMAND(resize),

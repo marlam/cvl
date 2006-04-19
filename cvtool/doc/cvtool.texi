@@ -720,6 +720,7 @@ $ cvtool shear -x 20 -y 10 < in.pnm > out.pnm
 
 @menu
 * blend::
+* layer::
 @end menu
 
 @node blend
@@ -743,6 +744,25 @@ $ cvtool blend --single -s logo.pnm -a logo-alpha.pgm -x 700 -y 0 \
   < video.y4m > video-with-logo.y4m
 @end example
 
+@node layer
+@subsection layer
+@cmindex layer
+@code{layer -m|--mode=min|max|median|or|and|xor|diff|add|sub|mul|div file@dots{}}
+
+@noindent
+Layers the frames from the given files on top of each other, using the given
+mode.  
+
+Layering will be done for each channel separately. Graylevel frames have
+only one channel. Color frames have the channels R, G, and B. Graylevel
+layering is only done if all input frames are graylevel. The input frames may
+differ in size. In this case, the result will be big enough to hold all input
+frames, and the input frames are centered on the result.
+
+@example
+$ cvtool layer --mode=or red.pnm green.pnm blue.pnm \
+  > allchannels.pnm
+@end example
 
 @node Color manipulation
 @section Color manipulation

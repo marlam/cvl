@@ -20,6 +20,7 @@ testscripts =	\
 	cmd_help.sh \
 	cmd_info.sh \
 	cmd_invert.sh \
+	cmd_layer.sh \
 	cmd_merge.sh \
 	cmd_opticalflow.sh \
 	cmd_resize.sh \

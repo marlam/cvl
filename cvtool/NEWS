@@ -1,4 +1,6 @@
 Version 0.0.2:
+- cvtool: Added a layer command.
+- CVL: Added cvl_frame_layer().
 - cvtool: Changed channel command: extract as graylevel, and allow reversion.
 - CVL: Add function cvl_sort_array_pixel().
 - cvtool: Added a "draw" command to draw geometric objects, lines, curves, and

@@ -21,6 +21,7 @@ cvtool_SOURCES = cvtool.c options.c options.h \
 	cmd_foreach.c		\
 	cmd_info.c		\
 	cmd_invert.c		\
+	cmd_layer.c		\
 	cmd_merge.c		\
 	cmd_opticalflow.c	\
 	cmd_resize.c		\

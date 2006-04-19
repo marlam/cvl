@@ -15,10 +15,10 @@ EXTRA_DIST = \
 	cvl_smooth.c \
 	cvl_edge.c \
 	cvl_transform.c \
-	cvl_blend.c \
-	cvl_misc.c \
+	cvl_mix.c \
 	cvl_stereo.c \
-	cvl_opticalflow.c
+	cvl_opticalflow.c \
+	cvl_misc.c
 
 libcvl_la_SOURCES = cvl.c
 libcvl_la_LDFLAGS = -version-info $(LT_CURRENT):$(LT_REVISION):$(LT_AGE)
@@ -37,10 +37,10 @@ nobase_include_HEADERS = \
 	cvl/cvl_smooth.h \
 	cvl/cvl_edge.h \
 	cvl/cvl_transform.h \
-	cvl/cvl_blend.h \
-	cvl/cvl_misc.h \
+	cvl/cvl_mix.h \
 	cvl/cvl_stereo.h \
 	cvl/cvl_opticalflow.h \
+	cvl/cvl_misc.h \
 	cvl/cvl.h
 
 AM_CPPFLAGS = -I$(top_srcdir)/gnulib -I$(top_srcdir)/notgnulib

@@ -44,9 +44,9 @@
 #include "cvl_smooth.h"
 #include "cvl_edge.h"
 #include "cvl_transform.h"
-#include "cvl_blend.h"
-#include "cvl_misc.h"
+#include "cvl_mix.h"
 #include "cvl_stereo.h"
 #include "cvl_opticalflow.h"
+#include "cvl_misc.h"
 
 #endif
