@@ -102,11 +102,11 @@ int cmd_channel(int argc, char *argv[])
 		}
 		else if (channel.value == 1)
 		{
-		    p = cvl_pixel_rgb(0, cvl_pixel_rgb_to_r(p), 0);
+		    p = cvl_pixel_rgb(0, cvl_pixel_rgb_to_g(p), 0);
 		}
 		else
 		{
-		    p = cvl_pixel_rgb(0, 0, cvl_pixel_rgb_to_r(p));
+		    p = cvl_pixel_rgb(0, 0, cvl_pixel_rgb_to_b(p));
 		}
 	    }
 	    cvl_frame_set_i(frame, i, p);
