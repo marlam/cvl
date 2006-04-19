@@ -1,7 +1,6 @@
 Version 0.0.2:
+- cvtool: Changed channel command: extract as graylevel, and allow reversion.
 - CVL: Add function cvl_sort_array_pixel().
-- cvtool: Add option to the channel command to extract a channel as a graylevel
-  image
 - cvtool: Added a "draw" command to draw geometric objects, lines, curves, and
   text. The command is a frontend to the CAIRO graphics library.
 - CVL: Added an interface to the CAIRO graphics library.

@@ -16,18 +16,18 @@ $CVTOOL merge -o merge.txt 1.pgm 0.pgm 0.pgm > 100.pgm
 $CVTOOL merge -o merge.txt 0.pgm 1.pgm 0.pgm > 010.pgm
 $CVTOOL merge -o merge.txt 0.pgm 0.pgm 1.pgm > 001.pgm
 
-$CVTOOL channel -c r < rgb.pnm > xr00.pnm
-cmp r00.pnm xr00.pnm
-$CVTOOL channel -c g < rgb.pnm > x0g0.pnm
-cmp 0g0.pnm x0g0.pnm
-$CVTOOL channel -c b < rgb.pnm > x00b.pnm
-cmp 00b.pnm x00b.pnm
-
-$CVTOOL channel --gray -c r < rgb.pnm > x100.pgm
+$CVTOOL channel -c r < rgb.pnm > x100.pgm
 cmp 100.pgm x100.pgm
-$CVTOOL channel -g     -c g < rgb.pnm > x010.pgm
+$CVTOOL channel -c g < rgb.pnm > x010.pgm
 cmp 010.pgm x010.pgm
-$CVTOOL channel --gray -c b < rgb.pnm > x001.pgm
+$CVTOOL channel -c b < rgb.pnm > x001.pgm
 cmp 001.pgm x001.pgm
+
+$CVTOOL channel -r -c r < 100.pgm > xr00.pnm
+cmp r00.pnm xr00.pnm
+$CVTOOL channel -r -c g < 010.pgm > x0g0.pnm
+cmp 0g0.pnm x0g0.pnm
+$CVTOOL channel -r -c b < 001.pgm > x00b.pnm
+cmp 00b.pnm x00b.pnm
 
 cmd_tests_cleanup
