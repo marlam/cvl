@@ -1329,13 +1329,16 @@ bool cvl_io_write_pnm(FILE *f, const cvl_frame_t *frame)
 bool cvl_io_load_pnm(const char *filename, cvl_frame_t **frame)
 {
     FILE *f;
+    bool ret;
     
     if (!(f = fopen(filename, "r")))
     {
 	cvl_msg_err("cannot open %s: %s", filename, strerror(errno));
 	return false;
     }
-    return cvl_io_read_pnm(f, frame);
+    ret = cvl_io_read_pnm(f, frame);
+    fclose(f);
+    return ret;
 }
 
 /**
@@ -1348,11 +1351,14 @@ bool cvl_io_load_pnm(const char *filename, cvl_frame_t **frame)
 bool cvl_io_save_pnm(const char *filename, const cvl_frame_t *frame)
 {
     FILE *f;
+    bool ret;
     
     if (!(f = fopen(filename, "w")))
     {
 	cvl_msg_err("cannot open %s: %s", filename, strerror(errno));
 	return false;
     }
-    return cvl_io_write_pnm(f, frame);    
+    ret = cvl_io_write_pnm(f, frame);
+    fclose(f);
+    return ret;
 }

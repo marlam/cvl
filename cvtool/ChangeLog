@@ -1,4 +1,5 @@
 Version 0.0.2 (not yet released):
+- CVL: cvl_io_(load|save)_pnm(): close file.
 - CVL: Add function cvl_sort_array_pixel().
 - CVL: Change prototype of cvl_pixel_convert().
 - cvtool: Add option to the channel command to extract a channel as a graylevel
