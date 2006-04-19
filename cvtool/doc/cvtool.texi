@@ -267,9 +267,10 @@ Cvtool returns @code{0} on success and @code{1} on error.
 * Stream manipulation::
 * Resizing frames::
 * Transforming frames::
-* Smoothing and Enhancing frames::
+* Mixing frames::
 * Color manipulation::
 * Drawing::
+* Smoothing and Enhancing frames::
 * Detecting image features::
 * Image analysis::
 * Comparing frames::
@@ -714,65 +715,32 @@ $ cvtool shear -x 20 -y 10 < in.pnm > out.pnm
 @end example
 
 
-@node Smoothing and Enhancing frames
-@section Smoothing and Enhancing frames
+@node Mixing frames
+@section Mixing frames
 
 @menu
-* smooth::
-* convolve::
+* blend::
 @end menu
 
-@node smooth
-@subsection smooth
-@cmindex smooth
-@code{smooth average [-3|--3d] -k|--k=@var{k}}@*
-@code{smooth average [-3|--3d] -x|--k-x=@var{kx} -y|--k-y=@var{ky}
-[-t|--k-t=@var{kt}]}@*
-@code{smooth median [-3|--3d] -k|--k=@var{k}}@*
-@code{smooth median [-3|--3d] -x|--k-x=@var{kx} -y|--k-y=@var{ky}
-[-t|--k-t=@var{kt}]}@*
-@code{smooth gauss [-3|--3d] -k|--k=@var{k}}@*
-@code{smooth gauss [-3|--3d] -x|--k-x=@var{kx} -y|--k-y=@var{ky}
-[-t|--k-t=@var{kt}]}@*
-@code{smooth gauss [-3|--3d] [-k|--k=@var{k}] [-x|--k-x=@var{kx}]
-[-y|--k-y=@var{ky}] [-t|--k-t=@var{kt}] [-s|--sigma=@var{s}]
-[--sigma-x=@var{sx}] [--sigma-y=@var{sy}] [--sigma-t=@var{st}]}
+@node blend
+@subsection blend
+@cmindex blend
+@code{blend -s|--source=@var{file} [-a|--alpha=@var{file}] [-S|--single]
+[-x|--x=@var{x}] [-y|--y=@var{y}]}
 
 @noindent
-Smooth frames, in 2D or 3D (with the third dimension being the
-time).
+Blends the source into the image stream, using an alpha map.
 
-The kernel size can be given for each dimension, or once for all. It will be
-(2@var{kx}+1)x(2@var{ky}+1)[x(2@var{kt}+1)]. Different values for each
-direction lead to asymmetric smoothing. The gauss filter can be specified by
-the sigma value(s): the mask size will be computed so that roughly 95% of the
-mass lies within the resulting mask. It is also possible to specify both
-@var{sigma} and @var{k}.
-
-@example
-$ cvtool smooth gauss --3d -k 3 < video.y4m > smoothed-video.y4m
-@end example
-
-@node convolve
-@subsection convolve
-@cmindex convolve
-@code{convolve -K|--kernel=@var{K}}@*
-@code{convolve -X|--vector-x=@var{X} -Y|--vector-y=@var{Y}
-[-T|--vector-t=@var{T}]}
-
-@noindent
-Convolve frames with the given convolution kernel.
-
-Both 2D and 3D kernels are accepted (the third dimension is the time). If the
-kernel is separable, the vectors that generate it can be given instead, to
-reduce computation costs. All kernel elements must be integers. The size of the
-kernel must be an odd number in each dimension.
+With no alpha map, the source is simply copied into the images. @var{x} and
+@var{y} specify the position that the source should be copied to. The default
+is (0,0). Positions outside of the images are possible: parts of the source
+that do not fit into the images will be ignored. When @option{--single} is
+used, only the first frame of the source will be used; this frame will be
+copied into all images of the stream.
 
 @example
-# Both commands are equivalent to 2D smoothing with the 
-# average filter with k=1:
-$ cvtool convolve -K 3x3:1,1,1,1,1,1,1,1,1 < in.pnm > out.pnm
-$ cvtool convolve -X 3:1,1,1 -Y 3:1,1,1    < in.pnm > out.pnm
+$ cvtool blend --single -s logo.pnm -a logo-alpha.pgm -x 700 -y 0 \
+  < video.y4m > video-with-logo.y4m
 @end example
 
 
@@ -1048,6 +1016,68 @@ $ cvtool draw -s none -S multipattern -P video2.y4m circle 50,50,40 \
 $ cvtool draw -u -f "Serif" -F 0.1,0.1 -j center -J center \
   move_to 0.5,0.5 text "Hello world" \
   < blank.pnm > text.pnm
+@end example
+
+
+@node Smoothing and Enhancing frames
+@section Smoothing and Enhancing frames
+
+@menu
+* smooth::
+* convolve::
+@end menu
+
+@node smooth
+@subsection smooth
+@cmindex smooth
+@code{smooth average [-3|--3d] -k|--k=@var{k}}@*
+@code{smooth average [-3|--3d] -x|--k-x=@var{kx} -y|--k-y=@var{ky}
+[-t|--k-t=@var{kt}]}@*
+@code{smooth median [-3|--3d] -k|--k=@var{k}}@*
+@code{smooth median [-3|--3d] -x|--k-x=@var{kx} -y|--k-y=@var{ky}
+[-t|--k-t=@var{kt}]}@*
+@code{smooth gauss [-3|--3d] -k|--k=@var{k}}@*
+@code{smooth gauss [-3|--3d] -x|--k-x=@var{kx} -y|--k-y=@var{ky}
+[-t|--k-t=@var{kt}]}@*
+@code{smooth gauss [-3|--3d] [-k|--k=@var{k}] [-x|--k-x=@var{kx}]
+[-y|--k-y=@var{ky}] [-t|--k-t=@var{kt}] [-s|--sigma=@var{s}]
+[--sigma-x=@var{sx}] [--sigma-y=@var{sy}] [--sigma-t=@var{st}]}
+
+@noindent
+Smooth frames, in 2D or 3D (with the third dimension being the
+time).
+
+The kernel size can be given for each dimension, or once for all. It will be
+(2@var{kx}+1)x(2@var{ky}+1)[x(2@var{kt}+1)]. Different values for each
+direction lead to asymmetric smoothing. The gauss filter can be specified by
+the sigma value(s): the mask size will be computed so that roughly 95% of the
+mass lies within the resulting mask. It is also possible to specify both
+@var{sigma} and @var{k}.
+
+@example
+$ cvtool smooth gauss --3d -k 3 < video.y4m > smoothed-video.y4m
+@end example
+
+@node convolve
+@subsection convolve
+@cmindex convolve
+@code{convolve -K|--kernel=@var{K}}@*
+@code{convolve -X|--vector-x=@var{X} -Y|--vector-y=@var{Y}
+[-T|--vector-t=@var{T}]}
+
+@noindent
+Convolve frames with the given convolution kernel.
+
+Both 2D and 3D kernels are accepted (the third dimension is the time). If the
+kernel is separable, the vectors that generate it can be given instead, to
+reduce computation costs. All kernel elements must be integers. The size of the
+kernel must be an odd number in each dimension.
+
+@example
+# Both commands are equivalent to 2D smoothing with the 
+# average filter with k=1:
+$ cvtool convolve -K 3x3:1,1,1,1,1,1,1,1,1 < in.pnm > out.pnm
+$ cvtool convolve -X 3:1,1,1 -Y 3:1,1,1    < in.pnm > out.pnm
 @end example
 
 
@@ -1335,30 +1365,8 @@ Stream. In @cite{Proceedings of the IEEE International Conference on Multimedia 
 @section Miscellaneous
 
 @menu
-* blend::
 * vectors::
 @end menu
-
-@node blend
-@subsection blend
-@cmindex blend
-@code{blend -s|--source=@var{file} [-a|--alpha=@var{file}] [-S|--single]
-[-x|--x=@var{x}] [-y|--y=@var{y}]}
-
-@noindent
-Blends the source into the image stream, using an alpha map.
-
-With no alpha map, the source is simply copied into the images. @var{x} and
-@var{y} specify the position that the source should be copied to. The default
-is (0,0). Positions outside of the images are possible: parts of the source
-that do not fit into the images will be ignored. When @option{--single} is
-used, only the first frame of the source will be used; this frame will be
-copied into all images of the stream.
-
-@example
-$ cvtool blend --single -s logo.pnm -a logo-alpha.pgm -x 700 -y 0 \
-  < video.y4m > video-with-logo.y4m
-@end example
 
 @node vectors
 @subsection vectors
