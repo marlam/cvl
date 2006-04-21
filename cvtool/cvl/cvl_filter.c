@@ -151,6 +151,84 @@ cvl_frame_t *cvl_filter_average(const cvl_frame_t *frame, int k_h, int k_v)
     return cvl_frame_convolve_separable(frame, mh, mh_len, mv, mv_len);     
 }
 
+/**
+ * \param frame		The frame.
+ * \param k_h		Mask size in horizontal direction.
+ * \param k_v		Mask size in vertical direction.
+ * \return		The filtered frame.
+ *
+ * The number of matrix columns will be 2k_h+1, the number of rows will
+ * be 2k_v+1. All pixel types are supported.
+ */
+cvl_frame_t *cvl_filter_min(const cvl_frame_t *frame, int k_h, int k_v)
+{
+    cvl_frame_t *new_frame = cvl_frame_new(cvl_frame_pixel_type(frame), 
+	    cvl_frame_width(frame), cvl_frame_height(frame));
+    
+    for (int y = 0; y < cvl_frame_height(frame); y++)
+    {
+	for (int x = 0; x < cvl_frame_width(frame); x++)
+	{
+	    int min_g = 0xff + 1;
+	    cvl_pixel_t min_p = 0;
+	    for (int r = - k_v; r <= k_v; r++)
+	    {
+		for (int c = - k_h; c <= k_h; c++)
+		{
+		    cvl_pixel_t p = cvl_frame_get_r(frame, x + c, y + r);
+		    int g = cvl_pixel_to_gray(p, cvl_frame_pixel_type(frame));
+		    if (g < min_g)
+		    {
+			min_g = g;
+			min_p = p;
+		    }			
+		}
+	    }
+	    cvl_frame_set(new_frame, x, y, min_p);
+	}
+    }
+    return new_frame;
+}
+
+/**
+ * \param frame		The frame.
+ * \param k_h		Mask size in horizontal direction.
+ * \param k_v		Mask size in vertical direction.
+ * \return		The filtered frame.
+ *
+ * The number of matrix columns will be 2k_h+1, the number of rows will
+ * be 2k_v+1. All pixel types are supported.
+ */
+cvl_frame_t *cvl_filter_max(const cvl_frame_t *frame, int k_h, int k_v)
+{
+    cvl_frame_t *new_frame = cvl_frame_new(cvl_frame_pixel_type(frame), 
+	    cvl_frame_width(frame), cvl_frame_height(frame));
+    
+    for (int y = 0; y < cvl_frame_height(frame); y++)
+    {
+	for (int x = 0; x < cvl_frame_width(frame); x++)
+	{
+	    int max_g = 0x00 - 1;
+	    cvl_pixel_t max_p = 0;
+	    for (int r = - k_v; r <= k_v; r++)
+	    {
+		for (int c = - k_h; c <= k_h; c++)
+		{
+		    cvl_pixel_t p = cvl_frame_get_r(frame, x + c, y + r);
+		    int g = cvl_pixel_to_gray(p, cvl_frame_pixel_type(frame));
+		    if (g > max_g)
+		    {
+			max_g = g;
+			max_p = p;
+		    }			
+		}
+	    }
+	    cvl_frame_set(new_frame, x, y, max_p);
+	}
+    }
+    return new_frame;
+}
+
 /* Helper for cvl_filter_median() */
 static int cvl_filter_median_maskcmp(const cvl_pixel_t *p1, const cvl_pixel_t *p2)
 {
@@ -183,18 +261,8 @@ cvl_frame_t *cvl_filter_median(const cvl_frame_t *frame, int k_h, int k_v)
 		for (int c = - k_h; c <= k_h; c++)
 		{
 		    mask[2 * mask_index] = cvl_frame_get_r(frame, x + c, y + r);
-		    if (cvl_frame_pixel_type(frame) == CVL_PIXEL_RGB)
-		    {
-	    		mask[2 * mask_index + 1] = cvl_pixel_rgb_to_gray(mask[2 * mask_index]);
-		    }
-		    else if (cvl_frame_pixel_type(frame) == CVL_PIXEL_YUV)
-		    {
-			mask[2 * mask_index + 1] = cvl_pixel_yuv_to_gray(mask[2 * mask_index]);
-		    }
-		    else
-		    {
-			mask[2 * mask_index + 1] = mask[2 * mask_index];
-		    }
+		    mask[2 * mask_index + 1] = cvl_pixel_to_gray(mask[2 * mask_index],
+			    cvl_frame_pixel_type(frame));
 		    mask_index++;
 		}
 	    }
@@ -323,6 +391,146 @@ cvl_frame_t *cvl_filter3d_average(const cvl_frame_t *frames[], int k_h, int k_v,
  * See cvl_convolve3d_separable() for a description of \a frames.
  * The kernel size will be (2k_t+1)x(2k_v+1)x(2k_h+1).
  */
+cvl_frame_t *cvl_filter3d_min(const cvl_frame_t *frames[], int k_h, int k_v, int k_t)
+{
+    const cvl_frame_t *framebuf[2 * k_t + 1];
+    cvl_frame_t *new_frame = cvl_frame_new(cvl_frame_pixel_type(frames[k_t]), 
+	    cvl_frame_width(frames[k_t]), cvl_frame_height(frames[k_t]));
+    
+    // Use reflective indexing to fill the frame buffer
+    int future_frames = 0;
+    while (future_frames < k_t && frames[k_t + future_frames + 1])
+    {
+	future_frames++;
+    }
+    int past_frames = 0;
+    while (past_frames < k_t && frames[k_t - past_frames - 1])
+    {
+	past_frames++;
+    }
+    int known_frames = past_frames + 1 + future_frames;
+    int first_known = k_t - past_frames;
+    for (int i = 0; i < 2 * k_t + 1; i++)
+    {
+	if (i < k_t - past_frames || i > k_t + future_frames)
+	{
+	    
+	    framebuf[i] = frames[cvl_reflect(i - first_known, known_frames) + first_known];
+	}
+     	else
+	{
+	    framebuf[i] = frames[i];
+	}
+    }
+
+    for (int y = 0; y < cvl_frame_height(new_frame); y++)
+    {
+	for (int x = 0; x < cvl_frame_width(new_frame); x++)
+	{
+	    int min_g = 0xff + 1;
+	    cvl_pixel_t min_p = 0;
+	    for (int t = - k_t; t <= k_t; t++)
+	    {
+		for (int r = - k_v; r <= k_v; r++)
+		{
+		    for (int c = - k_h; c <= k_h; c++)
+		    {
+			cvl_pixel_t p = cvl_frame_get_r(framebuf[t + k_t], x + c, y + r);
+			int g = cvl_pixel_to_gray(p, cvl_frame_pixel_type(framebuf[t + k_t]));
+			if (g < min_g)
+			{
+			    min_g = g;
+			    min_p = p;
+			}		
+		    }
+		}
+	    }
+	    cvl_frame_set(new_frame, x, y, min_p);
+	}
+    }
+    return new_frame;
+}
+
+/**
+ * \param frames	The frames.
+ * \param k_h		Mask size in horizontal direction.
+ * \param k_v		Mask size in vertical direction.
+ * \param k_t		Mask size in temporal direction.
+ * \return		The filtered frame.
+ *
+ * See cvl_convolve3d_separable() for a description of \a frames.
+ * The kernel size will be (2k_t+1)x(2k_v+1)x(2k_h+1).
+ */
+cvl_frame_t *cvl_filter3d_max(const cvl_frame_t *frames[], int k_h, int k_v, int k_t)
+{
+    const cvl_frame_t *framebuf[2 * k_t + 1];
+    cvl_frame_t *new_frame = cvl_frame_new(cvl_frame_pixel_type(frames[k_t]), 
+	    cvl_frame_width(frames[k_t]), cvl_frame_height(frames[k_t]));
+    
+    // Use reflective indexing to fill the frame buffer
+    int future_frames = 0;
+    while (future_frames < k_t && frames[k_t + future_frames + 1])
+    {
+	future_frames++;
+    }
+    int past_frames = 0;
+    while (past_frames < k_t && frames[k_t - past_frames - 1])
+    {
+	past_frames++;
+    }
+    int known_frames = past_frames + 1 + future_frames;
+    int first_known = k_t - past_frames;
+    for (int i = 0; i < 2 * k_t + 1; i++)
+    {
+	if (i < k_t - past_frames || i > k_t + future_frames)
+	{
+	    
+	    framebuf[i] = frames[cvl_reflect(i - first_known, known_frames) + first_known];
+	}
+     	else
+	{
+	    framebuf[i] = frames[i];
+	}
+    }
+
+    for (int y = 0; y < cvl_frame_height(new_frame); y++)
+    {
+	for (int x = 0; x < cvl_frame_width(new_frame); x++)
+	{
+	    int max_g = 0x00 - 1;
+	    cvl_pixel_t max_p = 0;
+	    for (int t = - k_t; t <= k_t; t++)
+	    {
+		for (int r = - k_v; r <= k_v; r++)
+		{
+		    for (int c = - k_h; c <= k_h; c++)
+		    {
+			cvl_pixel_t p = cvl_frame_get_r(framebuf[t + k_t], x + c, y + r);
+			int g = cvl_pixel_to_gray(p, cvl_frame_pixel_type(framebuf[t + k_t]));
+			if (g > max_g)
+			{
+			    max_g = g;
+			    max_p = p;
+			}		
+		    }
+		}
+	    }
+	    cvl_frame_set(new_frame, x, y, max_p);
+	}
+    }
+    return new_frame;
+}
+
+/**
+ * \param frames	The frames.
+ * \param k_h		Mask size in horizontal direction.
+ * \param k_v		Mask size in vertical direction.
+ * \param k_t		Mask size in temporal direction.
+ * \return		The filtered frame.
+ *
+ * See cvl_convolve3d_separable() for a description of \a frames.
+ * The kernel size will be (2k_t+1)x(2k_v+1)x(2k_h+1).
+ */
 cvl_frame_t *cvl_filter3d_median(const cvl_frame_t *frames[], int k_h, int k_v, int k_t)
 {
     const cvl_frame_t *framebuf[2 * k_t + 1];
@@ -369,18 +577,8 @@ cvl_frame_t *cvl_filter3d_median(const cvl_frame_t *frames[], int k_h, int k_v, 
 		    for (int c = - k_h; c <= k_h; c++)
 		    {
 			mask[2 * mask_index] = cvl_frame_get_r(framebuf[t + k_t], x + c, y + r);
-			if (cvl_frame_pixel_type(new_frame) == CVL_PIXEL_RGB)
-			{
-			    mask[2 * mask_index + 1] = cvl_pixel_rgb_to_gray(mask[2 * mask_index]);
-			}
-			else if (cvl_frame_pixel_type(new_frame) == CVL_PIXEL_YUV)
-			{
-			    mask[2 * mask_index + 1] = cvl_pixel_yuv_to_gray(mask[2 * mask_index]);
-			}
-			else
-			{
-			    mask[2 * mask_index + 1] = mask[2 * mask_index];
-			}
+			mask[2 * mask_index + 1] = cvl_pixel_to_gray(mask[2 * mask_index],
+			    	cvl_frame_pixel_type(framebuf[t + k_t]));
 			mask_index++;
 		    }
 		}

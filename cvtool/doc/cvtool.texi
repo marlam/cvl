@@ -1053,6 +1053,12 @@ $ cvtool draw -u -f "Serif" -F 0.1,0.1 -j center -J center \
 @code{filter average [-3|--3d] -k|--k=@var{k}}@*
 @code{filter average [-3|--3d] -x|--k-x=@var{kx} -y|--k-y=@var{ky}
 [-t|--k-t=@var{kt}]}@*
+@code{filter min [-3|--3d] -k|--k=@var{k}}@*
+@code{filter min [-3|--3d] -x|--k-x=@var{kx} -y|--k-y=@var{ky}
+[-t|--k-t=@var{kt}]}@*
+@code{filter max [-3|--3d] -k|--k=@var{k}}@*
+@code{filter max [-3|--3d] -x|--k-x=@var{kx} -y|--k-y=@var{ky}
+[-t|--k-t=@var{kt}]}@*
 @code{filter median [-3|--3d] -k|--k=@var{k}}@*
 @code{filter median [-3|--3d] -x|--k-x=@var{kx} -y|--k-y=@var{ky}
 [-t|--k-t=@var{kt}]}@*

@@ -38,6 +38,10 @@ void cmd_filter_print_help(void)
     cvl_msg_fmt_req(
 	    "filter average [-3|--3d] -k|--k=<k>\n"
 	    "filter average [-3|--3d] -x|--k-x=<kx> -y|--k-y=<ky> [-t|--k-t=<kt>]\n"
+	    "filter min [-3|--3d] -k|--k=<k>\n"
+	    "filter min [-3|--3d] -x|--k-x=<kx> -y|--k-y=<ky> [-t|--k-t=<kt>]\n"
+	    "filter max [-3|--3d] -k|--k=<k>\n"
+	    "filter max [-3|--3d] -x|--k-x=<kx> -y|--k-y=<ky> [-t|--k-t=<kt>]\n"
 	    "filter median [-3|--3d] -k|--k=<k>\n"
 	    "filter median [-3|--3d] -x|--k-x=<kx> -y|--k-y=<ky> [-t|--k-t=<kt>]\n"
 	    "filter gauss [-3|--3d] -k|--k=<k>\n"
@@ -46,7 +50,7 @@ void cmd_filter_print_help(void)
 	    "filter gauss [-3|--3d] [-k|--k=<k>] [-x|--k-x=<kx>] [-y|--k-y=<ky>] [-t|--k-t=<kt>] "
 	    "[-s|--sigma=<s>] [--sigma-x=<sx>] [--sigma-y=<sy>] [--sigma-t=<st>]\n"
 	    "\n"
-	    "Smooth frames, in 2D or 3D (with the third dimension being the time). The kernel size "
+	    "Filter frames, in 2D or 3D (with the third dimension being the time). The kernel size "
 	    "can be given for each dimension, or once for all. It will be (2kx+1)x(2ky+1)[x(2kt+1)]. "
 	    "Different values for each direction lead to asymmetric filtering. The gauss filter "
 	    "can be specified by the sigma value(s): the mask size will be computed so that "
@@ -57,7 +61,7 @@ void cmd_filter_print_help(void)
 
 int cmd_filter(int argc, char *argv[])
 {
-    typedef enum { AVERAGE, MEDIAN, GAUSS } subcommand_t;
+    typedef enum { FILTER_AVERAGE, FILTER_MIN, FILTER_MAX, FILTER_MEDIAN, FILTER_GAUSS } subcommand_t;
     subcommand_t subcommand;
     option_bool_t three_dimensional = { false, true };
     option_int_t k = { 0, 1, MASKSIZE_K_MAX };
@@ -77,15 +81,9 @@ int cmd_filter(int argc, char *argv[])
 	{ "k-t",     't', OPTION_INT,    &kt,                false },
 	null_option
     };
-    option_t median_options[] = 
-    {
-	{ "3d",      '3', OPTION_BOOL,   &three_dimensional, false },
-	{ "k",       'k', OPTION_INT,    &k,                 false },
-	{ "k-x",     'x', OPTION_INT,    &kx,                false },
-	{ "k-y",     'y', OPTION_INT,    &ky,                false },
-	{ "k-t",     't', OPTION_INT,    &kt,                false },
-	null_option
-    };
+    option_t *min_options = average_options;
+    option_t *max_options = average_options;
+    option_t *median_options = average_options;
     option_t gauss_options[] = 
     {
 	{ "3d",      '3', OPTION_BOOL,   &three_dimensional, false },
@@ -111,7 +109,7 @@ int cmd_filter(int argc, char *argv[])
     }
     else if (strcmp(argv[1], "average") == 0)
     {
-	subcommand = AVERAGE;
+	subcommand = FILTER_AVERAGE;
 	cvl_msg_set_command_name("%s %s", argv[0], argv[1]);
 	error = !cvtool_getopt(argc - 1, &(argv[1]), average_options, 0, 0, NULL);
 	if (!error)
@@ -135,9 +133,61 @@ int cmd_filter(int argc, char *argv[])
 	    }
 	}
     }
+    else if (strcmp(argv[1], "min") == 0)
+    {
+	subcommand = FILTER_MIN;
+	cvl_msg_set_command_name("%s %s", argv[0], argv[1]);
+	error = !cvtool_getopt(argc - 1, &(argv[1]), min_options, 0, 0, NULL);
+	if (!error)
+	{
+	    if (kt.value > 0)
+	    {
+		three_dimensional.value = true;
+	    }
+	    if (k.value > 0 && (kx.value > 0 || ky.value > 0 || kt.value > 0))
+	    {
+		cvl_msg_err("kernel size is overdetermined");
+		error = true;
+	    }
+	    else if (k.value <= 0)
+	    {
+		if (kx.value <= 0 || ky.value <= 0 || (three_dimensional.value && kt.value <= 0))
+		{
+		    cvl_msg_err("kernel size is underdetermined");
+		    error = true;
+		}
+	    }
+	}
+    }
+    else if (strcmp(argv[1], "max") == 0)
+    {
+	subcommand = FILTER_MAX;
+	cvl_msg_set_command_name("%s %s", argv[0], argv[1]);
+	error = !cvtool_getopt(argc - 1, &(argv[1]), max_options, 0, 0, NULL);
+	if (!error)
+	{
+	    if (kt.value > 0)
+	    {
+		three_dimensional.value = true;
+	    }
+	    if (k.value > 0 && (kx.value > 0 || ky.value > 0 || kt.value > 0))
+	    {
+		cvl_msg_err("kernel size is overdetermined");
+		error = true;
+	    }
+	    else if (k.value <= 0)
+	    {
+		if (kx.value <= 0 || ky.value <= 0 || (three_dimensional.value && kt.value <= 0))
+		{
+		    cvl_msg_err("kernel size is underdetermined");
+		    error = true;
+		}
+	    }
+	}
+    }
     else if (strcmp(argv[1], "median") == 0)
     {
-	subcommand = MEDIAN;
+	subcommand = FILTER_MEDIAN;
 	cvl_msg_set_command_name("%s %s", argv[0], argv[1]);
 	error = !cvtool_getopt(argc - 1, &(argv[1]), median_options, 0, 0, NULL);
 	if (!error)
@@ -163,7 +213,7 @@ int cmd_filter(int argc, char *argv[])
     }
     else if (strcmp(argv[1], "gauss") == 0)
     {
-	subcommand = GAUSS;
+	subcommand = FILTER_GAUSS;
 	cvl_msg_set_command_name("%s %s", argv[0], argv[1]);
 	error = !cvtool_getopt(argc - 1, &(argv[1]), gauss_options, 0, 0, NULL);
 	if (!error)
@@ -221,7 +271,7 @@ int cmd_filter(int argc, char *argv[])
 	ky.value = k.value;
 	kt.value = k.value;
     }
-    if (subcommand == GAUSS)
+    if (subcommand == FILTER_GAUSS)
     {
 	if (s.value > 0.0)
 	{
@@ -314,15 +364,23 @@ int cmd_filter(int argc, char *argv[])
 	    }
 		
 	    // Process the present frame
-	    if (subcommand == AVERAGE)
+	    if (subcommand == FILTER_AVERAGE)
 	    {
 		new_frame = cvl_filter3d_average((const cvl_frame_t **)framebuf, kx.value, ky.value, kt.value);
 	    }
-	    else if (subcommand == MEDIAN)
+	    else if (subcommand == FILTER_MIN)
+	    {
+		new_frame = cvl_filter3d_min((const cvl_frame_t **)framebuf, kx.value, ky.value, kt.value);
+	    }
+	    else if (subcommand == FILTER_MAX)
+	    {
+		new_frame = cvl_filter3d_max((const cvl_frame_t **)framebuf, kx.value, ky.value, kt.value);
+	    }
+	    else if (subcommand == FILTER_MEDIAN)
 	    {
 		new_frame = cvl_filter3d_median((const cvl_frame_t **)framebuf, kx.value, ky.value, kt.value);
 	    }
-	    else // (subcommand == GAUSS)
+	    else // (subcommand == FILTER_GAUSS)
 	    {
 		new_frame = cvl_filter3d_gauss((const cvl_frame_t **)framebuf, kx.value, ky.value, kt.value,
 			sx.value, sy.value, st.value);
@@ -358,15 +416,23 @@ int cmd_filter(int argc, char *argv[])
 		error = true;
 		break;
 	    }
-	    if (subcommand == AVERAGE)
+	    if (subcommand == FILTER_AVERAGE)
 	    {
 		new_frame = cvl_filter_average(frame, kx.value, ky.value);
 	    }
-	    else if (subcommand == MEDIAN)
+	    else if (subcommand == FILTER_MIN)
+	    {
+		new_frame = cvl_filter_min(frame, kx.value, ky.value);
+	    }
+	    else if (subcommand == FILTER_MAX)
+	    {
+		new_frame = cvl_filter_max(frame, kx.value, ky.value);
+	    }
+	    else if (subcommand == FILTER_MEDIAN)
 	    {
 		new_frame = cvl_filter_median(frame, kx.value, ky.value);
 	    }
-	    else // (subcommand == GAUSS)
+	    else // (subcommand == FILTER_GAUSS)
 	    {
 		new_frame = cvl_filter_gauss(frame, kx.value, ky.value, sx.value, sy.value);
 	    }
