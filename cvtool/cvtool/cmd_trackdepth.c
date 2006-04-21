@@ -56,7 +56,7 @@ void cmd_trackdepth_print_help(void)
 int cmd_trackdepth(int argc, char *argv[])
 {
     option_int_t N = { -1, 1, INT_MAX };
-    option_int_array_t depthmaplist = { NULL, 1, NULL };
+    option_int_array_t depthmaplist = { NULL, 0, NULL, 1, NULL };
     option_file_t flow_fw_file = { NULL, "r", false };
     option_file_t flow_bw_file = { NULL, "r", false };
     option_t options[] = 
@@ -104,7 +104,7 @@ int cmd_trackdepth(int argc, char *argv[])
     error = !cvtool_getopt(argc, argv, options, 1, -1, &first_argument);
     if (!error)
     {
-	for (int i = 0; i < depthmaplist.sizes[0]; i++)
+	for (int i = 0; i < depthmaplist.value_sizes[0]; i++)
 	{
 	    if (depthmaplist.value[i] < 0)
 	    {
@@ -126,7 +126,7 @@ int cmd_trackdepth(int argc, char *argv[])
 		break;
 	    }
 	}
-	if (argc - first_argument != depthmaplist.sizes[0])
+	if (argc - first_argument != depthmaplist.value_sizes[0])
 	{
 	    cvl_msg_err("exactly one depthmap file for each entry in the depthmap list is required");
     	    error = true;
@@ -152,7 +152,7 @@ int cmd_trackdepth(int argc, char *argv[])
      * We must make sure that output_info is hooked only to the io info of the
      * first depth map. */    
     for (int next_known_depthmap_index = 0; 
-	    next_known_depthmap_index <= depthmaplist.sizes[0]; 
+	    next_known_depthmap_index <= depthmaplist.value_sizes[0]; 
 	    next_known_depthmap_index++)
     {
 	last_part_A_index = current_part_A_index;
@@ -164,7 +164,7 @@ int cmd_trackdepth(int argc, char *argv[])
 	 */
 	
 	current_part_A_index = last_part_O_index;
-	if (next_known_depthmap_index < depthmaplist.sizes[0])
+	if (next_known_depthmap_index < depthmaplist.value_sizes[0])
 	{
 	    current_part_O_index = next_known_depthmap_index;
 	}
@@ -579,7 +579,7 @@ exit:
 	fclose(depth_O_file);
     }
     free(depthmaplist.value);
-    free(depthmaplist.sizes);
+    free(depthmaplist.value_sizes);
 
     return error ? 1 : 0;
 }

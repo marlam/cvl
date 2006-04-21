@@ -61,7 +61,7 @@ int cmd_color(int argc, char *argv[])
     option_double_t s = { 0.0, -1.0, true, DBL_MAX, true };
     option_double_t l = { 0.0, -1.0, true, DBL_MAX, true };
     option_double_t c = { 0.0, -1.0, true, DBL_MAX, true };
-    option_double_array_t g = { NULL, 1, NULL };
+    option_double_array_t g = { NULL, 0, NULL, 1, NULL };
     option_t options[] = 
     { 
 	{ "hue",        'h', OPTION_DOUBLE,        &h, false },
@@ -83,7 +83,7 @@ int cmd_color(int argc, char *argv[])
     {
 	if (g.value)
 	{
-	    if (g.sizes[0] != 1 && g.sizes[0] != 3)
+	    if (g.value_sizes[0] != 1 && g.value_sizes[0] != 3)
 	    {
 		cvl_msg_err("need either 1 or 3 values for gamma correction");
 		error = true;
@@ -91,7 +91,7 @@ int cmd_color(int argc, char *argv[])
 	    else
 	    {
 		do_gamma = false;
-		for (int i = 0; i < g.sizes[0]; i++)
+		for (int i = 0; i < g.value_sizes[0]; i++)
 		{
 		    if (g.value[i] <= 0.0)
 		    {
@@ -135,11 +135,11 @@ int cmd_color(int argc, char *argv[])
 	}
 	if (do_gamma)
 	{
-	    if (g.sizes[0] == 1)
+	    if (g.value_sizes[0] == 1)
 	    {
 		cvl_frame_gamma_correct(frame, g.value[0]);
 	    }
-	    else // g.sizes[0] == 3
+	    else // g.value_sizes[0] == 3
 	    {
 		cvl_frame_gamma_correct_rgb(frame, g.value[0], g.value[1], g.value[2]);
 	    }
@@ -159,5 +159,7 @@ int cmd_color(int argc, char *argv[])
 
     cvl_io_info_free(input_info);
     cvl_io_info_free(output_info);
+    free(g.value);
+    free(g.value_sizes);
     return error ? 1 : 0;
 }

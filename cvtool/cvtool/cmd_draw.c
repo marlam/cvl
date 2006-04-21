@@ -391,7 +391,7 @@ int cmd_draw(int argc, char *argv[])
     option_file_t P = { NULL, "r", false };
     option_string_t G = { NULL, NULL };
     option_double_t w = { 2.0, 0.0, true, DBL_MAX, true };
-    option_double_array_t d = { NULL, 1, NULL };
+    option_double_array_t d = { NULL, 0, NULL, 1, NULL };
     const char *l_names[] = { "butt", "round", "square", NULL };
     option_name_t l = { 0, l_names };
     const char *L_names[] = { "miter", "round", "bevel", NULL };
@@ -405,7 +405,7 @@ int cmd_draw(int argc, char *argv[])
     typedef enum { WEIGHT_NORMAL = 0, WEIGHT_BOLD } weight_t;
     const char *weight_names[] = { "normal", "bold", NULL };
     option_name_t W = { WEIGHT_NORMAL, weight_names };
-    option_double_array_t F = { NULL, 1, NULL };
+    option_double_array_t F = { NULL, 0, NULL, 1, NULL };
     typedef enum { JUSTIFY_X_LEFT = 0, JUSTIFY_X_RIGHT = 1, JUSTIFY_X_CENTER = 2 } justify_x_t;
     const char *justify_x_names[] = { "left", "right", "center", NULL };
     option_name_t j = { JUSTIFY_X_LEFT, justify_x_names };
@@ -463,7 +463,7 @@ int cmd_draw(int argc, char *argv[])
     if (!error && d.value)
     {
 	bool found_val_greater_zero = false;
-	for (int i = 0; i < d.sizes[0]; i++)
+	for (int i = 0; i < d.value_sizes[0]; i++)
 	{
 	    if (d.value[i] > 0.0)
 	    {
@@ -520,14 +520,14 @@ int cmd_draw(int argc, char *argv[])
     {
 	if (F.value)
 	{
-	    if ((F.sizes[0] != 1 && F.sizes[0] != 2)
+	    if ((F.value_sizes[0] != 1 && F.value_sizes[0] != 2)
 		    || F.value[0] <= 0.0
-		    || (F.sizes[0] == 2 && F.value[1] <= 0.0))
+		    || (F.value_sizes[0] == 2 && F.value[1] <= 0.0))
 	    {
 		cvl_msg_err("invalid font size");
 		error = true;		    
 	    }
-	    cairo_matrix_init_scale(&font_size_matrix, F.value[0], F.value[F.sizes[0] == 1 ? 0 : 1]);
+	    cairo_matrix_init_scale(&font_size_matrix, F.value[0], F.value[F.value_sizes[0] == 1 ? 0 : 1]);
 	}
 	else
 	{
@@ -616,7 +616,7 @@ int cmd_draw(int argc, char *argv[])
 	cairo_set_antialias(cr, a.value ? CAIRO_ANTIALIAS_DEFAULT : CAIRO_ANTIALIAS_NONE);
 	if (d.value)
 	{
-	    cairo_set_dash(cr, d.value, d.sizes[0], 0.0);
+	    cairo_set_dash(cr, d.value, d.value_sizes[0], 0.0);
 	}
 	cairo_set_line_cap(cr, l.value == 0 ? CAIRO_LINE_CAP_BUTT :
     		l.value == 1 ? CAIRO_LINE_CAP_ROUND : CAIRO_LINE_CAP_SQUARE);
@@ -833,5 +833,9 @@ int cmd_draw(int argc, char *argv[])
     free(font_family_utf8);
     cvl_io_info_free(input_info);
     cvl_io_info_free(output_info);
+    free(d.value);
+    free(d.value_sizes);
+    free(F.value);
+    free(F.value_sizes);
     return error ? 1 : 0;
 }

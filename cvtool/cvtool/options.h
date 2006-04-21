@@ -99,18 +99,22 @@ typedef struct
 typedef struct
 {
     int *value;
+    int value_dimensions;
+    int *value_sizes;
     int dimensions;		/* Number of dimensions: usually 1D, 2D, or 3D. If set to zero, 
 				   the user can choose. */
-    int *sizes;			/* Size in each dimension: for example 2x2 for a 2D transformation matrix. */
+    const int *sizes;		/* Size in each dimension: for example 2x2 for a 2D transformation matrix. */
     				/* If set to zero, the user can choose. */
 } option_int_array_t;
 
 typedef struct
 {
     double *value;
+    int value_dimensions;
+    int *value_sizes;
     int dimensions;		/* Number of dimensions: usually 1D, 2D, or 3D. If set to zero, 
 				   the user can choose. */
-    int *sizes;			/* Size in each dimension: for example 2x2 for a 2D transformation matrix. */
+    const int *sizes;		/* Size in each dimension: for example 2x2 for a 2D transformation matrix. */
     				/* If set to zero, the user can choose. */
 } option_double_array_t;
 

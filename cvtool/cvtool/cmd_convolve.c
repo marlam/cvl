@@ -48,10 +48,10 @@ void cmd_convolve_print_help(void)
 
 int cmd_convolve(int argc, char *argv[])
 {
-    option_int_array_t K = { NULL, 0, NULL };
-    option_int_array_t X = { NULL, 1, NULL };
-    option_int_array_t Y = { NULL, 1, NULL };
-    option_int_array_t T = { NULL, 1, NULL };
+    option_int_array_t K = { NULL, 0, NULL, 0, NULL };
+    option_int_array_t X = { NULL, 0, NULL, 1, NULL };
+    option_int_array_t Y = { NULL, 0, NULL, 1, NULL };
+    option_int_array_t T = { NULL, 0, NULL, 1, NULL };
     option_t options[] = 
     {
 	{ "kernel",   'K', OPTION_INT_ARRAY, &K, false },
@@ -74,9 +74,9 @@ int cmd_convolve(int argc, char *argv[])
     }
     if (!error && K.value)
     {
-	if ((K.dimensions != 2 && K.dimensions != 3) 
-		|| K.sizes[0] % 2 != 1 || K.sizes[1] % 2 != 1
-		|| (K.dimensions == 3 && K.sizes[2] % 2 != 1))
+	if ((K.value_dimensions != 2 && K.value_dimensions != 3) 
+		|| K.value_sizes[0] % 2 != 1 || K.value_sizes[1] % 2 != 1
+		|| (K.value_dimensions == 3 && K.value_sizes[2] % 2 != 1))
 	{
 	    cvl_msg_err("invalid convolution kernel");
 	    error = true;
@@ -89,7 +89,9 @@ int cmd_convolve(int argc, char *argv[])
 	    cvl_msg_err("incomplete kernel information");
 	    error = true;
 	}
-	else if (X.sizes[0] % 2 != 1 || Y.sizes[0] % 2 != 1 || (T.value && T.sizes[0] % 2 != 1))
+	else if (X.value_sizes[0] % 2 != 1 
+		|| Y.value_sizes[0] % 2 != 1 
+		|| (T.value && T.value_sizes[0] % 2 != 1))
 	{
 	    cvl_msg_err("invalid convolution kernel");
 	    error = true;
@@ -100,7 +102,7 @@ int cmd_convolve(int argc, char *argv[])
 	return 1;
     }
 
-    three_dimensional = ((K.value && K.dimensions == 3) || T.value);
+    three_dimensional = ((K.value && K.value_dimensions == 3) || T.value);
     
     input_info = cvl_io_info_new();
     output_info = cvl_io_info_new();
@@ -109,7 +111,7 @@ int cmd_convolve(int argc, char *argv[])
     if (three_dimensional)
     {
 	cvl_frame_t *new_frame;
-	int framebuflen = (K.value ? K.sizes[0] : T.sizes[0]);
+	int framebuflen = (K.value ? K.value_sizes[0] : T.value_sizes[0]);
 	cvl_frame_t *framebuf[framebuflen];
 	int future_frames = 0;
 	
@@ -164,12 +166,12 @@ int cmd_convolve(int argc, char *argv[])
 	    if (K.value)
 	    {
 		new_frame = cvl_frame_convolve3d((const cvl_frame_t **)framebuf, 
-			K.value, K.sizes[0], K.sizes[1], K.sizes[2]);
+			K.value, K.value_sizes[0], K.value_sizes[1], K.value_sizes[2]);
 	    }
 	    else
 	    {
 		new_frame = cvl_frame_convolve3d_separable((const cvl_frame_t **)framebuf, 
-		     	X.value, X.sizes[0], Y.value, Y.sizes[0], T.value, T.sizes[0]);
+		     	X.value, X.value_sizes[0], Y.value, Y.value_sizes[0], T.value, T.value_sizes[0]);
 	    }
 	    if (!cvl_io_write(stdout, output_info, new_frame))
 	    {
@@ -204,11 +206,12 @@ int cmd_convolve(int argc, char *argv[])
 	    }
     	    if (K.value)
 	    {
-		new_frame = cvl_frame_convolve(frame, K.value, K.sizes[0], K.sizes[1]);
+		new_frame = cvl_frame_convolve(frame, K.value, K.value_sizes[0], K.value_sizes[1]);
 	    }
 	    else
 	    {
-		new_frame = cvl_frame_convolve_separable(frame, X.value, X.sizes[0], Y.value, Y.sizes[0]);
+		new_frame = cvl_frame_convolve_separable(frame, X.value, X.value_sizes[0], 
+			Y.value, Y.value_sizes[0]);
 	    }
 	    cvl_frame_free(frame);
 	    if (!cvl_io_write(stdout, output_info, new_frame))
@@ -222,13 +225,13 @@ int cmd_convolve(int argc, char *argv[])
     }
 	
     free(K.value);
-    free(K.sizes);
+    free(K.value_sizes);
     free(X.value);
-    free(X.sizes);
+    free(X.value_sizes);
     free(Y.value);
-    free(Y.sizes);
+    free(Y.value_sizes);
     free(T.value);
-    free(T.sizes);
+    free(T.value_sizes);
     cvl_io_info_free(input_info);
     cvl_io_info_free(output_info);
     return error ? 1 : 0;

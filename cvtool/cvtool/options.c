@@ -63,13 +63,12 @@ void cvtool_getopt_msg_invalid_arg(option_t *options, int optval, bool option_sh
 /*
  * Helper for array parsing, independent of int or double.
  */
-bool cvtool_getopt_parse_array_info(char *s, char **p, int *number_of_values,
-	int *optstruct_dimensions, int **optstruct_sizes)
+bool cvtool_getopt_parse_array_info(char *s, 
+	int allowed_dimensions, const int *allowed_sizes, 
+	char **p, int *number_of_values,
+	int *dimensions, int **sizes)
 {
-    int dimensions;
     char *q;
-    int *sizes = NULL;
-    bool optstruct_sizes_allocated = false;
     bool error = false;
     
     /* An array has the form [[Nx]Nx...:]val1,val2,... */
@@ -79,30 +78,26 @@ bool cvtool_getopt_parse_array_info(char *s, char **p, int *number_of_values,
     if (*p)
     {
 	// the number of dimensions is 1 + (number of 'x' characters).
-	dimensions = 1;
+	*dimensions = 1;
 	q = s;
 	while ((q = strchr(q, 'x')))
 	{
-	    dimensions++;
+	    (*dimensions)++;
 	    q++;
 	}
     }
     else
     {
 	// we have no first part; the array is just a list of values
-	dimensions = (*optstruct_dimensions == 0) ? 1 : *optstruct_dimensions;
+	*dimensions = (allowed_dimensions == 0) ? 1 : allowed_dimensions;
     }
-    if (*optstruct_dimensions != 0 && dimensions != *optstruct_dimensions)
+    if (allowed_dimensions != 0 && *dimensions != allowed_dimensions)
     {
 	error = true;
     }
-    else
-    {
-	*optstruct_dimensions = dimensions;
-    }
     if (!error)
     {
-	sizes = xmalloc(dimensions * sizeof(int));
+	*sizes = xmalloc(*dimensions * sizeof(int));
     }
     
     // 2. Determine the size in each dimension
@@ -110,7 +105,7 @@ bool cvtool_getopt_parse_array_info(char *s, char **p, int *number_of_values,
     {
 	if (*p)
 	{
-	    int sizes_index = dimensions - 1;
+	    int sizes_index = *dimensions - 1;
 	    char *r;
 	    long value;
 	    
@@ -127,24 +122,24 @@ bool cvtool_getopt_parse_array_info(char *s, char **p, int *number_of_values,
 		}
 		else
 		{
-		    sizes[sizes_index--] = value;
+		    (*sizes)[sizes_index--] = value;
 		    q = r + 1;
 		}
 	    }
 	}
 	else
 	{
-	    if (*optstruct_sizes)
+	    if (allowed_sizes)
 	    {
-		memcpy(sizes, *optstruct_sizes, dimensions * sizeof(int));
+		memcpy(*sizes, allowed_sizes, *dimensions * sizeof(int));
 	    }
-	    else if (dimensions == 1)
+	    else if (*dimensions == 1)
 	    {
-		sizes[0] = 1;
+		(*sizes)[0] = 1;
 		q = s;
 		while ((q = strchr(q, ',')))
 		{
-		    sizes[0]++;
+		    (*sizes)[0]++;
 		    q++;
 		}
 	    }
@@ -156,39 +151,37 @@ bool cvtool_getopt_parse_array_info(char *s, char **p, int *number_of_values,
     }
     if (!error)
     {
-	if (!*optstruct_sizes)
-	{
-	    *optstruct_sizes = xmemdup(sizes, dimensions * sizeof(int));
-	    optstruct_sizes_allocated = true;
-	}
 	*number_of_values = 1;
-	for (int i = 0; i < dimensions; i++)
+	for (int i = 0; i < *dimensions; i++)
 	{
-	    if ((*optstruct_sizes)[i] == 0)
+	    if (allowed_sizes)
 	    {
-		(*optstruct_sizes)[i] = sizes[i];
-	    }
-	    else if ((*optstruct_sizes)[i] != sizes[i])
-	    {
-		error = true;
-		break;
+		if ((*sizes)[i] == 0)
+		{
+		    (*sizes)[i] = allowed_sizes[i];
+		}
+		else if ((*sizes)[i] != allowed_sizes[i])
+		{
+		    error = true;
+		    break;
+		}
 	    }
 	    /* Make sure that the total number of elements does not overflow an int */
-	    if (!cvl_product_fits_in_int(*number_of_values, sizes[i]))
+	    if (!cvl_product_fits_in_int(*number_of_values, (*sizes)[i]))
 	    {
 		error = true;
 		break;
 	    }
 	    else
 	    {
-		*number_of_values *= sizes[i];
+		*number_of_values *= (*sizes)[i];
 	    }
 	}
     }
-    free(sizes);
-    if (error && optstruct_sizes_allocated)
+    if (error)
     {
-	free(*optstruct_sizes);
+	free(*sizes);
+	*sizes = NULL;
     }
     *p = *p ? *p + 1 : s;
 
@@ -451,10 +444,13 @@ bool cvtool_getopt(int argc, char *argv[], option_t *options,
 	    
     	    free(option_struct->value);
 	    option_struct->value = NULL;
+    	    free(option_struct->value_sizes);
+	    option_struct->value_sizes = NULL;
 	    error = !cvtool_getopt_parse_array_info(optarg,
+		    option_struct->dimensions, option_struct->sizes,
 		    &p, &number_of_values,
-		    &(option_struct->dimensions),
-		    &(option_struct->sizes));
+		    &(option_struct->value_dimensions),
+		    &(option_struct->value_sizes));
 	    if (!error)
 	    {
 	    	option_struct->value = xmalloc(number_of_values * sizeof(int));
@@ -478,6 +474,8 @@ bool cvtool_getopt(int argc, char *argv[], option_t *options,
     	    {
 		cvtool_getopt_msg_invalid_arg(options, optval, option_shortname);
 		option_struct->value = NULL;
+		free(option_struct->value_sizes);
+		option_struct->value_sizes = NULL;
 	    }
 	}
 	else if (options[optval].type == OPTION_DOUBLE_ARRAY)
@@ -488,10 +486,13 @@ bool cvtool_getopt(int argc, char *argv[], option_t *options,
 	    
 	    free(option_struct->value);
     	    option_struct->value = NULL;
+    	    free(option_struct->value_sizes);
+	    option_struct->value_sizes = NULL;
 	    error = !cvtool_getopt_parse_array_info(optarg,
+		    option_struct->dimensions, option_struct->sizes,
 		    &p, &number_of_values,
-		    &(option_struct->dimensions),
-		    &(option_struct->sizes));
+		    &(option_struct->value_dimensions),
+		    &(option_struct->value_sizes));
 	    if (!error)
 	    {
 	    	option_struct->value = xmalloc(number_of_values * sizeof(double));
@@ -514,6 +515,8 @@ bool cvtool_getopt(int argc, char *argv[], option_t *options,
     	    {
 		cvtool_getopt_msg_invalid_arg(options, optval, option_shortname);
 		option_struct->value = NULL;
+		free(option_struct->value_sizes);
+		option_struct->value_sizes = NULL;
 	    }
 	}
 	else if (options[optval].type == OPTION_RATIO)

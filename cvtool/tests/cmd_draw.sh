@@ -19,7 +19,7 @@ STYLE3="--width=0.1 --line-cap=square --line-join=bevel "
 STYLE3="$STYLE3 --border-style=linear-gradient --border-gradient=10,10,green,90,90,black,0.5,yellow,0.7,blue "
 STYLE3="$STYLE3 --fill-style=radial-gradient --fill-gradient=20,20,20,green,80,80,40,black,0.5,yellow,0.7,blue "
 STYLE3="$STYLE3 -a0 "
-STYLE3="$STYLE3 --justify-y=center --font-slant=italic -F 0.1,0.2 --font-weight=bold"
+STYLE3="$STYLE3 --justify-y=center --font-slant=italic -F 0.1 -F 0.1,0.2 --font-weight=bold"
 
 $CVTOOL draw $STYLE1 -- rectangle 10,10,80,80 circle 15,15,2 75,75,2 ellipse 20,20,60,60 arc 30,30,30,90,270 \
 	move_to 50,50 line_to 40,50 40,40 curve_to 50,30,60,40,60,50 close \

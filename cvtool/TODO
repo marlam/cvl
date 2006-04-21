@@ -2,15 +2,11 @@ Changes planned for 0.0.2
 =========================
 
 cvtool:
-- Fix/redesign options.[ch]. Glitches:
-  Once -F 0.1 is given to draw, -F1,2 is not possible anymore, because the
-  sizes are fixed.
 - Add fieldconv command
   to convert to/from different kinds of fields, for example
   double <-> gray; double,double,double <-> RGB, 
   vectors -> needlemaps; int <-> gray; ...
 - Remove vectors command
-- Rewrite grid command (or remove it)
 - Replace foreach command with a similar command that does the same but also
   allows to select frame ranges, similar to the select command
 
