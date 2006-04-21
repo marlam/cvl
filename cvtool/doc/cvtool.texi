@@ -747,7 +747,7 @@ $ cvtool blend --single -s logo.pnm -a logo-alpha.pgm -x 700 -y 0 \
 @node layer
 @subsection layer
 @cmindex layer
-@code{layer -m|--mode=min|max|median|or|and|xor|diff|add|sub|mul|div file@dots{}}
+@code{layer -m|--mode=min|max|median|or|and|xor|diff|add|xadd|sub|xsub|mul|div file@dots{}}
 
 @noindent
 Layers the frames from the given files on top of each other, using the given
@@ -758,6 +758,26 @@ only one channel. Color frames have the channels R, G, and B. Graylevel
 layering is only done if all input frames are graylevel. The input frames may
 differ in size. In this case, the result will be big enough to hold all input
 frames, and the input frames are centered on the result.
+
+The modes are as follows:
+@itemize
+@item @code{min}: Use minimum value.
+@item @code{max}: Use maximum value.
+@item @code{median}: Use median value.
+@item @code{or}: Bitwise or.
+@item @code{and}: Bitwise and.
+@item @code{xor}: Bitwise xor.
+@item @code{diff}: Use difference between maximum and minimum value.
+@item @code{add}: Use sum of values.
+@item @code{xadd}: Use sum of values. The ranges are transformed so that the
+results fit in [0,255]. Example for two layers: X = (A/2) + (B/2).
+@item @code{sub}: Subtract values from the first value.
+@item @code{xsub}: Subtract values from the first value. The ranges are
+transformed so that the results fit in [0,255]. Example for two layers: X =
+(A/2) - (B/2) + 255/2.
+@item @code{mul}: Multiply values.
+@item @code{div}: Divide values.
+@end itemize
 
 @example
 $ cvtool layer --mode=or red.pnm green.pnm blue.pnm \

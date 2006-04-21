@@ -121,11 +121,17 @@ void cvl_frame_blend(cvl_frame_t *frame, int dst_x, int dst_y,
 /** \var CVL_LAYER_MODE_XOR
  *  Bitwise xor. */
 /** \var CVL_LAYER_MODE_DIFF
- *  Use difference between minimum and maximum value. */
+ *  Use difference between maximum and minimum value. */
 /** \var CVL_LAYER_MODE_ADD
  *  Use sum of values. */
+/** \var CVL_LAYER_MODE_XADD
+ *  Use sum of values. The ranges are transformed so that the results fit in
+ *  [0,255]. Example for two layers: X = (A/2) + (B/2). */
 /** \var CVL_LAYER_MODE_SUB
  *  Subtract values from the first value. */
+/** \var CVL_LAYER_MODE_XSUB
+ *  Subtract values from the first value. The ranges are transformed so that the results fit in
+ *  [0,255]. Example for two layers: X = (A/2) - (B/2) + 255/2. */
 /** \var CVL_LAYER_MODE_MUL
  *  Multiply values. */
 /** \var CVL_LAYER_MODE_DIV
@@ -218,6 +224,16 @@ static cvl_pixel_t cvl_layer_mode_add(const cvl_pixel_t *layered_pixels, int num
     return p;
 }
 
+static cvl_pixel_t cvl_layer_mode_xadd(const cvl_pixel_t *layered_pixels, int number_of_layers)
+{
+    cvl_pixel_t p = layered_pixels[0] / number_of_layers;
+    for (int i = 1; i < number_of_layers; i++)
+    {
+	p += layered_pixels[i] / number_of_layers;
+    }
+    return p;
+}
+
 static cvl_pixel_t cvl_layer_mode_sub(const cvl_pixel_t *layered_pixels, int number_of_layers)
 {
     cvl_pixel_t p = layered_pixels[0];
@@ -229,6 +245,16 @@ static cvl_pixel_t cvl_layer_mode_sub(const cvl_pixel_t *layered_pixels, int num
 	    break;
 	}
 	p -= layered_pixels[i];
+    }
+    return p;
+}
+
+static cvl_pixel_t cvl_layer_mode_xsub(const cvl_pixel_t *layered_pixels, int number_of_layers)
+{
+    cvl_pixel_t p = layered_pixels[0] / number_of_layers;
+    for (int i = 1; i < number_of_layers; i++)
+    {
+	p = p + 255 / number_of_layers - layered_pixels[i] / number_of_layers;
     }
     return p;
 }
@@ -274,7 +300,9 @@ static cvl_pixel_t (*cvl_layer_mode[])(const cvl_pixel_t *layered_pixels, int nu
     cvl_layer_mode_xor,
     cvl_layer_mode_diff,
     cvl_layer_mode_add,
+    cvl_layer_mode_xadd,
     cvl_layer_mode_sub,
+    cvl_layer_mode_xsub,
     cvl_layer_mode_mul,
     cvl_layer_mode_div
 };

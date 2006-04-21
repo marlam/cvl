@@ -36,7 +36,7 @@
 void cmd_layer_print_help(void)
 {
     cvl_msg_fmt_req(
-	    "layer -m|--mode=min|max|median|or|and|xor|diff|add|sub|mul|div file...\n"
+	    "layer -m|--mode=min|max|median|or|and|xor|diff|add|xadd|sub|xsub|mul|div file...\n"
 	    "\n"
 	    "Layers the frames from the given files on top of each other, using the given mode. "
 	    "Layering will be done for each channel separately. Graylevel frames have only one "
@@ -51,7 +51,7 @@ int cmd_layer(int argc, char *argv[])
 {
     /* these names correspond to the cvl_layer_mode_t values */
     const char *mode_names[] = { "min", "max", "median", "or", "and", "xor", 
-	"diff", "add", "sub", "mul", "div", NULL };
+	"diff", "add", "xadd", "sub", "xsub", "mul", "div", NULL };
     option_name_t mode = { -1, mode_names };
     option_t options[] = 
     { 

@@ -1,4 +1,5 @@
 Version 0.0.2 (not yet released):
+- CVL/cvtool: Added xadd and xsub layering modes.
 - CVL/cvtool: Added min and max filters.
 - CVL/cvtool: Renamed *smooth* to *filter*.
 - cvtool: Improved int/double array option handling.

@@ -38,9 +38,11 @@ typedef enum
     CVL_LAYER_MODE_XOR 		= 5,
     CVL_LAYER_MODE_DIFF 	= 6,
     CVL_LAYER_MODE_ADD 		= 7,
-    CVL_LAYER_MODE_SUB 		= 8,
-    CVL_LAYER_MODE_MUL 		= 9,
-    CVL_LAYER_MODE_DIV 		= 10
+    CVL_LAYER_MODE_XADD 	= 8,
+    CVL_LAYER_MODE_SUB 		= 9,
+    CVL_LAYER_MODE_XSUB 	= 10,
+    CVL_LAYER_MODE_MUL 		= 11,
+    CVL_LAYER_MODE_DIV 		= 12
 } cvl_layer_mode_t;
 
 void cvl_frame_layer(cvl_frame_t *frame, cvl_layer_mode_t mode,
