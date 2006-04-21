@@ -217,7 +217,7 @@ int cmd_trackdepth(int argc, char *argv[])
 			|| cvl_io_eof(depth_A_file, depth_info)
 			|| !cvl_io_read(depth_A_file, depth_info, &depth_A))
 		{
-		    cvl_msg_err("cannot read depthmap %s", argv[current_part_A_index]);
+		    cvl_msg_err("cannot read depthmap %s", argv[first_argument + current_part_A_index]);
 		    error = true;
 		    goto exit;
 		}
@@ -263,7 +263,7 @@ int cmd_trackdepth(int argc, char *argv[])
 		    || cvl_io_eof(depth_O_file, depth_info)
 		    || !cvl_io_read(depth_O_file, depth_info, &depth_O))
 	    {
-		cvl_msg_err("cannot read depthmap %s", argv[current_part_O_index]);
+		cvl_msg_err("cannot read depthmap %s", argv[first_argument + current_part_O_index]);
 		error = true;
 		goto exit;
 	    }
