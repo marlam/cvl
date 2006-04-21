@@ -12,7 +12,7 @@ EXTRA_DIST = \
 	cvl_color.c \
 	cvl_cairo.c \
 	cvl_convolve.c \
-	cvl_smooth.c \
+	cvl_filter.c \
 	cvl_edge.c \
 	cvl_transform.c \
 	cvl_mix.c \
@@ -34,7 +34,7 @@ nobase_include_HEADERS = \
 	cvl/cvl_color.h \
 	cvl/cvl_cairo.h \
 	cvl/cvl_convolve.h \
-	cvl/cvl_smooth.h \
+	cvl/cvl_filter.h \
 	cvl/cvl_edge.h \
 	cvl/cvl_transform.h \
 	cvl/cvl_mix.h \

@@ -1,5 +1,5 @@
 /*
- * cvl_smooth.c
+ * cvl_filter.c
  * 
  * This file is part of CVL, a computer vision library.
  *
@@ -21,10 +21,10 @@
  */
 
 /**
- * \file cvl_smooth.h
- * \brief Smoothing frames.
+ * \file cvl_filter.h
+ * \brief Filtering frames.
  *
- * Smoothing frames: Gauss, Median, and Mean filter.
+ * Filtering frames: Gauss, Median, and Mean filter.
  */
 
 #include "config.h"
@@ -38,29 +38,29 @@
 #include "cvl/cvl_frame.h"
 #include "cvl/cvl_math.h"
 #include "cvl/cvl_convolve.h"
-#include "cvl/cvl_smooth.h"
+#include "cvl/cvl_filter.h"
 
 
 /**
- * \param k		The parameter k of cvl_frame_smooth_gauss()
+ * \param k		The parameter k of cvl_filter_gauss()
  * \return		Sigma.
  *
  * Computes a sigma value that matches the given \a k: roughly 95% of the
  * mass should lie within the mask.
  */
-double cvl_smooth_gauss_k_to_sigma(int k)
+double cvl_filter_gauss_k_to_sigma(int k)
 {
     return (double)k / 2.5;
 }
 
 /**
- * \param sigma		The parameter sigma of cvl_frame_smooth_gauss()
+ * \param sigma		The parameter sigma of cvl_filter_gauss()
  * \return		k.
  *
  * Computes a k value that matches the given \a sigma: roughly 95% of the
  * mass should lie within the mask.
  */
-int cvl_smooth_gauss_sigma_to_k(double sigma)
+int cvl_filter_gauss_sigma_to_k(double sigma)
 {
     int k = cvl_iround(2.5 * sigma);
 
@@ -77,13 +77,13 @@ int cvl_smooth_gauss_sigma_to_k(double sigma)
  * \param k_v		Mask size in vertical direction.
  * \param sigma_h	Sigma value in horizontal direction.
  * \param sigma_v	Sigma value in vertical direction.
- * \return		The smoothed frame.
+ * \return		The filtered frame.
  *
  * The number of matrix columns will be 2k_h+1, the number of rows will
- * be 2k_v+1. All pixel types are supported. See also cvl_smooth_gauss_k_to_sigma()
- * and cvl_smooth_gauss_sigma_to_k().
+ * be 2k_v+1. All pixel types are supported. See also cvl_filter_gauss_k_to_sigma()
+ * and cvl_filter_gauss_sigma_to_k().
  */
-cvl_frame_t *cvl_frame_smooth_gauss(const cvl_frame_t *frame, int k_h, int k_v, double sigma_h, double sigma_v)
+cvl_frame_t *cvl_filter_gauss(const cvl_frame_t *frame, int k_h, int k_v, double sigma_h, double sigma_v)
 {
     double g_h[k_h + 1];
     double g_v[k_v + 1];
@@ -128,12 +128,12 @@ cvl_frame_t *cvl_frame_smooth_gauss(const cvl_frame_t *frame, int k_h, int k_v, 
  * \param frame		The frame.
  * \param k_h		Mask size in horizontal direction.
  * \param k_v		Mask size in vertical direction.
- * \return		The smoothed frame.
+ * \return		The filtered frame.
  *
  * The number of matrix columns will be 2k_h+1, the number of rows will
  * be 2k_v+1. All pixel types are supported.
  */
-cvl_frame_t *cvl_frame_smooth_average(const cvl_frame_t *frame, int k_h, int k_v)
+cvl_frame_t *cvl_filter_average(const cvl_frame_t *frame, int k_h, int k_v)
 {
     int mh_len = 2 * k_h + 1;
     int mv_len = 2 * k_v + 1;
@@ -151,8 +151,8 @@ cvl_frame_t *cvl_frame_smooth_average(const cvl_frame_t *frame, int k_h, int k_v
     return cvl_frame_convolve_separable(frame, mh, mh_len, mv, mv_len);     
 }
 
-/* Helper for cvl_frame_smooth_median() */
-static int cvl_frame_smooth_median_maskcmp(const cvl_pixel_t *p1, const cvl_pixel_t *p2)
+/* Helper for cvl_filter_median() */
+static int cvl_filter_median_maskcmp(const cvl_pixel_t *p1, const cvl_pixel_t *p2)
 {
     return (p1[1] < p2[1] ? -1 : (p1[1] > p2[1] ? +1 : 0));
 }
@@ -161,12 +161,12 @@ static int cvl_frame_smooth_median_maskcmp(const cvl_pixel_t *p1, const cvl_pixe
  * \param frame		The frame.
  * \param k_h		Mask size in horizontal direction.
  * \param k_v		Mask size in vertical direction.
- * \return		The smoothed frame.
+ * \return		The filtered frame.
  *
  * The number of matrix columns will be 2k_h+1, the number of rows will
  * be 2k_v+1. All pixel types are supported.
  */
-cvl_frame_t *cvl_frame_smooth_median(const cvl_frame_t *frame, int k_h, int k_v)
+cvl_frame_t *cvl_filter_median(const cvl_frame_t *frame, int k_h, int k_v)
 {
     cvl_frame_t *new_frame = cvl_frame_new(cvl_frame_pixel_type(frame), 
 	    cvl_frame_width(frame), cvl_frame_height(frame));
@@ -199,7 +199,7 @@ cvl_frame_t *cvl_frame_smooth_median(const cvl_frame_t *frame, int k_h, int k_v)
 		}
 	    }
 	    qsort(mask, (size_t)masklen, 2 * sizeof(cvl_pixel_t), 
-		    (int (*)(const void *, const void *))cvl_frame_smooth_median_maskcmp);
+		    (int (*)(const void *, const void *))cvl_filter_median_maskcmp);
 	    cvl_frame_set(new_frame, x, y, mask[2 * (masklen / 2)]);
 	}
     }
@@ -214,13 +214,13 @@ cvl_frame_t *cvl_frame_smooth_median(const cvl_frame_t *frame, int k_h, int k_v)
  * \param sigma_h	Sigma value in horizontal direction.
  * \param sigma_v	Sigma value in vertical direction.
  * \param sigma_t	Sigma value in temporal direction.
- * \return		The smoothed frame.
+ * \return		The filtered frame.
  *
  * See cvl_convolve3d_separable() for a description of \a frames.
  * The kernel size will be (2k_t+1)x(2k_v+1)x(2k_h+1).
- * See also cvl_smooth_gauss_k_to_sigma() and cvl_smooth_gauss_sigma_to_k().
+ * See also cvl_filter_gauss_k_to_sigma() and cvl_filter_gauss_sigma_to_k().
  */
-cvl_frame_t *cvl_frame_smooth3d_gauss(const cvl_frame_t *frames[], 
+cvl_frame_t *cvl_filter3d_gauss(const cvl_frame_t *frames[], 
 	int k_h, int k_v, int k_t, double sigma_h, double sigma_v, double sigma_t)
 {
     double g_h[k_h + 1];
@@ -284,12 +284,12 @@ cvl_frame_t *cvl_frame_smooth3d_gauss(const cvl_frame_t *frames[],
  * \param k_h		Mask size in horizontal direction.
  * \param k_v		Mask size in vertical direction.
  * \param k_t		Mask size in temporal direction.
- * \return		The smoothed frame.
+ * \return		The filtered frame.
  *
  * See cvl_convolve3d_separable() for a description of \a frames.
  * The kernel size will be (2k_t+1)x(2k_v+1)x(2k_h+1).
  */
-cvl_frame_t *cvl_frame_smooth3d_average(const cvl_frame_t *frames[], int k_h, int k_v, int k_t)
+cvl_frame_t *cvl_filter3d_average(const cvl_frame_t *frames[], int k_h, int k_v, int k_t)
 {
     int mh_len = 2 * k_h + 1;
     int mv_len = 2 * k_v + 1;
@@ -318,12 +318,12 @@ cvl_frame_t *cvl_frame_smooth3d_average(const cvl_frame_t *frames[], int k_h, in
  * \param k_h		Mask size in horizontal direction.
  * \param k_v		Mask size in vertical direction.
  * \param k_t		Mask size in temporal direction.
- * \return		The smoothed frame.
+ * \return		The filtered frame.
  *
  * See cvl_convolve3d_separable() for a description of \a frames.
  * The kernel size will be (2k_t+1)x(2k_v+1)x(2k_h+1).
  */
-cvl_frame_t *cvl_frame_smooth3d_median(const cvl_frame_t *frames[], int k_h, int k_v, int k_t)
+cvl_frame_t *cvl_filter3d_median(const cvl_frame_t *frames[], int k_h, int k_v, int k_t)
 {
     const cvl_frame_t *framebuf[2 * k_t + 1];
     cvl_frame_t *new_frame = cvl_frame_new(cvl_frame_pixel_type(frames[k_t]), 
@@ -386,7 +386,7 @@ cvl_frame_t *cvl_frame_smooth3d_median(const cvl_frame_t *frames[], int k_h, int
 		}
 	    }
 	    qsort(mask, (size_t)masklen, 2 * sizeof(cvl_pixel_t), 
-		    (int (*)(const void *, const void *))cvl_frame_smooth_median_maskcmp);
+		    (int (*)(const void *, const void *))cvl_filter_median_maskcmp);
 	    cvl_frame_set(new_frame, x, y, mask[2 * (masklen / 2)]);
 	}
     }

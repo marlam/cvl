@@ -1,5 +1,5 @@
 /*
- * cvl_smooth.h
+ * cvl_filter.h
  * 
  * This file is part of CVL, a computer vision library.
  *
@@ -20,21 +20,21 @@
  *   Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-#ifndef CVL_SMOOTH_H
-#define CVL_SMOOTH_H
+#ifndef CVL_FILTER_H
+#define CVL_FILTER_H
 
 #include "cvl_frame.h"
 
-double cvl_smooth_gauss_k_to_sigma(int k);
-int cvl_smooth_gauss_sigma_to_k(double sigma);
+double cvl_filter_gauss_k_to_sigma(int k);
+int cvl_filter_gauss_sigma_to_k(double sigma);
 
-cvl_frame_t *cvl_frame_smooth_gauss(const cvl_frame_t *frame, int k_h, int k_v, double sigma_h, double sigma_v);
-cvl_frame_t *cvl_frame_smooth_average(const cvl_frame_t *frame, int k_h, int k_v);
-cvl_frame_t *cvl_frame_smooth_median(const cvl_frame_t *frame, int k_h, int k_v);
+cvl_frame_t *cvl_filter_gauss(const cvl_frame_t *frame, int k_h, int k_v, double sigma_h, double sigma_v);
+cvl_frame_t *cvl_filter_average(const cvl_frame_t *frame, int k_h, int k_v);
+cvl_frame_t *cvl_filter_median(const cvl_frame_t *frame, int k_h, int k_v);
 
-cvl_frame_t *cvl_frame_smooth3d_gauss(const cvl_frame_t *frames[], 
+cvl_frame_t *cvl_filter3d_gauss(const cvl_frame_t *frames[], 
 	int k_h, int k_v, int k_t, double sigma_h, double sigma_v, double sigma_t);
-cvl_frame_t *cvl_frame_smooth3d_average(const cvl_frame_t *frames[], int k_h, int k_v, int k_t);
-cvl_frame_t *cvl_frame_smooth3d_median(const cvl_frame_t *frames[], int k_h, int k_v, int k_t);
+cvl_frame_t *cvl_filter3d_average(const cvl_frame_t *frames[], int k_h, int k_v, int k_t);
+cvl_frame_t *cvl_filter3d_median(const cvl_frame_t *frames[], int k_h, int k_v, int k_t);
 
 #endif

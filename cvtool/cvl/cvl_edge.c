@@ -37,7 +37,7 @@
 #include "cvl/cvl_frame.h"
 #include "cvl/cvl_math.h"
 #include "cvl/cvl_color.h"
-#include "cvl/cvl_smooth.h"
+#include "cvl/cvl_filter.h"
 #include "cvl/cvl_edge.h"
 #include "cvl/cvl_assert.h"
 
@@ -199,7 +199,7 @@ static void cvl_frame_edge_non_max_suppression(cvl_frame_t *edge_frame, const cv
 
 /**
  * \param frame		A graylevel frame.
- * \param sigma		The sigma value for gauss smoothing.
+ * \param sigma		The sigma value for gauss filtering.
  * \param tl		The tl parameter of Hysterese binarization.
  * \param th		The th parameter of Hysterese binarization.
  * \param edge_dir_field	A field to store edge directions in.
@@ -207,7 +207,7 @@ static void cvl_frame_edge_non_max_suppression(cvl_frame_t *edge_frame, const cv
  * 
  * Detects edges using the Canny edge detector.
  * The Canny edge detection algorithm consists of the following steps:
- * Gauss smoothing with parameter \a sigma, Sobel edge detector, non-maximum
+ * Gauss filtering with parameter \a sigma, Sobel edge detector, non-maximum
  * suppression, and binarization with the Hysterese method using the parameters
  * \a tl and \a th.
  * \a edge_dir_field must be a preallocated field of doubles with the same
@@ -222,11 +222,11 @@ cvl_frame_t *cvl_edge_canny(const cvl_frame_t *frame,
     cvl_assert(cvl_field_width(edge_dir_field) == cvl_frame_width(frame));
     cvl_assert(cvl_field_height(edge_dir_field) == cvl_frame_height(frame));
     
-    int gauss_k = cvl_smooth_gauss_sigma_to_k(sigma);
+    int gauss_k = cvl_filter_gauss_sigma_to_k(sigma);
     cvl_frame_t *smoothed_frame;
     cvl_frame_t *edge_frame;
     
-    smoothed_frame = cvl_frame_smooth_gauss(frame, sigma, sigma, gauss_k, gauss_k);
+    smoothed_frame = cvl_filter_gauss(frame, sigma, sigma, gauss_k, gauss_k);
     edge_frame = cvl_edge_sobel(smoothed_frame, edge_dir_field);
     cvl_frame_free(smoothed_frame);
     cvl_frame_edge_non_max_suppression(edge_frame, edge_dir_field);

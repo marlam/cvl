@@ -41,7 +41,7 @@
 #include "cvl_color.h"
 #include "cvl_cairo.h"
 #include "cvl_convolve.h"
-#include "cvl_smooth.h"
+#include "cvl_filter.h"
 #include "cvl_edge.h"
 #include "cvl_transform.h"
 #include "cvl_mix.h"

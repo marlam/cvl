@@ -16,6 +16,7 @@ cvtool_SOURCES = cvtool.c options.c options.h \
 	cmd_draw.c		\
 	cmd_edge.c		\
 	cmd_equalize.c		\
+	cmd_filter.c		\
 	cmd_flip.c		\
 	cmd_flop.c		\
 	cmd_foreach.c		\
@@ -30,7 +31,6 @@ cvtool_SOURCES = cvtool.c options.c options.h \
 	cmd_scale.c		\
 	cmd_select.c		\
 	cmd_shear.c		\
-	cmd_smooth.c		\
 	cmd_split.c		\
 	cmd_stereoview.c	\
 	cmd_trackdepth.c	\

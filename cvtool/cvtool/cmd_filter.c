@@ -1,5 +1,5 @@
 /*
- * cmd_smooth.c
+ * cmd_filter.c
  * 
  * This file is part of cvtool, a computer vision tool.
  *
@@ -33,29 +33,29 @@
 #include "options.h"
 
 
-void cmd_smooth_print_help(void)
+void cmd_filter_print_help(void)
 {
     cvl_msg_fmt_req(
-	    "smooth average [-3|--3d] -k|--k=<k>\n"
-	    "smooth average [-3|--3d] -x|--k-x=<kx> -y|--k-y=<ky> [-t|--k-t=<kt>]\n"
-	    "smooth median [-3|--3d] -k|--k=<k>\n"
-	    "smooth median [-3|--3d] -x|--k-x=<kx> -y|--k-y=<ky> [-t|--k-t=<kt>]\n"
-	    "smooth gauss [-3|--3d] -k|--k=<k>\n"
-	    "smooth gauss [-3|--3d] -s|--sigma=<s>\n"
-	    "smooth gauss [-3|--3d] -x|--k-x=<kx> -y|--k-y=<ky> [-t|--k-t=<kt>]\n"
-	    "smooth gauss [-3|--3d] [-k|--k=<k>] [-x|--k-x=<kx>] [-y|--k-y=<ky>] [-t|--k-t=<kt>] "
+	    "filter average [-3|--3d] -k|--k=<k>\n"
+	    "filter average [-3|--3d] -x|--k-x=<kx> -y|--k-y=<ky> [-t|--k-t=<kt>]\n"
+	    "filter median [-3|--3d] -k|--k=<k>\n"
+	    "filter median [-3|--3d] -x|--k-x=<kx> -y|--k-y=<ky> [-t|--k-t=<kt>]\n"
+	    "filter gauss [-3|--3d] -k|--k=<k>\n"
+	    "filter gauss [-3|--3d] -s|--sigma=<s>\n"
+	    "filter gauss [-3|--3d] -x|--k-x=<kx> -y|--k-y=<ky> [-t|--k-t=<kt>]\n"
+	    "filter gauss [-3|--3d] [-k|--k=<k>] [-x|--k-x=<kx>] [-y|--k-y=<ky>] [-t|--k-t=<kt>] "
 	    "[-s|--sigma=<s>] [--sigma-x=<sx>] [--sigma-y=<sy>] [--sigma-t=<st>]\n"
 	    "\n"
 	    "Smooth frames, in 2D or 3D (with the third dimension being the time). The kernel size "
 	    "can be given for each dimension, or once for all. It will be (2kx+1)x(2ky+1)[x(2kt+1)]. "
-	    "Different values for each direction lead to asymmetric smoothing. The gauss filter "
+	    "Different values for each direction lead to asymmetric filtering. The gauss filter "
 	    "can be specified by the sigma value(s): the mask size will be computed so that "
 	    "roughly 95%% of the mass lies within the resulting mask. It is also possible to "
 	    "specify both sigma and k.");
 }
 
 
-int cmd_smooth(int argc, char *argv[])
+int cmd_filter(int argc, char *argv[])
 {
     typedef enum { AVERAGE, MEDIAN, GAUSS } subcommand_t;
     subcommand_t subcommand;
@@ -231,27 +231,27 @@ int cmd_smooth(int argc, char *argv[])
 	}
      	if (kx.value <= 0)
 	{
-	    kx.value = cvl_smooth_gauss_sigma_to_k(sx.value);
+	    kx.value = cvl_filter_gauss_sigma_to_k(sx.value);
 	}
 	if (ky.value <= 0)
 	{
-	    ky.value = cvl_smooth_gauss_sigma_to_k(sy.value);
+	    ky.value = cvl_filter_gauss_sigma_to_k(sy.value);
 	}
 	if (three_dimensional.value && kt.value <= 0)
 	{
-	    kt.value = cvl_smooth_gauss_sigma_to_k(st.value);
+	    kt.value = cvl_filter_gauss_sigma_to_k(st.value);
 	}
 	if (sx.value <= 0.0)
 	{
-	    sx.value = cvl_smooth_gauss_k_to_sigma(kx.value);
+	    sx.value = cvl_filter_gauss_k_to_sigma(kx.value);
 	}
 	if (sy.value <= 0.0)
 	{
-	    sy.value = cvl_smooth_gauss_k_to_sigma(ky.value);
+	    sy.value = cvl_filter_gauss_k_to_sigma(ky.value);
 	}
 	if (three_dimensional.value && st.value <= 0.0)
 	{
-	    st.value = cvl_smooth_gauss_k_to_sigma(kt.value);
+	    st.value = cvl_filter_gauss_k_to_sigma(kt.value);
 	}
     }
 
@@ -316,15 +316,15 @@ int cmd_smooth(int argc, char *argv[])
 	    // Process the present frame
 	    if (subcommand == AVERAGE)
 	    {
-		new_frame = cvl_frame_smooth3d_average((const cvl_frame_t **)framebuf, kx.value, ky.value, kt.value);
+		new_frame = cvl_filter3d_average((const cvl_frame_t **)framebuf, kx.value, ky.value, kt.value);
 	    }
 	    else if (subcommand == MEDIAN)
 	    {
-		new_frame = cvl_frame_smooth3d_median((const cvl_frame_t **)framebuf, kx.value, ky.value, kt.value);
+		new_frame = cvl_filter3d_median((const cvl_frame_t **)framebuf, kx.value, ky.value, kt.value);
 	    }
 	    else // (subcommand == GAUSS)
 	    {
-		new_frame = cvl_frame_smooth3d_gauss((const cvl_frame_t **)framebuf, kx.value, ky.value, kt.value,
+		new_frame = cvl_filter3d_gauss((const cvl_frame_t **)framebuf, kx.value, ky.value, kt.value,
 			sx.value, sy.value, st.value);
 	    }
 	    if (!cvl_io_write(stdout, output_info, new_frame))
@@ -349,7 +349,7 @@ int cmd_smooth(int argc, char *argv[])
     }
     else
     {
-	cvl_frame_t *frame, *smoothed_frame;
+	cvl_frame_t *frame, *new_frame;
 	
 	while (!cvl_io_eof(stdin, input_info))
 	{
@@ -360,24 +360,24 @@ int cmd_smooth(int argc, char *argv[])
 	    }
 	    if (subcommand == AVERAGE)
 	    {
-		smoothed_frame = cvl_frame_smooth_average(frame, kx.value, ky.value);
+		new_frame = cvl_filter_average(frame, kx.value, ky.value);
 	    }
 	    else if (subcommand == MEDIAN)
 	    {
-		smoothed_frame = cvl_frame_smooth_median(frame, kx.value, ky.value);
+		new_frame = cvl_filter_median(frame, kx.value, ky.value);
 	    }
 	    else // (subcommand == GAUSS)
 	    {
-		smoothed_frame = cvl_frame_smooth_gauss(frame, kx.value, ky.value, sx.value, sy.value);
+		new_frame = cvl_filter_gauss(frame, kx.value, ky.value, sx.value, sy.value);
 	    }
 	    cvl_frame_free(frame);
-	    if (!cvl_io_write(stdout, output_info, smoothed_frame))
+	    if (!cvl_io_write(stdout, output_info, new_frame))
 	    {
-		cvl_frame_free(smoothed_frame);
+		cvl_frame_free(new_frame);
 		error = true;
 		break;
 	    }
-	    cvl_frame_free(smoothed_frame);
+	    cvl_frame_free(new_frame);
 	}
     }
 

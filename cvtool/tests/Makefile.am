@@ -14,6 +14,7 @@ testscripts =	\
 	cmd_draw.sh \
 	cmd_edge.sh \
 	cmd_equalize.sh \
+	cmd_filter.sh \
 	cmd_flip.sh \
 	cmd_flop.sh \
 	cmd_foreach.sh \
@@ -29,7 +30,6 @@ testscripts =	\
 	cmd_scale.sh \
 	cmd_select.sh \
 	cmd_shear.sh \
-	cmd_smooth.sh \
 	cmd_split.sh \
 	cmd_stereoview.sh \
 	cmd_trackdepth.sh \

@@ -208,7 +208,7 @@ cvl_field_t *cvl_opticalflow_lk(const cvl_frame_t *f1, const cvl_frame_t *f2, in
     
     /* Compute the weight matrix. It has the size 2k+1 x 2k+1 and is the same
      * matrix that would be used for Gauss filtering. */
-    double weight_sigma = cvl_smooth_gauss_k_to_sigma(k);
+    double weight_sigma = cvl_filter_gauss_k_to_sigma(k);
     double weight_gauss_vals1[k + 1];
     for (int i = 0; i <= k; i++)
     {

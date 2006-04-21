@@ -1,4 +1,5 @@
 Version 0.0.2:
+- CVL/cvtool: Renamed *smooth* to *filter*.
 - cvtool: Added a layer command.
 - CVL: Added cvl_frame_layer().
 - cvtool: Changed channel command: extract as graylevel, and allow reversion.

@@ -30,7 +30,7 @@
 #include "cvl_color.c"
 #include "cvl_cairo.c"
 #include "cvl_convolve.c"
-#include "cvl_smooth.c"
+#include "cvl_filter.c"
 #include "cvl_edge.c"
 #include "cvl_transform.c"
 #include "cvl_mix.c"

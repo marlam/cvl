@@ -74,6 +74,7 @@ COMMAND_DECL(diff)
 COMMAND_DECL(draw)
 COMMAND_DECL(edge)
 COMMAND_DECL(equalize)
+COMMAND_DECL(filter)
 COMMAND_DECL(flip)
 COMMAND_DECL(flop)
 COMMAND_DECL(foreach)
@@ -89,7 +90,6 @@ COMMAND_DECL(rotate)
 COMMAND_DECL(scale)
 COMMAND_DECL(select)
 COMMAND_DECL(shear)
-COMMAND_DECL(smooth)
 COMMAND_DECL(split)
 COMMAND_DECL(stereoview)
 COMMAND_DECL(trackdepth)
@@ -113,6 +113,7 @@ cvtool_command_t commands[] =
     COMMAND(draw),
     COMMAND(edge),
     COMMAND(equalize),
+    COMMAND(filter),
     COMMAND(flip),
     COMMAND(flop),
     COMMAND(foreach),
@@ -128,7 +129,6 @@ cvtool_command_t commands[] =
     COMMAND(scale),
     COMMAND(select),
     COMMAND(shear),
-    COMMAND(smooth),
     COMMAND(split),
     COMMAND(stereoview),
     COMMAND(trackdepth),
