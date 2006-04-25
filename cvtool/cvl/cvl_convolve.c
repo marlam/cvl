@@ -219,7 +219,7 @@ cvl_frame_t *cvl_frame_convolve(const cvl_frame_t *frame, const int *kernel, int
 	    int sum[3] = { 0, 0, 0 };
 	    for (int r = - dim_y / 2; r <= dim_y / 2; r++)
 	    {
-		for (int c = - dim_y / 2; c <= dim_x / 2; c++)
+		for (int c = - dim_x / 2; c <= dim_x / 2; c++)
 		{
 		    cvl_convolve_sum_helper1(cvl_frame_pixel_type(frame), 
 			    cvl_frame_get_r(frame, x + c, y + r),
