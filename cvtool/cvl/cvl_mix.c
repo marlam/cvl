@@ -320,7 +320,8 @@ static cvl_pixel_t (*cvl_layer_mode[])(const cvl_pixel_t *layered_pixels, int nu
  * The pixel type of the destination frame must be either #CVL_PIXEL_GRAY or
  * #CVL_PIXEL_RGB. Layering is done for each channel separately.
  * The offset values define the position in the destination frame at which the
- * corresponding source frame will be layered.
+ * corresponding source frame will be layered. If the pointers are NULL, then
+ * the offsets default to zero.
  * There are no restrictions for the destination frame size, the source frame
  * size, the source frame pixel type, or the offset values.
  * At least one layer must be present.
@@ -331,6 +332,8 @@ void cvl_frame_layer(cvl_frame_t *frame, cvl_layer_mode_t mode,
     cvl_assert(frame != NULL);
     cvl_assert(cvl_frame_pixel_type(frame) == CVL_PIXEL_GRAY 
 	    || cvl_frame_pixel_type(frame) == CVL_PIXEL_RGB);
+    cvl_assert(layers != NULL);
+    cvl_assert(layers[0] != NULL);
     cvl_assert(number_of_layers >= 1);
     
     cvl_pixel_t *layered_pixels;
@@ -351,8 +354,8 @@ void cvl_frame_layer(cvl_frame_t *frame, cvl_layer_mode_t mode,
 	    int number_of_layered_pixels = 0;
 	    for (int i = 0; i < number_of_layers; i++)
 	    {
-		int xx = x - offset_x[i];
-		int yy = y - offset_y[i];
+		int xx = offset_x ? (x - offset_x[i]) : x;
+		int yy = offset_y ? (y - offset_y[i]) : y;
 		if (xx >= 0 && xx < cvl_frame_width(layers[i])
 			&& yy >= 0 && yy < cvl_frame_height(layers[i]))
 		{
