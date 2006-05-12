@@ -1,9 +1,9 @@
 /*
- * cvl_assert.h
+ * cvl_assert.c
  * 
  * This file is part of CVL, a computer vision library.
  *
- * Copyright (C) 2005, 2006  Martin Lambers <marlam@marlam.de>
+ * Copyright (C) 2006  Martin Lambers <marlam@marlam.de>
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -20,41 +20,46 @@
  *   Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-#ifndef CVL_ASSERT_H
-#define CVL_ASSERT_H
-
 #include "config.h"
 
+#include "cvl_assert.h"
 
-/*
- * cvl_assert(condition)
- *
- * This function works like assert(3), except that it uses a cvl_msg_* function
- * to print the error message, and that it is activated by CVL_DEBUG != 0.
- */
 
 #if CVL_DEBUG
 
-# include <stdlib.h>
+# if HAVE_BACKTRACE
 
-# include "cvl/cvl_msg.h"
+#  include <stdlib.h>
+#  include <execinfo.h>
 
-void print_backtrace(void);
+#  include "cvl/cvl_msg.h"
 
-# define cvl_assert(condition) \
-    if (!(condition)) \
-    { \
-	cvl_msg_fmt_err(LIBRARY_NAME ": assertion failed in " \
-		"%s, line %d, function %s():\n\"%s\"", \
-		__FILE__, __LINE__, __func__, #condition); \
-	print_backtrace(); \
-	abort(); \
+/* Obtain a backtrace and print it. 
+ * Adapted from the example in the glibc manual. */
+void print_backtrace(void)
+{
+    void *array[64];
+    int size;
+    char **strings;
+    
+    size = backtrace(array, 64);
+    strings = backtrace_symbols(array, size);
+    
+    cvl_msg_err("Backtrace:");
+    for (int i = 1; i < size; i++)
+    {
+	cvl_msg_err("%s", strings[i]);
     }
+    
+    free(strings);
+}
 
-#else
+# else
 
-# define cvl_assert(condition)
+void print_backtrace(void)
+{
+}
 
-#endif
+# endif
 
 #endif

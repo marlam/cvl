@@ -57,6 +57,9 @@ gl_INIT
 dnl notgnulib
 ngl_INIT
 
+dnl optional features
+AC_CHECK_FUNCS(backtrace)
+
 dnl pkg-config
 PKG_PROG_PKG_CONFIG
 
