@@ -39,18 +39,6 @@
 
 
 /**
- * \typedef cvl_anaglyph_type_t
- * Type of glasses that the anaglyph will be viewed with.
- */
-/** \var CVL_ANAGLYPH_RED_CYAN
- * red/cyan glasses */
-/** \var CVL_ANAGLYPH_RED_GREEN
- * red/green glasses */
-/** \var CVL_ANAGLYPH_RED_BLUE
- * red/blue glasses */
-
-
-/**
  * \param req_version		The required version.
  *
  * Check that the version of the library is at minimum the requested one
