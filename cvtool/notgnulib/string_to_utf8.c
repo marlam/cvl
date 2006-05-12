@@ -29,10 +29,12 @@
 #include "localcharset.h"
 #include "xalloc.h"
 
-/* 
- * Converts a string from the character set of the users locale to UTF-8.
- * The result is an allocated string. If the conversion fails, the result is a
- * duplicate of default_value.
+
+/* Converts a string from the character set of the users locale to UTF-8.
+ * This function returns a pointer to an allocated string, or NULL if the
+ * conversion fails and default_value is NULL. If the conversion fails and
+ * default_value is not NULL, then the allocated string will be a duplicate of
+ * the default_value string.
  * This function tries to determine the users character set regardless of the
  * current locale settings of this process, so that it works as expected for
  * programs that do not use setlocale() at all.
@@ -50,7 +52,10 @@ char *string_to_utf8(const char *s, const char *default_value)
     }
     if (!(result = iconv_string(s, locale_charset(), "UTF-8")))
     {
-	result = xstrdup(default_value);
+	if (default_value)
+	{
+	    result = xstrdup(default_value);
+	}
     }
     if (locale_bak)
     {
