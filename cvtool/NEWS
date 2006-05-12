@@ -1,18 +1,18 @@
 Version 0.0.2:
 - New and improved cvtool commands:
-  - layer 
+  - layer :
     Mix multiple sources by layering them on top of each other and combining
     them in one of several modes.
-  - draw
+  - draw:
     Draw lines, curves, geometric objects, and text. This command is a frontend
     to the CAIRO graphics library.
-  - filter
-    New min and max filters, and all the smoothing filters. The old smooth
-    command was removed.
-  - channel
+  - filter:
+    This new command replaces the old smooth command. It also support the 
+    min and max filters, allowing erosion/dilation and opening/closing.
+  - channel:
     Extract color channels as graylevel, and allow to reconvert a graylevel
     image to a color channel.
-  - all commands that take colors as arguments
+  - All commands that take colors as arguments:
     Colors can now be specified as r<val>g<val>b<val> instead of the old
     rrr,ggg,bbb format. For example, "255,127,0" is now "r255g127b0" or shorter
     "r255g127".

@@ -1,7 +1,6 @@
 Changes planned for 0.0.2
 =========================
 
-cvtool:
 - Add fieldconv command
   to convert to/from different kinds of fields, for example
   double <-> gray; double,double,double <-> RGB, 
@@ -15,20 +14,14 @@ cvtool:
 Other plans
 ===========
 
-CVL:
 - Add Sharpening (Unsharp masking, Laplace, ...)
+- Add frequency domain manipulations
 - Add Segmentation framework
 - Add Thinning
 - Add Distance maps
-- Add morphological operators
 - Add corner detection
 - Add Marr/Hildreth edge detection
 - Add Hough transforms
 - Add Pyramid framework
 
-cvtool:
-- Add sharpen command
-  Unsharp masking, Laplace, ...
-
-Documentation:
 - Complete the texinfo manual for CVL
