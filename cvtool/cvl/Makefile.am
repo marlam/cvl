@@ -1,6 +1,7 @@
 lib_LTLIBRARIES = libcvl.la
 
 EXTRA_DIST = \
+	cvl_assert.c \
 	cvl_assert.h \
 	cvl_msg.c \
 	cvl_math.c \

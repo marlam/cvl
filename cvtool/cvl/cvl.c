@@ -21,6 +21,7 @@
  */
 
 #include "cvl_msg.c"
+#include "cvl_assert.c"
 #include "cvl_math.c"
 #include "cvl_pixel.c"
 #include "cvl_vector.c"
