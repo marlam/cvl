@@ -39,7 +39,7 @@ void cvl_field_free(cvl_field_t *field);
 inline size_t cvl_field_element_size(const cvl_field_t *field);
 inline int cvl_field_width(const cvl_field_t *field);
 inline int cvl_field_height(const cvl_field_t *field);
-inline int cvl_field_size(const cvl_frame_t *field);
+inline int cvl_field_size(const cvl_field_t *field);
 
 void cvl_field_zero(cvl_field_t *field);
 void cvl_field_copy(cvl_field_t *dst, const cvl_field_t *src);

@@ -154,7 +154,7 @@ inline int cvl_field_height(const cvl_field_t *field)
  *
  * Returns the size of a field (which means the number of elements in it).
  */
-inline int cvl_field_size(const cvl_frame_t *field)
+inline int cvl_field_size(const cvl_field_t *field)
 {
     return cvl_field_width(field) * cvl_field_height(field);
 }
