@@ -150,6 +150,18 @@ inline int cvl_field_height(const cvl_field_t *field)
 
 /**
  * \param field		The field.
+ * \return		The number of elements in the field.
+ *
+ * Returns the size of a field (which means the number of elements in it).
+ */
+inline int cvl_field_size(const cvl_frame_t *field)
+{
+    return cvl_field_width(field) * cvl_field_height(field);
+}
+
+
+/**
+ * \param field		The field.
  * 
  * Sets all elements in \a field to zero. Note that this may result in invalid
  * element data, depending on the type of the data stored in \a field.

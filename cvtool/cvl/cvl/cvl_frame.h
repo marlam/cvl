@@ -41,6 +41,7 @@ inline void cvl_frame_set_pixel_type(cvl_frame_t *frame, cvl_pixel_type_t type);
 inline cvl_pixel_type_t cvl_frame_pixel_type(const cvl_frame_t *frame);
 inline int cvl_frame_width(const cvl_frame_t *frame);
 inline int cvl_frame_height(const cvl_frame_t *frame);
+inline int cvl_frame_size(const cvl_frame_t *frame);
 
 void cvl_frame_zero(cvl_frame_t *frame);
 void cvl_frame_copy(cvl_frame_t *dst, const cvl_frame_t *src);

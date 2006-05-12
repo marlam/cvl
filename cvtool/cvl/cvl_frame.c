@@ -146,6 +146,18 @@ inline int cvl_frame_height(const cvl_frame_t *frame)
 	
 /**
  * \param frame		The frame.
+ * \return		The number of pixels in the frame.
+ *
+ * Returns the size of a frame (which means the number of pixels in it).
+ */
+inline int cvl_frame_size(const cvl_frame_t *frame)
+{
+    return cvl_frame_width(frame) * cvl_frame_height(frame);
+}
+
+	
+/**
+ * \param frame		The frame.
  * 
  * Sets all pixels in \a frame to zero. Note that this results in invalid pixel
  * values for YUV frames, because the Y part must be in [16,235].
