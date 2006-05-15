@@ -366,23 +366,23 @@ int cmd_filter(int argc, char *argv[])
 	    // Process the present frame
 	    if (subcommand == FILTER_AVERAGE)
 	    {
-		new_frame = cvl_filter3d_average((const cvl_frame_t **)framebuf, kx.value, ky.value, kt.value);
+		new_frame = cvl_filter3d_average(framebuf, kx.value, ky.value, kt.value);
 	    }
 	    else if (subcommand == FILTER_MIN)
 	    {
-		new_frame = cvl_filter3d_min((const cvl_frame_t **)framebuf, kx.value, ky.value, kt.value);
+		new_frame = cvl_filter3d_min(framebuf, kx.value, ky.value, kt.value);
 	    }
 	    else if (subcommand == FILTER_MAX)
 	    {
-		new_frame = cvl_filter3d_max((const cvl_frame_t **)framebuf, kx.value, ky.value, kt.value);
+		new_frame = cvl_filter3d_max(framebuf, kx.value, ky.value, kt.value);
 	    }
 	    else if (subcommand == FILTER_MEDIAN)
 	    {
-		new_frame = cvl_filter3d_median((const cvl_frame_t **)framebuf, kx.value, ky.value, kt.value);
+		new_frame = cvl_filter3d_median(framebuf, kx.value, ky.value, kt.value);
 	    }
 	    else // (subcommand == FILTER_GAUSS)
 	    {
-		new_frame = cvl_filter3d_gauss((const cvl_frame_t **)framebuf, kx.value, ky.value, kt.value,
+		new_frame = cvl_filter3d_gauss(framebuf, kx.value, ky.value, kt.value,
 			sx.value, sy.value, st.value);
 	    }
 	    if (!cvl_io_write(stdout, output_info, new_frame))

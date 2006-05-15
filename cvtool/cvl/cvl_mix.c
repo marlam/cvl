@@ -327,7 +327,8 @@ static cvl_pixel_t (*cvl_layer_mode[])(const cvl_pixel_t *layered_pixels, int nu
  * At least one layer must be present.
  */
 void cvl_frame_layer(cvl_frame_t *frame, cvl_layer_mode_t mode,
-	const cvl_frame_t **layers, const int *offset_x, const int *offset_y, int number_of_layers)
+	cvl_frame_t * const *layers, const int *offset_x, const int *offset_y, 
+	int number_of_layers)
 {
     cvl_assert(frame != NULL);
     cvl_assert(cvl_frame_pixel_type(frame) == CVL_PIXEL_GRAY 

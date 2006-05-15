@@ -288,7 +288,7 @@ cvl_frame_t *cvl_filter_median(const cvl_frame_t *frame, int k_h, int k_v)
  * The kernel size will be (2k_t+1)x(2k_v+1)x(2k_h+1).
  * See also cvl_filter_gauss_k_to_sigma() and cvl_filter_gauss_sigma_to_k().
  */
-cvl_frame_t *cvl_filter3d_gauss(const cvl_frame_t *frames[], 
+cvl_frame_t *cvl_filter3d_gauss(cvl_frame_t * const *frames, 
 	int k_h, int k_v, int k_t, double sigma_h, double sigma_v, double sigma_t)
 {
     double g_h[k_h + 1];
@@ -357,7 +357,7 @@ cvl_frame_t *cvl_filter3d_gauss(const cvl_frame_t *frames[],
  * See cvl_convolve3d_separable() for a description of \a frames.
  * The kernel size will be (2k_t+1)x(2k_v+1)x(2k_h+1).
  */
-cvl_frame_t *cvl_filter3d_average(const cvl_frame_t *frames[], int k_h, int k_v, int k_t)
+cvl_frame_t *cvl_filter3d_average(cvl_frame_t * const *frames, int k_h, int k_v, int k_t)
 {
     int mh_len = 2 * k_h + 1;
     int mv_len = 2 * k_v + 1;
@@ -391,7 +391,7 @@ cvl_frame_t *cvl_filter3d_average(const cvl_frame_t *frames[], int k_h, int k_v,
  * See cvl_convolve3d_separable() for a description of \a frames.
  * The kernel size will be (2k_t+1)x(2k_v+1)x(2k_h+1).
  */
-cvl_frame_t *cvl_filter3d_min(const cvl_frame_t *frames[], int k_h, int k_v, int k_t)
+cvl_frame_t *cvl_filter3d_min(cvl_frame_t * const *frames, int k_h, int k_v, int k_t)
 {
     const cvl_frame_t *framebuf[2 * k_t + 1];
     cvl_frame_t *new_frame = cvl_frame_new(cvl_frame_pixel_type(frames[k_t]), 
@@ -461,7 +461,7 @@ cvl_frame_t *cvl_filter3d_min(const cvl_frame_t *frames[], int k_h, int k_v, int
  * See cvl_convolve3d_separable() for a description of \a frames.
  * The kernel size will be (2k_t+1)x(2k_v+1)x(2k_h+1).
  */
-cvl_frame_t *cvl_filter3d_max(const cvl_frame_t *frames[], int k_h, int k_v, int k_t)
+cvl_frame_t *cvl_filter3d_max(cvl_frame_t * const *frames, int k_h, int k_v, int k_t)
 {
     const cvl_frame_t *framebuf[2 * k_t + 1];
     cvl_frame_t *new_frame = cvl_frame_new(cvl_frame_pixel_type(frames[k_t]), 
@@ -531,7 +531,7 @@ cvl_frame_t *cvl_filter3d_max(const cvl_frame_t *frames[], int k_h, int k_v, int
  * See cvl_convolve3d_separable() for a description of \a frames.
  * The kernel size will be (2k_t+1)x(2k_v+1)x(2k_h+1).
  */
-cvl_frame_t *cvl_filter3d_median(const cvl_frame_t *frames[], int k_h, int k_v, int k_t)
+cvl_frame_t *cvl_filter3d_median(cvl_frame_t * const *frames, int k_h, int k_v, int k_t)
 {
     const cvl_frame_t *framebuf[2 * k_t + 1];
     cvl_frame_t *new_frame = cvl_frame_new(cvl_frame_pixel_type(frames[k_t]), 

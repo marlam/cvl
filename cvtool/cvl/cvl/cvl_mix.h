@@ -46,6 +46,7 @@ typedef enum
 } cvl_layer_mode_t;
 
 void cvl_frame_layer(cvl_frame_t *frame, cvl_layer_mode_t mode,
-	const cvl_frame_t **layers, const int *src_x, const int *src_y, int number_of_layers);
+	cvl_frame_t * const *layers, const int *src_x, const int *src_y, 
+	int number_of_layers);
 
 #endif
