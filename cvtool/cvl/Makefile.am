@@ -1,6 +1,7 @@
 lib_LTLIBRARIES = libcvl.la
 
 EXTRA_DIST = \
+	cvl/cvl_version.h.in \
 	cvl_assert.c \
 	cvl_assert.h \
 	cvl_msg.c \
@@ -25,6 +26,7 @@ libcvl_la_SOURCES = cvl.c
 libcvl_la_LDFLAGS = -version-info $(LT_CURRENT):$(LT_REVISION):$(LT_AGE)
 libcvl_la_LIBADD = ../gnulib/libgnu.la ../notgnulib/libnotgnu.la
 nobase_include_HEADERS = \
+	cvl/cvl_version.h \
 	cvl/cvl_msg.h \
 	cvl/cvl_math.h \
 	cvl/cvl_pixel.h \

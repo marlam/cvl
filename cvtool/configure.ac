@@ -92,6 +92,6 @@ AC_SUBST(CVL_CFLAGS)
 AC_CONFIG_COMMANDS([chmod-config],[[chmod +x cvl/cvl-config]],[[]])
 
 AC_CONFIG_FILES(Makefile build-aux/Makefile gnulib/Makefile notgnulib/Makefile \
-	cvl/Makefile cvl/cvl-config cvl/cvl.pc cvtool/Makefile \
+	cvl/Makefile cvl/cvl-config cvl/cvl.pc cvl/cvl/cvl_version.h cvtool/Makefile \
 	doc/Makefile doc/doxy/Makefile tests/Makefile)
 AC_OUTPUT
