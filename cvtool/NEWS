@@ -28,7 +28,8 @@ Version 0.0.2:
   - New functions cvl_load_pnm() and cvl_save_pnm() to easily load and save
     NetPBM files.
   - New min and max filters.
-  - Renamed cvl_frame_smooth_*() to cvl_filter_*()
+  - Renamed many cvl_frame_* functions to cvl_*.
+  - Renamed cvl_frame_smooth_*() to cvl_filter_*().
 - Removed:
   - CVL: removed the cvl_draw_* functions. They are obsoleted by the new CAIRO
     graphics library interface.

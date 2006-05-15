@@ -126,7 +126,7 @@ int cmd_diff(int argc, char *argv[])
 	    error = true;
 	    break;
 	}
-	diff_frame = cvl_frame_diff(src1_frame, src2_frame);
+	diff_frame = cvl_diff(src1_frame, src2_frame);
 	size = cvl_frame_height(src1_frame) * cvl_frame_width(src1_frame);
 	if (cvl_frame_pixel_type(src1_frame) == CVL_PIXEL_GRAY)
 	{

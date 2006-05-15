@@ -51,7 +51,7 @@
  * pixel type #CVL_PIXEL_GRAY. The block and the frame must have the same pixel
  * type. The block must fit in the frame.
  */
-void cvl_frame_blend(cvl_frame_t *frame, int dst_x, int dst_y,
+void cvl_blend(cvl_frame_t *frame, int dst_x, int dst_y,
 	const cvl_frame_t *block, const cvl_frame_t *block_alpha)
 {
     cvl_assert(frame != NULL && block != NULL && block_alpha != NULL);
@@ -326,7 +326,7 @@ static cvl_pixel_t (*cvl_layer_mode[])(const cvl_pixel_t *layered_pixels, int nu
  * size, the source frame pixel type, or the offset values.
  * At least one layer must be present.
  */
-void cvl_frame_layer(cvl_frame_t *frame, cvl_layer_mode_t mode,
+void cvl_layer(cvl_frame_t *frame, cvl_layer_mode_t mode,
 	cvl_frame_t * const *layers, const int *offset_x, const int *offset_y, 
 	int number_of_layers)
 {

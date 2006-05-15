@@ -85,7 +85,7 @@ int cmd_cut(int argc, char *argv[])
 	    error = true;
 	    break;
 	}
-	newframe = cvl_frame_cut(frame, l.value, t.value, w.value, h.value);
+	newframe = cvl_cut(frame, l.value, t.value, w.value, h.value);
 	cvl_frame_free(frame);
 	cvl_io_info_set_width(output_info, cvl_frame_width(newframe));
 	cvl_io_info_set_height(output_info, cvl_frame_height(newframe));

@@ -121,7 +121,7 @@ cvl_frame_t *cvl_filter_gauss(const cvl_frame_t *frame, int k_h, int k_v, double
 	m_v[i] = cvl_iround(g_v[i - k_v] / g_v[k_v]);
     }
 
-    return cvl_frame_convolve_separable(frame, m_h, 2 * k_h + 1, m_v, 2 * k_v + 1);
+    return cvl_convolve_separable(frame, m_h, 2 * k_h + 1, m_v, 2 * k_v + 1);
 }
 
 /**
@@ -148,7 +148,7 @@ cvl_frame_t *cvl_filter_average(const cvl_frame_t *frame, int k_h, int k_v)
     {
 	mv[i] = 1;
     }
-    return cvl_frame_convolve_separable(frame, mh, mh_len, mv, mv_len);     
+    return cvl_convolve_separable(frame, mh, mh_len, mv, mv_len);     
 }
 
 /**
@@ -344,7 +344,7 @@ cvl_frame_t *cvl_filter3d_gauss(cvl_frame_t * const *frames,
 	m_t[i] = cvl_iround(g_t[i - k_t] / g_t[k_t]);
     }
 
-    return cvl_frame_convolve3d_separable(frames, m_h, 2 * k_h + 1, m_v, 2 * k_v + 1, m_t, 2 * k_t + 1);
+    return cvl_convolve3d_separable(frames, m_h, 2 * k_h + 1, m_v, 2 * k_v + 1, m_t, 2 * k_t + 1);
 }
 
 /**
@@ -378,7 +378,7 @@ cvl_frame_t *cvl_filter3d_average(cvl_frame_t * const *frames, int k_h, int k_v,
     {
 	mt[i] = 1;
     }
-    return cvl_frame_convolve3d_separable(frames, mh, mh_len, mv, mv_len, mt, mt_len);
+    return cvl_convolve3d_separable(frames, mh, mh_len, mv, mv_len, mt, mt_len);
 }
 
 /**

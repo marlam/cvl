@@ -86,7 +86,7 @@ int cmd_rotate(int argc, char *argv[])
 	    error = true;
 	    break;
 	}
-    	rotated_frame = cvl_frame_rotate(frame, interpolation.value, color.value, angle.value); 
+    	rotated_frame = cvl_rotate(frame, interpolation.value, color.value, angle.value); 
 	cvl_frame_free(frame);
 	cvl_io_info_set_width(output_info, cvl_frame_width(rotated_frame));
 	cvl_io_info_set_height(output_info, cvl_frame_height(rotated_frame));

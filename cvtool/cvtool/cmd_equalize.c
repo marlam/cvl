@@ -66,7 +66,7 @@ int cmd_equalize(int argc, char *argv[])
 	    error = true;
 	    break;
 	}
-	cvl_frame_equalize_histogram(frame);
+	cvl_equalize_histogram(frame);
 	if (!cvl_io_write(stdout, output_info, frame))
 	{
 	    cvl_frame_free(frame);

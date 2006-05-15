@@ -2471,7 +2471,7 @@ inline void cvl_srgb_to_cielab(cvl_pixel_t srgb, double *L, double *a, double *b
  * the obvious way, YUV images are converted to RGB first, then inverted, then
  * converted back to YUV.
  */
-void cvl_frame_invert(cvl_frame_t *frame)
+void cvl_invert(cvl_frame_t *frame)
 {
     bool yuv = false;
     cvl_pixel_t mask = (cvl_frame_pixel_type(frame) == CVL_PIXEL_GRAY) ? 0xff : 0xffffff;
@@ -2505,7 +2505,7 @@ void cvl_frame_invert(cvl_frame_t *frame)
  * manipulations; the image is converted back to its original pixel type
  * afterwards.
  */
-void cvl_frame_color_adjust(cvl_frame_t *frame, 
+void cvl_color_adjust(cvl_frame_t *frame, 
 	double hue, double saturation, double lightness, double contrast)
 {
     int size = cvl_frame_width(frame) * cvl_frame_height(frame);
@@ -2585,7 +2585,7 @@ void cvl_frame_color_adjust(cvl_frame_t *frame,
  * For \a CVL_PIXEL_TYPE_RGB, gamma correction is applied to each of the R,G,B channels.
  * For \a CVL_PIXEL_TYPE_YUV, gamma correction is applied to the Y channel.
  */
-void cvl_frame_gamma_correct(cvl_frame_t *frame, double gamma)
+void cvl_gamma_correct(cvl_frame_t *frame, double gamma)
 {
     cvl_assert(frame != NULL);
     cvl_assert(gamma > 0.0);
@@ -2660,7 +2660,7 @@ void cvl_frame_gamma_correct(cvl_frame_t *frame, double gamma)
  * If the frame is not of type \a CVL_PIXEL_TYPE_RGB, it is temporarily
  * converted to RGB. After the correction, the original pixel type is restored.
  */
-void cvl_frame_gamma_correct_rgb(cvl_frame_t *frame, double gamma_r, double gamma_g, double gamma_b)
+void cvl_gamma_correct_rgb(cvl_frame_t *frame, double gamma_r, double gamma_g, double gamma_b)
 {
     cvl_assert(frame != NULL);
     cvl_assert(gamma_r > 0.0);
@@ -2704,7 +2704,7 @@ void cvl_frame_gamma_correct_rgb(cvl_frame_t *frame, double gamma_r, double gamm
  * one channel). For #CVL_PIXEL_RGB frames it means 0 for red, 1 for green, and 2
  * for blue. For #CVL_PIXEL_YUV frames it means 0 for Y, 1 for U, and 2 for V.
  */
-void cvl_frame_get_abs_histogram(cvl_frame_t *frame, int channel, int *count)
+void cvl_abs_histogram(cvl_frame_t *frame, int channel, int *count)
 {
     cvl_assert(frame != NULL);
     cvl_assert(count != NULL);
@@ -2757,7 +2757,7 @@ void cvl_histogram_sum(int *count, int *sum)
  * Computes the relative histogram of \a frame from its absolute histogram
  * \a abs_hist.
  */
-void cvl_frame_get_rel_histogram(cvl_frame_t *frame, int *abs_hist, double *rel_hist)
+void cvl_rel_histogram(cvl_frame_t *frame, int *abs_hist, double *rel_hist)
 {
     for (int i = 0; i < 256; i++)
     {
@@ -2765,8 +2765,8 @@ void cvl_frame_get_rel_histogram(cvl_frame_t *frame, int *abs_hist, double *rel_
     }
 }
 
-/* A helper for cvl_frame_equalize_histogram() */
-static cvl_pixel_t cvl_frame_equalize_histogram_clip_y(int y)
+/* A helper for cvl_equalize_histogram() */
+static cvl_pixel_t cvl_equalize_histogram_clip_y(int y)
 {
     if (y < 16)
     {
@@ -2789,7 +2789,7 @@ static cvl_pixel_t cvl_frame_equalize_histogram_clip_y(int y)
  * part of the YUV color space qill be equalized. In case of #CVL_PIXEL_RGB, the
  * conversion to YUV and back will be done automatically.
  */
-void cvl_frame_equalize_histogram(cvl_frame_t *frame)
+void cvl_equalize_histogram(cvl_frame_t *frame)
 {
     bool rgb = false;
     int abs_hist[256];
@@ -2801,7 +2801,7 @@ void cvl_frame_equalize_histogram(cvl_frame_t *frame)
 	rgb = true;
 	cvl_frame_to_yuv(frame);
     }
-    cvl_frame_get_abs_histogram(frame, 0, abs_hist);
+    cvl_abs_histogram(frame, 0, abs_hist);
     cvl_histogram_sum(abs_hist, sum);
     if (cvl_frame_pixel_type(frame) == CVL_PIXEL_GRAY)
     {
@@ -2824,7 +2824,7 @@ void cvl_frame_equalize_histogram(cvl_frame_t *frame)
 	{
     	    cvl_pixel_t yuv = cvl_frame_get_i(frame, i);
 	    cvl_frame_set_i(frame, i, cvl_pixel_yuv(
-			rpl_tab[cvl_frame_equalize_histogram_clip_y(cvl_pixel_yuv_to_y(yuv)) - 16] + 16, 
+			rpl_tab[cvl_equalize_histogram_clip_y(cvl_pixel_yuv_to_y(yuv)) - 16] + 16, 
 			cvl_pixel_yuv_to_u(yuv), 
 			cvl_pixel_yuv_to_v(yuv)));
 	}	
@@ -2843,7 +2843,7 @@ void cvl_frame_equalize_histogram(cvl_frame_t *frame)
  * necessary. Pixels will be set to 0x00 if their value is less than the
  * threshold, and to 0xff otherwise.
  */
-void cvl_frame_binarize_global_threshold(cvl_frame_t *frame, int threshold)
+void cvl_binarize_global_threshold(cvl_frame_t *frame, int threshold)
 {
     cvl_frame_to_gray(frame);
     for (int i = 0; i < cvl_frame_width(frame) * cvl_frame_height(frame); i++)
@@ -2859,7 +2859,7 @@ void cvl_frame_binarize_global_threshold(cvl_frame_t *frame, int threshold)
  *
  * The frame will be converted to #CVL_PIXEL_GRAY if necessary.
  */
-int cvl_frame_binarize_get_threshold_iterative(cvl_frame_t *frame)
+int cvl_binarize_get_threshold_iterative(cvl_frame_t *frame)
 {
     int s = 128;
     int s_old = 0;
@@ -2867,7 +2867,7 @@ int cvl_frame_binarize_get_threshold_iterative(cvl_frame_t *frame)
     int count[256];
 
     cvl_frame_to_gray(frame);
-    cvl_frame_get_abs_histogram(frame, 0, count);
+    cvl_abs_histogram(frame, 0, count);
 
     while (s_old != s)
     {
@@ -2907,7 +2907,7 @@ int cvl_frame_binarize_get_threshold_iterative(cvl_frame_t *frame)
  *
  * The frame will be converted to #CVL_PIXEL_GRAY if necessary.
  */
-int cvl_frame_binarize_get_threshold_otsu(cvl_frame_t *frame)
+int cvl_binarize_get_threshold_otsu(cvl_frame_t *frame)
 {
     int abs_hist[256];
     double rel_hist[256];
@@ -2915,8 +2915,8 @@ int cvl_frame_binarize_get_threshold_otsu(cvl_frame_t *frame)
     double sqb_max = 0.0;
     
     cvl_frame_to_gray(frame);
-    cvl_frame_get_abs_histogram(frame, 0, abs_hist);
-    cvl_frame_get_rel_histogram(frame, abs_hist, rel_hist);
+    cvl_abs_histogram(frame, 0, abs_hist);
+    cvl_rel_histogram(frame, abs_hist, rel_hist);
     for (int s = 1; s <= 254; s++)
     {
 	double p1 = 0.0;
@@ -2960,7 +2960,7 @@ int cvl_frame_binarize_get_threshold_otsu(cvl_frame_t *frame)
  * maximum of the pixel values (type #CVL_BINARIZE_LOCAL_THRESHOLD_MINMAX). C 
  * can be negative. The mean type is much faster than median and minmax.
  */
-void cvl_frame_binarize_local_threshold(cvl_frame_t *frame, cvl_binarize_local_threshold_type_t type, int k, int C)
+void cvl_binarize_local_threshold(cvl_frame_t *frame, cvl_binarize_local_threshold_type_t type, int k, int C)
 {
     int T;
     cvl_frame_to_gray(frame);
@@ -3048,7 +3048,7 @@ void cvl_frame_binarize_local_threshold(cvl_frame_t *frame, cvl_binarize_local_t
  * The hysterese method is not adequate for general images; it is mainly used 
  * by the Canny edge detector.
  */
-void cvl_frame_binarize_hysterese(cvl_frame_t *frame, int tl, int th)
+void cvl_binarize_hysterese(cvl_frame_t *frame, int tl, int th)
 {
     bool stable;
 

@@ -66,7 +66,7 @@ int cmd_flop(int argc, char *argv[] UNUSED)
 	    error = true;
 	    break;
 	}
-	flopped_frame = cvl_frame_flop(frame);
+	flopped_frame = cvl_flop(frame);
 	cvl_frame_free(frame);
 	if (!cvl_io_write(stdout, output_info, flopped_frame))
 	{

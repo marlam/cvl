@@ -150,23 +150,23 @@ int cmd_binarize(int argc, char *argv[])
 	}
 	if (subcommand == GLOBAL)
 	{
-	    cvl_frame_binarize_global_threshold(frame, global_threshold.value);
+	    cvl_binarize_global_threshold(frame, global_threshold.value);
 	}
 	else if (subcommand == ITERATIVE)
 	{
-	    cvl_frame_binarize_global_threshold(frame, cvl_frame_binarize_get_threshold_iterative(frame));
+	    cvl_binarize_global_threshold(frame, cvl_binarize_get_threshold_iterative(frame));
 	}
 	else if (subcommand == OTSU)
 	{
-	    cvl_frame_binarize_global_threshold(frame, cvl_frame_binarize_get_threshold_otsu(frame));
+	    cvl_binarize_global_threshold(frame, cvl_binarize_get_threshold_otsu(frame));
 	}
 	else if (subcommand == HYSTERESE)
 	{
-	    cvl_frame_binarize_hysterese(frame, hysterese_low.value, hysterese_high.value);
+	    cvl_binarize_hysterese(frame, hysterese_low.value, hysterese_high.value);
 	}
 	else // (subcommand == LOCAL)
 	{
-	    cvl_frame_binarize_local_threshold(frame, local_type.value, local_k.value, local_C.value);
+	    cvl_binarize_local_threshold(frame, local_type.value, local_k.value, local_C.value);
 	}
 	error = !cvl_io_write(stdout, output_info, frame);
 	cvl_frame_free(frame);

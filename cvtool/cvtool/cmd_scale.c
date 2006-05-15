@@ -155,7 +155,7 @@ int cmd_scale(int argc, char *argv[])
 		new_height = cvl_maxi(1, cvl_iround(factor * (double)cvl_frame_height(frame)));
 	    }
 	}
-	scaled_frame = cvl_frame_scale(frame, interpolation.value, new_width, new_height);
+	scaled_frame = cvl_scale(frame, interpolation.value, new_width, new_height);
 	cvl_frame_free(frame);
 	cvl_io_info_set_width(output_info, cvl_frame_width(scaled_frame));
 	cvl_io_info_set_height(output_info, cvl_frame_height(scaled_frame));

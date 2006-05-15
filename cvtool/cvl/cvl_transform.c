@@ -145,7 +145,7 @@ static cvl_pixel_t (*cvl_interpolation[])(const cvl_frame_t *frame,
  * 
  * Flips a frame left/right.
  */
-cvl_frame_t *cvl_frame_flip(const cvl_frame_t *frame)
+cvl_frame_t *cvl_flip(const cvl_frame_t *frame)
 {
     cvl_frame_t *flipped = cvl_frame_new(cvl_frame_pixel_type(frame), cvl_frame_width(frame), cvl_frame_height(frame));
     for (int x = 0; x < cvl_frame_width(flipped); x++)
@@ -161,7 +161,7 @@ cvl_frame_t *cvl_frame_flip(const cvl_frame_t *frame)
  * 
  * Flops a frame top/bottom.
  */
-cvl_frame_t *cvl_frame_flop(const cvl_frame_t *frame)
+cvl_frame_t *cvl_flop(const cvl_frame_t *frame)
 {
     cvl_frame_t *flopped = cvl_frame_new(cvl_frame_pixel_type(frame), cvl_frame_width(frame), cvl_frame_height(frame));
     for (int y = 0; y < cvl_frame_height(flopped); y++)
@@ -171,8 +171,8 @@ cvl_frame_t *cvl_frame_flop(const cvl_frame_t *frame)
     return flopped;
 }
 
-/* A helper function for cvl_frame_resize() */
-static void cvl_frame_resize_fill_rect_checked(cvl_frame_t *frame, int x, int y, int w, int h, cvl_pixel_t p)
+/* A helper function for cvl_resize() */
+static void cvl_resize_fill_rect_checked(cvl_frame_t *frame, int x, int y, int w, int h, cvl_pixel_t p)
 {
     if (x >= 0 && x < cvl_frame_width(frame)
 	    && y >= 0 && y < cvl_frame_height(frame)
@@ -194,7 +194,7 @@ static void cvl_frame_resize_fill_rect_checked(cvl_frame_t *frame, int x, int y,
  * 
  * Resizes a frame.
  */
-cvl_frame_t *cvl_frame_resize(const cvl_frame_t *frame, cvl_color_t color, 
+cvl_frame_t *cvl_resize(const cvl_frame_t *frame, cvl_color_t color, 
 	int new_width, int new_height, int new_x_offset, int new_y_offset)
 {
     cvl_frame_t *new_frame = cvl_frame_new(cvl_frame_pixel_type(frame), new_width, new_height);
@@ -221,13 +221,13 @@ cvl_frame_t *cvl_frame_resize(const cvl_frame_t *frame, cvl_color_t color,
     {
 	cvl_frame_copy_rect(new_frame, drx, dry, frame, srx, sry, rw, rh);
 	/* Now fill the space around this rectangle, divided into 4 rectangles */
-	cvl_frame_resize_fill_rect_checked(new_frame, 
+	cvl_resize_fill_rect_checked(new_frame, 
 		0, 0, cvl_frame_width(new_frame), dry, p);
-	cvl_frame_resize_fill_rect_checked(new_frame, 
+	cvl_resize_fill_rect_checked(new_frame, 
 		0, dry + rh, cvl_frame_width(new_frame), cvl_frame_height(new_frame) - dry - rh, p);
-	cvl_frame_resize_fill_rect_checked(new_frame, 
+	cvl_resize_fill_rect_checked(new_frame, 
 		0, dry, drx, rh, p);
-	cvl_frame_resize_fill_rect_checked(new_frame, 
+	cvl_resize_fill_rect_checked(new_frame, 
 		drx + rw, dry, cvl_frame_width(new_frame) - drx - rw, rh, p);
     }
     else
@@ -248,7 +248,7 @@ cvl_frame_t *cvl_frame_resize(const cvl_frame_t *frame, cvl_color_t color,
  * 
  * Cuts a rectangle out of a frame.
  */
-cvl_frame_t *cvl_frame_cut(const cvl_frame_t *frame, int x, int y, int w, int h)
+cvl_frame_t *cvl_cut(const cvl_frame_t *frame, int x, int y, int w, int h)
 {
     cvl_frame_t *rect = cvl_frame_new(cvl_frame_pixel_type(frame), w, h);
     cvl_frame_copy_rect(rect, 0, 0, frame, x, y, w, h);
@@ -265,7 +265,7 @@ cvl_frame_t *cvl_frame_cut(const cvl_frame_t *frame, int x, int y, int w, int h)
  * 
  * Scales a frame.
  */
-cvl_frame_t *cvl_frame_scale(const cvl_frame_t *frame, 
+cvl_frame_t *cvl_scale(const cvl_frame_t *frame, 
 	cvl_interpolation_type_t interpolation_type, int new_width, int new_height)
 {
     double factor_h = (double)new_width / (double)cvl_frame_width(frame);
@@ -301,7 +301,7 @@ cvl_frame_t *cvl_frame_scale(const cvl_frame_t *frame,
  * than the original frame. Simple rotations (0, 90, 180, 270) are implemented
  * as fast special cases.
  */
-cvl_frame_t *cvl_frame_rotate(const cvl_frame_t *frame, 
+cvl_frame_t *cvl_rotate(const cvl_frame_t *frame, 
 	cvl_interpolation_type_t interpolation_type, cvl_color_t color, double angle)
 {
     /* implemented directly because the simple rotations 0, 90, 180, 270 should be
@@ -410,7 +410,7 @@ cvl_frame_t *cvl_frame_rotate(const cvl_frame_t *frame,
  * The angles should not be to close to -PI/2 or PI/2, or the resulting frame 
  * will be unreasonable wide.
  */
-cvl_frame_t *cvl_frame_shear(const cvl_frame_t *frame, 
+cvl_frame_t *cvl_shear(const cvl_frame_t *frame, 
 	cvl_interpolation_type_t interpolation_type, cvl_color_t color, double shear_angle_x, double shear_angle_y)
 {
     /* implemented directly for efficiency, though it is simply a special affine
@@ -480,7 +480,7 @@ cvl_frame_t *cvl_frame_shear(const cvl_frame_t *frame,
  * 
  * Applies an affine transformation on a frame.
  */
-cvl_frame_t *cvl_frame_affine(const cvl_frame_t *frame, 
+cvl_frame_t *cvl_affine(const cvl_frame_t *frame, 
 	cvl_interpolation_type_t interpolation_type, cvl_color_t color, const double *matrix)
 {
     /* determine where the four edge points will be */

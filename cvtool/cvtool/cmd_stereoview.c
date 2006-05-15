@@ -163,17 +163,17 @@ int cmd_stereoview(int argc, char *argv[])
 		    offset_x = (width.value / 2 - new_width) / 2;
 		    offset_y = 0;
 		}
-		l = cvl_frame_cut(stereoframe, 0, 0, 
+		l = cvl_cut(stereoframe, 0, 0, 
 			cvl_frame_width(stereoframe) / 2, cvl_frame_height(stereoframe));
-		sl = cvl_frame_scale(l, CVL_INTERPOLATION_BILINEAR, new_width, new_height);
+		sl = cvl_scale(l, CVL_INTERPOLATION_BILINEAR, new_width, new_height);
 		cvl_frame_free(l);
-		rsl = cvl_frame_resize(sl, CVL_COLOR_BLACK, width.value / 2, height.value, offset_x, offset_y);
+		rsl = cvl_resize(sl, CVL_COLOR_BLACK, width.value / 2, height.value, offset_x, offset_y);
 		cvl_frame_free(sl);			
-		r = cvl_frame_cut(stereoframe, cvl_frame_width(stereoframe) / 2, 0, 
+		r = cvl_cut(stereoframe, cvl_frame_width(stereoframe) / 2, 0, 
 			cvl_frame_width(stereoframe) / 2, cvl_frame_height(stereoframe));
-		sr = cvl_frame_scale(r, CVL_INTERPOLATION_BILINEAR, new_width, new_height);
+		sr = cvl_scale(r, CVL_INTERPOLATION_BILINEAR, new_width, new_height);
 		cvl_frame_free(r);
-		rsr = cvl_frame_resize(sr, CVL_COLOR_BLACK, width.value / 2, height.value, offset_x, offset_y);
+		rsr = cvl_resize(sr, CVL_COLOR_BLACK, width.value / 2, height.value, offset_x, offset_y);
 		cvl_frame_free(sr);
 		outputframe = cvl_frame_new(cvl_frame_pixel_type(stereoframe), width.value, height.value);
 		if (format.value == LEFT_RIGHT)
@@ -211,17 +211,17 @@ int cmd_stereoview(int argc, char *argv[])
 		    offset_x = 0;
 		    offset_y = (height.value / 2 - new_height) / 2;
 		}		
-		l = cvl_frame_cut(stereoframe, 0, 0, 
+		l = cvl_cut(stereoframe, 0, 0, 
 			cvl_frame_width(stereoframe) / 2, cvl_frame_height(stereoframe));
-		sl = cvl_frame_scale(l, CVL_INTERPOLATION_BILINEAR, new_width, new_height);
+		sl = cvl_scale(l, CVL_INTERPOLATION_BILINEAR, new_width, new_height);
 		cvl_frame_free(l);
-		rsl = cvl_frame_resize(sl, CVL_COLOR_BLACK, width.value, height.value / 2, offset_x, offset_y);
+		rsl = cvl_resize(sl, CVL_COLOR_BLACK, width.value, height.value / 2, offset_x, offset_y);
 		cvl_frame_free(sl);			
-		r = cvl_frame_cut(stereoframe, cvl_frame_width(stereoframe) / 2, 0, 
+		r = cvl_cut(stereoframe, cvl_frame_width(stereoframe) / 2, 0, 
 			cvl_frame_width(stereoframe) / 2, cvl_frame_height(stereoframe));
-		sr = cvl_frame_scale(r, CVL_INTERPOLATION_BILINEAR, new_width, new_height);
+		sr = cvl_scale(r, CVL_INTERPOLATION_BILINEAR, new_width, new_height);
 		cvl_frame_free(r);
-		rsr = cvl_frame_resize(sr, CVL_COLOR_BLACK, width.value, height.value / 2, offset_x, offset_y);
+		rsr = cvl_resize(sr, CVL_COLOR_BLACK, width.value, height.value / 2, offset_x, offset_y);
 		cvl_frame_free(sr);
 		outputframe = cvl_frame_new(cvl_frame_pixel_type(stereoframe), width.value, height.value);
 		if (format.value == TOP_BOTTOM)

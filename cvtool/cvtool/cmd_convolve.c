@@ -165,12 +165,12 @@ int cmd_convolve(int argc, char *argv[])
 	    // Process the present frame
 	    if (K.value)
 	    {
-		new_frame = cvl_frame_convolve3d(framebuf, 
+		new_frame = cvl_convolve3d(framebuf, 
 			K.value, K.value_sizes[0], K.value_sizes[1], K.value_sizes[2]);
 	    }
 	    else
 	    {
-		new_frame = cvl_frame_convolve3d_separable(framebuf, 
+		new_frame = cvl_convolve3d_separable(framebuf, 
 		     	X.value, X.value_sizes[0], Y.value, Y.value_sizes[0], T.value, T.value_sizes[0]);
 	    }
 	    if (!cvl_io_write(stdout, output_info, new_frame))
@@ -206,11 +206,11 @@ int cmd_convolve(int argc, char *argv[])
 	    }
     	    if (K.value)
 	    {
-		new_frame = cvl_frame_convolve(frame, K.value, K.value_sizes[0], K.value_sizes[1]);
+		new_frame = cvl_convolve(frame, K.value, K.value_sizes[0], K.value_sizes[1]);
 	    }
 	    else
 	    {
-		new_frame = cvl_frame_convolve_separable(frame, X.value, X.value_sizes[0], 
+		new_frame = cvl_convolve_separable(frame, X.value, X.value_sizes[0], 
 			Y.value, Y.value_sizes[0]);
 	    }
 	    cvl_frame_free(frame);

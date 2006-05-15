@@ -88,7 +88,7 @@ int cmd_shear(int argc, char *argv[])
 	    error = true;
 	    break;
 	}
-    	sheared_frame = cvl_frame_shear(frame, interpolation.value, color.value, ax.value, ay.value); 
+    	sheared_frame = cvl_shear(frame, interpolation.value, color.value, ax.value, ay.value); 
 	cvl_frame_free(frame);
 	cvl_io_info_set_width(output_info, cvl_frame_width(sheared_frame));
 	cvl_io_info_set_height(output_info, cvl_frame_height(sheared_frame));

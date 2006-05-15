@@ -160,13 +160,13 @@ int cmd_blend(int argc, char *argv[])
 	    
 	    if (new_width > 0 && new_height > 0)
 	    {
-		cvl_frame_t *source_tmp = cvl_frame_cut(source_frame, 
+		cvl_frame_t *source_tmp = cvl_cut(source_frame, 
 			x_offset, y_offset, new_width, new_height);
 		if (alpha.value)
 		{
-		    cvl_frame_t *alpha_tmp = cvl_frame_cut(alpha_frame, 
+		    cvl_frame_t *alpha_tmp = cvl_cut(alpha_frame, 
 			    x_offset, y_offset, new_width, new_height);
-		    cvl_frame_blend(frame, cvl_maxi(x.value, 0), cvl_maxi(y.value, 0),
+		    cvl_blend(frame, cvl_maxi(x.value, 0), cvl_maxi(y.value, 0),
 			    source_tmp, alpha_tmp);
 		    cvl_frame_free(alpha_tmp);
 		}
@@ -182,7 +182,7 @@ int cmd_blend(int argc, char *argv[])
 	{
 	    if (alpha.value)
 	    {
-    		cvl_frame_blend(frame, x.value, y.value, source_frame, alpha_frame);
+    		cvl_blend(frame, x.value, y.value, source_frame, alpha_frame);
     	    }
     	    else
     	    {

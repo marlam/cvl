@@ -25,14 +25,14 @@
 
 #include "cvl_frame.h"
 
-cvl_frame_t *cvl_frame_convolve_separable(const cvl_frame_t *frame, 
+cvl_frame_t *cvl_convolve_separable(const cvl_frame_t *frame, 
 	const int *h, int h_len, const int *v, int v_len);
-cvl_frame_t *cvl_frame_convolve(const cvl_frame_t *frame, 
+cvl_frame_t *cvl_convolve(const cvl_frame_t *frame, 
 	const int *kernel, int dim_y, int dim_x);
 
-cvl_frame_t *cvl_frame_convolve3d_separable(cvl_frame_t * const *frames, 
+cvl_frame_t *cvl_convolve3d_separable(cvl_frame_t * const *frames, 
 	const int *h, int h_len, const int *v, int v_len, const int *t, int t_len);
-cvl_frame_t *cvl_frame_convolve3d(cvl_frame_t * const *frames,
+cvl_frame_t *cvl_convolve3d(cvl_frame_t * const *frames,
 	const int *kernel, int dim_t, int dim_y, int dim_x);
 
 #endif

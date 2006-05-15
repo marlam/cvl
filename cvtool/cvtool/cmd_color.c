@@ -137,16 +137,16 @@ int cmd_color(int argc, char *argv[])
 	{
 	    if (g.value_sizes[0] == 1)
 	    {
-		cvl_frame_gamma_correct(frame, g.value[0]);
+		cvl_gamma_correct(frame, g.value[0]);
 	    }
 	    else // g.value_sizes[0] == 3
 	    {
-		cvl_frame_gamma_correct_rgb(frame, g.value[0], g.value[1], g.value[2]);
+		cvl_gamma_correct_rgb(frame, g.value[0], g.value[1], g.value[2]);
 	    }
 	}
 	if (do_color)
 	{
-	    cvl_frame_color_adjust(frame, h.value, s.value, l.value, c.value);
+	    cvl_color_adjust(frame, h.value, s.value, l.value, c.value);
 	}
 	if (!cvl_io_write(stdout, output_info, frame))
 	{

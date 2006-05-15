@@ -696,27 +696,27 @@ inline void cvl_rgb_to_hsl(cvl_pixel_t rgb, double *H, double *S, double *L);
 inline cvl_pixel_t cvl_hsl_to_rgb(double H, double S, double L);
 inline void cvl_srgb_to_cielab(cvl_pixel_t srgb, double *L, double *a, double *b);
 
-void cvl_frame_color_adjust(cvl_frame_t *frame, 
+void cvl_color_adjust(cvl_frame_t *frame, 
 	double hue, double saturation, double lightness, double contrast);
-void cvl_frame_gamma_correct(cvl_frame_t *frame, double gamma);
-void cvl_frame_gamma_correct_rgb(cvl_frame_t *frame, double gamma_r, double gamma_g, double gamma_b);
-void cvl_frame_invert(cvl_frame_t *frame);
+void cvl_gamma_correct(cvl_frame_t *frame, double gamma);
+void cvl_gamma_correct_rgb(cvl_frame_t *frame, double gamma_r, double gamma_g, double gamma_b);
+void cvl_invert(cvl_frame_t *frame);
 
-void cvl_frame_get_abs_histogram(cvl_frame_t *frame, int channel, int *count);
+void cvl_abs_histogram(cvl_frame_t *frame, int channel, int *count);
 void cvl_histogram_sum(int *count, int *sum);
-void cvl_frame_get_rel_histogram(cvl_frame_t *frame, int *abs_hist, double *rel_hist);
-void cvl_frame_equalize_histogram(cvl_frame_t *frame);
+void cvl_rel_histogram(cvl_frame_t *frame, int *abs_hist, double *rel_hist);
+void cvl_equalize_histogram(cvl_frame_t *frame);
 
-void cvl_frame_binarize_global_threshold(cvl_frame_t *frame, int threshold);
-int cvl_frame_binarize_get_threshold_iterative(cvl_frame_t *frame);
-int cvl_frame_binarize_get_threshold_otsu(cvl_frame_t *frame);
+void cvl_binarize_global_threshold(cvl_frame_t *frame, int threshold);
+int cvl_binarize_get_threshold_iterative(cvl_frame_t *frame);
+int cvl_binarize_get_threshold_otsu(cvl_frame_t *frame);
 typedef enum
 {
     CVL_BINARIZE_LOCAL_THRESHOLD_MEAN = 0,
     CVL_BINARIZE_LOCAL_THRESHOLD_MEDIAN = 1,
     CVL_BINARIZE_LOCAL_THRESHOLD_MINMAX = 2
 } cvl_binarize_local_threshold_type_t;
-void cvl_frame_binarize_local_threshold(cvl_frame_t *frame, cvl_binarize_local_threshold_type_t type, int k, int C);
-void cvl_frame_binarize_hysterese(cvl_frame_t *frame, int tl, int th);
+void cvl_binarize_local_threshold(cvl_frame_t *frame, cvl_binarize_local_threshold_type_t type, int k, int C);
+void cvl_binarize_hysterese(cvl_frame_t *frame, int tl, int th);
 
 #endif

@@ -71,7 +71,7 @@ const char *cvl_check_version(const char *req_version)
  * p2 = (r3, g11, b13) => (r8, g1, b0). For other pixel types, the 
  * luminosity difference is measured and represented by a gray value.
  */
-cvl_frame_t *cvl_frame_diff(const cvl_frame_t *f1, const cvl_frame_t *f2)
+cvl_frame_t *cvl_diff(const cvl_frame_t *f1, const cvl_frame_t *f2)
 {
     cvl_frame_t *d = cvl_frame_new(cvl_frame_pixel_type(f1), cvl_frame_width(f1), cvl_frame_height(f1));
 

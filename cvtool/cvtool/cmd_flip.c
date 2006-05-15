@@ -66,7 +66,7 @@ int cmd_flip(int argc, char *argv[] UNUSED)
 	    error = true;
 	    break;
 	}
-	flipped_frame = cvl_frame_flip(frame);
+	flipped_frame = cvl_flip(frame);
 	cvl_frame_free(frame);
 	if (!cvl_io_write(stdout, output_info, flipped_frame))
 	{

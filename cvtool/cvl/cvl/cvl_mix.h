@@ -25,7 +25,7 @@
 
 #include "cvl_frame.h"
 
-void cvl_frame_blend(cvl_frame_t *frame, int dst_x, int dst_y,
+void cvl_blend(cvl_frame_t *frame, int dst_x, int dst_y,
 	const cvl_frame_t *block, const cvl_frame_t *block_alpha);
 
 typedef enum
@@ -45,7 +45,7 @@ typedef enum
     CVL_LAYER_MODE_DIV 		= 12
 } cvl_layer_mode_t;
 
-void cvl_frame_layer(cvl_frame_t *frame, cvl_layer_mode_t mode,
+void cvl_layer(cvl_frame_t *frame, cvl_layer_mode_t mode,
 	cvl_frame_t * const *layers, const int *src_x, const int *src_y, 
 	int number_of_layers);
 

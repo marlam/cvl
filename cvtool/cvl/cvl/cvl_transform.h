@@ -31,18 +31,18 @@ typedef enum
     CVL_INTERPOLATION_BILINEAR = 1
 } cvl_interpolation_type_t;
 
-cvl_frame_t *cvl_frame_flip(const cvl_frame_t *frame);
-cvl_frame_t *cvl_frame_flop(const cvl_frame_t *frame);
-cvl_frame_t *cvl_frame_resize(const cvl_frame_t *frame, cvl_color_t color, 
+cvl_frame_t *cvl_flip(const cvl_frame_t *frame);
+cvl_frame_t *cvl_flop(const cvl_frame_t *frame);
+cvl_frame_t *cvl_resize(const cvl_frame_t *frame, cvl_color_t color, 
 	int new_width, int new_height, int new_x_offset, int new_y_offset);
-cvl_frame_t *cvl_frame_cut(const cvl_frame_t *frame, int x, int y, int w, int h);
-cvl_frame_t *cvl_frame_scale(const cvl_frame_t *frame, cvl_interpolation_type_t interpolation_type, 
+cvl_frame_t *cvl_cut(const cvl_frame_t *frame, int x, int y, int w, int h);
+cvl_frame_t *cvl_scale(const cvl_frame_t *frame, cvl_interpolation_type_t interpolation_type, 
 	int new_width, int new_height);
-cvl_frame_t *cvl_frame_rotate(const cvl_frame_t *frame, cvl_interpolation_type_t interpolation_type, 
+cvl_frame_t *cvl_rotate(const cvl_frame_t *frame, cvl_interpolation_type_t interpolation_type, 
 	cvl_color_t color, double angle);
-cvl_frame_t *cvl_frame_shear(const cvl_frame_t *frame, cvl_interpolation_type_t interpolation_type,
+cvl_frame_t *cvl_shear(const cvl_frame_t *frame, cvl_interpolation_type_t interpolation_type,
 	cvl_color_t color, double shear_angle_x, double shear_angle_y);
-cvl_frame_t *cvl_frame_affine(const cvl_frame_t *frame, cvl_interpolation_type_t interpolation_type,
+cvl_frame_t *cvl_affine(const cvl_frame_t *frame, cvl_interpolation_type_t interpolation_type,
 	cvl_color_t color, const double *matrix);
 
 #endif

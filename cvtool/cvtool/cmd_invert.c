@@ -66,7 +66,7 @@ int cmd_invert(int argc, char *argv[])
 	    error = true;
 	    break;
 	}
-	cvl_frame_invert(frame);
+	cvl_invert(frame);
 	if (!cvl_io_write(stdout, output_info, frame))
 	{
 	    cvl_frame_free(frame);

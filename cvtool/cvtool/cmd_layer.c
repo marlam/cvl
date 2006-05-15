@@ -164,7 +164,7 @@ int cmd_layer(int argc, char *argv[])
 	    offset_x[i] = maxwidth / 2 - cvl_frame_width(input_frames[i]) / 2;
 	    offset_y[i] = maxheight / 2 - cvl_frame_height(input_frames[i]) / 2;
 	}
-	cvl_frame_layer(frame, mode.value, input_frames, offset_x, offset_y, number_of_files);	
+	cvl_layer(frame, mode.value, input_frames, offset_x, offset_y, number_of_files);	
 	for (int i = 0; i < number_of_files; i++)
 	{
 	    cvl_frame_free(input_frames[i]);

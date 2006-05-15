@@ -98,7 +98,7 @@ int cmd_resize(int argc, char *argv[])
 	{
 	    y.value = (h.value - cvl_frame_height(frame)) / 2;
 	}
-	newframe = cvl_frame_resize(frame, color.value, w.value, h.value, x.value, y.value);
+	newframe = cvl_resize(frame, color.value, w.value, h.value, x.value, y.value);
 	cvl_frame_free(frame);
 	cvl_io_info_set_width(output_info, cvl_frame_width(newframe));
 	cvl_io_info_set_height(output_info, cvl_frame_height(newframe));

@@ -230,7 +230,7 @@ cvl_frame_t *cvl_edge_canny(const cvl_frame_t *frame,
     edge_frame = cvl_edge_sobel(smoothed_frame, edge_dir_field);
     cvl_frame_free(smoothed_frame);
     cvl_frame_edge_non_max_suppression(edge_frame, edge_dir_field);
-    cvl_frame_binarize_hysterese(edge_frame, tl, th);
+    cvl_binarize_hysterese(edge_frame, tl, th);
     
     return edge_frame;
 }

@@ -86,7 +86,7 @@ int cmd_affine(int argc, char *argv[])
 	    error = true;
 	    break;
 	}
-	new_frame = cvl_frame_affine(frame, interpolation.value, color.value, matrix.value);
+	new_frame = cvl_affine(frame, interpolation.value, color.value, matrix.value);
 	cvl_frame_free(frame);
 	cvl_io_info_set_width(output_info, cvl_frame_width(new_frame));
 	cvl_io_info_set_height(output_info, cvl_frame_height(new_frame));
