@@ -18,7 +18,6 @@ Other plans
 - Add frequency domain manipulations
 - Add Segmentation framework
 - Add Thinning
-- Add Distance maps
 - Add corner detection
 - Add Marr/Hildreth edge detection
 - Add Hough transforms

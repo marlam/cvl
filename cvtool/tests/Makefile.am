@@ -13,6 +13,7 @@ testscripts =	\
 	cmd_diff.sh \
 	cmd_draw.sh \
 	cmd_edge.sh \
+	cmd_edt.sh \
 	cmd_equalize.sh \
 	cmd_filter.sh \
 	cmd_flip.sh \

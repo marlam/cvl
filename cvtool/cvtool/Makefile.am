@@ -15,6 +15,7 @@ cvtool_SOURCES = cvtool.c options.c options.h \
 	cmd_diff.c		\
 	cmd_draw.c		\
 	cmd_edge.c		\
+	cmd_edt.c		\
 	cmd_equalize.c		\
 	cmd_filter.c		\
 	cmd_flip.c		\

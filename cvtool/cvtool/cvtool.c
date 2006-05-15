@@ -73,6 +73,7 @@ COMMAND_DECL(dibr)
 COMMAND_DECL(diff)
 COMMAND_DECL(draw)
 COMMAND_DECL(edge)
+COMMAND_DECL(edt)
 COMMAND_DECL(equalize)
 COMMAND_DECL(filter)
 COMMAND_DECL(flip)
@@ -112,6 +113,7 @@ cvtool_command_t commands[] =
     COMMAND(diff),
     COMMAND(draw),
     COMMAND(edge),
+    COMMAND(edt),
     COMMAND(equalize),
     COMMAND(filter),
     COMMAND(flip),

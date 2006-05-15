@@ -1411,8 +1411,80 @@ Stream. In @cite{Proceedings of the IEEE International Conference on Multimedia 
 @section Miscellaneous
 
 @menu
+* edt::
 * vectors::
 @end menu
+
+@node edt
+@subsection edt
+@cmindex edt
+@code{edt [-3|--3d]}
+
+@noindent
+Computes the Euclidean Distance Transform (EDT) of the input frames. The result
+will be stored in integer fields with the same dimensions as the input. If the
+pixel at position (x,y[,z]) in the input is a background pixel (its value is
+zero), then its entry in the distance map will be zero.  If the pixel is an
+object pixel (its value is not zero), then its entry in the distance map will
+be its @emph{squared} euclidean distance to the next background pixel.
+
+If the option @option{--3d} is used, then the input frames are interpreted as a
+3D cuboid, and the 3D EDT will be computed. In this case, all input frames must
+have the same dimensions. Their number determines the depth of the cuboid.  The
+result can only be guaranteed to be correct if the width/height/depth of the
+input are smaller than 2*sqrt(INT_MAX/2) pixels, or if it is known that the
+maximum distance between object pixel and background pixels in the input is
+less than sqrt(INT_MAX/2).
+
+@example
+# Construct a single white point in a black 3x3 cube
+$ cvtool create -w 3 -h 3 > black.ppm
+$ cvtool create -w 1 -h 1 -c r255g255b255 > point.ppm
+$ cvtool blend -s point.ppm -S -x 1 -y 1 < black.ppm > pointedblack.ppm
+$ cvtool merge black.ppm pointedblack.ppm black.ppm > cube.ppm
+# Calculate the EDT of the cube
+$ cvtool edt --3d < cube.ppm
+CVL FIELD 3 3
+3
+2
+3
+2
+1
+2
+3
+2
+3
+CVL FIELD 3 3
+2
+1
+2
+1
+0
+1
+2
+1
+2
+CVL FIELD 3 3
+3
+2
+3
+2
+1
+2
+3
+2
+3
+@end example
+
+@noindent 
+See also:
+@itemize @asis
+@item 
+C.R. Maurer, R. Qi, and V. Raghavan. A Linear Time Algorithm for Computing
+Exact Euclidean Distance Transforms of Binary Images in Arbitrary Dimensions.
+In @cite{IEEE Transactions on Pattern Analysis and Machine Intelligence, vol. 25(2),
+February 2003}.
+@end itemize
 
 @node vectors
 @subsection vectors

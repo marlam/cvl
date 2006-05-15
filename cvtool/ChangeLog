@@ -1,4 +1,7 @@
 Version 0.0.2 (not yet released):
+- cvtool: Added the edt command as an interface to cvl_edt() and cvl_edt3d().
+- CVL: Added cvl_edt() and cvl_edt3d() to compute the Euclidean Distance 
+  Transform in O(n).
 - CVL: Fixed prototype of functions that get an array of frames.
 - CVL: Added functions to report the size of fields and frames.
 - CVL: Print a backtrace when cvl_assert() fails (only on glibc systems).
