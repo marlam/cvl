@@ -520,7 +520,7 @@ static bool cvl_netpbm_skip(FILE *f)
 
 static bool cvl_io_read_frame_pnm(FILE *f, cvl_io_info_t *input_info, cvl_frame_t **frame)
 {
-    const char errmsg[] = "cannot read NetPBM frame: ";
+    const char errmsg[] = "cannot read NetPBM frame";
     typedef enum { NETPBM_PBM, NETPBM_PGM, NETPBM_PPM } netpbm_subformat_t;
     netpbm_subformat_t subformat;
     cvl_pixel_type_t pixel_type;
