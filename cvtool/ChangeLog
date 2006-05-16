@@ -1,4 +1,5 @@
 Version 0.0.2 (not yet released):
+- CVL: Improve error messages when reading NetPBM frames.
 - CVL: Export CVL_VERSION, needed by cvl.m4.
 - CVL: Renamed many cvl_frame_* functions to cvl_*.
 - cvtool: Added the edt command as an interface to cvl_edt() and cvl_edt3d().

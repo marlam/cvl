@@ -520,6 +520,7 @@ static bool cvl_netpbm_skip(FILE *f)
 
 static bool cvl_io_read_frame_pnm(FILE *f, cvl_io_info_t *input_info, cvl_frame_t **frame)
 {
+    const char errmsg[] = "cannot read NetPBM frame: ";
     typedef enum { NETPBM_PBM, NETPBM_PGM, NETPBM_PPM } netpbm_subformat_t;
     netpbm_subformat_t subformat;
     cvl_pixel_type_t pixel_type;
@@ -528,7 +529,21 @@ static bool cvl_io_read_frame_pnm(FILE *f, cvl_io_info_t *input_info, cvl_frame_
     
     if ((c = fgetc(f)) != 'P')
     {
-	cvl_msg_err("no valid PNM image: '%c' instead of P!", c);
+	if (c == EOF)
+	{
+	    if (ferror(f))
+	    {
+		cvl_msg_err("%s: input error", errmsg);
+	    }
+	    else
+	    {
+		cvl_msg_err("%s: EOF", errmsg);
+	    }
+	}
+	else
+	{
+	    cvl_msg_err("%s: no valid PNM image: '%c' instead of P!", errmsg, c);
+	}
 	return false;
     }
     c = fgetc(f);
@@ -541,7 +556,7 @@ static bool cvl_io_read_frame_pnm(FILE *f, cvl_io_info_t *input_info, cvl_frame_
 		|| fscanf(f, "%d", &width) != 1 || width < 1 || !cvl_netpbm_skip(f)
 		|| fscanf(f, "%d", &height) != 1 || height < 1 || fgetc(f) == EOF)
 	{
-	    cvl_msg_err("PBM header invalid");
+	    cvl_msg_err("%s: PBM header invalid", errmsg);
 	    return false;
 	}
     }
@@ -554,7 +569,7 @@ static bool cvl_io_read_frame_pnm(FILE *f, cvl_io_info_t *input_info, cvl_frame_
 		|| fscanf(f, "%d", &height) != 1 || height < 1 || !cvl_netpbm_skip(f)
 		|| fscanf(f, "%d", &maxval) != 1 || maxval < 1 || maxval > 65535 || fgetc(f) == EOF)
 	{
-	    cvl_msg_err("PGM header invalid");
+	    cvl_msg_err("%s: PGM header invalid", errmsg);
 	    return false;
 	}
     }
@@ -567,7 +582,7 @@ static bool cvl_io_read_frame_pnm(FILE *f, cvl_io_info_t *input_info, cvl_frame_
 		|| fscanf(f, "%d", &height) != 1 || height < 1 || !cvl_netpbm_skip(f)
 		|| fscanf(f, "%d", &maxval) != 1 || maxval < 1 || maxval > 65535 || fgetc(f) == EOF)
 	{
-	    cvl_msg_err("PPM header invalid");
+	    cvl_msg_err("%s: PPM header invalid", errmsg);
 	    return false;
 	}
     }
@@ -585,7 +600,7 @@ static bool cvl_io_read_frame_pnm(FILE *f, cvl_io_info_t *input_info, cvl_frame_
 	{
 	    if (!cvl_netpbm_skip(f) || (c = fgetc(f)) == EOF || ungetc(c, f) == EOF)
 	    {
-		cvl_msg_err("PAM header invalid, error 1");
+		cvl_msg_err("%s: PAM header invalid, error 1", errmsg);
 		return false;
 	    }
 	    switch (c)
@@ -632,7 +647,7 @@ static bool cvl_io_read_frame_pnm(FILE *f, cvl_io_info_t *input_info, cvl_frame_
 	}
 	if (!header_end || !ok)
 	{
-	    cvl_msg_err("PAM header invalid, error 2");
+	    cvl_msg_err("%s: PAM header invalid, error 2", errmsg);
 	    return false;
 	}
 	if (strcmp(tupletype, "BLACKANDWHITE") == 0)
@@ -652,13 +667,13 @@ static bool cvl_io_read_frame_pnm(FILE *f, cvl_io_info_t *input_info, cvl_frame_
 	}
 	else
 	{
-	    cvl_msg_err("unknown tuple type in PAM header");
+	    cvl_msg_err("%s: unknown tuple type in PAM header", errmsg);
 	    return false;
 	}	    
     }
     else
     {
-	cvl_msg_err("unknown PNM subtype: '%c'", c);
+	cvl_msg_err("%s: unknown PNM subtype: '%c'", errmsg, c);
 	return false;
     }
     
@@ -680,7 +695,7 @@ static bool cvl_io_read_frame_pnm(FILE *f, cvl_io_info_t *input_info, cvl_frame_
 	if (fread(pbmdata, sizeof(uint8_t), rawsize, f) != rawsize)
 	{
 	    cvl_frame_free(*frame);
-	    cvl_msg_err("EOF or input error in PBM data");
+	    cvl_msg_err("%s: EOF or input error in PBM data", errmsg);
 	    free(pbmdata);
 	    return false;
 	}
@@ -717,7 +732,7 @@ static bool cvl_io_read_frame_pnm(FILE *f, cvl_io_info_t *input_info, cvl_frame_
 	if (fread(pgmdata, sizeof(uint8_t), rawsize, f) != rawsize)
 	{
 	    cvl_frame_free(*frame);
-	    cvl_msg_err("EOF or input error in PGM data");
+	    cvl_msg_err("%s: EOF or input error in PGM data", errmsg);
 	    free(pgmdata);
 	    return false;
 	}
@@ -755,7 +770,7 @@ static bool cvl_io_read_frame_pnm(FILE *f, cvl_io_info_t *input_info, cvl_frame_
 	if (maxval >= 256 && !cvl_product_fits_in_size_t(size, 6))
 	{
 	    cvl_frame_free(*frame);
-	    cvl_msg_err("PPM data too big"); 
+	    cvl_msg_err("%s: PPM data too big", errmsg); 
 	    return NULL;
 	}
 	size_t rawsize = (size_t)size * 3 * (maxval < 256 ? 1 : 2);
@@ -764,7 +779,7 @@ static bool cvl_io_read_frame_pnm(FILE *f, cvl_io_info_t *input_info, cvl_frame_
 	if (fread(ppmdata, sizeof(uint8_t), rawsize, f) != rawsize)
 	{
 	    cvl_frame_free(*frame);
-	    cvl_msg_err("EOF or input error in PPM data");
+	    cvl_msg_err("%s: EOF or input error in PPM data", errmsg);
 	    free(ppmdata);
 	    return NULL;
 	}
