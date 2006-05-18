@@ -542,7 +542,7 @@ static bool cvl_io_read_frame_pnm(FILE *f, cvl_io_info_t *input_info, cvl_frame_
 	}
 	else
 	{
-	    cvl_msg_err("%s: no valid PNM header", errmsg, c);
+	    cvl_msg_err("%s: no valid PNM header", errmsg);
 	}
 	return false;
     }
