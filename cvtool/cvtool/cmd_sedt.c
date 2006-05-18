@@ -1,5 +1,5 @@
 /*
- * cmd_edt.c
+ * cmd_sedt.c
  * 
  * This file is part of cvtool, a computer vision tool.
  *
@@ -34,12 +34,12 @@
 #include "options.h"
 
 
-void cmd_edt_print_help(void)
+void cmd_sedt_print_help(void)
 {
     cvl_msg_fmt_req(
-	    "edt [-3|--3d]\n"
+	    "sedt [-3|--3d]\n"
 	    "\n"
-	    "Computes the Euclidean Distance Transform (EDT) of the input frames. The "
+	    "Computes the Squared Euclidean Distance Transform (SEDT) of the input frames. The "
 	    "result will be stored in integer fields with the same dimensions as the "
 	    "input. If the pixel at position (x,y[,z]) in the input is a background "
 	    "pixel (its value is zero), then its entry in the distance map will be zero. "
@@ -47,7 +47,7 @@ void cmd_edt_print_help(void)
 	    "the distance map will be its squared euclidean distance to the next background "
 	    "pixel.\n"
 	    "If the option --3d is used, then the input frames are interpreted as a 3D cuboid, "
-	    "and the 3D EDT will be computed. In this case, all input frames must have the same "
+	    "and the 3D SEDT will be computed. In this case, all input frames must have the same "
 	    "dimensions. Their number determines the depth of the cuboid.\n"
 	    "The result can only be guaranteed to be correct if the width/height/depth of "
 	    "the input are smaller than 2*sqrt(INT_MAX/2) pixels, or if it is known "
@@ -60,7 +60,7 @@ bool write_int(char *s, size_t s_size, const int *i)
     return (snprintf(s, s_size, "%d", *i) < (int)s_size);
 }
 
-int cmd_edt(int argc, char *argv[])
+int cmd_sedt(int argc, char *argv[])
 {
     option_bool_t three_dimensional = { false, true };
     option_t options[] = 
@@ -111,7 +111,7 @@ int cmd_edt(int argc, char *argv[])
 	}
 	if (!error && depth > 0)
 	{
-	    edt = cvl_edt3d(frames, depth);
+	    edt = cvl_sedt3d(frames, depth);
 	    for (int i = 0; i < depth; i++)
 	    {
 		cvl_frame_free(frames[i]);
@@ -142,7 +142,7 @@ int cmd_edt(int argc, char *argv[])
 		break;
 	    }
 	    cvl_frame_to_gray(frame);
-	    edt = cvl_edt(frame);
+	    edt = cvl_sedt(frame);
 	    cvl_frame_free(frame);
 	    if (!cvl_field_write(stdout, edt,
 			(bool (*)(char *, size_t, const void *))write_int))

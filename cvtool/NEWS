@@ -1,7 +1,8 @@
 Version 0.0.2:
 - New and improved cvtool commands:
-  - edt:
-    Compute the Euclidean Distance Transform (EDT) in two or three dimensions.
+  - sedt:
+    Compute the Squared Euclidean Distance Transform (SEDT) in two or three 
+    dimensions.
   - layer:
     Mix multiple sources by layering them on top of each other and combining
     them in one of several modes.
@@ -19,8 +20,8 @@ Version 0.0.2:
     rrr,ggg,bbb format. For example, "255,127,0" is now "r255g127b0" or shorter
     "r255g127".
 - New and improved CVL functionality:
-  - New functions cvl_edt() and cvl_edt3d() to compute the Euclidean Distance 
-    Transform (EDT).
+  - New functions cvl_sedt() and cvl_sedt3d() to compute the Squared Euclidean 
+    Distance Transform (SEDT).
   - New function cvl_frame_layer() to mix multiple sources.
   - New function cvl_sort_array_pixel() to sort an array of pixels.
   - New functions cvl_cairo_start() and cvl_cairo_stop() provide an interface

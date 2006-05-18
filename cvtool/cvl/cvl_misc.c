@@ -103,7 +103,7 @@ cvl_frame_t *cvl_diff(const cvl_frame_t *f1, const cvl_frame_t *f2)
 
 
 /*
- * Euclidean Distance Transform.
+ * Squared Euclidean Distance Transform.
  *
  * See
  * C.R. Maurer, R. Qi, and V. Raghavan, A Linear Time Algorithm for Computing
@@ -112,7 +112,7 @@ cvl_frame_t *cvl_diff(const cvl_frame_t *f1, const cvl_frame_t *f2)
  * February 2003.
  */
 
-static inline bool cvl_edt_remove(int d2u, int d2v, int d2w, int ud, int vd, int wd)
+static inline bool cvl_sedt_remove(int d2u, int d2v, int d2w, int ud, int vd, int wd)
 {
     const int a = vd - ud;
     const int b = wd - vd;
@@ -120,7 +120,7 @@ static inline bool cvl_edt_remove(int d2u, int d2v, int d2w, int ud, int vd, int
     return (c * d2v - b * d2u - a * d2w > a * b * c);
 }
 
-static void cvl_edt_voronoi(cvl_field_t **dt, 
+static void cvl_sedt_voronoi(cvl_field_t **dt, 
 	int *g,		// temporary storage space
 	int *h,		// temporary storage space
 	int d,		// number of dimension: 0 = x, 1 = y, 2 = z
@@ -144,7 +144,7 @@ static void cvl_edt_voronoi(cvl_field_t **dt,
 	    else
 	    {
 		while (l >= 2 
-			&& cvl_edt_remove(g[l - 1], g[l], fi, 
+			&& cvl_sedt_remove(g[l - 1], g[l], fi, 
 			    h[l - 1], h[l], i[d]))
 		{
 		    l--;
@@ -179,7 +179,7 @@ static void cvl_edt_voronoi(cvl_field_t **dt,
  * \param frame		The frame. Must be graylevel.
  * \return		The distance transform.
  *
- * Computes the Euclidean Distance Transform (EDT) of the given frame. The
+ * Computes the Squared Euclidean Distance Transform (SEDT) of the given frame. The
  * result will be stored in an integer field that has the same dimensions as the
  * frame. If the pixel at position (x,y) in the frame is a background pixel
  * (its value is zero), then its entry in the distance map will be zero.
@@ -197,7 +197,7 @@ static void cvl_edt_voronoi(cvl_field_t **dt,
  * IEEE Transactions on Pattern Analysis and Machine Intelligence, vol. 25(2),
  * February 2003.
  */
-cvl_field_t *cvl_edt(const cvl_frame_t *frame)
+cvl_field_t *cvl_sedt(const cvl_frame_t *frame)
 {
     cvl_assert(frame != NULL);
     
@@ -219,11 +219,11 @@ cvl_field_t *cvl_edt(const cvl_frame_t *frame)
 	    *(int *)cvl_field_ref(dt, x, y) = 
 		(cvl_frame_get(frame, x, y) != 0x00 ? 0x00 : INT_MAX);
 	}
-    	cvl_edt_voronoi(&dt, g, h, 0, cvl_frame_width(frame), 0, y, 0);
+    	cvl_sedt_voronoi(&dt, g, h, 0, cvl_frame_width(frame), 0, y, 0);
     }
     for (int x = 0; x < cvl_frame_width(frame); x++)
     {
-	cvl_edt_voronoi(&dt, g, h, 1, cvl_frame_height(frame), x, 0, 0);
+	cvl_sedt_voronoi(&dt, g, h, 1, cvl_frame_height(frame), x, 0, 0);
     }
 
     free(g);
@@ -236,7 +236,7 @@ cvl_field_t *cvl_edt(const cvl_frame_t *frame)
  * \param depth		The number of frames in the array.
  * \return		The distance transform.
  *
- * Computes the Euclidean Distance Transform (EDT) of the given array of 
+ * Computes the Squared Euclidean Distance Transform (SEDT) of the given array of 
  * frames. The result will be stored in an array of integer fields that 
  * has the same dimensions as the array of frames.\n
  * This function interprets the array of frames as a 3D cuboid and computes the
@@ -257,7 +257,7 @@ cvl_field_t *cvl_edt(const cvl_frame_t *frame)
  * IEEE Transactions on Pattern Analysis and Machine Intelligence, vol. 25(2),
  * February 2003.
  */
-cvl_field_t **cvl_edt3d(cvl_frame_t * const *frames, int depth)
+cvl_field_t **cvl_sedt3d(cvl_frame_t * const *frames, int depth)
 {
     cvl_assert(frames != NULL);
     cvl_assert(depth > 0);
@@ -295,18 +295,18 @@ cvl_field_t **cvl_edt3d(cvl_frame_t * const *frames, int depth)
 		*(int *)cvl_field_ref(dt[z], x, y) = 
 		    (cvl_frame_get(frames[z], x, y) != 0x00 ? 0x00 : INT_MAX);
 	    }
-	    cvl_edt_voronoi(dt, g, h, 0, cvl_frame_width(frames[0]), 0, y, z);
+	    cvl_sedt_voronoi(dt, g, h, 0, cvl_frame_width(frames[0]), 0, y, z);
 	}
 	for (int x = 0; x < cvl_frame_width(frames[0]); x++)
 	{
-	    cvl_edt_voronoi(dt, g, h, 1, cvl_frame_height(frames[0]), x, 0, z);
+	    cvl_sedt_voronoi(dt, g, h, 1, cvl_frame_height(frames[0]), x, 0, z);
 	}
     }
     for (int x = 0; x < cvl_frame_width(frames[0]); x++)
     {
 	for (int y = 0; y < cvl_frame_height(frames[0]); y++)
 	{
-	    cvl_edt_voronoi(dt, g, h, 2, depth, x, y, 0);
+	    cvl_sedt_voronoi(dt, g, h, 2, depth, x, y, 0);
 	}
     }
 

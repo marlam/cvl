@@ -29,7 +29,7 @@
 
 const char *cvl_check_version(const char *req_version);
 cvl_frame_t *cvl_diff(const cvl_frame_t *f1, const cvl_frame_t *f2);
-cvl_field_t *cvl_edt(const cvl_frame_t *frame);
-cvl_field_t **cvl_edt3d(cvl_frame_t * const *frames, int depth);
+cvl_field_t *cvl_sedt(const cvl_frame_t *frame);
+cvl_field_t **cvl_sedt3d(cvl_frame_t * const *frames, int depth);
 
 #endif

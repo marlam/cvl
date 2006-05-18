@@ -1411,25 +1411,25 @@ Stream. In @cite{Proceedings of the IEEE International Conference on Multimedia 
 @section Miscellaneous
 
 @menu
-* edt::
+* sedt::
 * vectors::
 @end menu
 
-@node edt
-@subsection edt
-@cmindex edt
-@code{edt [-3|--3d]}
+@node sedt
+@subsection sedt
+@cmindex sedt
+@code{sedt [-3|--3d]}
 
 @noindent
-Computes the Euclidean Distance Transform (EDT) of the input frames. The result
+Computes the Squared Euclidean Distance Transform (SEDT) of the input frames. The result
 will be stored in integer fields with the same dimensions as the input. If the
 pixel at position (x,y[,z]) in the input is a background pixel (its value is
 zero), then its entry in the distance map will be zero.  If the pixel is an
 object pixel (its value is not zero), then its entry in the distance map will
-be its @emph{squared} euclidean distance to the next background pixel.
+be its squared euclidean distance to the next background pixel.
 
 If the option @option{--3d} is used, then the input frames are interpreted as a
-3D cuboid, and the 3D EDT will be computed. In this case, all input frames must
+3D cuboid, and the 3D SEDT will be computed. In this case, all input frames must
 have the same dimensions. Their number determines the depth of the cuboid.  The
 result can only be guaranteed to be correct if the width/height/depth of the
 input are smaller than 2*sqrt(INT_MAX/2) pixels, or if it is known that the
@@ -1443,7 +1443,7 @@ $ cvtool create -w 1 -h 1 -c r255g255b255 > point.ppm
 $ cvtool blend -s point.ppm -S -x 1 -y 1 < black.ppm > pointedblack.ppm
 $ cvtool merge black.ppm pointedblack.ppm black.ppm > cube.ppm
 # Calculate the EDT of the cube
-$ cvtool edt --3d < cube.ppm
+$ cvtool sedt --3d < cube.ppm
 CVL FIELD 3 3
 3
 2

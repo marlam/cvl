@@ -73,7 +73,6 @@ COMMAND_DECL(dibr)
 COMMAND_DECL(diff)
 COMMAND_DECL(draw)
 COMMAND_DECL(edge)
-COMMAND_DECL(edt)
 COMMAND_DECL(equalize)
 COMMAND_DECL(filter)
 COMMAND_DECL(flip)
@@ -89,6 +88,7 @@ COMMAND_DECL(resize)
 COMMAND_DECL(reverse)
 COMMAND_DECL(rotate)
 COMMAND_DECL(scale)
+COMMAND_DECL(sedt)
 COMMAND_DECL(select)
 COMMAND_DECL(shear)
 COMMAND_DECL(split)
@@ -113,7 +113,6 @@ cvtool_command_t commands[] =
     COMMAND(diff),
     COMMAND(draw),
     COMMAND(edge),
-    COMMAND(edt),
     COMMAND(equalize),
     COMMAND(filter),
     COMMAND(flip),
@@ -129,6 +128,7 @@ cvtool_command_t commands[] =
     COMMAND(reverse),
     COMMAND(rotate),
     COMMAND(scale),
+    COMMAND(sedt),
     COMMAND(select),
     COMMAND(shear),
     COMMAND(split),
