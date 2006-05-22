@@ -7,7 +7,7 @@ $CVTOOL create -w 1 -h 1 -c r255g255b255 > dot.ppm
 $CVTOOL blend -s dot.ppm -S -x 3 -y 3 < black.ppm > dotted.ppm
 $CVTOOL merge -o merge.txt black.ppm black.ppm black.ppm dotted.ppm black.ppm black.ppm black.ppm > cube.ppm
 
-cat << EOF > edt-dotted.ppm
+cat << EOF > sedt-dotted.ppm
 CVL FIELD 7 7
 18
 13
@@ -59,10 +59,10 @@ CVL FIELD 7 7
 13
 18
 EOF
-$CVTOOL edt < dotted.ppm > x-edt-dotted.ppm
-cmp x-edt-dotted.ppm edt-dotted.ppm
+$CVTOOL sedt < dotted.ppm > x-sedt-dotted.ppm
+cmp x-sedt-dotted.ppm sedt-dotted.ppm
 
-cat << EOF > edt-cube.ppm
+cat << EOF > sedt-cube.ppm
 CVL FIELD 7 7
 27
 22
@@ -414,7 +414,7 @@ CVL FIELD 7 7
 22
 27
 EOF
-$CVTOOL edt -3 < cube.ppm > x-edt-cube.ppm
-cmp x-edt-cube.ppm edt-cube.ppm
+$CVTOOL sedt -3 < cube.ppm > x-sedt-cube.ppm
+cmp x-sedt-cube.ppm sedt-cube.ppm
 
 cmd_tests_cleanup

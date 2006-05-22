@@ -13,7 +13,6 @@ testscripts =	\
 	cmd_diff.sh \
 	cmd_draw.sh \
 	cmd_edge.sh \
-	cmd_edt.sh \
 	cmd_equalize.sh \
 	cmd_filter.sh \
 	cmd_flip.sh \
@@ -29,6 +28,7 @@ testscripts =	\
 	cmd_reverse.sh \
 	cmd_rotate.sh \
 	cmd_scale.sh \
+	cmd_sedt.sh \
 	cmd_select.sh \
 	cmd_shear.sh \
 	cmd_split.sh \
