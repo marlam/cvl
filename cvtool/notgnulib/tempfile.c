@@ -30,17 +30,17 @@
 #include <string.h>
 #include <errno.h>
 extern int errno;
-#ifdef _WIN32
+#ifdef W32_NATIVE
 #include <windows.h>
 #include <io.h>
 #include <fcntl.h>
-#endif /* _WIN32 */
+#endif /* W32_NATIVE */
 
 #include "xalloc.h"
 
 #include "tempfile.h"
 
-#ifdef _WIN32
+#ifdef W32_NATIVE
 # define PATH_SEP '\\'
 #else
 # define PATH_SEP '/'
@@ -48,7 +48,7 @@ extern int errno;
 
 
 /* A Win32 mkstemp(), POSIX conformant. */
-#ifdef _WIN32
+#ifdef W32_NATIVE
 #define mkstemp w32_mkstemp
 int w32_mkstemp(char *template)
 {
@@ -85,7 +85,7 @@ int w32_mkstemp(char *template)
 
     return ret;
 }
-#endif /* _WIN32 */
+#endif /* W32_NATIVE */
 
 
 /*
@@ -122,7 +122,7 @@ FILE *tempfile(const char *base, char **filename)
     if (!(dir = getenv("TMPDIR")))
     {
 	/* system dependent default location */
-#ifdef _WIN32
+#ifdef W32_NATIVE
 	if (!(dir = getenv("TEMP")))
 	{
 	    if (!(dir = getenv("TMP")))
@@ -162,7 +162,7 @@ FILE *tempfile(const char *base, char **filename)
     }
 
     /* UNIX only: set the permissions (not every mkstemp() sets them to 0600) */
-#ifndef _WIN32
+#ifndef W32_NATIVE
     if (fchmod(fd, S_IRUSR | S_IWUSR) == -1)
     {
 	goto error_exit;

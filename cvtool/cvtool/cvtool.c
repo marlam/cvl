@@ -28,7 +28,7 @@
 #include <limits.h>
 #include <errno.h>
 extern int errno;
-#ifdef _WIN32
+#ifdef W32_NATIVE
 #include <fcntl.h>
 #include <io.h>
 #endif
@@ -243,7 +243,7 @@ int main(int argc, char *argv[])
     char *column_string;
     int exitcode;
     
-#ifdef _WIN32
+#ifdef W32_NATIVE
     /* This must be done before anything is read or written */
     _setmode(_fileno(stdin), _O_BINARY);	    
     _setmode(_fileno(stdout), _O_BINARY);	    
@@ -251,7 +251,7 @@ int main(int argc, char *argv[])
     _fmode = _O_BINARY;
 #endif
 
-#ifdef _WIN32
+#ifdef W32_NATIVE
     program_name = strrchr(argv[0], '\\');
 #else
     program_name = strrchr(argv[0], '/');

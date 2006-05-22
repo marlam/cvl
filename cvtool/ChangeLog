@@ -1,4 +1,9 @@
 Version 0.0.2 (not yet released):
+- Replace '#ifdef _WIN32' with '#ifdef W32_NATIVE', where W32_NATIVE is defined
+  in config.h if the following is true:
+  '#if (defined _WIN32 || defined __WIN32__) && !defined __CYGWIN__'.
+  The reason is that Cygwin defines _WIN32 nowadays, but we want the UNIX API
+  on that platform.
 - CVL: Improve error messages when reading NetPBM frames.
 - CVL: Export CVL_VERSION, needed by cvl.m4.
 - CVL: Renamed many cvl_frame_* functions to cvl_*.

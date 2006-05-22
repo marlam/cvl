@@ -159,7 +159,7 @@ int cmd_foreach(int argc, char *argv[])
     }
     else
     {
-#ifdef _WIN32
+#ifdef W32_NATIVE
 	char *tmp = getenv("COMSPEC");
 	if (!tmp)
 	{

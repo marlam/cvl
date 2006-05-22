@@ -83,6 +83,11 @@ AH_VERBATIM([UNUSED],
 #ifndef UNUSED
 # define UNUSED __attribute__ ((__unused__))
 #endif])
+AH_VERBATIM([W32_NATIVE],
+[/* Define to 1 if the native W32 API should be used. */
+#if (defined _WIN32 || defined __WIN32__) && !defined __CYGWIN__
+#define W32_NATIVE 1
+#endif])
 
 CVL_LIBS="-L${libdir} -lcvl $GSL_LIBS $CAIRO_LIBS $LIBS"
 CVL_CFLAGS="-I${includedir} $GSL_CFLAGS $CAIRO_CFLAGS"
