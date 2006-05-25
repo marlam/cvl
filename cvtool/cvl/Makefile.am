@@ -24,7 +24,7 @@ EXTRA_DIST = \
 
 libcvl_la_SOURCES = cvl.c
 libcvl_la_LDFLAGS = -version-info $(LT_CURRENT):$(LT_REVISION):$(LT_AGE)
-libcvl_la_LIBADD = ../gnulib/libgnu.la ../notgnulib/libnotgnu.la
+libcvl_la_LIBADD = $(top_builddir)/gnulib/libgnu.la $(top_builddir)/notgnulib/libnotgnu.la
 nobase_include_HEADERS = \
 	cvl/cvl_version.h \
 	cvl/cvl_msg.h \

@@ -38,9 +38,9 @@ cvtool_SOURCES = cvtool.c options.c options.h \
 	cmd_vectors.c
 
 cvtool_LDADD = \
-	$(top_srcdir)/cvl/libcvl.la \
-	$(top_srcdir)/gnulib/libgnu.la \
-	$(top_srcdir)/notgnulib/libnotgnu.la \
+	$(top_builddir)/cvl/libcvl.la \
+	$(top_builddir)/gnulib/libgnu.la \
+	$(top_builddir)/notgnulib/libnotgnu.la \
 	$(GSL_LIBS) \
 	$(CAIRO_LIBS)
 
