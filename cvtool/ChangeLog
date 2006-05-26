@@ -1,4 +1,5 @@
 Version 0.0.2 (not yet released):
+- Gnulib update.
 - In cvl/Makefile.am and cvtool/Makefile.am: use $(top_builddir) where
   appropriate.
 - Replace '#ifdef _WIN32' with '#ifdef W32_NATIVE', where W32_NATIVE is defined
