@@ -1,4 +1,4 @@
-Version 0.0.2 (not yet released):
+Version 0.0.2:
 - Gnulib update.
 - In cvl/Makefile.am and cvtool/Makefile.am: use $(top_builddir) where
   appropriate.
