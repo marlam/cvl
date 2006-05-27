@@ -26,7 +26,6 @@
 <ul id="menu-ul">
 <li><a href="index.html">About</a></li>
 <li><a href="news.html">News</a></li>
-<li><a href="status.html">Status</a></li>
 <li><b><a href="requirements.html">Requirements</a></b></li>
 <li><a href="documentation.html">Documentation</a></li>
 <li><a href="download.html">Download</a></li>
@@ -52,17 +51,21 @@ Proprietary systems that fulfill the requirements above are automatically suppor
 proprietary systems (without C99 or POSIX support) can be supported through the use of 
 <a href="http://www.gnu.org/software/gnulib/">gnulib</a> modules and the GNU autotools, 
 but only if a user of such a system is willing to write and maintain the workarounds needed on his
-broken platform. 
+platform. 
 </p><p>
-Version 0.0.1 of cvtool was tested on GNU/Linux, NetBSD, Solaris, and Windows.
+So far, cvtool has been tested on GNU/Linux, NetBSD, Solaris, and Windows.
 </p>
 <br>
 
 <div class="content-section">Libraries</div>
 <p>
-Cvtool depends on the <a href="http://www.gnu.org/software/gsl/">GNU Scientific Library</a>,
-version 1.6 or later. The GSL does not depend on any other software or library and is 
-tested on many systems.
+Cvtool needs the following libraries:
+<ul>
+<li>The <a href="http://www.gnu.org/software/gsl/">GNU Scientific Library</a>,
+version 1.6 or later.</li>
+<li>The <a href="http://www.cairographics.org/">CAIRO 2D graphics library</a>,
+version 1.0.0 or later.</li>
+</ul>
 </p>
 
 
