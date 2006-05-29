@@ -2,7 +2,7 @@ Version 0.0.3 (not yet released):
 - CVL: Export command line handling function cvl_getopt() and support data 
   types. This code was in cvtool before, but is now accessible for other 
   programs.
-- CVL: Fix cvl_convole() and cvl_convolve(): the order of dim_x, dim_y, and 
+- CVL: Fix cvl_convole() and cvl_convolve3d(): the order of dim_x, dim_y, and 
   dim_t was changed.
 - cvtool: Added a crash handler to cvtool. It prints a backtrace on SIGILL, 
   SIGFPE, and SIGSEGV. The crash handler is only available for systems with 

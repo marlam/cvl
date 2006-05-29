@@ -1,3 +1,19 @@
+Version 0.0.3 (not yet released):
+- New and improved cvtool commands:
+- New and improved CVL functionality:
+  - New function cvl_getopt() for command line handling, including some useful
+    option types.
+  - Fixed cvl_convole() and cvl_convolve3d(): the order of the dim_x, dim_y, 
+    and dim_t arguments was changed.
+  - New macro cvl_assert() and new function cvl_print_backtrace(). Both are 
+    useful for debugging purposes.
+  - New convenience functions cvl_field_get(i|f)*() for fields that store 
+    only floats or ints.
+- Removed:
+- Miscellaneous:
+  - cvtool: Added a crash handler that prints a backtrace on SIGILL, 
+    SIGFPE, and SIGSEGV, at least on platforms where this is supported.
+
 Version 0.0.2:
 - New and improved cvtool commands:
   - sedt:
