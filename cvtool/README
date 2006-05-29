@@ -7,9 +7,9 @@ the mjpegtools.
 
 Cvtool integrates all its functionality into a single binary, and makes it
 available through commands. For example, 
-$ cvtool smooth gauss --3d --k 3 < video.y4m > smoothed-video.y4m
+$ cvtool filter gauss --3d --k 3 < video.y4m > filtered-video.y4m
 applies three-dimensional (spatiotemporal) Gauss smoothing to the video
-video.y4m and writes the result to smoothed-video.y4m. 
+video.y4m and writes the result to filtered-video.y4m. 
 
 All the image manipulation and analysis functionality of cvtool is implemented
 in CVL, a computer vision library. CVL is currently included in cvtool. It is
