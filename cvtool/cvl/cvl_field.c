@@ -758,7 +758,7 @@ bool cvl_field_read_raw(FILE *f, cvl_field_t *field)
  * \return		Success or error.
  * 
  * Writes the field \a field into \a f in raw binary data form.
- * Exactly width*height*element_size bytes are read.
+ * Exactly width*height*element_size bytes are written.
  */
 bool cvl_field_write_raw(FILE *f, cvl_field_t *field)
 {
