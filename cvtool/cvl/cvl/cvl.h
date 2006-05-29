@@ -33,6 +33,7 @@
 
 #include "cvl_version.h"
 #include "cvl_msg.h"
+#include "cvl_assert.h"
 #include "cvl_math.h"
 #include "cvl_pixel.h"
 #include "cvl_vector.h"
