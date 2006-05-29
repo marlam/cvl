@@ -33,10 +33,10 @@
 
 void crashhandler(int signum)
 {
-    cvl_msg_err("Caught signal %s (%d). Aborting.", 
-	    (signum == SIGILL ? "SIGILL" : (signum == SIGFPE ? "SIGFPE" : "SIGSEGV")),
-	    signum);
+    cvl_msg_err("Caught signal %d (%s). Aborting.", signum,
+	    (signum == SIGILL ? "SIGILL" : (signum == SIGFPE ? "SIGFPE" : "SIGSEGV")));
     cvl_print_backtrace();
+    cvl_msg_err("Please report this bug to <%s>.", PACKAGE_BUGREPORT);
     abort();
 }
 

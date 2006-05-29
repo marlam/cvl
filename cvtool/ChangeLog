@@ -1,4 +1,7 @@
 Version 0.0.3 (not yet released):
+- cvtool: Improve crash messages.
+- cvtool: Adjust --version and --help output to more closely match the latest 
+  GNU standards.
 - CVL: Export command line handling function cvl_getopt() and support data 
   types. This code was in cvtool before, but is now accessible for other 
   programs.

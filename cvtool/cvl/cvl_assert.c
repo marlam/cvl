@@ -52,15 +52,21 @@ void cvl_print_backtrace(void)
     char **strings;
     
     size = backtrace(array, 64);
-    strings = backtrace_symbols(array, size);
     
-    cvl_msg_err("Backtrace:");
-    for (int i = 1; i < size; i++)
+    if (size <= 1)
     {
-	cvl_msg_err("%s", strings[i]);
+	cvl_msg_err("No backtrace available.");
     }
-    
-    free(strings);
+    else
+    {
+	strings = backtrace_symbols(array, size);
+	cvl_msg_err("Backtrace:");
+	for (int i = 1; i < size; i++)
+	{
+	    cvl_msg_err("%s", strings[i]);
+	}
+	free(strings);
+    }
 }
 
 #else
