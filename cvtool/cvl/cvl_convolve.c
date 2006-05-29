@@ -185,13 +185,13 @@ cvl_frame_t *cvl_convolve_separable(const cvl_frame_t *frame,
 /**
  * \param frame		The frame.
  * \param kernel	The convolution kernel as an array of ints.
- * \param dim_y		Number of rows of the kernel.
  * \param dim_x		Number of columns of the kernel.
+ * \param dim_y		Number of rows of the kernel.
  * \return		The resulting frame.
  * 
  * Applies a convolution kernel on a frame.
  */
-cvl_frame_t *cvl_convolve(const cvl_frame_t *frame, const int *kernel, int dim_y, int dim_x)
+cvl_frame_t *cvl_convolve(const cvl_frame_t *frame, const int *kernel, int dim_x, int dim_y)
 {
     cvl_assert(frame != NULL && kernel != NULL);
     cvl_assert(dim_x > 0 && dim_y > 0);
@@ -370,9 +370,9 @@ cvl_frame_t *cvl_convolve3d_separable(cvl_frame_t * const *frames,
 /**
  * \param frames	The frames.
  * \param kernel	The convolution kernel as an array of ints.
- * \param dim_t		Dimension in temporal direction.
- * \param dim_y		Dimension in vertical direction.
  * \param dim_x		Dimension in horizontal direction.
+ * \param dim_y		Dimension in vertical direction.
+ * \param dim_t		Dimension in temporal direction.
  * \return		The resulting frame.
  * 
  * Applies a 3D convolution matrix on a frame.
@@ -383,7 +383,7 @@ cvl_frame_t *cvl_convolve3d_separable(cvl_frame_t * const *frames,
  * can be NULL. This function will use reflective indexing to compensate that.
  */
 cvl_frame_t *cvl_convolve3d(cvl_frame_t * const *frames, 
-	const int *kernel, int dim_t, int dim_y, int dim_x)
+	const int *kernel, int dim_x, int dim_y, int dim_t)
 {
     cvl_assert(frames != NULL && kernel != NULL);
     cvl_assert(dim_t > 0 && dim_y > 0 && dim_x > 0);

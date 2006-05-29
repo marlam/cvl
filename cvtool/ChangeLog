@@ -1,4 +1,6 @@
 Version 0.0.3 (not yet released):
+- CVL: Fix cvl_convole() and cvl_convolve(): the order of dim_x, dim_y, and 
+  dim_t was changed.
 - cvtool: Added a crash handler to cvtool. It prints a backtrace on SIGILL, 
   SIGFPE, and SIGSEGV. The crash handler is only available for systems with 
   POSIX signals. A backtrace is only printed on GNU/Linux systems.
