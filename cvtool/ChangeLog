@@ -1,9 +1,10 @@
 Version 0.0.3 (not yet released):
-- Added a crash handler to cvtool. It prints a backtrace on SIGILL, SIGFPE, and
-  SIGSEGV. Only for systems with POSIX signals.
-- Export cvl_assert() and cvl_print_backtrace().
-- Added convenience funtions cvl_field_get(i|f)*() for fields that store only
-  floats or ints.
+- cvtool: Added a crash handler to cvtool. It prints a backtrace on SIGILL, 
+  SIGFPE, and SIGSEGV. The crash handler is only available for systems with 
+  POSIX signals. A backtrace is only printed on GNU/Linux systems.
+- CVL: Export cvl_assert() and cvl_print_backtrace().
+- CVL: Added convenience funtions cvl_field_get(i|f)*() for fields that store 
+  only floats or ints.
 
 Version 0.0.2:
 - Gnulib update.
