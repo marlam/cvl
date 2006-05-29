@@ -170,8 +170,7 @@ void cvl_field_zero(cvl_field_t *field)
 {
     cvl_assert(field != NULL);
 
-    memset(field->_p, 0, cvl_field_width(field) * cvl_field_height(field) 
-	    * cvl_field_element_size(field));
+    memset(field->_p, 0, cvl_field_size(field) * cvl_field_element_size(field));
 }
 
 /**
@@ -222,7 +221,7 @@ inline void *cvl_field_ref_i(const cvl_field_t *field, int i)
 {
     cvl_assert(field != NULL);
     cvl_assert(i >= 0);
-    cvl_assert(i < cvl_field_width(field) * cvl_field_height(field));
+    cvl_assert(i < cvl_field_size(field));
 
     return &((unsigned char *)(field->_p))[cvl_field_element_size(field) * i];
 }
@@ -279,7 +278,7 @@ inline const void *cvl_field_get_i(const cvl_field_t *field, int i)
 {
     cvl_assert(field != NULL);
     cvl_assert(i >= 0);
-    cvl_assert(i < cvl_field_width(field) * cvl_field_height(field));
+    cvl_assert(i < cvl_field_size);
 
     return cvl_field_ref_i(field, i);
 }
@@ -335,7 +334,7 @@ inline void cvl_field_set_i(cvl_field_t *field, int i, const void *e)
     cvl_assert(field != NULL);
     cvl_assert(e != NULL);
     cvl_assert(i >= 0);
-    cvl_assert(i < cvl_field_width(field) * cvl_field_height(field));
+    cvl_assert(i < cvl_field_size);
 
     memcpy(cvl_field_ref_i(field, i), e, cvl_field_element_size(field));
 }
@@ -346,7 +345,7 @@ inline void cvl_field_set_i(cvl_field_t *field, int i, const void *e)
  * \param y		The y coordinate.
  * \param e		The element. 
  *
- * Sets the element at \a x, \a y in \a field to \a v.
+ * Sets the element at \a x, \a y in \a field to \a e.
  */
 inline void cvl_field_set(cvl_field_t *field, int x, int y, const void *e)
 {
@@ -358,6 +357,125 @@ inline void cvl_field_set(cvl_field_t *field, int x, int y, const void *e)
     cvl_assert(y < cvl_field_height(field));
 
     cvl_field_set_i(field, y * cvl_field_width(field) + x, e);
+}
+
+
+/**
+ * \param field		The field.
+ * \param i		The index of the element.
+ * \return 		A pointer to the element.
+ *
+ * Convenience interface to cvl_field_get_i() for fields that store one or more
+ * floats in one element.\n
+ * Gets an element from a field by returning a pointer to it.
+ * The index refers to all lines of the field one after another, 
+ * from top to bottom and left to right.
+ */
+inline const float *cvl_field_getf_i(const cvl_field_t *field, int i)
+{
+    cvl_assert(field != NULL);
+    cvl_assert(i >= 0);
+    cvl_assert(i < cvl_field_size);
+
+    return cvl_field_get_i(field, i);
+}
+
+/**
+ * \param field		The field.
+ * \param x		The x coordinate.
+ * \param y		The y coordinate.
+ * \return 		A pointer to the element.
+ * 
+ * Convenience interface to cvl_field_get() for fields that store one or more
+ * floats in one element.\n
+ * Gets an element from a field by returning a pointer to it.
+ */
+inline const float *cvl_field_getf(const cvl_field_t *field, int x, int y)
+{
+    cvl_assert(field != NULL);
+    cvl_assert(x >= 0);
+    cvl_assert(x < cvl_field_width(field));
+    cvl_assert(y >= 0);
+    cvl_assert(y < cvl_field_height(field));
+
+    return cvl_field_get(field, x, y);
+}
+
+/**
+ * \param field		The field.
+ * \param x		The x coordinate.
+ * \param y		The y coordinate.
+ * \return 		A pointer to the element.
+ * 
+ * Convenience interface to cvl_field_get_r() for fields that store one or more
+ * floats in one element.\n
+ * Gets an element from a field by returning a pointer to it.
+ * This function uses reflective indexing: arbitrary \a x and \a y values are accepted.
+ */
+inline const float *cvl_field_getf_r(const cvl_field_t *field, int x, int y)
+{
+    cvl_assert(field != NULL);
+
+    return cvl_field_get_r(field, x, y);
+}
+
+/**
+ * \param field		The field.
+ * \param i		The index of the element.
+ * \return 		A pointer to the element.
+ *
+ * Convenience interface to cvl_field_get_i() for fields that store one or more
+ * ints in one element.\n
+ * Gets an element from a field by returning a pointer to it.
+ * The index refers to all lines of the field one after another, 
+ * from top to bottom and left to right.
+ */
+inline const int *cvl_field_geti_i(const cvl_field_t *field, int i)
+{
+    cvl_assert(field != NULL);
+    cvl_assert(i >= 0);
+    cvl_assert(i < cvl_field_size);
+
+    return cvl_field_get_i(field, i);
+}
+
+/**
+ * \param field		The field.
+ * \param x		The x coordinate.
+ * \param y		The y coordinate.
+ * \return 		A pointer to the element.
+ * 
+ * Convenience interface to cvl_field_get() for fields that store one or more
+ * ints in one element.\n
+ * Gets an element from a field by returning a pointer to it.
+ */
+inline const int *cvl_field_geti(const cvl_field_t *field, int x, int y)
+{
+    cvl_assert(field != NULL);
+    cvl_assert(x >= 0);
+    cvl_assert(x < cvl_field_width(field));
+    cvl_assert(y >= 0);
+    cvl_assert(y < cvl_field_height(field));
+
+    return cvl_field_get(field, x, y);
+}
+
+/**
+ * \param field		The field.
+ * \param x		The x coordinate.
+ * \param y		The y coordinate.
+ * \return 		A pointer to the element.
+ * 
+ * Convenience interface to cvl_field_get_r() for fields that store one or more
+ * ints in one element.\n
+ * Gets an element from a field by returning a pointer to it.
+ * This function uses reflective indexing: arbitrary \a x and \a y values are accepted.
+ */
+inline const int *cvl_field_geti_r(const cvl_field_t *field, int x, int y)
+{
+    cvl_assert(field != NULL);
+
+    return cvl_field_get_r(field, x, y);
 }
 
 
@@ -571,7 +689,7 @@ bool cvl_field_write(FILE *f, cvl_field_t *field,
 	cvl_msg_err("cannot write CVL field header: %s", strerror(errno));
 	return false;
     }
-    for (int i = 0; i < cvl_field_width(field) * cvl_field_height(field); i++)
+    for (int i = 0; i < cvl_field_size(field); i++)
     {
 	if (!write_element(linebuf, CVL_FIELD_IO_LINEBUFSIZE,
     		    &((unsigned char *)(field->_p))[cvl_field_element_size(field) * i]))
@@ -625,7 +743,7 @@ bool cvl_field_read_raw(FILE *f, cvl_field_t *field)
     cvl_assert(f != NULL);
     cvl_assert(field != NULL);
 
-    size_t count = cvl_field_width(field) * cvl_field_height(field);
+    size_t count = cvl_field_size(field);
     if (fread(field->_p, cvl_field_element_size(field), count, f) != count)
     {
 	cvl_msg_err("cannot read raw CVL field data: %s", strerror(errno));
@@ -647,7 +765,7 @@ bool cvl_field_write_raw(FILE *f, cvl_field_t *field)
     cvl_assert(f != NULL);
     cvl_assert(field != NULL);
 
-    size_t count = cvl_field_width(field) * cvl_field_height(field);
+    size_t count = cvl_field_size(field);
     if (fwrite(field->_p, cvl_field_element_size(field), count, f) != count)
     {
 	cvl_msg_err("cannot write raw CVL field data: %s", strerror(errno));

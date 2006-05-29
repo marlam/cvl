@@ -1,3 +1,7 @@
+Version 0.0.3 (not yet released):
+- Added convenience funtions cvl_field_get(i|f)*() for fields that store only
+  floats or ints.
+
 Version 0.0.2:
 - Gnulib update.
 - In cvl/Makefile.am and cvtool/Makefile.am: use $(top_builddir) where

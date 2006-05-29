@@ -54,6 +54,13 @@ inline const void *cvl_field_get_r(const cvl_field_t *field, int x, int y);
 inline void cvl_field_set_i(cvl_field_t *field, int i, const void *e);
 inline void cvl_field_set(cvl_field_t *field, int x, int y, const void *e);
 
+inline const float *cvl_field_getf_i(const cvl_field_t *field, int i);
+inline const float *cvl_field_getf(const cvl_field_t *field, int x, int y);
+inline const float *cvl_field_getf_r(const cvl_field_t *field, int x, int y);
+inline const int *cvl_field_geti_i(const cvl_field_t *field, int i);
+inline const int *cvl_field_geti(const cvl_field_t *field, int x, int y);
+inline const int *cvl_field_geti_r(const cvl_field_t *field, int x, int y);
+
 void cvl_field_fill_rect(cvl_field_t *field, int x, int y, int w, int h, const void *e);
 void cvl_field_copy_rect(cvl_field_t *dst, int dst_x, int dst_y, 
 	const cvl_field_t *src, int src_x, int src_y, int rwidth, int rheight);
