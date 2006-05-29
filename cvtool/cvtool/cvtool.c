@@ -35,6 +35,8 @@ extern int errno;
 
 #include <cvl/cvl.h>
 
+#include "crash.h"
+
 char *program_name;
 
 
@@ -258,6 +260,7 @@ int main(int argc, char *argv[])
 #endif
     program_name = program_name ? program_name + 1 : argv[0];
     
+    init_crashhandler();
     cvl_msg_set_program_name("%s", program_name);
     cvl_msg_set_output_level(CVL_MSG_INF);
     if ((column_string = getenv("COLUMNS")))

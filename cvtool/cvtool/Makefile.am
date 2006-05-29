@@ -1,6 +1,6 @@
 bin_PROGRAMS = cvtool
 
-cvtool_SOURCES = cvtool.c options.c options.h \
+cvtool_SOURCES = cvtool.c crash.c crash.h options.c options.h \
 	cmd_affine.c		\
 	cmd_binarize.c		\
 	cmd_blend.c		\
