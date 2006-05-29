@@ -178,10 +178,11 @@ int cmd_version(int argc, char *argv[])
     if (argc == 1)
     {
 	cvl_msg_fmt_req("%s version %s\n"
-		"Copyright (C) 2005, 2006  Martin Lambers <%s>.\n"
-		"This is free software; see the source for copying conditions. There is NO "
-		"warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.",
-		PROGRAM_NAME, VERSION, PACKAGE_BUGREPORT);
+		"Copyright (C) 2006  Martin Lambers and others.\n"
+		"This is free software. You may redistribute copies of it under the terms of "
+		"the GNU General Public License <http://www.gnu.org/licenses/gpl.html>.\n"
+		"There is NO WARRANTY, to the extent permitted by law.",
+		PROGRAM_NAME, VERSION);
 	return 0;
     }
     else
@@ -215,8 +216,8 @@ int cmd_help(int argc, char *argv[])
 	}
 	cvl_msg_fmt_req(
 		"\n"
-		"Use \"%s help <command>\" for command specific help.", 
-		program_name);
+		"Use \"%s help <command>\" for command specific help.\n"
+		"Report bugs to <%s>.", program_name, PACKAGE_BUGREPORT);
 	return 0;
     }
     else if (argc == 2)
