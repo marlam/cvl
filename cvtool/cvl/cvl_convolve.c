@@ -193,7 +193,7 @@ cvl_frame_t *cvl_convolve_separable(const cvl_frame_t *frame,
  */
 cvl_frame_t *cvl_convolve(const cvl_frame_t *frame, const int *kernel, int dim_y, int dim_x)
 {
-    cvl_assert(frame != NULL && kernel != 0);
+    cvl_assert(frame != NULL && kernel != NULL);
     cvl_assert(dim_x > 0 && dim_y > 0);
     
     cvl_frame_t *new_frame = cvl_frame_new(cvl_frame_pixel_type(frame), 
