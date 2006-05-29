@@ -29,8 +29,6 @@
 
 #include <cvl/cvl.h>
 
-#include "options.h"
-
 
 void cmd_create_print_help(void)
 {
@@ -51,26 +49,26 @@ void cmd_create_print_help(void)
 int cmd_create(int argc, char *argv[])
 {
     const char *type_names[] = { "gray", "rgb", "yuv", NULL };
-    option_name_t t = { 1, type_names };
-    option_int_t n = { 1, 1, INT_MAX };
-    option_int_t w = { 0, 1, INT_MAX };
-    option_int_t h = { 0, 1, INT_MAX };
-    option_color_t c = { CVL_COLOR_BLACK };
+    cvl_option_name_t t = { 1, type_names };
+    cvl_option_int_t n = { 1, 1, INT_MAX };
+    cvl_option_int_t w = { 0, 1, INT_MAX };
+    cvl_option_int_t h = { 0, 1, INT_MAX };
+    cvl_option_color_t c = { CVL_COLOR_BLACK };
     const char *chroma_names[] = { "420jpeg", "444", NULL };
-    option_name_t C = { 0, chroma_names };
-    option_ratio_t F = { 0, 0 };
-    option_ratio_t A = { 0, 0 };
-    option_t options[] =
+    cvl_option_name_t C = { 0, chroma_names };
+    cvl_option_ratio_t F = { 0, 0 };
+    cvl_option_ratio_t A = { 0, 0 };
+    cvl_option_t options[] =
     {
-	{ "type",         't', OPTION_NAME,  &t, false },
-	{ "n",            'n', OPTION_INT,   &n, false },
-	{ "width",        'w', OPTION_INT,   &w, true },
-	{ "height",       'h', OPTION_INT,   &h, true },
-	{ "color",        'c', OPTION_COLOR, &c, false },
-	{ "chroma",       'C', OPTION_NAME,  &C, false },
-	{ "framerate",    'F', OPTION_RATIO, &F, false },
-	{ "aspect-ratio", 'A', OPTION_RATIO, &A, false },
-	null_option
+	{ "type",         't', CVL_OPTION_NAME,  &t, false },
+	{ "n",            'n', CVL_OPTION_INT,   &n, false },
+	{ "width",        'w', CVL_OPTION_INT,   &w, true },
+	{ "height",       'h', CVL_OPTION_INT,   &h, true },
+	{ "color",        'c', CVL_OPTION_COLOR, &c, false },
+	{ "chroma",       'C', CVL_OPTION_NAME,  &C, false },
+	{ "framerate",    'F', CVL_OPTION_RATIO, &F, false },
+	{ "aspect-ratio", 'A', CVL_OPTION_RATIO, &A, false },
+	cvl_option_null
     };
     cvl_io_info_t *output_info;
     cvl_frame_t *frame;
@@ -79,7 +77,7 @@ int cmd_create(int argc, char *argv[])
 
     
     cvl_msg_set_command_name("%s", argv[0]);
-    if (!cvtool_getopt(argc, argv, options, 0, 0, NULL))
+    if (!cvl_getopt(argc, argv, options, 0, 0, NULL))
     {
 	return 1;
     }

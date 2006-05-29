@@ -30,8 +30,6 @@
 
 #include "xalloc.h"
 
-#include "options.h"
-
 
 void cmd_layer_print_help(void)
 {
@@ -52,11 +50,11 @@ int cmd_layer(int argc, char *argv[])
     /* these names correspond to the cvl_layer_mode_t values */
     const char *mode_names[] = { "min", "max", "median", "or", "and", "xor", 
 	"diff", "add", "xadd", "sub", "xsub", "mul", "div", NULL };
-    option_name_t mode = { -1, mode_names };
-    option_t options[] = 
+    cvl_option_name_t mode = { -1, mode_names };
+    cvl_option_t options[] = 
     { 
-	{ "mode", 'm', OPTION_NAME, &mode, true },
-	null_option 
+	{ "mode", 'm', CVL_OPTION_NAME, &mode, true },
+	cvl_option_null 
     };
     int first_argument;
     int number_of_files;
@@ -70,7 +68,7 @@ int cmd_layer(int argc, char *argv[])
     bool error;
 
     cvl_msg_set_command_name("%s", argv[0]);
-    if (!cvtool_getopt(argc, argv, options, 1, -1, &first_argument))
+    if (!cvl_getopt(argc, argv, options, 1, -1, &first_argument))
     {
 	return 1;
     }

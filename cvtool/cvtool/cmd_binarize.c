@@ -27,8 +27,6 @@
 
 #include <cvl/cvl.h>
 
-#include "options.h"
-
 
 void cmd_binarize_print_help(void)    
 {
@@ -59,32 +57,32 @@ int cmd_binarize(int argc, char *argv[])
 {
     typedef enum { GLOBAL, ITERATIVE, OTSU, HYSTERESE, LOCAL } subcommand_t;
     subcommand_t subcommand;
-    option_int_t global_threshold = { -1, 0, 256 };
-    option_t global_options[] = 
+    cvl_option_int_t global_threshold = { -1, 0, 256 };
+    cvl_option_t global_options[] = 
     {
-	{ "threshold", 't', OPTION_INT, &global_threshold, true },
-	null_option 
+	{ "threshold", 't', CVL_OPTION_INT, &global_threshold, true },
+	cvl_option_null 
     };
-    option_t iterative_options[] = { null_option };
-    option_t otsu_options[] = { null_option };
-    option_int_t hysterese_low = { -1, 0, 255 };
-    option_int_t hysterese_high = { -1, 0, 255 };
-    option_t hysterese_options[] = 
+    cvl_option_t iterative_options[] = { cvl_option_null };
+    cvl_option_t otsu_options[] = { cvl_option_null };
+    cvl_option_int_t hysterese_low = { -1, 0, 255 };
+    cvl_option_int_t hysterese_high = { -1, 0, 255 };
+    cvl_option_t hysterese_options[] = 
     {
-	{ "low",  'l', OPTION_INT, &hysterese_low,  true },
-	{ "high", 'h', OPTION_INT, &hysterese_high, true },
-	null_option 
+	{ "low",  'l', CVL_OPTION_INT, &hysterese_low,  true },
+	{ "high", 'h', CVL_OPTION_INT, &hysterese_high, true },
+	cvl_option_null 
     };
     const char *local_type_names[] = { "mean", "median", "minmax", NULL };
-    option_name_t local_type = { -1, local_type_names };
-    option_int_t local_k = { -1, 1, MASKSIZE_K_MAX };
-    option_int_t local_C = { INT_MIN, INT_MIN + 1, INT_MAX };
-    option_t local_options[] = 
+    cvl_option_name_t local_type = { -1, local_type_names };
+    cvl_option_int_t local_k = { -1, 1, CVL_MASKSIZE_K_MAX };
+    cvl_option_int_t local_C = { INT_MIN, INT_MIN + 1, INT_MAX };
+    cvl_option_t local_options[] = 
     {
-	{ "type",     'T', OPTION_NAME, &local_type, true },
-	{ "k",        'k', OPTION_INT,  &local_k,    true },
-	{ "constant", 'C', OPTION_INT,  &local_C,    true },
-	null_option 
+	{ "type",     'T', CVL_OPTION_NAME, &local_type, true },
+	{ "k",        'k', CVL_OPTION_INT,  &local_k,    true },
+	{ "constant", 'C', CVL_OPTION_INT,  &local_C,    true },
+	cvl_option_null 
     };
     cvl_io_info_t *input_info;    
     cvl_io_info_t *output_info;
@@ -101,31 +99,31 @@ int cmd_binarize(int argc, char *argv[])
     {
 	subcommand = GLOBAL;
 	cvl_msg_set_command_name("%s %s", argv[0], argv[1]);
-	error = !cvtool_getopt(argc - 1, &(argv[1]), global_options, 0, 0, NULL);
+	error = !cvl_getopt(argc - 1, &(argv[1]), global_options, 0, 0, NULL);
     }
     else if (strcmp(argv[1], "iterative") == 0)
     {
 	subcommand = ITERATIVE;
 	cvl_msg_set_command_name("%s %s", argv[0], argv[1]);
-	error = !cvtool_getopt(argc - 1, &(argv[1]), iterative_options, 0, 0, NULL);
+	error = !cvl_getopt(argc - 1, &(argv[1]), iterative_options, 0, 0, NULL);
     }
     else if (strcmp(argv[1], "otsu") == 0)
     {
 	subcommand = OTSU;
 	cvl_msg_set_command_name("%s %s", argv[0], argv[1]);
-	error = !cvtool_getopt(argc - 1, &(argv[1]), otsu_options, 0, 0, NULL);
+	error = !cvl_getopt(argc - 1, &(argv[1]), otsu_options, 0, 0, NULL);
     }
     else if (strcmp(argv[1], "hysterese") == 0)
     {
 	subcommand = HYSTERESE;
 	cvl_msg_set_command_name("%s %s", argv[0], argv[1]);
-	error = !cvtool_getopt(argc - 1, &(argv[1]), hysterese_options, 0, 0, NULL);
+	error = !cvl_getopt(argc - 1, &(argv[1]), hysterese_options, 0, 0, NULL);
     }
     else if (strcmp(argv[1], "local") == 0)
     {
 	subcommand = LOCAL;
 	cvl_msg_set_command_name("%s %s", argv[0], argv[1]);
-	error = !cvtool_getopt(argc - 1, &(argv[1]), local_options, 0, 0, NULL);
+	error = !cvl_getopt(argc - 1, &(argv[1]), local_options, 0, 0, NULL);
     }
     else
     {

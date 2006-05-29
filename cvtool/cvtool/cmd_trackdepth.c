@@ -36,8 +36,6 @@ extern int errno;
 
 #include "tempfile.h"
 
-#include "options.h"
-
 
 void cmd_trackdepth_print_help(void)
 {
@@ -55,17 +53,17 @@ void cmd_trackdepth_print_help(void)
 
 int cmd_trackdepth(int argc, char *argv[])
 {
-    option_int_t N = { -1, 1, INT_MAX };
-    option_int_array_t depthmaplist = { NULL, 0, NULL, 1, NULL };
-    option_file_t flow_fw_file = { NULL, "r", false };
-    option_file_t flow_bw_file = { NULL, "r", false };
-    option_t options[] = 
+    cvl_option_int_t N = { -1, 1, INT_MAX };
+    cvl_option_int_array_t depthmaplist = { NULL, 0, NULL, 1, NULL };
+    cvl_option_file_t flow_fw_file = { NULL, "r", false };
+    cvl_option_file_t flow_bw_file = { NULL, "r", false };
+    cvl_option_t options[] = 
     {
-	{ "n",             'n', OPTION_INT,       &N,            true },
-	{ "depthmap-list", 'd', OPTION_INT_ARRAY, &depthmaplist, true },
-	{ "flow-forward",  'f', OPTION_FILE,      &flow_fw_file, true },
-	{ "flow-backward", 'F', OPTION_FILE,      &flow_bw_file, true },
-      	null_option
+	{ "n",             'n', CVL_OPTION_INT,       &N,            true },
+	{ "depthmap-list", 'd', CVL_OPTION_INT_ARRAY, &depthmaplist, true },
+	{ "flow-forward",  'f', CVL_OPTION_FILE,      &flow_fw_file, true },
+	{ "flow-backward", 'F', CVL_OPTION_FILE,      &flow_bw_file, true },
+      	cvl_option_null
     };
     int first_argument;
     /* Forward and backward flow fields */
@@ -101,7 +99,7 @@ int cmd_trackdepth(int argc, char *argv[])
     bool error;
 
     cvl_msg_set_command_name("%s", argv[0]);
-    error = !cvtool_getopt(argc, argv, options, 1, -1, &first_argument);
+    error = !cvl_getopt(argc, argv, options, 1, -1, &first_argument);
     if (!error)
     {
 	for (int i = 0; i < depthmaplist.value_sizes[0]; i++)

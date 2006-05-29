@@ -36,8 +36,6 @@ extern int errno;
 
 #include <cvl/cvl.h>
 
-#include "options.h"
-
 
 void cmd_split_print_help(void)
 {
@@ -72,24 +70,24 @@ bool template_is_ok(const char *t)
 
 int cmd_split(int argc, char *argv[])
 {
-    option_int_t n = { 1, 1, INT_MAX };
-    option_string_t t = { (char *)"frame-%6N", template_is_ok };
-    option_bool_t b = { false, true };
-    option_int_t s = { 0, 0, INT_MAX };
-    option_t options[] = 
+    cvl_option_int_t n = { 1, 1, INT_MAX };
+    cvl_option_string_t t = { (char *)"frame-%6N", template_is_ok };
+    cvl_option_bool_t b = { false, true };
+    cvl_option_int_t s = { 0, 0, INT_MAX };
+    cvl_option_t options[] = 
     { 
-	{ "n",         'n', OPTION_INT,    &n, false },
-	{ "template",  't', OPTION_STRING, &t, false },
-	{ "backwards", 'b', OPTION_BOOL,   &b, false },
-	{ "start",     's', OPTION_INT,    &s, false },
-	null_option 
+	{ "n",         'n', CVL_OPTION_INT,    &n, false },
+	{ "template",  't', CVL_OPTION_STRING, &t, false },
+	{ "backwards", 'b', CVL_OPTION_BOOL,   &b, false },
+	{ "start",     's', CVL_OPTION_INT,    &s, false },
+	cvl_option_null 
     };
     cvl_io_info_t *input_info;    
     int frame_number_index;
     bool error;
 
     cvl_msg_set_command_name("%s", argv[0]);    
-    if (!cvtool_getopt(argc, argv, options, 0, 0, NULL))
+    if (!cvl_getopt(argc, argv, options, 0, 0, NULL))
     {
 	return 1;
     }

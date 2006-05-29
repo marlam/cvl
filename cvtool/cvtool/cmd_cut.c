@@ -28,8 +28,6 @@
 
 #include <cvl/cvl.h>
 
-#include "options.h"
-
 
 void cmd_cut_print_help(void)
 {
@@ -42,17 +40,17 @@ void cmd_cut_print_help(void)
 
 int cmd_cut(int argc, char *argv[])
 {
-    option_int_t l = { 0, 0, INT_MAX };
-    option_int_t t = { 0, 0, INT_MAX };
-    option_int_t w = { 0, 1, INT_MAX };
-    option_int_t h = { 0, 1, INT_MAX };
-    option_t options[] =
+    cvl_option_int_t l = { 0, 0, INT_MAX };
+    cvl_option_int_t t = { 0, 0, INT_MAX };
+    cvl_option_int_t w = { 0, 1, INT_MAX };
+    cvl_option_int_t h = { 0, 1, INT_MAX };
+    cvl_option_t options[] =
     {
-	{ "left",   'l', OPTION_INT, &l, true },
-	{ "top",    't', OPTION_INT, &t, true },
-	{ "width",  'w', OPTION_INT, &w, true },
-	{ "height", 'h', OPTION_INT, &h, true },
-	null_option
+	{ "left",   'l', CVL_OPTION_INT, &l, true },
+	{ "top",    't', CVL_OPTION_INT, &t, true },
+	{ "width",  'w', CVL_OPTION_INT, &w, true },
+	{ "height", 'h', CVL_OPTION_INT, &h, true },
+	cvl_option_null
     };
     cvl_io_info_t *input_info;
     cvl_io_info_t *output_info;
@@ -62,7 +60,7 @@ int cmd_cut(int argc, char *argv[])
 
     
     cvl_msg_set_command_name("%s", argv[0]);
-    if (!cvtool_getopt(argc, argv, options, 0, 0, NULL))
+    if (!cvl_getopt(argc, argv, options, 0, 0, NULL))
     {
 	return 1;
     }

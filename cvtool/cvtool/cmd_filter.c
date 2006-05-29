@@ -30,8 +30,6 @@
 
 #include <cvl/cvl.h>
 
-#include "options.h"
-
 
 void cmd_filter_print_help(void)
 {
@@ -63,39 +61,39 @@ int cmd_filter(int argc, char *argv[])
 {
     typedef enum { FILTER_AVERAGE, FILTER_MIN, FILTER_MAX, FILTER_MEDIAN, FILTER_GAUSS } subcommand_t;
     subcommand_t subcommand;
-    option_bool_t three_dimensional = { false, true };
-    option_int_t k = { 0, 1, MASKSIZE_K_MAX };
-    option_int_t kx = { 0, 1, MASKSIZE_K_MAX };
-    option_int_t ky = { 0, 1, MASKSIZE_K_MAX };
-    option_int_t kt = { 0, 1, MASKSIZE_K_MAX };
-    option_double_t s = { -1.0, 0.0, false, DBL_MAX, true };
-    option_double_t sx = { -1.0, 0.0, false, DBL_MAX, true };
-    option_double_t sy = { -1.0, 0.0, false, DBL_MAX, true };
-    option_double_t st = { -1.0, 0.0, false, DBL_MAX, true };
-    option_t average_options[] = 
+    cvl_option_bool_t three_dimensional = { false, true };
+    cvl_option_int_t k = { 0, 1, CVL_MASKSIZE_K_MAX };
+    cvl_option_int_t kx = { 0, 1, CVL_MASKSIZE_K_MAX };
+    cvl_option_int_t ky = { 0, 1, CVL_MASKSIZE_K_MAX };
+    cvl_option_int_t kt = { 0, 1, CVL_MASKSIZE_K_MAX };
+    cvl_option_double_t s = { -1.0, 0.0, false, DBL_MAX, true };
+    cvl_option_double_t sx = { -1.0, 0.0, false, DBL_MAX, true };
+    cvl_option_double_t sy = { -1.0, 0.0, false, DBL_MAX, true };
+    cvl_option_double_t st = { -1.0, 0.0, false, DBL_MAX, true };
+    cvl_option_t average_options[] = 
     {
-	{ "3d",      '3', OPTION_BOOL,   &three_dimensional, false },
-	{ "k",       'k', OPTION_INT,    &k,                 false },
-	{ "k-x",     'x', OPTION_INT,    &kx,                false },
-	{ "k-y",     'y', OPTION_INT,    &ky,                false },
-	{ "k-t",     't', OPTION_INT,    &kt,                false },
-	null_option
+	{ "3d",      '3', CVL_OPTION_BOOL,   &three_dimensional, false },
+	{ "k",       'k', CVL_OPTION_INT,    &k,                 false },
+	{ "k-x",     'x', CVL_OPTION_INT,    &kx,                false },
+	{ "k-y",     'y', CVL_OPTION_INT,    &ky,                false },
+	{ "k-t",     't', CVL_OPTION_INT,    &kt,                false },
+	cvl_option_null
     };
-    option_t *min_options = average_options;
-    option_t *max_options = average_options;
-    option_t *median_options = average_options;
-    option_t gauss_options[] = 
+    cvl_option_t *min_options = average_options;
+    cvl_option_t *max_options = average_options;
+    cvl_option_t *median_options = average_options;
+    cvl_option_t gauss_options[] = 
     {
-	{ "3d",      '3', OPTION_BOOL,   &three_dimensional, false },
-	{ "k",       'k', OPTION_INT,    &k,                 false },
-	{ "k-x",     'x', OPTION_INT,    &kx,                false },
-	{ "k-y",     'y', OPTION_INT,    &ky,                false },
-	{ "k-t",     't', OPTION_INT,    &kt,                false },
-	{ "sigma",   's', OPTION_DOUBLE, &s,                 false },
-	{ "sigma-x", 'X', OPTION_DOUBLE, &sx,                false },
-	{ "sigma-y", 'Y', OPTION_DOUBLE, &sy,                false },
-	{ "sigma-t", 'T', OPTION_DOUBLE, &st,                false },
-	null_option
+	{ "3d",      '3', CVL_OPTION_BOOL,   &three_dimensional, false },
+	{ "k",       'k', CVL_OPTION_INT,    &k,                 false },
+	{ "k-x",     'x', CVL_OPTION_INT,    &kx,                false },
+	{ "k-y",     'y', CVL_OPTION_INT,    &ky,                false },
+	{ "k-t",     't', CVL_OPTION_INT,    &kt,                false },
+	{ "sigma",   's', CVL_OPTION_DOUBLE, &s,                 false },
+	{ "sigma-x", 'X', CVL_OPTION_DOUBLE, &sx,                false },
+	{ "sigma-y", 'Y', CVL_OPTION_DOUBLE, &sy,                false },
+	{ "sigma-t", 'T', CVL_OPTION_DOUBLE, &st,                false },
+	cvl_option_null
     };
     cvl_io_info_t *input_info;    
     cvl_io_info_t *output_info;
@@ -111,7 +109,7 @@ int cmd_filter(int argc, char *argv[])
     {
 	subcommand = FILTER_AVERAGE;
 	cvl_msg_set_command_name("%s %s", argv[0], argv[1]);
-	error = !cvtool_getopt(argc - 1, &(argv[1]), average_options, 0, 0, NULL);
+	error = !cvl_getopt(argc - 1, &(argv[1]), average_options, 0, 0, NULL);
 	if (!error)
 	{
 	    if (kt.value > 0)
@@ -137,7 +135,7 @@ int cmd_filter(int argc, char *argv[])
     {
 	subcommand = FILTER_MIN;
 	cvl_msg_set_command_name("%s %s", argv[0], argv[1]);
-	error = !cvtool_getopt(argc - 1, &(argv[1]), min_options, 0, 0, NULL);
+	error = !cvl_getopt(argc - 1, &(argv[1]), min_options, 0, 0, NULL);
 	if (!error)
 	{
 	    if (kt.value > 0)
@@ -163,7 +161,7 @@ int cmd_filter(int argc, char *argv[])
     {
 	subcommand = FILTER_MAX;
 	cvl_msg_set_command_name("%s %s", argv[0], argv[1]);
-	error = !cvtool_getopt(argc - 1, &(argv[1]), max_options, 0, 0, NULL);
+	error = !cvl_getopt(argc - 1, &(argv[1]), max_options, 0, 0, NULL);
 	if (!error)
 	{
 	    if (kt.value > 0)
@@ -189,7 +187,7 @@ int cmd_filter(int argc, char *argv[])
     {
 	subcommand = FILTER_MEDIAN;
 	cvl_msg_set_command_name("%s %s", argv[0], argv[1]);
-	error = !cvtool_getopt(argc - 1, &(argv[1]), median_options, 0, 0, NULL);
+	error = !cvl_getopt(argc - 1, &(argv[1]), median_options, 0, 0, NULL);
 	if (!error)
 	{
 	    if (kt.value > 0)
@@ -215,7 +213,7 @@ int cmd_filter(int argc, char *argv[])
     {
 	subcommand = FILTER_GAUSS;
 	cvl_msg_set_command_name("%s %s", argv[0], argv[1]);
-	error = !cvtool_getopt(argc - 1, &(argv[1]), gauss_options, 0, 0, NULL);
+	error = !cvl_getopt(argc - 1, &(argv[1]), gauss_options, 0, 0, NULL);
 	if (!error)
 	{
     	    if (kt.value > 0 || st.value > 0.0)

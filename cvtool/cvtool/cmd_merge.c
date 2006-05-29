@@ -35,8 +35,6 @@ extern int errno;
 
 #include "xalloc.h"
 
-#include "options.h"
-
 
 void cmd_merge_print_help(void)
 {
@@ -52,13 +50,13 @@ void cmd_merge_print_help(void)
 
 int cmd_merge(int argc, char *argv[])
 {
-    option_bool_t shuffle = { false, true };
-    option_file_t output = { NULL, "w", false };
-    option_t options[] = 
+    cvl_option_bool_t shuffle = { false, true };
+    cvl_option_file_t output = { NULL, "w", false };
+    cvl_option_t options[] = 
     {
-	{ "shuffle", 's', OPTION_BOOL, &shuffle, false },
-	{ "output",  'o', OPTION_FILE, &output,  false },
-	null_option 
+	{ "shuffle", 's', CVL_OPTION_BOOL, &shuffle, false },
+	{ "output",  'o', CVL_OPTION_FILE, &output,  false },
+	cvl_option_null 
     };
     int first_argument;
     int number_of_files;
@@ -70,7 +68,7 @@ int cmd_merge(int argc, char *argv[])
     cvl_frame_t *frame;
 
     cvl_msg_set_command_name("%s", argv[0]);    
-    if (!cvtool_getopt(argc, argv, options, 1, -1, &first_argument))
+    if (!cvl_getopt(argc, argv, options, 1, -1, &first_argument))
     {
 	return 1;
     }

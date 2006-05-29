@@ -30,8 +30,6 @@ extern int errno;
 
 #include <cvl/cvl.h>
 
-#include "options.h"
-
 
 void cmd_diff_print_help(void)
 {
@@ -55,11 +53,11 @@ void cmd_diff_print_help(void)
 
 int cmd_diff(int argc, char *argv[])
 {
-    option_file_t output = { NULL, "w", true };
-    option_t options[] = 
+    cvl_option_file_t output = { NULL, "w", true };
+    cvl_option_t options[] = 
     {
-	{ "output",  'o', OPTION_FILE, &output,  false },
-	null_option
+	{ "output",  'o', CVL_OPTION_FILE, &output,  false },
+	cvl_option_null
     };
     int first_argument;
     FILE *src1, *src2;
@@ -71,7 +69,7 @@ int cmd_diff(int argc, char *argv[])
     bool error;
 
     cvl_msg_set_command_name("%s", argv[0]);
-    error = !cvtool_getopt(argc, argv, options, 2, 2, &first_argument);
+    error = !cvl_getopt(argc, argv, options, 2, 2, &first_argument);
     if (!error)
     {
 	if (!(src1 = fopen(argv[first_argument], "r")))

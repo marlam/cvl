@@ -30,8 +30,6 @@
 
 #include <cvl/cvl.h>
 
-#include "options.h"
-
 
 void cmd_scale_print_help(void)
 {
@@ -51,22 +49,22 @@ void cmd_scale_print_help(void)
 
 int cmd_scale(int argc, char *argv[])
 {
-    option_int_t width = { 0, 1, INT_MAX };
-    option_int_t height = { 0, 1, INT_MAX };
-    option_double_t factor_x = { -1.0, 0.0, false, DBL_MAX, true };
-    option_double_t factor_y = { -1.0, 0.0, false, DBL_MAX, true };
-    option_double_t factor = { -1.0, 0.0, false, DBL_MAX, true };
+    cvl_option_int_t width = { 0, 1, INT_MAX };
+    cvl_option_int_t height = { 0, 1, INT_MAX };
+    cvl_option_double_t factor_x = { -1.0, 0.0, false, DBL_MAX, true };
+    cvl_option_double_t factor_y = { -1.0, 0.0, false, DBL_MAX, true };
+    cvl_option_double_t factor = { -1.0, 0.0, false, DBL_MAX, true };
     const char *interpolation_names[] = { "none", "bilinear", NULL };
-    option_name_t interpolation = { 1, interpolation_names };
-    option_t options[] = 
+    cvl_option_name_t interpolation = { 1, interpolation_names };
+    cvl_option_t options[] = 
     {
-        { "width",         'w', OPTION_INT,    &width,         false },
-	{ "height",        'h', OPTION_INT,    &height,        false },
-	{ "factor-x",      'x', OPTION_DOUBLE, &factor_x,      false },
-	{ "factor-y",      'y', OPTION_DOUBLE, &factor_y,      false },
-	{ "factor",        'f', OPTION_DOUBLE, &factor,        false },
-	{ "interpolation", 'i', OPTION_NAME,   &interpolation, false },
-	null_option
+        { "width",         'w', CVL_OPTION_INT,    &width,         false },
+	{ "height",        'h', CVL_OPTION_INT,    &height,        false },
+	{ "factor-x",      'x', CVL_OPTION_DOUBLE, &factor_x,      false },
+	{ "factor-y",      'y', CVL_OPTION_DOUBLE, &factor_y,      false },
+	{ "factor",        'f', CVL_OPTION_DOUBLE, &factor,        false },
+	{ "interpolation", 'i', CVL_OPTION_NAME,   &interpolation, false },
+	cvl_option_null
     };
     bool absolute_size = false;
     cvl_io_info_t *input_info;
@@ -76,7 +74,7 @@ int cmd_scale(int argc, char *argv[])
     bool error;
 
     cvl_msg_set_command_name("%s", argv[0]);
-    error = !cvtool_getopt(argc, argv, options, 0, 0, NULL);
+    error = !cvl_getopt(argc, argv, options, 0, 0, NULL);
     if (!error)
     {
 	if (width.value > 0 || height.value > 0)

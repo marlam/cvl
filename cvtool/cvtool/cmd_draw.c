@@ -41,8 +41,6 @@ extern int errno;
 
 #include "string_to_utf8.h"
 
-#include "options.h"
-
 
 void cmd_draw_print_help(void)
 {
@@ -382,59 +380,59 @@ int cmd_draw(int argc, char *argv[])
 	STYLE_LINEAR_GRADIENT = 4, STYLE_RADIAL_GRADIENT = 5} style_t;
     const char *style_names[] = { "none", "color", "pattern", "multipattern", 
 	"linear-gradient", "radial-gradient", NULL };
-    option_name_t s = { STYLE_COLOR, style_names };
-    option_color_t c = { CVL_COLOR_BLACK };
-    option_file_t p = { NULL, "r", false };
-    option_string_t g = { NULL, NULL };
-    option_name_t S = { STYLE_NONE, style_names };
-    option_color_t C = { CVL_COLOR_BLACK };
-    option_file_t P = { NULL, "r", false };
-    option_string_t G = { NULL, NULL };
-    option_double_t w = { 2.0, 0.0, true, DBL_MAX, true };
-    option_double_array_t d = { NULL, 0, NULL, 1, NULL };
+    cvl_option_name_t s = { STYLE_COLOR, style_names };
+    cvl_option_color_t c = { CVL_COLOR_BLACK };
+    cvl_option_file_t p = { NULL, "r", false };
+    cvl_option_string_t g = { NULL, NULL };
+    cvl_option_name_t S = { STYLE_NONE, style_names };
+    cvl_option_color_t C = { CVL_COLOR_BLACK };
+    cvl_option_file_t P = { NULL, "r", false };
+    cvl_option_string_t G = { NULL, NULL };
+    cvl_option_double_t w = { 2.0, 0.0, true, DBL_MAX, true };
+    cvl_option_double_array_t d = { NULL, 0, NULL, 1, NULL };
     const char *l_names[] = { "butt", "round", "square", NULL };
-    option_name_t l = { 0, l_names };
+    cvl_option_name_t l = { 0, l_names };
     const char *L_names[] = { "miter", "round", "bevel", NULL };
-    option_name_t L = { 0, L_names };
-    option_bool_t a = { true, true };
-    option_bool_t u = { false, true };
-    option_string_t f = { (char *)"Serif", NULL };
+    cvl_option_name_t L = { 0, L_names };
+    cvl_option_bool_t a = { true, true };
+    cvl_option_bool_t u = { false, true };
+    cvl_option_string_t f = { (char *)"Serif", NULL };
     typedef enum { SLANT_NORMAL = 0, SLANT_ITALIC = 1, SLANT_OBLIQUE = 2 } slant_t;
     const char *slant_names[] = { "normal", "italic", "oblique", NULL };
-    option_name_t t = { SLANT_NORMAL, slant_names };
+    cvl_option_name_t t = { SLANT_NORMAL, slant_names };
     typedef enum { WEIGHT_NORMAL = 0, WEIGHT_BOLD } weight_t;
     const char *weight_names[] = { "normal", "bold", NULL };
-    option_name_t W = { WEIGHT_NORMAL, weight_names };
-    option_double_array_t F = { NULL, 0, NULL, 1, NULL };
+    cvl_option_name_t W = { WEIGHT_NORMAL, weight_names };
+    cvl_option_double_array_t F = { NULL, 0, NULL, 1, NULL };
     typedef enum { JUSTIFY_X_LEFT = 0, JUSTIFY_X_RIGHT = 1, JUSTIFY_X_CENTER = 2 } justify_x_t;
     const char *justify_x_names[] = { "left", "right", "center", NULL };
-    option_name_t j = { JUSTIFY_X_LEFT, justify_x_names };
+    cvl_option_name_t j = { JUSTIFY_X_LEFT, justify_x_names };
     typedef enum { JUSTIFY_Y_BOTTOM = 0, JUSTIFY_Y_TOP = 1, JUSTIFY_Y_CENTER = 2 } justify_y_t;
     const char *justify_y_names[] = { "bottom", "top", "center", NULL };
-    option_name_t J = { JUSTIFY_Y_BOTTOM, justify_y_names };
-    option_t options[] = 
+    cvl_option_name_t J = { JUSTIFY_Y_BOTTOM, justify_y_names };
+    cvl_option_t options[] = 
     { 
-	{ "border-style",    's', OPTION_NAME,         &s, false },
-	{ "border-color",    'c', OPTION_COLOR,        &c, false },
-	{ "border-pattern",  'p', OPTION_FILE,         &p, false },
-	{ "border-gradient", 'g', OPTION_STRING,       &g, false },
-	{ "fill-style",      'S', OPTION_NAME,         &S, false },
-	{ "fill-color",      'C', OPTION_COLOR,        &C, false },
-	{ "fill-pattern",    'P', OPTION_FILE,         &P, false },
-	{ "fill-gradient",   'G', OPTION_STRING,       &G, false },
-	{ "width",           'w', OPTION_DOUBLE,       &w, false },
-	{ "dash",            'd', OPTION_DOUBLE_ARRAY, &d, false },
-	{ "line-cap",        'l', OPTION_NAME,         &l, false },
-	{ "line-join",       'L', OPTION_NAME,         &L, false },
-	{ "font-family",     'f', OPTION_STRING,       &f, false },
-	{ "font-slant",      't', OPTION_NAME,         &t, false },
-	{ "font-weight",     'W', OPTION_NAME,         &W, false },
-	{ "font-size",       'F', OPTION_DOUBLE_ARRAY, &F, false },
-	{ "justify-x",       'j', OPTION_NAME,         &j, false },
-	{ "justify-y",       'J', OPTION_NAME,         &J, false },
-	{ "antialias",       'a', OPTION_BOOL,         &a, false },
-	{ "unit",            'u', OPTION_BOOL,         &u, false },
-	null_option 
+	{ "border-style",    's', CVL_OPTION_NAME,         &s, false },
+	{ "border-color",    'c', CVL_OPTION_COLOR,        &c, false },
+	{ "border-pattern",  'p', CVL_OPTION_FILE,         &p, false },
+	{ "border-gradient", 'g', CVL_OPTION_STRING,       &g, false },
+	{ "fill-style",      'S', CVL_OPTION_NAME,         &S, false },
+	{ "fill-color",      'C', CVL_OPTION_COLOR,        &C, false },
+	{ "fill-pattern",    'P', CVL_OPTION_FILE,         &P, false },
+	{ "fill-gradient",   'G', CVL_OPTION_STRING,       &G, false },
+	{ "width",           'w', CVL_OPTION_DOUBLE,       &w, false },
+	{ "dash",            'd', CVL_OPTION_DOUBLE_ARRAY, &d, false },
+	{ "line-cap",        'l', CVL_OPTION_NAME,         &l, false },
+	{ "line-join",       'L', CVL_OPTION_NAME,         &L, false },
+	{ "font-family",     'f', CVL_OPTION_STRING,       &f, false },
+	{ "font-slant",      't', CVL_OPTION_NAME,         &t, false },
+	{ "font-weight",     'W', CVL_OPTION_NAME,         &W, false },
+	{ "font-size",       'F', CVL_OPTION_DOUBLE_ARRAY, &F, false },
+	{ "justify-x",       'j', CVL_OPTION_NAME,         &j, false },
+	{ "justify-y",       'J', CVL_OPTION_NAME,         &J, false },
+	{ "antialias",       'a', CVL_OPTION_BOOL,         &a, false },
+	{ "unit",            'u', CVL_OPTION_BOOL,         &u, false },
+	cvl_option_null 
     };
     int first_argument;
     draw_cmd_t **cmd_list = NULL;			// initialize to shut up compiler warning
@@ -459,7 +457,7 @@ int cmd_draw(int argc, char *argv[])
     bool error;
 
     cvl_msg_set_command_name("%s", argv[0]);    
-    error = !cvtool_getopt(argc, argv, options, 1, -1, &first_argument);
+    error = !cvl_getopt(argc, argv, options, 1, -1, &first_argument);
     if (!error && d.value)
     {
 	bool found_val_greater_zero = false;

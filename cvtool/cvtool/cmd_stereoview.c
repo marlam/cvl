@@ -27,8 +27,6 @@
 
 #include <cvl/cvl.h>
 
-#include "options.h"
-
 
 void cmd_stereoview_print_help(void)
 {
@@ -53,26 +51,26 @@ int cmd_stereoview(int argc, char *argv[])
 {
     typedef enum { ANAGLYPH, THREEDIM_DISPLAY } subcommand_t;
     subcommand_t subcommand;
-    option_bool_t color = { false, true };
+    cvl_option_bool_t color = { false, true };
     const char *glasses_names[] = { "red-cyan", "red-green", "red-blue", NULL };
-    option_name_t glasses = { 2, glasses_names };
-    option_t anaglyph_options[] = 
+    cvl_option_name_t glasses = { 2, glasses_names };
+    cvl_option_t anaglyph_options[] = 
     {
-	{ "color",   'c', OPTION_BOOL, &color,   false },
-	{ "glasses", 'g', OPTION_NAME, &glasses, false },
-	null_option
+	{ "color",   'c', CVL_OPTION_BOOL, &color,   false },
+	{ "glasses", 'g', CVL_OPTION_NAME, &glasses, false },
+	cvl_option_null
     };
     enum { LEFT_RIGHT = 0, TOP_BOTTOM = 1, COLUMN_INTERLEAVED = 2, ROW_INTERLEAVED = 3 }; 
     const char *format_names[] = { "lr", "tb", "ci", "ri", NULL };
-    option_name_t format = { -1, format_names };
-    option_int_t width = { 1280, 1, INT_MAX };
-    option_int_t height = { 1024, 1, INT_MAX };
-    option_t threedim_display_options[] = 
+    cvl_option_name_t format = { -1, format_names };
+    cvl_option_int_t width = { 1280, 1, INT_MAX };
+    cvl_option_int_t height = { 1024, 1, INT_MAX };
+    cvl_option_t threedim_display_options[] = 
     {
-	{ "format", 'f', OPTION_NAME, &format, true },
-	{ "width",  'w', OPTION_INT,  &width,  false },
-	{ "height", 'h', OPTION_INT,  &height, false },
-	null_option
+	{ "format", 'f', CVL_OPTION_NAME, &format, true },
+	{ "width",  'w', CVL_OPTION_INT,  &width,  false },
+	{ "height", 'h', CVL_OPTION_INT,  &height, false },
+	cvl_option_null
     };
     cvl_io_info_t *input_info;    
     cvl_io_info_t *output_info;
@@ -90,13 +88,13 @@ int cmd_stereoview(int argc, char *argv[])
     {
 	subcommand = ANAGLYPH;
 	cvl_msg_set_command_name("%s %s", argv[0], argv[1]);
-	error = !cvtool_getopt(argc - 1, &(argv[1]), anaglyph_options, 0, 0, NULL);
+	error = !cvl_getopt(argc - 1, &(argv[1]), anaglyph_options, 0, 0, NULL);
     }
     else if (strcmp(argv[1], "3d-display") == 0)
     {
 	subcommand = THREEDIM_DISPLAY;
 	cvl_msg_set_command_name("%s %s", argv[0], argv[1]);
-	error = !cvtool_getopt(argc - 1, &(argv[1]), threedim_display_options, 0, 0, NULL);
+	error = !cvl_getopt(argc - 1, &(argv[1]), threedim_display_options, 0, 0, NULL);
 	if (!error)
 	{
 	    if (width.value % 2 != 0 || height.value % 2 != 0)

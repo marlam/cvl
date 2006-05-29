@@ -33,8 +33,6 @@
 
 #include <cvl/cvl.h>
 
-#include "options.h"
-
 
 void cmd_dibr_print_help(void)
 {
@@ -54,20 +52,20 @@ void cmd_dibr_print_help(void)
 
 int cmd_dibr(int argc, char *argv[])
 {
-    option_file_t depth = { NULL, "r", false };
-    option_int_t b = { -1, 0, INT_MAX };
-    option_double_t position = { 0.0, -1.0, true, +1.0, true };
-    option_double_t zps = { 0.0, 0.0, true, 1.0, true };
+    cvl_option_file_t depth = { NULL, "r", false };
+    cvl_option_int_t b = { -1, 0, INT_MAX };
+    cvl_option_double_t position = { 0.0, -1.0, true, +1.0, true };
+    cvl_option_double_t zps = { 0.0, 0.0, true, 1.0, true };
     const char *hole_filling_names[] = { "none", "average", "near", "far", "linear", NULL };
-    option_name_t hole_filling = { 1, hole_filling_names };
-    option_t options[] =
+    cvl_option_name_t hole_filling = { 1, hole_filling_names };
+    cvl_option_t options[] =
     {
-	{ "depth",        'd', OPTION_FILE,   &depth,        true },
-	{ "b",            'b', OPTION_INT,    &b,            true },
-	{ "position",     'p', OPTION_DOUBLE, &position,     false },
-	{ "zps",          'z', OPTION_DOUBLE, &zps,          false },
-	{ "hole-filling", 'h', OPTION_NAME,   &hole_filling, false },
-	null_option
+	{ "depth",        'd', CVL_OPTION_FILE,   &depth,        true },
+	{ "b",            'b', CVL_OPTION_INT,    &b,            true },
+	{ "position",     'p', CVL_OPTION_DOUBLE, &position,     false },
+	{ "zps",          'z', CVL_OPTION_DOUBLE, &zps,          false },
+	{ "hole-filling", 'h', CVL_OPTION_NAME,   &hole_filling, false },
+	cvl_option_null
     };
     cvl_io_info_t *frame_info;    
     cvl_io_info_t *depthmap_info;
@@ -78,7 +76,7 @@ int cmd_dibr(int argc, char *argv[])
     bool error;
 
     cvl_msg_set_command_name("%s", argv[0]);
-    if (!cvtool_getopt(argc, argv, options, 0, 0, NULL))
+    if (!cvl_getopt(argc, argv, options, 0, 0, NULL))
     {
 	return 1;
     }

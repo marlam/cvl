@@ -30,8 +30,6 @@
 
 #include <cvl/cvl.h>
 
-#include "options.h"
-
 
 void cmd_opticalflow_print_help(void)
 {
@@ -69,66 +67,66 @@ int cmd_opticalflow(int argc, char *argv[])
 {
     typedef enum { HS, LK, CLG, BM_SAD, BM_ASW, CC } subcommand_t;
     subcommand_t subcommand;
-    option_bool_t backwards = { false, true };
-    option_double_t lambda = { -1.0, 0.0, false, DBL_MAX, true };
-    option_double_t omega = { -1.0, 0.0, false, 2.0, false };
-    option_int_t iterations = { -1, 1, INT_MAX };
-    option_int_t k = { -1, 1, MASKSIZE_K_MAX };
-    option_int_t max_distance = { -1, 0, MASKSIZE_K_MAX };
-    option_double_t distance_weight = { -1.0, 0.0, true, 1.0, true };
-    option_double_t luminance_weight = { -1.0, 0.0, true, 1.0, true };
-    option_double_t gamma_c = { -1.0, 0.0, false, DBL_MAX, true };
-    option_double_t gamma_p = { -1.0, 0.0, false, DBL_MAX, true };
-    option_int_t tolerance = { -1, INT_MIN, INT_MAX };
-    option_double_t warninglevel = { -1.0, 0.0, true, 1.0, true };
-    option_file_t output = { NULL, "w", false };
-    option_file_t verificationflow = { NULL, "r", false };
-    option_t hs_options[] = 
+    cvl_option_bool_t backwards = { false, true };
+    cvl_option_double_t lambda = { -1.0, 0.0, false, DBL_MAX, true };
+    cvl_option_double_t omega = { -1.0, 0.0, false, 2.0, false };
+    cvl_option_int_t iterations = { -1, 1, INT_MAX };
+    cvl_option_int_t k = { -1, 1, CVL_MASKSIZE_K_MAX };
+    cvl_option_int_t max_distance = { -1, 0, CVL_MASKSIZE_K_MAX };
+    cvl_option_double_t distance_weight = { -1.0, 0.0, true, 1.0, true };
+    cvl_option_double_t luminance_weight = { -1.0, 0.0, true, 1.0, true };
+    cvl_option_double_t gamma_c = { -1.0, 0.0, false, DBL_MAX, true };
+    cvl_option_double_t gamma_p = { -1.0, 0.0, false, DBL_MAX, true };
+    cvl_option_int_t tolerance = { -1, INT_MIN, INT_MAX };
+    cvl_option_double_t warninglevel = { -1.0, 0.0, true, 1.0, true };
+    cvl_option_file_t output = { NULL, "w", false };
+    cvl_option_file_t verificationflow = { NULL, "r", false };
+    cvl_option_t hs_options[] = 
     {
-	{ "backwards",         'b', OPTION_BOOL,   &backwards,        false },
-	{ "lambda",            'l', OPTION_DOUBLE, &lambda,           true },
-	{ "iterations",        'n', OPTION_INT,    &iterations,       true },
-	null_option
+	{ "backwards",         'b', CVL_OPTION_BOOL,   &backwards,        false },
+	{ "lambda",            'l', CVL_OPTION_DOUBLE, &lambda,           true },
+	{ "iterations",        'n', CVL_OPTION_INT,    &iterations,       true },
+	cvl_option_null
     };
-    option_t lk_options[] = 
+    cvl_option_t lk_options[] = 
     {
-	{ "backwards",         'b', OPTION_BOOL,   &backwards,        false },
-	{ "k",                 'k', OPTION_INT,    &k,                true },
-	null_option
+	{ "backwards",         'b', CVL_OPTION_BOOL,   &backwards,        false },
+	{ "k",                 'k', CVL_OPTION_INT,    &k,                true },
+	cvl_option_null
     };
-    option_t clg_options[] = 
+    cvl_option_t clg_options[] = 
     {
-	{ "backwards",         'b', OPTION_BOOL,   &backwards,        false },
-	{ "lambda",            'l', OPTION_DOUBLE, &lambda,           true },
-	{ "iterations",        'n', OPTION_INT,    &iterations,       true },
-	{ "omega",             'O', OPTION_DOUBLE, &omega,            true },
-	null_option
+	{ "backwards",         'b', CVL_OPTION_BOOL,   &backwards,        false },
+	{ "lambda",            'l', CVL_OPTION_DOUBLE, &lambda,           true },
+	{ "iterations",        'n', CVL_OPTION_INT,    &iterations,       true },
+	{ "omega",             'O', CVL_OPTION_DOUBLE, &omega,            true },
+	cvl_option_null
     };
-    option_t bm_sad_options[] = 
+    cvl_option_t bm_sad_options[] = 
     {
-	{ "backwards",         'b', OPTION_BOOL,   &backwards,        false },
-	{ "k",                 'k', OPTION_INT,    &k,                true },
-	{ "max-distance",      'M', OPTION_INT,    &max_distance,     true },
-	{ "distance-weight",   'D', OPTION_DOUBLE, &distance_weight,  true },
-	{ "luminance-weight",  'L', OPTION_DOUBLE, &luminance_weight, true },
-	null_option
+	{ "backwards",         'b', CVL_OPTION_BOOL,   &backwards,        false },
+	{ "k",                 'k', CVL_OPTION_INT,    &k,                true },
+	{ "max-distance",      'M', CVL_OPTION_INT,    &max_distance,     true },
+	{ "distance-weight",   'D', CVL_OPTION_DOUBLE, &distance_weight,  true },
+	{ "luminance-weight",  'L', CVL_OPTION_DOUBLE, &luminance_weight, true },
+	cvl_option_null
     };
-    option_t bm_asw_options[] = 
+    cvl_option_t bm_asw_options[] = 
     {
-	{ "backwards",         'b', OPTION_BOOL,   &backwards,        false },
-	{ "k",                 'k', OPTION_INT,    &k,                true },
-	{ "max-distance",      'M', OPTION_INT,    &max_distance,     true },
-	{ "gamma-c",           'c', OPTION_DOUBLE, &gamma_c,          true },
-	{ "gamma-p",           'p', OPTION_DOUBLE, &gamma_p,          true },
-	null_option
+	{ "backwards",         'b', CVL_OPTION_BOOL,   &backwards,        false },
+	{ "k",                 'k', CVL_OPTION_INT,    &k,                true },
+	{ "max-distance",      'M', CVL_OPTION_INT,    &max_distance,     true },
+	{ "gamma-c",           'c', CVL_OPTION_DOUBLE, &gamma_c,          true },
+	{ "gamma-p",           'p', CVL_OPTION_DOUBLE, &gamma_p,          true },
+	cvl_option_null
     };
-    option_t cc_options[] = 
+    cvl_option_t cc_options[] = 
     {
-	{ "tolerance",         't', OPTION_INT,    &tolerance,        true },
-	{ "warning-level",     'w', OPTION_DOUBLE, &warninglevel,     false },
-	{ "output",            'o', OPTION_FILE,   &output,           false },
-	{ "verification-flow", 'f', OPTION_FILE,   &verificationflow, true },
-	null_option
+	{ "tolerance",         't', CVL_OPTION_INT,    &tolerance,        true },
+	{ "warning-level",     'w', CVL_OPTION_DOUBLE, &warninglevel,     false },
+	{ "output",            'o', CVL_OPTION_FILE,   &output,           false },
+	{ "verification-flow", 'f', CVL_OPTION_FILE,   &verificationflow, true },
+	cvl_option_null
     };
     cvl_field_t *flowfield;
     bool error;
@@ -143,37 +141,37 @@ int cmd_opticalflow(int argc, char *argv[])
     {
 	subcommand = HS;
 	cvl_msg_set_command_name("%s %s", argv[0], argv[1]);
-	error = !cvtool_getopt(argc - 1, &(argv[1]), hs_options, 0, 0, NULL);
+	error = !cvl_getopt(argc - 1, &(argv[1]), hs_options, 0, 0, NULL);
     }
     else if (strcmp(argv[1], "lk") == 0)
     {
 	subcommand = LK;
 	cvl_msg_set_command_name("%s %s", argv[0], argv[1]);
-	error = !cvtool_getopt(argc - 1, &(argv[1]), lk_options, 0, 0, NULL);
+	error = !cvl_getopt(argc - 1, &(argv[1]), lk_options, 0, 0, NULL);
     }
     else if (strcmp(argv[1], "clg") == 0)
     {
 	subcommand = CLG;
 	cvl_msg_set_command_name("%s %s", argv[0], argv[1]);
-	error = !cvtool_getopt(argc - 1, &(argv[1]), clg_options, 0, 0, NULL);
+	error = !cvl_getopt(argc - 1, &(argv[1]), clg_options, 0, 0, NULL);
     }
     else if (strcmp(argv[1], "bm-sad") == 0)
     {
 	subcommand = BM_SAD;
 	cvl_msg_set_command_name("%s %s", argv[0], argv[1]);
-	error = !cvtool_getopt(argc - 1, &(argv[1]), bm_sad_options, 0, 0, NULL);
+	error = !cvl_getopt(argc - 1, &(argv[1]), bm_sad_options, 0, 0, NULL);
     }
     else if (strcmp(argv[1], "bm-asw") == 0)
     {
 	subcommand = BM_ASW;
 	cvl_msg_set_command_name("%s %s", argv[0], argv[1]);
-	error = !cvtool_getopt(argc - 1, &(argv[1]), bm_asw_options, 0, 0, NULL);
+	error = !cvl_getopt(argc - 1, &(argv[1]), bm_asw_options, 0, 0, NULL);
     }
     else if (strcmp(argv[1], "cc") == 0)
     {
 	subcommand = CC;
 	cvl_msg_set_command_name("%s %s", argv[0], argv[1]);
-	error = !cvtool_getopt(argc - 1, &(argv[1]), cc_options, 0, 0, NULL);
+	error = !cvl_getopt(argc - 1, &(argv[1]), cc_options, 0, 0, NULL);
     }
     else
     {

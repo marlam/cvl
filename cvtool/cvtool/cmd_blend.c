@@ -24,8 +24,6 @@
 
 #include <cvl/cvl.h>
 
-#include "options.h"
-
 
 void cmd_blend_print_help(void)
 {
@@ -45,19 +43,19 @@ void cmd_blend_print_help(void)
 
 int cmd_blend(int argc, char *argv[])
 {
-    option_file_t source = { NULL, "r", false };
-    option_file_t alpha = { NULL, "r", false };
-    option_bool_t single = { false, true };
-    option_int_t x = { 0, INT_MIN, INT_MAX };
-    option_int_t y = { 0, INT_MIN, INT_MAX };
-    option_t options[] =
+    cvl_option_file_t source = { NULL, "r", false };
+    cvl_option_file_t alpha = { NULL, "r", false };
+    cvl_option_bool_t single = { false, true };
+    cvl_option_int_t x = { 0, INT_MIN, INT_MAX };
+    cvl_option_int_t y = { 0, INT_MIN, INT_MAX };
+    cvl_option_t options[] =
     {
-	{ "source", 's', OPTION_FILE, &source, true },
-	{ "alpha",  'a', OPTION_FILE, &alpha,  false },
-	{ "single", 'S', OPTION_BOOL, &single, false },
-	{ "x",      'x', OPTION_INT,  &x,      false },
-	{ "y",      'y', OPTION_INT,  &y,      false },
-	null_option
+	{ "source", 's', CVL_OPTION_FILE, &source, true },
+	{ "alpha",  'a', CVL_OPTION_FILE, &alpha,  false },
+	{ "single", 'S', CVL_OPTION_BOOL, &single, false },
+	{ "x",      'x', CVL_OPTION_INT,  &x,      false },
+	{ "y",      'y', CVL_OPTION_INT,  &y,      false },
+	cvl_option_null
     };
     cvl_io_info_t *input_info;    
     cvl_io_info_t *source_info;
@@ -70,7 +68,7 @@ int cmd_blend(int argc, char *argv[])
     bool error;
 
     cvl_msg_set_command_name("%s", argv[0]);
-    if (!cvtool_getopt(argc, argv, options, 0, 0, NULL))
+    if (!cvl_getopt(argc, argv, options, 0, 0, NULL))
     {
 	return 1;
     }

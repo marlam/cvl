@@ -28,8 +28,6 @@
 
 #include <cvl/cvl.h>
 
-#include "options.h"
-
 
 void cmd_resize_print_help(void)
 {
@@ -47,19 +45,19 @@ void cmd_resize_print_help(void)
 
 int cmd_resize(int argc, char *argv[])
 {
-    option_int_t w = { 0, 1, INT_MAX };
-    option_int_t h = { 0, 1, INT_MAX };
-    option_int_t x = { INT_MIN, INT_MIN + 1, INT_MAX };
-    option_int_t y = { INT_MIN, INT_MIN + 1, INT_MAX };
-    option_color_t color = { CVL_COLOR_BLACK };
-    option_t options[] =
+    cvl_option_int_t w = { 0, 1, INT_MAX };
+    cvl_option_int_t h = { 0, 1, INT_MAX };
+    cvl_option_int_t x = { INT_MIN, INT_MIN + 1, INT_MAX };
+    cvl_option_int_t y = { INT_MIN, INT_MIN + 1, INT_MAX };
+    cvl_option_color_t color = { CVL_COLOR_BLACK };
+    cvl_option_t options[] =
     {
-	{ "width",      'w', OPTION_INT,   &w,     true },
-	{ "height",     'h', OPTION_INT,   &h,     true },
-	{ "x-offset",   'x', OPTION_INT,   &x,     false },
-	{ "y-offset",   'y', OPTION_INT,   &y,     false },
-	{ "color",      'c', OPTION_COLOR, &color, false },
-	null_option
+	{ "width",      'w', CVL_OPTION_INT,   &w,     true },
+	{ "height",     'h', CVL_OPTION_INT,   &h,     true },
+	{ "x-offset",   'x', CVL_OPTION_INT,   &x,     false },
+	{ "y-offset",   'y', CVL_OPTION_INT,   &y,     false },
+	{ "color",      'c', CVL_OPTION_COLOR, &color, false },
+	cvl_option_null
     };
     bool compute_x;
     bool compute_y;
@@ -71,7 +69,7 @@ int cmd_resize(int argc, char *argv[])
 
     
     cvl_msg_set_command_name("%s", argv[0]);
-    if (!cvtool_getopt(argc, argv, options, 0, 0, NULL))
+    if (!cvl_getopt(argc, argv, options, 0, 0, NULL))
     {
 	return 1;
     }

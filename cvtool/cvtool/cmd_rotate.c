@@ -30,8 +30,6 @@
 
 #include <cvl/cvl.h>
 
-#include "options.h"
-
 
 void cmd_rotate_print_help(void)
 {
@@ -48,16 +46,16 @@ void cmd_rotate_print_help(void)
 
 int cmd_rotate(int argc, char *argv[])
 {
-    option_double_t angle = { 0.0, -DBL_MAX, true, DBL_MAX, true };
-    option_color_t color = { CVL_COLOR_BLACK };
+    cvl_option_double_t angle = { 0.0, -DBL_MAX, true, DBL_MAX, true };
+    cvl_option_color_t color = { CVL_COLOR_BLACK };
     const char *interpolation_names[] = { "none", "bilinear", NULL };
-    option_name_t interpolation = { 1, interpolation_names };
-    option_t options[] = 
+    cvl_option_name_t interpolation = { 1, interpolation_names };
+    cvl_option_t options[] = 
     {
-	{ "angle",         'a', OPTION_DOUBLE, &angle,         true },
-	{ "color",         'c', OPTION_COLOR, &color,         false },
-	{ "interpolation", 'i', OPTION_NAME,  &interpolation, false },
-	null_option
+	{ "angle",         'a', CVL_OPTION_DOUBLE, &angle,         true },
+	{ "color",         'c', CVL_OPTION_COLOR, &color,         false },
+	{ "interpolation", 'i', CVL_OPTION_NAME,  &interpolation, false },
+	cvl_option_null
     };
     cvl_io_info_t *input_info;
     cvl_io_info_t *output_info;
@@ -67,7 +65,7 @@ int cmd_rotate(int argc, char *argv[])
 
     
     cvl_msg_set_command_name("%s", argv[0]);
-    if (!cvtool_getopt(argc, argv, options, 0, 0, NULL))
+    if (!cvl_getopt(argc, argv, options, 0, 0, NULL))
     {
 	return 1;
     }

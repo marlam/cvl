@@ -34,8 +34,6 @@ extern int errno;
 
 #include "xalloc.h"
 
-#include "options.h"
-
 
 void cmd_combine_print_help(void)
 {
@@ -53,16 +51,16 @@ void cmd_combine_print_help(void)
 int cmd_combine(int argc, char *argv[])
 {
     const char *method_names[] = { "lr", "leftright", "tb", "topbottom", NULL };
-    option_name_t method = { 0, method_names };
+    cvl_option_name_t method = { 0, method_names };
     const char *justify_names[] = { "left", "top", "center", "bottom", "right", NULL };
-    option_name_t justify = { 2, justify_names };
-    option_color_t color = { CVL_COLOR_BLACK };
-    option_t options[] = 
+    cvl_option_name_t justify = { 2, justify_names };
+    cvl_option_color_t color = { CVL_COLOR_BLACK };
+    cvl_option_t options[] = 
     {
-	{ "method",   'm', OPTION_NAME,  &method,  false },
-	{ "justify",  'j', OPTION_NAME,  &justify, false },
-	{ "color",    'c', OPTION_COLOR, &color,   false },
-	null_option
+	{ "method",   'm', CVL_OPTION_NAME,  &method,  false },
+	{ "justify",  'j', CVL_OPTION_NAME,  &justify, false },
+	{ "color",    'c', CVL_OPTION_COLOR, &color,   false },
+	cvl_option_null
     };
     cvl_io_info_t *combined_info;
     cvl_frame_t *combined_frame;
@@ -74,7 +72,7 @@ int cmd_combine(int argc, char *argv[])
     bool error;
 
     cvl_msg_set_command_name("%s", argv[0]);
-    if (!cvtool_getopt(argc, argv, options, 1, -1, &first_argument))
+    if (!cvl_getopt(argc, argv, options, 1, -1, &first_argument))
     {
 	return 1;
     }

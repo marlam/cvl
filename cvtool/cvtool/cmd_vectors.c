@@ -30,8 +30,6 @@
 
 #include <cvl/cvl.h>
 
-#include "options.h"
-
 
 void cmd_vectors_print_help(void)
 {
@@ -57,21 +55,21 @@ int cmd_vectors(int argc, char *argv[])
     enum subcommand_t { VISUALIZE };
     int subcommand;
     const char *type_names[] = { "2i", "2", "3", NULL };
-    option_name_t type = { -1, type_names };
-    option_int_t sample_x = { 10, 1, INT_MAX };
-    option_int_t sample_y = { 10, 1, INT_MAX };
-    option_int_t dist_x = { 10, 1, INT_MAX };
-    option_int_t dist_y = { 10, 1, INT_MAX };
-    option_double_t factor = { 1.0, -DBL_MAX, true, DBL_MAX, true };
-    option_t visualize_options[] = 
+    cvl_option_name_t type = { -1, type_names };
+    cvl_option_int_t sample_x = { 10, 1, INT_MAX };
+    cvl_option_int_t sample_y = { 10, 1, INT_MAX };
+    cvl_option_int_t dist_x = { 10, 1, INT_MAX };
+    cvl_option_int_t dist_y = { 10, 1, INT_MAX };
+    cvl_option_double_t factor = { 1.0, -DBL_MAX, true, DBL_MAX, true };
+    cvl_option_t visualize_options[] = 
     {
-	{ "type",     't', OPTION_NAME,   &type,     true },
-	{ "sample-x", 'x', OPTION_INT,    &sample_x, false },
-	{ "sample-y", 'y', OPTION_INT,    &sample_y, false },
-	{ "dist-x",   'X', OPTION_INT,    &dist_x,   false },
-	{ "dist-y",   'Y', OPTION_INT,    &dist_y,   false },
-	{ "factor",   'f', OPTION_DOUBLE, &factor,   false },
-	null_option
+	{ "type",     't', CVL_OPTION_NAME,   &type,     true },
+	{ "sample-x", 'x', CVL_OPTION_INT,    &sample_x, false },
+	{ "sample-y", 'y', CVL_OPTION_INT,    &sample_y, false },
+	{ "dist-x",   'X', CVL_OPTION_INT,    &dist_x,   false },
+	{ "dist-y",   'Y', CVL_OPTION_INT,    &dist_y,   false },
+	{ "factor",   'f', CVL_OPTION_DOUBLE, &factor,   false },
+	cvl_option_null
     };
     cvl_io_info_t *output_info;
     cvl_frame_t *frame;
@@ -88,7 +86,7 @@ int cmd_vectors(int argc, char *argv[])
     {
 	subcommand = VISUALIZE;
 	cvl_msg_set_command_name("%s %s", argv[0], argv[1]);
-	error = !cvtool_getopt(argc - 1, &(argv[1]), visualize_options, 0, 0, NULL);
+	error = !cvl_getopt(argc - 1, &(argv[1]), visualize_options, 0, 0, NULL);
     }
     else
     {

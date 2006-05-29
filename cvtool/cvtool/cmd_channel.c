@@ -28,8 +28,6 @@
 
 #include <cvl/cvl.h>
 
-#include "options.h"
-
 
 void cmd_channel_print_help(void)
 {
@@ -45,14 +43,14 @@ void cmd_channel_print_help(void)
 
 int cmd_channel(int argc, char *argv[])
 {
-    option_bool_t reverse = { false, true };
+    cvl_option_bool_t reverse = { false, true };
     const char *channel_names[] = { "r", "g", "b", NULL };
-    option_name_t channel = { -1, channel_names };
-    option_t options[] = 
+    cvl_option_name_t channel = { -1, channel_names };
+    cvl_option_t options[] = 
     { 
-	{ "reverse", 'r', OPTION_BOOL, &reverse, false },
-	{ "channel", 'c', OPTION_NAME, &channel, true },
-	null_option 
+	{ "reverse", 'r', CVL_OPTION_BOOL, &reverse, false },
+	{ "channel", 'c', CVL_OPTION_NAME, &channel, true },
+	cvl_option_null 
     };
     cvl_io_info_t *input_info;    
     cvl_io_info_t *output_info;
@@ -60,7 +58,7 @@ int cmd_channel(int argc, char *argv[])
     bool error;
 
     cvl_msg_set_command_name("%s", argv[0]);
-    if (!cvtool_getopt(argc, argv, options, 0, 0, NULL))
+    if (!cvl_getopt(argc, argv, options, 0, 0, NULL))
     {
 	return 1;
     }

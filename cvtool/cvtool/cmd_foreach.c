@@ -39,8 +39,6 @@ extern int errno;
 
 #include <cvl/cvl.h>
 
-#include "options.h"
-
 
 void cmd_foreach_print_help(void)
 {
@@ -101,13 +99,13 @@ char *string_replace(char *str, const char *s, const char *r)
 
 int cmd_foreach(int argc, char *argv[])
 {
-    option_string_t shell = { NULL, NULL };
-    option_int_t n = { 1, 1, INT_MAX };
-    option_t options[] =
+    cvl_option_string_t shell = { NULL, NULL };
+    cvl_option_int_t n = { 1, 1, INT_MAX };
+    cvl_option_t options[] =
     {
-	{ "shell",   's', OPTION_STRING, &shell, false },
-	{ "n",       'n', OPTION_INT,    &n,     false },
-	null_option
+	{ "shell",   's', CVL_OPTION_STRING, &shell, false },
+	{ "n",       'n', CVL_OPTION_INT,    &n,     false },
+	cvl_option_null
     };
     int argument_index;
     char *cmd;
@@ -134,7 +132,7 @@ int cmd_foreach(int argc, char *argv[])
 
     
     cvl_msg_set_command_name("%s", argv[0]);
-    if (!cvtool_getopt(argc, argv, options, 1, 1, &argument_index))
+    if (!cvl_getopt(argc, argv, options, 1, 1, &argument_index))
     {
 	return 1;
     }

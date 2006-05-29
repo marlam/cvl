@@ -30,8 +30,6 @@
 
 #include <cvl/cvl.h>
 
-#include "options.h"
-
 
 void cmd_color_print_help(void)
 {
@@ -57,19 +55,19 @@ void cmd_color_print_help(void)
 
 int cmd_color(int argc, char *argv[])
 {
-    option_double_t h = { 0.0, -DBL_MAX, true, DBL_MAX, true };
-    option_double_t s = { 0.0, -1.0, true, DBL_MAX, true };
-    option_double_t l = { 0.0, -1.0, true, DBL_MAX, true };
-    option_double_t c = { 0.0, -1.0, true, DBL_MAX, true };
-    option_double_array_t g = { NULL, 0, NULL, 1, NULL };
-    option_t options[] = 
+    cvl_option_double_t h = { 0.0, -DBL_MAX, true, DBL_MAX, true };
+    cvl_option_double_t s = { 0.0, -1.0, true, DBL_MAX, true };
+    cvl_option_double_t l = { 0.0, -1.0, true, DBL_MAX, true };
+    cvl_option_double_t c = { 0.0, -1.0, true, DBL_MAX, true };
+    cvl_option_double_array_t g = { NULL, 0, NULL, 1, NULL };
+    cvl_option_t options[] = 
     { 
-	{ "hue",        'h', OPTION_DOUBLE,        &h, false },
-	{ "saturation", 's', OPTION_DOUBLE,        &s, false },
-	{ "lightness",  'l', OPTION_DOUBLE,        &l, false },
-	{ "contrast",   'c', OPTION_DOUBLE,        &c, false },
-	{ "gamma",      'g', OPTION_DOUBLE_ARRAY,  &g, false },
-	null_option 
+	{ "hue",        'h', CVL_OPTION_DOUBLE,        &h, false },
+	{ "saturation", 's', CVL_OPTION_DOUBLE,        &s, false },
+	{ "lightness",  'l', CVL_OPTION_DOUBLE,        &l, false },
+	{ "contrast",   'c', CVL_OPTION_DOUBLE,        &c, false },
+	{ "gamma",      'g', CVL_OPTION_DOUBLE_ARRAY,  &g, false },
+	cvl_option_null 
     };
     bool do_color, do_gamma;
     cvl_io_info_t *input_info;    
@@ -78,7 +76,7 @@ int cmd_color(int argc, char *argv[])
     bool error;
 
     cvl_msg_set_command_name("%s", argv[0]);    
-    error = !cvtool_getopt(argc, argv, options, 0, 0, NULL);
+    error = !cvl_getopt(argc, argv, options, 0, 0, NULL);
     if (!error)
     {
 	if (g.value)

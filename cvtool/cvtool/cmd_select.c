@@ -37,8 +37,6 @@
 
 #include <cvl/cvl.h>
 
-#include "options.h"
-
 
 void cmd_select_print_help(void)
 {
@@ -372,11 +370,11 @@ bool frameno_in_range(framerange_t *ranges, int ranges_len, int *ranges_index, l
 
 int cmd_select(int argc, char *argv[])
 {
-    option_bool_t drop = { false, true };
-    option_t options[] =
+    cvl_option_bool_t drop = { false, true };
+    cvl_option_t options[] =
     {
-	{ "drop", 'd', OPTION_BOOL, &drop, false },
-	null_option
+	{ "drop", 'd', CVL_OPTION_BOOL, &drop, false },
+	cvl_option_null
     };
     int first_argument;		/* index in argv where the first range string is stored */
     bool ranges_parsed;
@@ -394,7 +392,7 @@ int cmd_select(int argc, char *argv[])
 
     
     cvl_msg_set_command_name("%s", argv[0]);
-    if (!cvtool_getopt(argc, argv, options, 1, -1, &first_argument))
+    if (!cvl_getopt(argc, argv, options, 1, -1, &first_argument))
     {
 	return 1;
     }

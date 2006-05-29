@@ -31,8 +31,6 @@
 
 #include <cvl/cvl.h>
 
-#include "options.h"
-
 
 void cmd_edge_print_help(void)
 {
@@ -51,16 +49,16 @@ int cmd_edge(int argc, char *argv[])
 {
     typedef enum { SOBEL, CANNY } subcommand_t;
     subcommand_t subcommand;
-    option_t sobel_options[] = { null_option };
-    option_double_t canny_sigma = { -1.0, 0.0, false, DBL_MAX, true };
-    option_int_t canny_tl = { -1, 0, 255 };
-    option_int_t canny_th = { -1, 0, 255 };
-    option_t canny_options[] =
+    cvl_option_t sobel_options[] = { cvl_option_null };
+    cvl_option_double_t canny_sigma = { -1.0, 0.0, false, DBL_MAX, true };
+    cvl_option_int_t canny_tl = { -1, 0, 255 };
+    cvl_option_int_t canny_th = { -1, 0, 255 };
+    cvl_option_t canny_options[] =
     {
-	{ "sigma",  's', OPTION_DOUBLE, &canny_sigma, true },
-	{ "low",    'l', OPTION_INT,    &canny_tl,    true },
-	{ "high",   'h', OPTION_INT,    &canny_th,    true },
-	null_option
+	{ "sigma",  's', CVL_OPTION_DOUBLE, &canny_sigma, true },
+	{ "low",    'l', CVL_OPTION_INT,    &canny_tl,    true },
+	{ "high",   'h', CVL_OPTION_INT,    &canny_th,    true },
+	cvl_option_null
     };
     cvl_io_info_t *input_info;    
     cvl_io_info_t *output_info;
@@ -78,13 +76,13 @@ int cmd_edge(int argc, char *argv[])
     {
 	subcommand = SOBEL;
 	cvl_msg_set_command_name("%s %s", argv[0], argv[1]);
-	error = !cvtool_getopt(argc - 1, &(argv[1]), sobel_options, 0, 0, NULL);
+	error = !cvl_getopt(argc - 1, &(argv[1]), sobel_options, 0, 0, NULL);
     }
     else if (strcmp(argv[1], "canny") == 0)
     {
 	subcommand = CANNY;
 	cvl_msg_set_command_name("%s %s", argv[0], argv[1]);
-	error = !cvtool_getopt(argc - 1, &(argv[1]), canny_options, 0, 0, NULL);
+	error = !cvl_getopt(argc - 1, &(argv[1]), canny_options, 0, 0, NULL);
     }
     else
     {

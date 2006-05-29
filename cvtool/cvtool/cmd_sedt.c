@@ -31,8 +31,6 @@
 
 #include "xalloc.h"
 
-#include "options.h"
-
 
 void cmd_sedt_print_help(void)
 {
@@ -62,18 +60,18 @@ bool write_int(char *s, size_t s_size, const int *i)
 
 int cmd_sedt(int argc, char *argv[])
 {
-    option_bool_t three_dimensional = { false, true };
-    option_t options[] = 
+    cvl_option_bool_t three_dimensional = { false, true };
+    cvl_option_t options[] = 
     { 
-	{ "3d", '3', OPTION_BOOL, &three_dimensional, false },
-	null_option 
+	{ "3d", '3', CVL_OPTION_BOOL, &three_dimensional, false },
+	cvl_option_null 
     };
     cvl_io_info_t *input_info;    
     cvl_io_info_t *output_info;
     bool error;
 
     cvl_msg_set_command_name("%s", argv[0]);    
-    if (!cvtool_getopt(argc, argv, options, 0, 0, NULL))
+    if (!cvl_getopt(argc, argv, options, 0, 0, NULL))
     {
 	return 1;
     }

@@ -5,6 +5,7 @@ EXTRA_DIST = \
 	cvl_assert.c \
 	cvl_msg.c \
 	cvl_math.c \
+	cvl_getopt.c \
 	cvl_pixel.c \
 	cvl_vector.c \
 	cvl_field.c \
@@ -29,6 +30,7 @@ nobase_include_HEADERS = \
 	cvl/cvl_msg.h \
 	cvl/cvl_assert.h \
 	cvl/cvl_math.h \
+	cvl/cvl_getopt.h \
 	cvl/cvl_pixel.h \
 	cvl/cvl_vector.h \
 	cvl/cvl_field.h \

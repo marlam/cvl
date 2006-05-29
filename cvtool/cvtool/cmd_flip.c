@@ -28,8 +28,6 @@
 
 #include <cvl/cvl.h>
 
-#include "options.h"
-
 
 void cmd_flip_print_help(void)
 {
@@ -42,14 +40,14 @@ void cmd_flip_print_help(void)
 
 int cmd_flip(int argc, char *argv[] UNUSED)
 {
-    option_t options[] = { null_option };
+    cvl_option_t options[] = { cvl_option_null };
     cvl_io_info_t *input_info;    
     cvl_io_info_t *output_info;
     cvl_frame_t *frame, *flipped_frame;
     bool error;
 
     cvl_msg_set_command_name("%s", argv[0]);    
-    if (!cvtool_getopt(argc, argv, options, 0, 0, NULL))
+    if (!cvl_getopt(argc, argv, options, 0, 0, NULL))
     {
 	return 1;
     }

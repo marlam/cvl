@@ -28,8 +28,6 @@
 
 #include <cvl/cvl.h>
 
-#include "options.h"
-
 
 void cmd_info_print_help(void)
 {
@@ -46,18 +44,18 @@ void cmd_info_print_help(void)
 
 int cmd_info(int argc, char *argv[])
 {
-    option_file_t output = { NULL, "w", true };
-    option_t options[] = 
+    cvl_option_file_t output = { NULL, "w", true };
+    cvl_option_t options[] = 
     {
-	{ "output", 'o', OPTION_FILE, &output, false },
-	null_option
+	{ "output", 'o', CVL_OPTION_FILE, &output, false },
+	cvl_option_null
     };
     cvl_io_info_t *input_info;    
     cvl_frame_t *frame;
     bool error;
 
     cvl_msg_set_command_name("%s", argv[0]);    
-    if (!cvtool_getopt(argc, argv, options, 0, 0, NULL))
+    if (!cvl_getopt(argc, argv, options, 0, 0, NULL))
     {
 	return 1;
     }

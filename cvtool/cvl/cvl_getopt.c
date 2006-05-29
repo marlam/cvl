@@ -1,7 +1,7 @@
 /*
- * options.c
+ * cvl_getopt.c
  * 
- * This file is part of cvtool, a computer vision tool.
+ * This file is part of CVL, a computer vision library.
  *
  * Copyright (C) 2005, 2006  Martin Lambers <marlam@marlam.de>
  *
@@ -18,6 +18,14 @@
  *   You should have received a copy of the GNU General Public License
  *   along with this program; if not, write to the Free Software Foundation,
  *   Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+ */
+
+/**
+ * \file cvl_getopt.h
+ * \brief Handling command line options and arguments.
+ *
+ * Convenient handling of command line options and arguments that are typical
+ * for programs using CVL. 
  */
 
 #include "config.h"
@@ -37,18 +45,211 @@ extern int opterr;
 
 #include "xalloc.h"
 
-#include <cvl/cvl.h>
+#include "cvl/cvl_msg.h"
+#include "cvl/cvl_math.h"
+#include "cvl/cvl_color.h"
+#include "cvl/cvl_getopt.h"
+#include "cvl/cvl_assert.h"
 
-#include "options.h"
 
+/**
+ * This is the "End of option list" marker.
+ */
+const cvl_option_t cvl_option_null = { NULL, '\0', 0, NULL, false };
 
-const option_t null_option = { NULL, '\0', 0, NULL, false };
+/**
+ * Maximum allowed value for k values that define mask sizes or kernels so that
+ * the maximum real mask/kernel size (2k+1 * 2k+1 * 2k+1) will not overflow an
+ * int. This is not the highest possible value, but it is good enough. 
+ */
+const int CVL_MASKSIZE_K_MAX = (1 << (((sizeof(int) * CHAR_BIT - 1) / 3) - 1));
+
+/**
+ * \typedef cvl_option_type_t
+ *
+ * Type of an option.
+ */
+/** \var CVL_OPTION_BOOL
+ *  Boolean option: yes/no, on/off, 1/0, true/false. */
+/** \var CVL_OPTION_INT
+ *  Integer option. */
+/** \var CVL_OPTION_DOUBLE
+ *  Double option. */
+/** \var CVL_OPTION_INT_ARRAY
+ *  Array of integers option: a (possibly multidimensional) array with int values. */
+/** \var CVL_OPTION_DOUBLE_ARRAY
+ *  Array of doubles option: a (possibly multidimensional) array with double values. */
+/** \var CVL_OPTION_NAME
+ *  Name option: a string from a set of valid names. */
+/** \var CVL_OPTION_STRING
+ *  String option: may contain everything */
+/** \var CVL_OPTION_FILE
+ *  File option: a filename. */
+/** \var CVL_OPTION_COLOR
+ *  Color option. */
+/** \var CVL_OPTION_RATIO
+ *  Ratio option: a ratio of two integers: "x1:x2" */
+
+/**
+ * \struct cvl_option_bool_t
+ * \brief A boolean option. 
+ * 
+ * A boolean option. 
+ */
+/** \var cvl_option_bool_t::value
+ *  The default value. May be overwritten by cvl_getopt(). */
+/** \var cvl_option_bool_t::default_value
+ *  The value to use when the option has no explicit argument. */
+
+/**
+ * \struct cvl_option_int_t
+ * \brief An integer option.
+ * 
+ * An integer option.
+ */
+/** \var cvl_option_int_t::value
+ *  The default value. May be overwritten by cvl_getopt(). */
+/** \var cvl_option_int_t::min_value
+ *  Minimum allowed value. */
+/** \var cvl_option_int_t::max_value
+ *  Maximum allowed value. */
+
+/**
+ * \struct cvl_option_double_t
+ * \brief A double option.
+ * 
+ * A double option.
+ */
+/** \var cvl_option_double_t::value
+ *  The default value. May be overwritten by cvl_getopt(). */
+/** \var cvl_option_double_t::lower_bound
+ *  Lower bound for the value. */
+/** \var cvl_option_double_t::lower_bound_inclusive
+ *  Whether the lower bound is inclusive or not */
+/** \var cvl_option_double_t::higher_bound
+ *  Higher bound for the value. */
+/** \var cvl_option_double_t::higher_bound_inclusive
+ *  Whether the higher bound is inclusive or not */
+
+/**
+ * \struct cvl_option_int_array_t
+ * \brief An integer array option.
+ * 
+ * An integer array option.
+ */
+/** \var cvl_option_int_array_t::value
+ *  The default value. May be overwritten by cvl_getopt(). */
+/** \var cvl_option_int_array_t::value_dimensions
+ *  The number of dimensions of the default value. May be overwritten by cvl_getopt(). */
+/** \var cvl_option_int_array_t::value_sizes
+ *  The sizes of the default value in each dimension. May be overwritten by cvl_getopt(). */
+/** \var cvl_option_int_array_t::dimensions
+ *  Number of dimensions that the array must have. Usually 1, 2, or 3. If set to
+ *  zero, the user can choose. */
+/** \var cvl_option_int_array_t::sizes
+ *  Sizes in each dimension that the array must have. For example {2, 2} for a
+ *  2x2 matrix. If set to NULL, the user can choose. */
+
+/**
+ * \struct cvl_option_double_array_t
+ * \brief A double array option.
+ * 
+ * A double array option.
+ */
+/** \var cvl_option_double_array_t::value
+ *  The default value. May be overwritten by cvl_getopt(). */
+/** \var cvl_option_double_array_t::value_dimensions
+ *  The number of dimensions of the default value. May be overwritten by cvl_getopt(). */
+/** \var cvl_option_double_array_t::value_sizes
+ *  The sizes of the default value in each dimension. May be overwritten by cvl_getopt(). */
+/** \var cvl_option_double_array_t::dimensions
+ *  Number of dimensions that the array must have. Usually 1, 2, or 3. If set to
+ *  zero, the user can choose. */
+/** \var cvl_option_double_array_t::sizes
+ *  Sizes in each dimension that the array must have. For example {2, 2} for a
+ *  2x2 matrix. If set to NULL, the user can choose. */
+
+/**
+ * \struct cvl_option_name_t
+ * \brief A name option.
+ * 
+ * A name option.
+ */
+/** \var cvl_option_name_t::value
+ *  The default value. May be overwritten by cvl_getopt().
+ *  The value is an index into the array \a cvl_option_name_t::valid_values. */
+/** \var cvl_option_name_t::valid_values
+ *  A NULL-terminated array of valid strings. */
+
+/**
+ * \struct cvl_option_string_t
+ * \brief A string option.
+ * 
+ * A string option.
+ */
+/** \var cvl_option_string_t::value
+ *  The default value. May be overwritten by cvl_getopt(). */
+/** \var cvl_option_string_t::is_valid
+ *  Function to check whether a string is valid for this option. If NULL, every
+ *  string will be accepted. */
+
+/**
+ * \struct cvl_option_file_t
+ * \brief A file option.
+ * 
+ * A file option.
+ */
+/** \var cvl_option_file_t::value
+ *  The default value. May be overwritten by cvl_getopt(). This value will
+ *  usually be NULL, but can also be stdin or stdout for example. */
+/** \var cvl_option_file_t::mode
+ *  Mode to open the file with, see fopen(). */
+/** \var cvl_option_file_t::dash_means_stdinout
+ *  If true, the filename "-" means stdout (if \a cvl_option_file_t::mode contains 'w')
+ *  or stdin (if \a cvl_option_file_t::mode contains 'r'). */
+
+/**
+ * \struct cvl_option_color_t
+ * \brief A color option.
+ * 
+ * A color option.
+ */
+/** \var cvl_option_color_t::value
+ *  The default value. May be overwritten by cvl_getopt(). */
+
+/**
+ * \struct cvl_option_ratio_t
+ * \brief A ratio option.
+ * 
+ * A ratio option.
+ */
+/** \var cvl_option_ratio_t::value1
+ *  The default value 1. May be overwritten by cvl_getopt(). */
+/** \var cvl_option_ratio_t::value2
+ *  The default value 2. May be overwritten by cvl_getopt(). */
+
+/**
+ * \struct cvl_option_t
+ * \brief An option description.
+ *
+ * An option description.
+ */
+/** \var cvl_option_t::long_name
+ *  Long name of the option, or NULL if no long name exists. */
+/** \var cvl_option_t::short_name
+ *  Short name of the option, or NULL if no short name exists. */
+/** \var cvl_option_t::type
+ *  Type of the option. */
+/** \var cvl_option_t::option_struct
+ *  Pointer to the appropriate struct for this option type. */
+/** \var cvl_option_t::mandatory
+ *  Whether this option is mandatory (or optional). */
 
 
 /*
  * Error message helper.
  */
-void cvtool_getopt_msg_invalid_arg(option_t *options, int optval, bool option_shortname)
+static void cvl_getopt_msg_invalid_arg(cvl_option_t *options, int optval, bool option_shortname)
 {
     if (option_shortname)
     {
@@ -63,7 +264,7 @@ void cvtool_getopt_msg_invalid_arg(option_t *options, int optval, bool option_sh
 /*
  * Helper for array parsing, independent of int or double.
  */
-bool cvtool_getopt_parse_array_info(char *s, 
+static bool cvl_getopt_parse_array_info(char *s, 
 	int allowed_dimensions, const int *allowed_sizes, 
 	char **p, int *number_of_values,
 	int *dimensions, int **sizes)
@@ -189,15 +390,38 @@ bool cvtool_getopt_parse_array_info(char *s,
 }
 
 
-/*
- * cvtool_getopt()
+/**
+ * \param argc			Argument count.
+ * \param argv			Argument vector.
+ * \param options		Array of option definitions.
+ * \param min_nonopt_args	Minimum number of required non-option arguments.
+ * \param max_nonopt_args	Maximum number of required non-option arguments, or -1.
+ * \param argument_ind		Storage space for the index of the first non-option argument, or NULL.
+ * \return 			Success or error.
  *
- * see options.h
+ * Parses the command line given by \a argc and \a argv and processes the
+ * options defined in the array \a options, which must be terminated with \a
+ * cvl_option_null. The minimum and maximum number of required non-option
+ * arguments can be given in \a min_nonopt_args and \a max_nonopt_args. If \a
+ * max_nonopt_args is -1, any number of non-option arguments is accepted. If
+ * \a argument_ind is not NULL, then the index of the first non-option argument
+ * will be stored in it, allowing easy access to all non-option arguments
+ * (since GNU getopt() is used, the command line arguments are reordered so 
+ * that all non-option arguments appear after the option arguments).
+ * If the command line is invalid, this function prints an informative error
+ * message and returns false. The contents of \a argument_ind are undefined in
+ * this case. If the command line is valid, the option values will be filled
+ * into \a options, and true is returned.
  */
-
-bool cvtool_getopt(int argc, char *argv[], option_t *options, 
+bool cvl_getopt(int argc, char *argv[], cvl_option_t *options,
 	int min_nonopt_args, int max_nonopt_args, int *argument_ind)
 {
+    cvl_assert(argc >= 0);
+    cvl_assert(argv != NULL);
+    cvl_assert(options != NULL);
+    cvl_assert(min_nonopt_args >= 0);
+    cvl_assert(max_nonopt_args >= -1);
+
     int longopt_count;		/* Number of long options == number of options */
     int longopt_ind;		/* Index in options and longoptions */
     int shortopt_count;		/* Number of short options <= number of options */
@@ -245,7 +469,7 @@ bool cvtool_getopt(int argc, char *argv[], option_t *options,
     for (longopt_ind = 0; longopt_ind < longopt_count; longopt_ind++)
     {
 	longopts[longopt_ind].name = options[longopt_ind].long_name;
-	if (options[longopt_ind].type == OPTION_BOOL)
+	if (options[longopt_ind].type == CVL_OPTION_BOOL)
 	{
 	    longopts[longopt_ind].has_arg = optional_argument;
 	}
@@ -261,7 +485,7 @@ bool cvtool_getopt(int argc, char *argv[], option_t *options,
 	    shortopt_opt_ind[shortopts_ind] = longopt_ind;
 	    shortopts_ind++;
 	    shortopts[shortopts_ind++] = ':';
-	    if (options[longopt_ind].type == OPTION_BOOL)
+	    if (options[longopt_ind].type == CVL_OPTION_BOOL)
 	    {
 		shortopts[shortopts_ind++] = ':';
 	    }		
@@ -319,9 +543,9 @@ bool cvtool_getopt(int argc, char *argv[], option_t *options,
 	}
 	/* options[optval] is the original description of the current option. */
 	option_was_seen[optval] = true;
-	if (options[optval].type == OPTION_BOOL)
+	if (options[optval].type == CVL_OPTION_BOOL)
 	{
-	    option_bool_t *option_struct = options[optval].option_struct;
+	    cvl_option_bool_t *option_struct = options[optval].option_struct;
 	    if (!optarg)
 	    {
 		option_struct->value = option_struct->default_value;
@@ -338,13 +562,13 @@ bool cvtool_getopt(int argc, char *argv[], option_t *options,
 	    }
 	    else
 	    {
-		cvtool_getopt_msg_invalid_arg(options, optval, option_shortname);
+		cvl_getopt_msg_invalid_arg(options, optval, option_shortname);
 		error = true;
 	    }
 	}
-	else if (options[optval].type == OPTION_INT)
+	else if (options[optval].type == CVL_OPTION_INT)
 	{
-	    option_int_t *option_struct = options[optval].option_struct;
+	    cvl_option_int_t *option_struct = options[optval].option_struct;
 	    long value;
 	    char *endptr;
 
@@ -355,7 +579,7 @@ bool cvtool_getopt(int argc, char *argv[], option_t *options,
 		    || value < (long)option_struct->min_value
 		    || value > (long)option_struct->max_value)
 	    {
-		cvtool_getopt_msg_invalid_arg(options, optval, option_shortname);
+		cvl_getopt_msg_invalid_arg(options, optval, option_shortname);
 		error = true;
 	    }
 	    else
@@ -363,9 +587,9 @@ bool cvtool_getopt(int argc, char *argv[], option_t *options,
 		option_struct->value = (int)value;
 	    }
 	}
-	else if (options[optval].type == OPTION_DOUBLE)
+	else if (options[optval].type == CVL_OPTION_DOUBLE)
 	{
-	    option_double_t *option_struct = options[optval].option_struct;
+	    cvl_option_double_t *option_struct = options[optval].option_struct;
 	    double value;
 	    char *endptr;
 
@@ -378,7 +602,7 @@ bool cvtool_getopt(int argc, char *argv[], option_t *options,
 		    || (option_struct->higher_bound_inclusive && value > option_struct->higher_bound)
 		    || (!option_struct->higher_bound_inclusive && value >= option_struct->higher_bound))
 	    {
-		cvtool_getopt_msg_invalid_arg(options, optval, option_shortname);
+		cvl_getopt_msg_invalid_arg(options, optval, option_shortname);
 		error = true;
 	    }
 	    else
@@ -386,59 +610,9 @@ bool cvtool_getopt(int argc, char *argv[], option_t *options,
 		option_struct->value = value;
 	    }
 	}
-	else if (options[optval].type == OPTION_NAME)
+	else if (options[optval].type == CVL_OPTION_INT_ARRAY)
 	{
-	    option_name_t *option_struct = options[optval].option_struct;
-	    bool found = false;
-	    int i = 0;
-	    while (!found && option_struct->valid_values[i])
-	    {
-		if (strcmp(optarg, option_struct->valid_values[i]) == 0)
-		{
-		    option_struct->value = i;
-		    found = true;
-		}
-		i++;
-	    }
-	    if (!found)
-	    {
-		cvtool_getopt_msg_invalid_arg(options, optval, option_shortname);
-		error = true;
-	    }
-	}
-	else if (options[optval].type == OPTION_FILE)
-	{
-	    option_file_t *option_struct = options[optval].option_struct;
-	    if (option_struct->dash_means_stdinout && strcmp(optarg, "-") == 0)
-	    {
-		if (strchr(option_struct->mode, 'w'))
-		{
-		    option_struct->value = stdout;
-		}
-		else // assume that mode contains 'r'
-		{
-		    option_struct->value = stdin;
-		}
-	    }
-	    else if (!(option_struct->value = fopen(optarg, option_struct->mode)))
-	    {
-		cvl_msg_err("%s: %s", optarg, strerror(errno));
-		cvtool_getopt_msg_invalid_arg(options, optval, option_shortname);
-		error = true;
-	    }
-	}
-	else if (options[optval].type == OPTION_COLOR)
-	{
-	    option_color_t *option_struct = options[optval].option_struct;
-	    if (!cvl_color_from_string(optarg, &(option_struct->value)))
-	    {
-		cvtool_getopt_msg_invalid_arg(options, optval, option_shortname);
-		error = true;
-	    }
-	}
-	else if (options[optval].type == OPTION_INT_ARRAY)
-	{
-	    option_int_array_t *option_struct = options[optval].option_struct;
+	    cvl_option_int_array_t *option_struct = options[optval].option_struct;
 	    int number_of_values;
 	    char *p, *q;
 	    
@@ -446,7 +620,7 @@ bool cvtool_getopt(int argc, char *argv[], option_t *options,
 	    option_struct->value = NULL;
     	    free(option_struct->value_sizes);
 	    option_struct->value_sizes = NULL;
-	    error = !cvtool_getopt_parse_array_info(optarg,
+	    error = !cvl_getopt_parse_array_info(optarg,
 		    option_struct->dimensions, option_struct->sizes,
 		    &p, &number_of_values,
 		    &(option_struct->value_dimensions),
@@ -472,15 +646,15 @@ bool cvtool_getopt(int argc, char *argv[], option_t *options,
 	    }
 	    if (error)
     	    {
-		cvtool_getopt_msg_invalid_arg(options, optval, option_shortname);
+		cvl_getopt_msg_invalid_arg(options, optval, option_shortname);
 		option_struct->value = NULL;
 		free(option_struct->value_sizes);
 		option_struct->value_sizes = NULL;
 	    }
 	}
-	else if (options[optval].type == OPTION_DOUBLE_ARRAY)
+	else if (options[optval].type == CVL_OPTION_DOUBLE_ARRAY)
 	{
-	    option_double_array_t *option_struct = options[optval].option_struct;
+	    cvl_option_double_array_t *option_struct = options[optval].option_struct;
 	    int number_of_values;
 	    char *p, *q;
 	    
@@ -488,7 +662,7 @@ bool cvtool_getopt(int argc, char *argv[], option_t *options,
     	    option_struct->value = NULL;
     	    free(option_struct->value_sizes);
 	    option_struct->value_sizes = NULL;
-	    error = !cvtool_getopt_parse_array_info(optarg,
+	    error = !cvl_getopt_parse_array_info(optarg,
 		    option_struct->dimensions, option_struct->sizes,
 		    &p, &number_of_values,
 		    &(option_struct->value_dimensions),
@@ -513,15 +687,78 @@ bool cvtool_getopt(int argc, char *argv[], option_t *options,
 	    }
 	    if (error)
     	    {
-		cvtool_getopt_msg_invalid_arg(options, optval, option_shortname);
+		cvl_getopt_msg_invalid_arg(options, optval, option_shortname);
 		option_struct->value = NULL;
 		free(option_struct->value_sizes);
 		option_struct->value_sizes = NULL;
 	    }
 	}
-	else if (options[optval].type == OPTION_RATIO)
+	else if (options[optval].type == CVL_OPTION_NAME)
 	{
-	    option_ratio_t *option_struct = options[optval].option_struct;
+	    cvl_option_name_t *option_struct = options[optval].option_struct;
+	    bool found = false;
+	    int i = 0;
+	    while (!found && option_struct->valid_values[i])
+	    {
+		if (strcmp(optarg, option_struct->valid_values[i]) == 0)
+		{
+		    option_struct->value = i;
+		    found = true;
+		}
+		i++;
+	    }
+	    if (!found)
+	    {
+		cvl_getopt_msg_invalid_arg(options, optval, option_shortname);
+		error = true;
+	    }
+	}
+	else if (options[optval].type == CVL_OPTION_STRING)
+	{
+	    cvl_option_string_t *option_struct = options[optval].option_struct;
+	    if (option_struct->is_valid && !option_struct->is_valid(optarg))
+	    {
+		cvl_getopt_msg_invalid_arg(options, optval, option_shortname);
+		error = true;
+	    }
+	    else
+	    {
+		option_struct->value = optarg;
+	    }
+	}
+	else if (options[optval].type == CVL_OPTION_FILE)
+	{
+	    cvl_option_file_t *option_struct = options[optval].option_struct;
+	    if (option_struct->dash_means_stdinout && strcmp(optarg, "-") == 0)
+	    {
+		if (strchr(option_struct->mode, 'w'))
+		{
+		    option_struct->value = stdout;
+		}
+		else // assume that mode contains 'r'
+		{
+		    option_struct->value = stdin;
+		}
+	    }
+	    else if (!(option_struct->value = fopen(optarg, option_struct->mode)))
+	    {
+		cvl_msg_err("%s: %s", optarg, strerror(errno));
+		cvl_getopt_msg_invalid_arg(options, optval, option_shortname);
+		error = true;
+	    }
+	}
+	else if (options[optval].type == CVL_OPTION_COLOR)
+	{
+	    cvl_option_color_t *option_struct = options[optval].option_struct;
+	    if (!cvl_color_from_string(optarg, &(option_struct->value)))
+	    {
+		cvl_getopt_msg_invalid_arg(options, optval, option_shortname);
+		error = true;
+	    }
+	}
+	else if (options[optval].type == CVL_OPTION_RATIO)
+	{
+	    cvl_option_ratio_t *option_struct = options[optval].option_struct;
 	    char *p, *s = optarg;
 	    long v1, v2;
 	    error = true;
@@ -542,20 +779,7 @@ bool cvtool_getopt(int argc, char *argv[], option_t *options,
 	    }
 	    if (error)
 	    {
-		cvtool_getopt_msg_invalid_arg(options, optval, option_shortname);
-	    }
-	}
-	else if (options[optval].type == OPTION_STRING)
-	{
-	    option_string_t *option_struct = options[optval].option_struct;
-	    if (option_struct->is_valid && !option_struct->is_valid(optarg))
-	    {
-		cvtool_getopt_msg_invalid_arg(options, optval, option_shortname);
-		error = true;
-	    }
-	    else
-	    {
-		option_struct->value = optarg;
+		cvl_getopt_msg_invalid_arg(options, optval, option_shortname);
 	    }
 	}
     }

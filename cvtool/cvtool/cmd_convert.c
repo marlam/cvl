@@ -28,8 +28,6 @@
 
 #include <cvl/cvl.h>
 
-#include "options.h"
-
 
 void cmd_convert_print_help(void)
 {
@@ -50,20 +48,20 @@ void cmd_convert_print_help(void)
 int cmd_convert(int argc, char *argv[])
 {
     const char *output_type_names[] = { "y4m", "pnm", NULL };
-    option_name_t output_type = { -1, output_type_names };
-    option_bool_t gray = { false, true };
+    cvl_option_name_t output_type = { -1, output_type_names };
+    cvl_option_bool_t gray = { false, true };
     const char *chroma_names[] = { "420jpeg", "444", NULL };
-    option_name_t chroma = { -1, chroma_names };
-    option_ratio_t framerate = { -1, -1 };
-    option_ratio_t aspectratio = { -1, -1 };
-    option_t options[] = 
+    cvl_option_name_t chroma = { -1, chroma_names };
+    cvl_option_ratio_t framerate = { -1, -1 };
+    cvl_option_ratio_t aspectratio = { -1, -1 };
+    cvl_option_t options[] = 
     {
-	{ "output-type",  'o', OPTION_NAME,  &output_type, false },
-	{ "gray",         'g', OPTION_BOOL,  &gray,        false },
-	{ "chroma",       'C', OPTION_NAME,  &chroma,      false },
-	{ "framerate",    'F', OPTION_RATIO, &framerate,   false },
-	{ "aspect-ratio", 'A', OPTION_RATIO, &aspectratio, false },
-	null_option
+	{ "output-type",  'o', CVL_OPTION_NAME,  &output_type, false },
+	{ "gray",         'g', CVL_OPTION_BOOL,  &gray,        false },
+	{ "chroma",       'C', CVL_OPTION_NAME,  &chroma,      false },
+	{ "framerate",    'F', CVL_OPTION_RATIO, &framerate,   false },
+	{ "aspect-ratio", 'A', CVL_OPTION_RATIO, &aspectratio, false },
+	cvl_option_null
     };
     cvl_frame_t *frame;
     cvl_io_info_t *input_info;
@@ -72,7 +70,7 @@ int cmd_convert(int argc, char *argv[])
 
     
     cvl_msg_set_command_name("%s", argv[0]);
-    if (!cvtool_getopt(argc, argv, options, 0, 0, NULL))
+    if (!cvl_getopt(argc, argv, options, 0, 0, NULL))
     {
 	return 1;
     }

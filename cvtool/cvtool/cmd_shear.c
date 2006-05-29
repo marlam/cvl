@@ -30,8 +30,6 @@
 
 #include <cvl/cvl.h>
 
-#include "options.h"
-
 
 void cmd_shear_print_help(void)
 {
@@ -48,18 +46,18 @@ void cmd_shear_print_help(void)
 
 int cmd_shear(int argc, char *argv[])
 {
-    option_double_t ax = { 0.0, -90.0, false, 90.0, false };
-    option_double_t ay = { 0.0, -90.0, false, 90.0, false };
-    option_color_t color = { CVL_COLOR_BLACK };
+    cvl_option_double_t ax = { 0.0, -90.0, false, 90.0, false };
+    cvl_option_double_t ay = { 0.0, -90.0, false, 90.0, false };
+    cvl_option_color_t color = { CVL_COLOR_BLACK };
     const char *interpolation_names[] = { "none", "bilinear", NULL };
-    option_name_t interpolation = { 1, interpolation_names };
-    option_t options[] = 
+    cvl_option_name_t interpolation = { 1, interpolation_names };
+    cvl_option_t options[] = 
     {
-	{ "shear-x",       'x', OPTION_DOUBLE, &ax,            false },
-	{ "shear-y",       'y', OPTION_DOUBLE, &ay,            false },
-	{ "color",         'c', OPTION_COLOR, &color,         false },
-	{ "interpolation", 'i', OPTION_NAME,  &interpolation, false },
-	null_option
+	{ "shear-x",       'x', CVL_OPTION_DOUBLE, &ax,            false },
+	{ "shear-y",       'y', CVL_OPTION_DOUBLE, &ay,            false },
+	{ "color",         'c', CVL_OPTION_COLOR, &color,         false },
+	{ "interpolation", 'i', CVL_OPTION_NAME,  &interpolation, false },
+	cvl_option_null
     };
     cvl_io_info_t *input_info;
     cvl_io_info_t *output_info;
@@ -69,7 +67,7 @@ int cmd_shear(int argc, char *argv[])
 
     
     cvl_msg_set_command_name("%s", argv[0]);
-    if (!cvtool_getopt(argc, argv, options, 0, 0, NULL))
+    if (!cvl_getopt(argc, argv, options, 0, 0, NULL))
     {
 	return 1;
     }

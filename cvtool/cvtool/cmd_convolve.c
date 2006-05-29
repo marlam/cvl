@@ -30,8 +30,6 @@
 
 #include <cvl/cvl.h>
 
-#include "options.h"
-
 
 void cmd_convolve_print_help(void)
 {
@@ -48,17 +46,17 @@ void cmd_convolve_print_help(void)
 
 int cmd_convolve(int argc, char *argv[])
 {
-    option_int_array_t K = { NULL, 0, NULL, 0, NULL };
-    option_int_array_t X = { NULL, 0, NULL, 1, NULL };
-    option_int_array_t Y = { NULL, 0, NULL, 1, NULL };
-    option_int_array_t T = { NULL, 0, NULL, 1, NULL };
-    option_t options[] = 
+    cvl_option_int_array_t K = { NULL, 0, NULL, 0, NULL };
+    cvl_option_int_array_t X = { NULL, 0, NULL, 1, NULL };
+    cvl_option_int_array_t Y = { NULL, 0, NULL, 1, NULL };
+    cvl_option_int_array_t T = { NULL, 0, NULL, 1, NULL };
+    cvl_option_t options[] = 
     {
-	{ "kernel",   'K', OPTION_INT_ARRAY, &K, false },
-	{ "vector-x", 'X', OPTION_INT_ARRAY, &X, false },
-	{ "vector-y", 'Y', OPTION_INT_ARRAY, &Y, false },
-	{ "vector-t", 'T', OPTION_INT_ARRAY, &T, false },
-	null_option
+	{ "kernel",   'K', CVL_OPTION_INT_ARRAY, &K, false },
+	{ "vector-x", 'X', CVL_OPTION_INT_ARRAY, &X, false },
+	{ "vector-y", 'Y', CVL_OPTION_INT_ARRAY, &Y, false },
+	{ "vector-t", 'T', CVL_OPTION_INT_ARRAY, &T, false },
+	cvl_option_null
     };
     bool three_dimensional;
     cvl_io_info_t *input_info;    
@@ -66,7 +64,7 @@ int cmd_convolve(int argc, char *argv[])
     bool error;
 
     cvl_msg_set_command_name("%s", argv[0]);
-    error = !cvtool_getopt(argc, argv, options, 0, 0, NULL);
+    error = !cvl_getopt(argc, argv, options, 0, 0, NULL);
     if (!error && (K.value && (X.value || Y.value || T.value)))
     {
 	cvl_msg_err("cannot use kernel and vectors at the same time");
