@@ -21,7 +21,7 @@ cvtool trackdepth -n 451 -d 0,225,450 \
 	nasad000.pgm nasad225.pgm nasad450.pgm > nasad.pgm
 
 # Smooth the depth maps for better image quality
-cvtool smooth gauss -k 3 < nasad.pgm > nasad-smoothed.pgm
+cvtool filter gauss -k 3 < nasad.pgm > nasad-smoothed.pgm
 
 # Depth image based rendering (DIBR)
 cvtool dibr -d nasad-smoothed.pgm -b 8 < nasa.y4m > nasa-stereo.y4m
