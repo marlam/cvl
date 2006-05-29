@@ -278,7 +278,7 @@ inline const void *cvl_field_get_i(const cvl_field_t *field, int i)
 {
     cvl_assert(field != NULL);
     cvl_assert(i >= 0);
-    cvl_assert(i < cvl_field_size);
+    cvl_assert(i < cvl_field_size(field));
 
     return cvl_field_ref_i(field, i);
 }
@@ -334,7 +334,7 @@ inline void cvl_field_set_i(cvl_field_t *field, int i, const void *e)
     cvl_assert(field != NULL);
     cvl_assert(e != NULL);
     cvl_assert(i >= 0);
-    cvl_assert(i < cvl_field_size);
+    cvl_assert(i < cvl_field_size(field));
 
     memcpy(cvl_field_ref_i(field, i), e, cvl_field_element_size(field));
 }
@@ -375,7 +375,7 @@ inline const float *cvl_field_getf_i(const cvl_field_t *field, int i)
 {
     cvl_assert(field != NULL);
     cvl_assert(i >= 0);
-    cvl_assert(i < cvl_field_size);
+    cvl_assert(i < cvl_field_size(size));
 
     return cvl_field_get_i(field, i);
 }
@@ -434,7 +434,7 @@ inline const int *cvl_field_geti_i(const cvl_field_t *field, int i)
 {
     cvl_assert(field != NULL);
     cvl_assert(i >= 0);
-    cvl_assert(i < cvl_field_size);
+    cvl_assert(i < cvl_field_size(field));
 
     return cvl_field_get_i(field, i);
 }

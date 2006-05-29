@@ -2864,6 +2864,7 @@ int cvl_binarize_get_threshold_iterative(cvl_frame_t *frame)
     int s = 128;
     int s_old = 0;
     int skh, sh;
+    double m1, m2;
     int count[256];
 
     cvl_frame_to_gray(frame);
@@ -2871,6 +2872,7 @@ int cvl_binarize_get_threshold_iterative(cvl_frame_t *frame)
 
     while (s_old != s)
     {
+	
 	skh = 0;
 	sh = 0;
     	for (int k = 0; k <= s; k++)
@@ -2878,7 +2880,7 @@ int cvl_binarize_get_threshold_iterative(cvl_frame_t *frame)
 	    skh += k * count[k];
 	    sh += count[k];
 	}
-	double m1 = (double)skh / (double)sh;
+	m1 = (sh > 0 ? (double)skh / (double)sh : 255.0);
 	skh = 0;
 	sh = 0;
 	for (int k = s + 1; k < 256; k++)
@@ -2886,7 +2888,7 @@ int cvl_binarize_get_threshold_iterative(cvl_frame_t *frame)
 	    skh += k * count[k];
 	    sh += count[k];
 	}
-	double m2 = (double)skh / (double)sh;
+	m2 = (sh > 0 ? (double)skh / (double)sh : 255.0);
 	s_old = s;
 	s = (int)(m1 + m2) / 2;
 	if (s < 0)
