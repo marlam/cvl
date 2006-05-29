@@ -58,7 +58,7 @@ dnl notgnulib
 ngl_INIT
 
 dnl optional features
-AC_CHECK_FUNCS(backtrace)
+AC_CHECK_FUNCS(backtrace sigaction)
 
 dnl pkg-config
 PKG_PROG_PKG_CONFIG
