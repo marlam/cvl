@@ -1,4 +1,5 @@
 Version 0.0.3 (not yet released):
+- Export cvl_assert() and cvl_print_backtrace().
 - Added convenience funtions cvl_field_get(i|f)*() for fields that store only
   floats or ints.
 

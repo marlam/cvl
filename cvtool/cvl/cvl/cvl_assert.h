@@ -23,31 +23,29 @@
 #ifndef CVL_ASSERT_H
 #define CVL_ASSERT_H
 
-#include "config.h"
 
+void cvl_print_backtrace(void);
 
-/*
- * cvl_assert(condition)
+/**
+ * \param condition	Condition to assert.
  *
- * This function works like assert(3), except that it uses a cvl_msg_* function
- * to print the error message, and that it is activated by CVL_DEBUG != 0.
+ * This macro works like assert(3), except that it uses a cvl_msg_* function
+ * to print the error message, and that it is activated by defining CVL_DEBUG to
+ * 1. If CVL_DEBUG is undefined or defined to 0, this macro is empty.
  */
 
-#if CVL_DEBUG
+#if defined CVL_DEBUG && CVL_DEBUG
 
 # include <stdlib.h>
 
-# include "cvl/cvl_msg.h"
-
-void print_backtrace(void);
+# include "cvl_msg.h"
 
 # define cvl_assert(condition) \
     if (!(condition)) \
     { \
-	cvl_msg_fmt_err(LIBRARY_NAME ": assertion failed in " \
-		"%s, line %d, function %s():\n\"%s\"", \
+	cvl_msg_fmt_err("assertion failed in %s, line %d, function %s():\n\"%s\"", \
 		__FILE__, __LINE__, __func__, #condition); \
-	print_backtrace(); \
+	cvl_print_backtrace(); \
 	abort(); \
     }
 

@@ -51,7 +51,7 @@
 #include "cvl/cvl_math.h"
 #include "cvl/cvl_color.h"
 #include "cvl/cvl_stereo.h"
-#include "cvl_assert.h"
+#include "cvl/cvl_assert.h"
 
 
 /******************************************************************************

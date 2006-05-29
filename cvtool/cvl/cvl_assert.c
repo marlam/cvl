@@ -20,24 +20,33 @@
  *   Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
+/**
+ * \file cvl_assert.h
+ * \brief Debugging.
+ *
+ * Functions useful to debug both CVL and programs that use CVL.
+ */
+
 #include "config.h"
 
-#include "cvl_assert.h"
+#include "cvl/cvl_assert.h"
 
 
-#if CVL_DEBUG
+#if HAVE_BACKTRACE
 
-# if HAVE_BACKTRACE
+# include <stdlib.h>
+# include <execinfo.h>
 
-#  include <stdlib.h>
-#  include <execinfo.h>
+# include "cvl/cvl_msg.h"
 
-#  include "cvl/cvl_msg.h"
-
-/* Obtain a backtrace and print it. 
- * Adapted from the example in the glibc manual. */
-void print_backtrace(void)
+/**
+ * Obtains a backtrace and prints it. Useful for debugging purposes.
+ * This function currently only works on GNU/Linux. On other systems, it does
+ * nothing.
+ */
+void cvl_print_backtrace(void)
 {
+    /* Adapted from the example in the glibc manual. */
     void *array[64];
     int size;
     char **strings;
@@ -54,12 +63,15 @@ void print_backtrace(void)
     free(strings);
 }
 
-# else
+#else
 
-void print_backtrace(void)
+/**
+ * Obtains a backtrace and prints it. Useful for debugging purposes.
+ * This function currently only works on GNU/Linux. On other systems, it does
+ * nothing.
+ */
+void cvl_print_backtrace(void)
 {
 }
-
-# endif
 
 #endif
