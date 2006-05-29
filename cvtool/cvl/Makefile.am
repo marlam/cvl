@@ -3,7 +3,6 @@ lib_LTLIBRARIES = libcvl.la
 EXTRA_DIST = \
 	cvl/cvl_version.h.in \
 	cvl_assert.c \
-	cvl_assert.h \
 	cvl_msg.c \
 	cvl_math.c \
 	cvl_pixel.c \
@@ -28,6 +27,7 @@ libcvl_la_LIBADD = $(top_builddir)/gnulib/libgnu.la $(top_builddir)/notgnulib/li
 nobase_include_HEADERS = \
 	cvl/cvl_version.h \
 	cvl/cvl_msg.h \
+	cvl/cvl_assert.h \
 	cvl/cvl_math.h \
 	cvl/cvl_pixel.h \
 	cvl/cvl_vector.h \
