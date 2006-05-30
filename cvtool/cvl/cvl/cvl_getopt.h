@@ -41,7 +41,8 @@ typedef enum
     CVL_OPTION_STRING,
     CVL_OPTION_FILE,
     CVL_OPTION_COLOR,
-    CVL_OPTION_RATIO
+    CVL_OPTION_RATIO,
+    CVL_OPTION_INFO
 } cvl_option_type_t;
 
 typedef struct
@@ -113,6 +114,12 @@ typedef struct
     int value1;
     int value2;
 } cvl_option_ratio_t;
+
+typedef struct
+{
+    bool value;
+    void (*function)(void);
+} cvl_option_info_t;
 
 typedef struct
 {

@@ -1,4 +1,6 @@
 Version 0.0.3 (not yet released):
+- CVL: cvl_getopt(): Added the new option type CVL_OPTION_INFO for options that
+  request information, like --help and --version.
 - cvtool: Improve crash messages.
 - cvtool: Adjust --version and --help output to more closely match the latest 
   GNU standards.

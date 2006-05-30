@@ -89,6 +89,9 @@ const int CVL_MASKSIZE_K_MAX = (1 << (((sizeof(int) * CHAR_BIT - 1) / 3) - 1));
  *  Color option. */
 /** \var CVL_OPTION_RATIO
  *  Ratio option: a ratio of two integers: "x1:x2" */
+/** \var CVL_OPTION_INFO
+ *  Info option: If this option is given, a function will be called.
+ *  This is intended to be used for "--help" and "--version". */
 
 /**
  * \struct cvl_option_bool_t
@@ -227,6 +230,22 @@ const int CVL_MASKSIZE_K_MAX = (1 << (((sizeof(int) * CHAR_BIT - 1) / 3) - 1));
  *  The default value 1. May be overwritten by cvl_getopt(). */
 /** \var cvl_option_ratio_t::value2
  *  The default value 2. May be overwritten by cvl_getopt(). */
+
+/**
+ * \strzct cvl_option_info_t.
+ * \brief An info option.
+ *
+ * An info option.
+ */
+/** \var cvl_option_info_t::value
+ *  Whether this option was given. Should be initialized to false, may be
+ *  overwritten by cvl_getopt(). Once some informational option was found
+ *  on the command line, error messages about missing mandatory options or
+ *  about the number of arguments are not printed anymore. The program is
+ *  expected to test if a CVL_OPTION_INFO was used and exit in this case. */
+/** \var cvl_option_info_t::function
+ *  Function to be called when the option is found. The function will only be
+ *  called at most once. */
 
 /**
  * \struct cvl_option_t
@@ -432,8 +451,10 @@ bool cvl_getopt(int argc, char *argv[], cvl_option_t *options,
     int *shortopt_opt_ind;	/* Mapping from index of short options to index of options */
     bool option_shortname;	/* Whether the short name of an option was used */
     bool *option_was_seen;	/* Whether option i was used */
+    bool info_option_was_seen;	/* Whether an option of type CVL_OPTION_INFO was seen */
     bool error;
     
+    info_option_was_seen = false;
     longopt_count = 0;
     shortopt_count = 0;
     optval_base = 0;
@@ -473,6 +494,10 @@ bool cvl_getopt(int argc, char *argv[], cvl_option_t *options,
 	{
 	    longopts[longopt_ind].has_arg = optional_argument;
 	}
+	else if (options[longopt_ind].type == CVL_OPTION_INFO)
+	{
+	    longopts[longopt_ind].has_arg = no_argument;
+	}
 	else
 	{
 	    longopts[longopt_ind].has_arg = required_argument;
@@ -484,11 +509,21 @@ bool cvl_getopt(int argc, char *argv[], cvl_option_t *options,
 	    shortopts[shortopts_ind] = options[longopt_ind].short_name;
 	    shortopt_opt_ind[shortopts_ind] = longopt_ind;
 	    shortopts_ind++;
-	    shortopts[shortopts_ind++] = ':';
 	    if (options[longopt_ind].type == CVL_OPTION_BOOL)
 	    {
+		// optional_argument
+		shortopts[shortopts_ind++] = ':';
 		shortopts[shortopts_ind++] = ':';
 	    }		
+	    else if (options[longopt_ind].type == CVL_OPTION_INFO)
+	    {
+		// no_argument
+	    }
+	    else
+	    {
+		// required_argument
+		shortopts[shortopts_ind++] = ':';
+	    }
 	}
     }
     shortopts[shortopts_ind] = '\0';
@@ -782,10 +817,21 @@ bool cvl_getopt(int argc, char *argv[], cvl_option_t *options,
 		cvl_getopt_msg_invalid_arg(options, optval, option_shortname);
 	    }
 	}
+	else if (options[optval].type == CVL_OPTION_INFO)
+	{
+	    cvl_option_info_t *option_struct = options[optval].option_struct;
+	    if (!option_struct->value)
+	    {
+		// do not call the function more than once
+		option_struct->function();
+	    }
+	    option_struct->value = true;	    
+	    info_option_was_seen = true;
+	}
     }
     
     /* Test if all mandatory options were seen */
-    if (!error)
+    if (!error && !info_option_was_seen)
     {
 	for (int i = 0; i < longopt_count; i++)
 	{
@@ -808,7 +854,7 @@ bool cvl_getopt(int argc, char *argv[], cvl_option_t *options,
     }
     
     /* Test if number of non-options arguments is ok */
-    if (!error)
+    if (!error && !info_option_was_seen)
     {
 	int number_of_nonopt_args = argc - optind;
 	if (number_of_nonopt_args < min_nonopt_args)
