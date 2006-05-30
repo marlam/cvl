@@ -79,6 +79,7 @@ int cvl_filter_gauss_sigma_to_k(double sigma)
  * \param sigma_v	Sigma value in vertical direction.
  * \return		The filtered frame.
  *
+ * Applies Gauss filtering to the given frame.
  * The number of matrix columns will be 2k_h+1, the number of rows will
  * be 2k_v+1. All pixel types are supported. See also cvl_filter_gauss_k_to_sigma()
  * and cvl_filter_gauss_sigma_to_k().
@@ -130,6 +131,7 @@ cvl_frame_t *cvl_filter_gauss(const cvl_frame_t *frame, int k_h, int k_v, double
  * \param k_v		Mask size in vertical direction.
  * \return		The filtered frame.
  *
+ * Applies average filtering to the given frame.
  * The number of matrix columns will be 2k_h+1, the number of rows will
  * be 2k_v+1. All pixel types are supported.
  */
@@ -157,6 +159,7 @@ cvl_frame_t *cvl_filter_average(const cvl_frame_t *frame, int k_h, int k_v)
  * \param k_v		Mask size in vertical direction.
  * \return		The filtered frame.
  *
+ * Applies minimum filtering to the given frame.
  * The number of matrix columns will be 2k_h+1, the number of rows will
  * be 2k_v+1. All pixel types are supported.
  */
@@ -196,6 +199,7 @@ cvl_frame_t *cvl_filter_min(const cvl_frame_t *frame, int k_h, int k_v)
  * \param k_v		Mask size in vertical direction.
  * \return		The filtered frame.
  *
+ * Applies maximum filtering to the given frame.
  * The number of matrix columns will be 2k_h+1, the number of rows will
  * be 2k_v+1. All pixel types are supported.
  */
@@ -241,6 +245,7 @@ static int cvl_filter_median_maskcmp(const cvl_pixel_t *p1, const cvl_pixel_t *p
  * \param k_v		Mask size in vertical direction.
  * \return		The filtered frame.
  *
+ * Applies median filtering to the given frame.
  * The number of matrix columns will be 2k_h+1, the number of rows will
  * be 2k_v+1. All pixel types are supported.
  */
@@ -284,6 +289,7 @@ cvl_frame_t *cvl_filter_median(const cvl_frame_t *frame, int k_h, int k_v)
  * \param sigma_t	Sigma value in temporal direction.
  * \return		The filtered frame.
  *
+ * Applies Gauss filtering.
  * See cvl_convolve3d_separable() for a description of \a frames.
  * The kernel size will be (2k_t+1)x(2k_v+1)x(2k_h+1).
  * See also cvl_filter_gauss_k_to_sigma() and cvl_filter_gauss_sigma_to_k().
@@ -354,6 +360,7 @@ cvl_frame_t *cvl_filter3d_gauss(cvl_frame_t * const *frames,
  * \param k_t		Mask size in temporal direction.
  * \return		The filtered frame.
  *
+ * Applies average filtering.
  * See cvl_convolve3d_separable() for a description of \a frames.
  * The kernel size will be (2k_t+1)x(2k_v+1)x(2k_h+1).
  */
@@ -388,6 +395,7 @@ cvl_frame_t *cvl_filter3d_average(cvl_frame_t * const *frames, int k_h, int k_v,
  * \param k_t		Mask size in temporal direction.
  * \return		The filtered frame.
  *
+ * Applies minimum filtering.
  * See cvl_convolve3d_separable() for a description of \a frames.
  * The kernel size will be (2k_t+1)x(2k_v+1)x(2k_h+1).
  */
@@ -458,6 +466,7 @@ cvl_frame_t *cvl_filter3d_min(cvl_frame_t * const *frames, int k_h, int k_v, int
  * \param k_t		Mask size in temporal direction.
  * \return		The filtered frame.
  *
+ * Applies maximum filtering.
  * See cvl_convolve3d_separable() for a description of \a frames.
  * The kernel size will be (2k_t+1)x(2k_v+1)x(2k_h+1).
  */
@@ -528,6 +537,7 @@ cvl_frame_t *cvl_filter3d_max(cvl_frame_t * const *frames, int k_h, int k_v, int
  * \param k_t		Mask size in temporal direction.
  * \return		The filtered frame.
  *
+ * Applies median filtering.
  * See cvl_convolve3d_separable() for a description of \a frames.
  * The kernel size will be (2k_t+1)x(2k_v+1)x(2k_h+1).
  */
