@@ -375,7 +375,7 @@ inline const float *cvl_field_getf_i(const cvl_field_t *field, int i)
 {
     cvl_assert(field != NULL);
     cvl_assert(i >= 0);
-    cvl_assert(i < cvl_field_size(size));
+    cvl_assert(i < cvl_field_size(field));
 
     return cvl_field_get_i(field, i);
 }
