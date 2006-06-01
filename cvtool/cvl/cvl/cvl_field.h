@@ -73,6 +73,6 @@ bool cvl_field_write(FILE *f, cvl_field_t *field,
 
 bool cvl_field_seek_raw(FILE *f, size_t element_size, int width, int height, int newpos);
 bool cvl_field_read_raw(FILE *f, cvl_field_t *field);
-bool cvl_field_write_raw(FILE *f, cvl_field_t *field);
+bool cvl_field_write_raw(FILE *f, const cvl_field_t *field);
 
 #endif
