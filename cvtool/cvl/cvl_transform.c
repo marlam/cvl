@@ -39,6 +39,7 @@
 #include "cvl/cvl_math.h"
 #include "cvl/cvl_color.h"
 #include "cvl/cvl_transform.h"
+#include "cvl/cvl_assert.h"
 
 
 /**
@@ -147,6 +148,8 @@ static cvl_pixel_t (*cvl_interpolation[])(const cvl_frame_t *frame,
  */
 cvl_frame_t *cvl_flip(const cvl_frame_t *frame)
 {
+    cvl_assert(frame != NULL);
+
     cvl_frame_t *flipped = cvl_frame_new(cvl_frame_pixel_type(frame), cvl_frame_width(frame), cvl_frame_height(frame));
     for (int x = 0; x < cvl_frame_width(flipped); x++)
     {
@@ -163,6 +166,8 @@ cvl_frame_t *cvl_flip(const cvl_frame_t *frame)
  */
 cvl_frame_t *cvl_flop(const cvl_frame_t *frame)
 {
+    cvl_assert(frame != NULL);
+
     cvl_frame_t *flopped = cvl_frame_new(cvl_frame_pixel_type(frame), cvl_frame_width(frame), cvl_frame_height(frame));
     for (int y = 0; y < cvl_frame_height(flopped); y++)
     {
@@ -197,6 +202,10 @@ static void cvl_resize_fill_rect_checked(cvl_frame_t *frame, int x, int y, int w
 cvl_frame_t *cvl_resize(const cvl_frame_t *frame, cvl_color_t color, 
 	int new_width, int new_height, int new_x_offset, int new_y_offset)
 {
+    cvl_assert(frame != NULL);
+    cvl_assert(new_width > 0);
+    cvl_assert(new_height > 0);
+
     cvl_frame_t *new_frame = cvl_frame_new(cvl_frame_pixel_type(frame), new_width, new_height);
     cvl_pixel_t p = cvl_color_to_pixel(color, cvl_frame_pixel_type(new_frame));
     int srx, sry, drx, dry, rw, rh;
@@ -250,6 +259,14 @@ cvl_frame_t *cvl_resize(const cvl_frame_t *frame, cvl_color_t color,
  */
 cvl_frame_t *cvl_cut(const cvl_frame_t *frame, int x, int y, int w, int h)
 {
+    cvl_assert(frame != NULL);
+    cvl_assert(x >= 0);
+    cvl_assert(y >= 0);
+    cvl_assert(w > 0);
+    cvl_assert(h > 0);
+    cvl_assert(x + w <= cvl_frame_width(frame));
+    cvl_assert(y + h <= cvl_frame_height(frame));
+    
     cvl_frame_t *rect = cvl_frame_new(cvl_frame_pixel_type(frame), w, h);
     cvl_frame_copy_rect(rect, 0, 0, frame, x, y, w, h);
     return rect;
@@ -268,6 +285,10 @@ cvl_frame_t *cvl_cut(const cvl_frame_t *frame, int x, int y, int w, int h)
 cvl_frame_t *cvl_scale(const cvl_frame_t *frame, 
 	cvl_interpolation_type_t interpolation_type, int new_width, int new_height)
 {
+    cvl_assert(frame != NULL);
+    cvl_assert(new_width > 0);
+    cvl_assert(new_height > 0);
+
     double factor_h = (double)new_width / (double)cvl_frame_width(frame);
     double factor_v = (double)new_height / (double)cvl_frame_height(frame);
     /* Implemented directly, though it's only a special affine transformation with
@@ -304,6 +325,8 @@ cvl_frame_t *cvl_scale(const cvl_frame_t *frame,
 cvl_frame_t *cvl_rotate(const cvl_frame_t *frame, 
 	cvl_interpolation_type_t interpolation_type, cvl_color_t color, double angle)
 {
+    cvl_assert(frame != NULL);
+
     /* implemented directly because the simple rotations 0, 90, 180, 270 should be
      * fast. the general rotation is only a special affine transformation with
      * matrix 2x2:cos(a),sin(a),-sin(a),cos(a), but it is implemented directly
@@ -413,6 +436,8 @@ cvl_frame_t *cvl_rotate(const cvl_frame_t *frame,
 cvl_frame_t *cvl_shear(const cvl_frame_t *frame, 
 	cvl_interpolation_type_t interpolation_type, cvl_color_t color, double shear_angle_x, double shear_angle_y)
 {
+    cvl_assert(frame != NULL);
+
     /* implemented directly for efficiency, though it is simply a special affine
        transformation with matrix 2x2:1,0,sx,1 (x_shearing), 2x2:1,sy,0,1 (y_shearing). */
     int shear_x = cvl_frame_height(frame) * tan(shear_angle_x);
@@ -483,6 +508,8 @@ cvl_frame_t *cvl_shear(const cvl_frame_t *frame,
 cvl_frame_t *cvl_affine(const cvl_frame_t *frame, 
 	cvl_interpolation_type_t interpolation_type, cvl_color_t color, const double *matrix)
 {
+    cvl_assert(frame != NULL);
+
     /* determine where the four edge points will be */
     double w = (double)cvl_frame_width(frame);
     double h = (double)cvl_frame_height(frame);
