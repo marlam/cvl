@@ -37,6 +37,7 @@
 
 #include "cvl/cvl_math.h"
 #include "cvl/cvl_pixel.h"
+#include "cvl/cvl_assert.h"
 #include "cvl/cvl_frame.h"
 
 

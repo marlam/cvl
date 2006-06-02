@@ -43,8 +43,8 @@ extern int errno;
 
 #include "cvl/cvl_msg.h"
 #include "cvl/cvl_math.h"
-#include "cvl/cvl_field.h"
 #include "cvl/cvl_assert.h"
+#include "cvl/cvl_field.h"
 
 #define CVL_FIELD_IO_LINEBUFSIZE 512
 

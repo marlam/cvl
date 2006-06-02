@@ -37,6 +37,7 @@
 
 #include "cvl/cvl_pixel.h"
 #include "cvl/cvl_frame.h"
+#include "cvl/cvl_assert.h"
 #include "cvl/cvl_misc.h"
 
 
@@ -73,6 +74,9 @@ const char *cvl_check_version(const char *req_version)
  */
 cvl_frame_t *cvl_diff(const cvl_frame_t *f1, const cvl_frame_t *f2)
 {
+    cvl_assert(f1 != NULL);
+    cvl_assert(f2 != NULL);
+
     cvl_frame_t *d = cvl_frame_new(cvl_frame_pixel_type(f1), cvl_frame_width(f1), cvl_frame_height(f1));
 
     for (int i = 0; i < cvl_frame_width(d) * cvl_frame_height(d); i++)

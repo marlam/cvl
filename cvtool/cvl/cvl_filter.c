@@ -38,6 +38,7 @@
 #include "cvl/cvl_frame.h"
 #include "cvl/cvl_math.h"
 #include "cvl/cvl_convolve.h"
+#include "cvl/cvl_assert.h"
 #include "cvl/cvl_filter.h"
 
 
@@ -86,6 +87,12 @@ int cvl_filter_gauss_sigma_to_k(double sigma)
  */
 cvl_frame_t *cvl_filter_gauss(const cvl_frame_t *frame, int k_h, int k_v, double sigma_h, double sigma_v)
 {
+    cvl_assert(frame != NULL);
+    cvl_assert(k_h >= 0);
+    cvl_assert(k_v >= 0);
+    cvl_assert(sigma_h > 0.0);
+    cvl_assert(sigma_v > 0.0);
+    
     double g_h[k_h + 1];
     double g_v[k_v + 1];
     int m_h[2 * k_h + 1];
@@ -137,6 +144,10 @@ cvl_frame_t *cvl_filter_gauss(const cvl_frame_t *frame, int k_h, int k_v, double
  */
 cvl_frame_t *cvl_filter_average(const cvl_frame_t *frame, int k_h, int k_v)
 {
+    cvl_assert(frame != NULL);
+    cvl_assert(k_h >= 0);
+    cvl_assert(k_v >= 0);
+
     int mh_len = 2 * k_h + 1;
     int mv_len = 2 * k_v + 1;
     int mh[mh_len];
@@ -165,6 +176,10 @@ cvl_frame_t *cvl_filter_average(const cvl_frame_t *frame, int k_h, int k_v)
  */
 cvl_frame_t *cvl_filter_min(const cvl_frame_t *frame, int k_h, int k_v)
 {
+    cvl_assert(frame != NULL);
+    cvl_assert(k_h >= 0);
+    cvl_assert(k_v >= 0);
+
     cvl_frame_t *new_frame = cvl_frame_new(cvl_frame_pixel_type(frame), 
 	    cvl_frame_width(frame), cvl_frame_height(frame));
     
@@ -205,6 +220,10 @@ cvl_frame_t *cvl_filter_min(const cvl_frame_t *frame, int k_h, int k_v)
  */
 cvl_frame_t *cvl_filter_max(const cvl_frame_t *frame, int k_h, int k_v)
 {
+    cvl_assert(frame != NULL);
+    cvl_assert(k_h >= 0);
+    cvl_assert(k_v >= 0);
+
     cvl_frame_t *new_frame = cvl_frame_new(cvl_frame_pixel_type(frame), 
 	    cvl_frame_width(frame), cvl_frame_height(frame));
     
@@ -251,6 +270,10 @@ static int cvl_filter_median_maskcmp(const cvl_pixel_t *p1, const cvl_pixel_t *p
  */
 cvl_frame_t *cvl_filter_median(const cvl_frame_t *frame, int k_h, int k_v)
 {
+    cvl_assert(frame != NULL);
+    cvl_assert(k_h >= 0);
+    cvl_assert(k_v >= 0);
+
     cvl_frame_t *new_frame = cvl_frame_new(cvl_frame_pixel_type(frame), 
 	    cvl_frame_width(frame), cvl_frame_height(frame));
     int masklen = (2 * k_h + 1) * (2 * k_v + 1);
@@ -297,6 +320,15 @@ cvl_frame_t *cvl_filter_median(const cvl_frame_t *frame, int k_h, int k_v)
 cvl_frame_t *cvl_filter3d_gauss(cvl_frame_t * const *frames, 
 	int k_h, int k_v, int k_t, double sigma_h, double sigma_v, double sigma_t)
 {
+    cvl_assert(k_h >= 0);
+    cvl_assert(k_v >= 0);
+    cvl_assert(k_t >= 0);
+    cvl_assert(frames != NULL);
+    cvl_assert(frames[k_t] != NULL);
+    cvl_assert(sigma_h > 0.0);
+    cvl_assert(sigma_v > 0.0);
+    cvl_assert(sigma_t > 0.0);
+
     double g_h[k_h + 1];
     double g_v[k_v + 1];
     double g_t[k_t + 1];
@@ -366,6 +398,12 @@ cvl_frame_t *cvl_filter3d_gauss(cvl_frame_t * const *frames,
  */
 cvl_frame_t *cvl_filter3d_average(cvl_frame_t * const *frames, int k_h, int k_v, int k_t)
 {
+    cvl_assert(k_h >= 0);
+    cvl_assert(k_v >= 0);
+    cvl_assert(k_t >= 0);
+    cvl_assert(frames != NULL);
+    cvl_assert(frames[k_t] != NULL);
+
     int mh_len = 2 * k_h + 1;
     int mv_len = 2 * k_v + 1;
     int mt_len = 2 * k_t + 1;
@@ -401,6 +439,12 @@ cvl_frame_t *cvl_filter3d_average(cvl_frame_t * const *frames, int k_h, int k_v,
  */
 cvl_frame_t *cvl_filter3d_min(cvl_frame_t * const *frames, int k_h, int k_v, int k_t)
 {
+    cvl_assert(k_h >= 0);
+    cvl_assert(k_v >= 0);
+    cvl_assert(k_t >= 0);
+    cvl_assert(frames != NULL);
+    cvl_assert(frames[k_t] != NULL);
+
     const cvl_frame_t *framebuf[2 * k_t + 1];
     cvl_frame_t *new_frame = cvl_frame_new(cvl_frame_pixel_type(frames[k_t]), 
 	    cvl_frame_width(frames[k_t]), cvl_frame_height(frames[k_t]));
@@ -472,6 +516,12 @@ cvl_frame_t *cvl_filter3d_min(cvl_frame_t * const *frames, int k_h, int k_v, int
  */
 cvl_frame_t *cvl_filter3d_max(cvl_frame_t * const *frames, int k_h, int k_v, int k_t)
 {
+    cvl_assert(k_h >= 0);
+    cvl_assert(k_v >= 0);
+    cvl_assert(k_t >= 0);
+    cvl_assert(frames != NULL);
+    cvl_assert(frames[k_t] != NULL);
+
     const cvl_frame_t *framebuf[2 * k_t + 1];
     cvl_frame_t *new_frame = cvl_frame_new(cvl_frame_pixel_type(frames[k_t]), 
 	    cvl_frame_width(frames[k_t]), cvl_frame_height(frames[k_t]));
@@ -543,6 +593,12 @@ cvl_frame_t *cvl_filter3d_max(cvl_frame_t * const *frames, int k_h, int k_v, int
  */
 cvl_frame_t *cvl_filter3d_median(cvl_frame_t * const *frames, int k_h, int k_v, int k_t)
 {
+    cvl_assert(k_h >= 0);
+    cvl_assert(k_v >= 0);
+    cvl_assert(k_t >= 0);
+    cvl_assert(frames != NULL);
+    cvl_assert(frames[k_t] != NULL);
+
     const cvl_frame_t *framebuf[2 * k_t + 1];
     cvl_frame_t *new_frame = cvl_frame_new(cvl_frame_pixel_type(frames[k_t]), 
 	    cvl_frame_width(frames[k_t]), cvl_frame_height(frames[k_t]));

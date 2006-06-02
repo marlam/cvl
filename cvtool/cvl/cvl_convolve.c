@@ -34,8 +34,8 @@
 #include "cvl/cvl_pixel.h"
 #include "cvl/cvl_frame.h"
 #include "cvl/cvl_math.h"
-#include "cvl/cvl_convolve.h"
 #include "cvl/cvl_assert.h"
+#include "cvl/cvl_convolve.h"
 
 
 /*
@@ -122,8 +122,11 @@ static inline cvl_pixel_t cvl_convolve_sum_helper2(cvl_pixel_type_t pixel_type, 
 cvl_frame_t *cvl_convolve_separable(const cvl_frame_t *frame, 
 	const int *h, int h_len, const int *v, int v_len)
 {
-    cvl_assert(frame != NULL && h != NULL && v != NULL);
-    cvl_assert(h_len > 0 && v_len > 0);
+    cvl_assert(frame != NULL);
+    cvl_assert(h != NULL);
+    cvl_assert(h_len > 0);
+    cvl_assert(v != NULL);
+    cvl_assert(v_len > 0);
     
     cvl_frame_t *tmp_frame = cvl_frame_new(cvl_frame_pixel_type(frame), 
 	    cvl_frame_width(frame), cvl_frame_height(frame));
@@ -193,8 +196,10 @@ cvl_frame_t *cvl_convolve_separable(const cvl_frame_t *frame,
  */
 cvl_frame_t *cvl_convolve(const cvl_frame_t *frame, const int *kernel, int dim_x, int dim_y)
 {
-    cvl_assert(frame != NULL && kernel != NULL);
-    cvl_assert(dim_x > 0 && dim_y > 0);
+    cvl_assert(frame != NULL);
+    cvl_assert(kernel != NULL);
+    cvl_assert(dim_x > 0);
+    cvl_assert(dim_y > 0);
     
     cvl_frame_t *new_frame = cvl_frame_new(cvl_frame_pixel_type(frame), 
 	    cvl_frame_width(frame), cvl_frame_height(frame));
@@ -255,8 +260,14 @@ cvl_frame_t *cvl_convolve(const cvl_frame_t *frame, const int *kernel, int dim_x
 cvl_frame_t *cvl_convolve3d_separable(cvl_frame_t * const *frames, 
 	const int *h, int h_len, const int *v, int v_len, const int *t, int t_len)
 {
-    cvl_assert(frames != NULL && h != NULL && v != NULL && t != NULL);
-    cvl_assert(h_len > 0 && v_len > 0 && t_len > 0);
+    cvl_assert(h != NULL);
+    cvl_assert(h_len > 0);
+    cvl_assert(v != NULL);
+    cvl_assert(v_len > 0);
+    cvl_assert(t != NULL);
+    cvl_assert(t_len > 0);
+    cvl_assert(frames != NULL);
+    cvl_assert(frames[t_len / 2] != NULL);
 
     const cvl_frame_t *framebuf[t_len];
     cvl_frame_t *tmp1_frame = cvl_frame_new(cvl_frame_pixel_type(frames[t_len / 2]), 
@@ -376,17 +387,21 @@ cvl_frame_t *cvl_convolve3d_separable(cvl_frame_t * const *frames,
  * \return		The resulting frame.
  * 
  * Applies a 3D convolution matrix on a frame.
- * The number of frames in the array \a frames must be \a mt_len. Only the entry
- * at (\a mt_len / 2) must be non-NULL, because this is the frame that will be
+ * The number of frames in the array \a frames must be \a dim_t. Only the entry
+ * at (\a dim_t / 2) must be non-NULL, because this is the frame that will be
  * processed. The number of past and future frames (those with indices less than or
- * greater than \a mt_len / 2) can be limited; in this case, some array entries
+ * greater than \a dim_t / 2) can be limited; in this case, some array entries
  * can be NULL. This function will use reflective indexing to compensate that.
  */
 cvl_frame_t *cvl_convolve3d(cvl_frame_t * const *frames, 
 	const int *kernel, int dim_x, int dim_y, int dim_t)
 {
-    cvl_assert(frames != NULL && kernel != NULL);
-    cvl_assert(dim_t > 0 && dim_y > 0 && dim_x > 0);
+    cvl_assert(kernel != NULL);
+    cvl_assert(dim_x > 0);
+    cvl_assert(dim_y > 0);
+    cvl_assert(dim_t > 0);
+    cvl_assert(frames != NULL);
+    cvl_assert(frames[dim_t / 2] != NULL);
 
     const cvl_frame_t *framebuf[dim_t];
     cvl_frame_t *new_frame = cvl_frame_new(cvl_frame_pixel_type(frames[dim_t / 2]), 

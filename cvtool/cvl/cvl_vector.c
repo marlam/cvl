@@ -43,8 +43,8 @@ extern int errno;
 #include "cvl/cvl_frame.h"
 #include "cvl/cvl_math.h"
 #include "cvl/cvl_cairo.h"
-#include "cvl/cvl_vector.h"
 #include "cvl/cvl_assert.h"
+#include "cvl/cvl_vector.h"
 
 
 /**

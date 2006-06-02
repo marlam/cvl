@@ -38,8 +38,8 @@
 #include "cvl/cvl_math.h"
 #include "cvl/cvl_color.h"
 #include "cvl/cvl_filter.h"
-#include "cvl/cvl_edge.h"
 #include "cvl/cvl_assert.h"
+#include "cvl/cvl_edge.h"
 
 
 /**

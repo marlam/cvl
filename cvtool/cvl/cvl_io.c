@@ -45,6 +45,7 @@ extern int errno;
 #include "cvl/cvl_math.h"
 #include "cvl/cvl_pixel.h"
 #include "cvl/cvl_frame.h"
+#include "cvl/cvl_assert.h"
 #include "cvl/cvl_io.h"
 
 
@@ -941,6 +942,8 @@ void cvl_io_info_free(cvl_io_info_t *info)
  */
 int cvl_io_info_frame_counter(cvl_io_info_t *info)
 {
+    cvl_assert(info != NULL);
+    
     return info->_frame_counter;
 }
 
@@ -952,6 +955,8 @@ int cvl_io_info_frame_counter(cvl_io_info_t *info)
  */
 cvl_io_stream_t cvl_io_info_stream_type(cvl_io_info_t *info)
 {
+    cvl_assert(info != NULL);
+    
     return info->_stream_type;
 }
 
@@ -963,6 +968,8 @@ cvl_io_stream_t cvl_io_info_stream_type(cvl_io_info_t *info)
  */
 void cvl_io_info_set_stream_type(cvl_io_info_t *output_info, cvl_io_stream_t stream_type)
 {
+    cvl_assert(output_info != NULL);
+    
     output_info->_stream_type = stream_type;
 }
 
@@ -974,6 +981,8 @@ void cvl_io_info_set_stream_type(cvl_io_info_t *output_info, cvl_io_stream_t str
  */
 int cvl_io_info_width(cvl_io_info_t *info)
 {
+    cvl_assert(info != NULL);
+    
     return info->_width;
 }
 
@@ -985,6 +994,8 @@ int cvl_io_info_width(cvl_io_info_t *info)
  */
 void cvl_io_info_set_width(cvl_io_info_t *output_info, int width)
 {
+    cvl_assert(output_info != NULL);
+    
     output_info->_width = width;
 }
 
@@ -996,6 +1007,8 @@ void cvl_io_info_set_width(cvl_io_info_t *output_info, int width)
  */
 int cvl_io_info_height(cvl_io_info_t *info)
 {
+    cvl_assert(info != NULL);
+    
     return info->_height;
 }
 
@@ -1007,6 +1020,8 @@ int cvl_io_info_height(cvl_io_info_t *info)
  */
 void cvl_io_info_set_height(cvl_io_info_t *output_info, int height)
 {
+    cvl_assert(output_info != NULL);
+    
     output_info->_height = height;
 }
 
@@ -1019,6 +1034,8 @@ void cvl_io_info_set_height(cvl_io_info_t *output_info, int height)
  */
 cvl_y4m_chroma_t cvl_io_info_chroma(cvl_io_info_t *info)
 {
+    cvl_assert(info != NULL);
+    
     return info->_chroma;
 }
 
@@ -1031,6 +1048,8 @@ cvl_y4m_chroma_t cvl_io_info_chroma(cvl_io_info_t *info)
  */
 void cvl_io_info_set_chroma(cvl_io_info_t *output_info, cvl_y4m_chroma_t chroma)
 {
+    cvl_assert(output_info != NULL);
+    
     output_info->_chroma = chroma;
 }
 
@@ -1043,6 +1062,8 @@ void cvl_io_info_set_chroma(cvl_io_info_t *output_info, cvl_y4m_chroma_t chroma)
  */
 cvl_y4m_interlacing_t cvl_io_info_interlacing(cvl_io_info_t *info)
 {
+    cvl_assert(info != NULL);
+    
     return info->_interlacing;
 }
 
@@ -1055,6 +1076,8 @@ cvl_y4m_interlacing_t cvl_io_info_interlacing(cvl_io_info_t *info)
  */
 void cvl_io_info_set_interlacing(cvl_io_info_t *output_info, cvl_y4m_interlacing_t interlacing)
 {
+    cvl_assert(output_info != NULL);
+    
     output_info->_interlacing = interlacing;
 }
 
@@ -1069,6 +1092,10 @@ void cvl_io_info_set_interlacing(cvl_io_info_t *output_info, cvl_y4m_interlacing
  */
 void cvl_io_info_framerate(cvl_io_info_t *info, int *framerate1, int *framerate2)
 {
+    cvl_assert(info != NULL);
+    cvl_assert(framerate1 != NULL);
+    cvl_assert(framerate2 != NULL);
+    
     *framerate1 = info->_framerate1;
     *framerate2 = info->_framerate2;
 }
@@ -1083,6 +1110,8 @@ void cvl_io_info_framerate(cvl_io_info_t *info, int *framerate1, int *framerate2
  */
 void cvl_io_info_set_framerate(cvl_io_info_t *output_info, int framerate1, int framerate2)
 {
+    cvl_assert(output_info != NULL);
+    
     output_info->_framerate1 = framerate1;
     output_info->_framerate2 = framerate2;
 }
@@ -1098,6 +1127,10 @@ void cvl_io_info_set_framerate(cvl_io_info_t *output_info, int framerate1, int f
  */
 void cvl_io_info_aspectratio(cvl_io_info_t *info, int *aspectratio1, int *aspectratio2)
 {
+    cvl_assert(info != NULL);
+    cvl_assert(aspectratio1 != NULL);
+    cvl_assert(aspectratio2 != NULL);
+    
     *aspectratio1 = info->_aspectratio1;
     *aspectratio2 = info->_aspectratio2;
 }
@@ -1112,6 +1145,8 @@ void cvl_io_info_aspectratio(cvl_io_info_t *info, int *aspectratio1, int *aspect
  */
 void cvl_io_info_set_aspectratio(cvl_io_info_t *output_info, int aspectratio1, int aspectratio2)
 {
+    cvl_assert(output_info != NULL);
+
     output_info->_aspectratio1 = aspectratio1;
     output_info->_aspectratio2 = aspectratio2;
 }
@@ -1127,6 +1162,9 @@ void cvl_io_info_set_aspectratio(cvl_io_info_t *output_info, int aspectratio1, i
  */
 void cvl_io_info_link_output_to_input(cvl_io_info_t *output_info, const cvl_io_info_t *input_info)
 {
+    cvl_assert(output_info != NULL);
+    cvl_assert(input_info != NULL);
+
     output_info->_input_info = input_info;
 }
 
@@ -1139,6 +1177,8 @@ void cvl_io_info_link_output_to_input(cvl_io_info_t *output_info, const cvl_io_i
  */
 bool cvl_io_eof(FILE *f, const cvl_io_info_t *input_info UNUSED)
 {
+    cvl_assert(f != NULL);
+
     int c;
 
     if ((c = fgetc(f)) == EOF)
@@ -1164,6 +1204,9 @@ bool cvl_io_eof(FILE *f, const cvl_io_info_t *input_info UNUSED)
  */
 bool cvl_io_read_input_info(FILE *f, cvl_io_info_t *input_info)
 {
+    cvl_assert(f != NULL);
+    cvl_assert(input_info != NULL);
+
     int c;
     
     if ((c = fgetc(f)) == EOF || ungetc(c, f) == EOF)
@@ -1199,6 +1242,10 @@ bool cvl_io_read_input_info(FILE *f, cvl_io_info_t *input_info)
  */
 bool cvl_io_read(FILE *f, cvl_io_info_t *input_info, cvl_frame_t **frame)
 {
+    cvl_assert(f != NULL);
+    cvl_assert(input_info != NULL);
+    cvl_assert(frame != NULL);
+
     bool success;
     
     if (!input_info->_input_info_known && !cvl_io_read_input_info(f, input_info))
@@ -1234,6 +1281,10 @@ bool cvl_io_read(FILE *f, cvl_io_info_t *input_info, cvl_frame_t **frame)
  */
 bool cvl_io_write(FILE *f, cvl_io_info_t *output_info, const cvl_frame_t *frame)
 {
+    cvl_assert(f != NULL);
+    cvl_assert(output_info != NULL);
+    cvl_assert(frame != NULL);
+
     if (!output_info->_output_info_written)
     {
 	if (output_info->_input_info)
@@ -1306,6 +1357,9 @@ bool cvl_io_write(FILE *f, cvl_io_info_t *output_info, const cvl_frame_t *frame)
  */
 bool cvl_io_read_pnm(FILE *f, cvl_frame_t **frame)
 {
+    cvl_assert(f != NULL);
+    cvl_assert(frame != NULL);
+
     cvl_io_info_t *input_info;
     bool e;
     
@@ -1324,6 +1378,9 @@ bool cvl_io_read_pnm(FILE *f, cvl_frame_t **frame)
  */
 bool cvl_io_write_pnm(FILE *f, const cvl_frame_t *frame)
 {
+    cvl_assert(f != NULL);
+    cvl_assert(frame != NULL);
+
     cvl_io_info_t *output_info;
     bool e;
     
@@ -1343,6 +1400,9 @@ bool cvl_io_write_pnm(FILE *f, const cvl_frame_t *frame)
  */
 bool cvl_io_load_pnm(const char *filename, cvl_frame_t **frame)
 {
+    cvl_assert(filename != NULL);
+    cvl_assert(frame != NULL);
+
     FILE *f;
     bool ret;
     
@@ -1365,6 +1425,9 @@ bool cvl_io_load_pnm(const char *filename, cvl_frame_t **frame)
  */
 bool cvl_io_save_pnm(const char *filename, const cvl_frame_t *frame)
 {
+    cvl_assert(filename != NULL);
+    cvl_assert(frame != NULL);
+
     FILE *f;
     bool ret;
     
