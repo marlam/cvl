@@ -1,6 +1,7 @@
 Version 0.0.3 (not yet released):
 - New and improved cvtool commands:
 - New and improved CVL functionality:
+  - New function cvl_sort_array_float().
   - New function cvl_getopt() for command line handling, including some useful
     option types.
   - Fixed cvl_convole() and cvl_convolve3d(): the order of the dim_x, dim_y, 

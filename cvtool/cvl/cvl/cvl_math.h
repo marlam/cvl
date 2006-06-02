@@ -58,6 +58,7 @@ bool cvl_product_fits_in_size_t(size_t a, size_t b);
 
 void cvl_sort_array_pixel(cvl_pixel_t *a, size_t a_len);
 void cvl_sort_array_int(int *a, size_t a_len);
+void cvl_sort_array_float(float *a, size_t a_len);
 void cvl_sort_array_double(double *a, size_t a_len);
 
 extern gsl_rng *cvl_rng;

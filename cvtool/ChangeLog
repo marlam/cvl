@@ -1,4 +1,5 @@
 Version 0.0.3 (not yet released):
+- CVL: Add cvl_sort_array_float()
 - CVL: Add missing const qualifier to prototype of cvl_field_write_raw().
 - CVL: cvl_getopt(): Added the new option type CVL_OPTION_INFO for options that
   request information, like --help and --version.

@@ -316,6 +316,26 @@ void cvl_sort_array_int(int *a, size_t a_len)
     qsort(a, a_len, sizeof(int), (int (*)(const void *, const void *))cvl_compare_ints);
 }
 
+
+/* Helper for cvl_sort_array_double */
+static int cvl_compare_floats(float *x1, float *x2)
+{
+    return (*x1 < *x2 ? -1 : (*x1 > *x2 ? +1 : 0));
+}
+
+/**
+ * \param a		The array.
+ * \param a_len		The length of the array.
+ *
+ * Sorts an array of floats.
+ * This is just a convenient wrapper around qsort.
+ */
+void cvl_sort_array_float(float *a, size_t a_len)
+{
+    qsort(a, a_len, sizeof(float), (int (*)(const void *, const void *))cvl_compare_floats);
+}
+
+
 /* Helper for cvl_sort_array_double */
 static int cvl_compare_doubles(double *x1, double *x2)
 {
