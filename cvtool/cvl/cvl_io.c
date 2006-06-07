@@ -772,7 +772,7 @@ static bool cvl_io_read_frame_pnm(FILE *f, cvl_io_info_t *input_info, cvl_frame_
 	{
 	    cvl_frame_free(*frame);
 	    cvl_msg_err("%s: PPM data too big", errmsg); 
-	    return NULL;
+	    return false;
 	}
 	size_t rawsize = (size_t)size * 3 * (maxval < 256 ? 1 : 2);
 	uint8_t *ppmdata = xmalloc(rawsize * sizeof(uint8_t));
@@ -782,7 +782,7 @@ static bool cvl_io_read_frame_pnm(FILE *f, cvl_io_info_t *input_info, cvl_frame_
 	    cvl_frame_free(*frame);
 	    cvl_msg_err("%s: EOF or input error in PPM data", errmsg);
 	    free(ppmdata);
-	    return NULL;
+	    return false;
 	}
 	if (maxval == 255)
 	{
