@@ -12,12 +12,12 @@ $CVTOOL merge -o merge2.txt b.pnm g.pnm r.pnm > bgr.pnm
 $CVTOOL merge -o merge3.txt 0.pnm 0.pnm 0.pnm > 000.pnm 
 $CVTOOL merge -o merge4.txt rb.pnm 0.pnm rb.pnm > rb0rb.pnm 
 
-$CVTOOL diff -o d1.txt rgb.pnm rgb.pnm > x000.pnm 
+$CVTOOL diff -s -o d1.txt rgb.pnm rgb.pnm > x000.pnm 
 cmp 000.pnm x000.pnm 
-$CVTOOL diff -o d2.txt rgb.pnm bgr.pnm > xrb0rb.pnm 
+$CVTOOL diff -s rgb.pnm bgr.pnm > xrb0rb.pnm 2> d2.txt
 cmp rb0rb.pnm xrb0rb.pnm 
 
-$CVTOOL diff -o - rgb.pnm rgb.pnm > d3.txt
+$CVTOOL diff -s -o - rgb.pnm rgb.pnm > d3.txt
 cmp d1.txt d3.txt
 
 cmd_tests_cleanup

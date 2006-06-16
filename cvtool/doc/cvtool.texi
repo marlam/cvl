@@ -1,10 +1,10 @@
 \input texinfo   @c -*-texinfo-*-
 @afourpaper
 @setfilename cvtool.info
-@set UPDATED May 26, 2006
-@set UPDATED-MONTH May 2006
-@set EDITION 0.0.2
-@set VERSION 0.0.2
+@set UPDATED June 16, 2006
+@set UPDATED-MONTH June 2006
+@set EDITION 0.0.3
+@set VERSION 0.0.3
 @settitle cvtool @value{VERSION}
 
 @c Define new index for commands
@@ -1277,30 +1277,33 @@ San Diego, CA, USA, June 2005.
 @node diff
 @subsection diff
 @cmindex diff
-@code{diff [-o|--output=@var{file}] @var{file-1} @var{file-2}}
+@code{diff [-s|--statistics] [-o|--output=@var{file}] @var{file-1} @var{file-2}}
 
 @noindent
-Shows the differences between the two sources.
+Shows the differences between the two sources. 
 
 The sources must have the same pixel type, width, and height. This command
 produces frames of the same dimensions and of the same pixel type. Each pixel
 will be the absolute value of the difference of the corresponding pixels in the
-two sources. The difference is computed separated by color channels. Example:
-p1 = (r11, g12, b13), p2 = (r3, g11, b13) => (r8, g1, b0).
+two sources.  For RGB frames, the values will be computed for each channel
+separately.
 
-In addition to the difference frames, the command will compute the sum of the
-absolute differences of all pixel values, divided by the number of pixels. The
-value will be printed to stderr, unless the output is redirected with the
-@option{--output} option. If the output is redirected to @code{stdout} (-),
-then only the difference values and no frames will be written to @code{stdout}.
-@samp{rgb} and @samp{yuv} frames produce three error values (one per channel),
-printed on a single line.
+If @option{--statistics} is used, the command will also compute the minimum,
+maximum, average, and median error, and the standard deviation. For RGB frames,
+these values will be computed for each channel separately. For YUV frames, only
+the Y channel is considered.  The output will be printed to @code{stderr}, unless it
+is redirected with the @option{--output} option. If the output is redirected to
+@code{stdout} (-), then only the statistics and no frames will be written to @code{stdout}.
 
 @example 
-$ cvtool create -w 10 -h 10 -c 255,0,0 > red.pnm
-$ cvtool create -w 10 -h 10 -c 0,255,0 > green.pnm
-$ cvtool diff red.pnm green.pnm > diff.pnm
-cvtool: [REQ] diff: 255 255 0
+$ cvtool create -w 10 -h 10 -c r255g0b0 > red.pnm
+$ cvtool create -w 10 -h 10 -c r0g255b0 > green.pnm
+$ cvtool diff -s -o - red.pnm green.pnm
+frame pair 1: minimum error      = 255 255 0
+frame pair 1: maximum error      = 255 255 0
+frame pair 1: median error       = 255 255 0
+frame pair 1: average error      = 255 255 0
+frame pair 1: standard deviation = 0 0 0
 @end example
 
 

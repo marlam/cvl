@@ -1,6 +1,10 @@
 Version 0.0.3 (not yet released):
 - New and improved cvtool commands:
+  - diff:
+    Can now print simple statistics.
 - New and improved CVL functionality:
+  - New function cvl_diffstat() to compute simple statistics for the differences
+    between two frames.
   - New function cvl_sort_array_float().
   - New function cvl_getopt() for command line handling, including some useful
     option types.

@@ -31,6 +31,9 @@
 
 #include <stdlib.h>
 #include <stdbool.h>
+#include <stdint.h>
+#include <limits.h>
+#include <math.h>
 
 #include "strverscmp.h"
 #include "xalloc.h"
@@ -58,6 +61,176 @@ const char *cvl_check_version(const char *req_version)
     return NULL;	 
 }
 
+
+/* Helper for cvl_diffstat(): Compare two uint8_ts. */
+int cvl_uint8_cmp(uint8_t *x1, uint8_t *x2)
+{
+    return (*x1 < *x2 ? -1 : (*x1 > *x2 ? +1 : 0));
+}
+
+/**
+ * \param f1		The first frame.
+ * \param f2		The second frame.
+ * \param diff		The frame to store the differences in, or NULL.
+ * \param min		Pointer to 1 (gray, yuv) or 3 (rgb) integers.
+ * \param max		Pointer to 1 (gray, yuv) or 3 (rgb) integers.
+ * \param med		Pointer to 1 (gray, yuv) or 3 (rgb) integers.
+ * \param avg		Pointer to 1 (gray, yuv) or 3 (rgb) doubles.
+ * \param dev		Pointer to 1 (gray, yuv) or 3 (rgb) doubles.
+ *
+ * Visualizes the differences between two frames, and computes some simple
+ * statistics.\n
+ * \a f1 and \a f2 must have the same dimensions and the same pixel type.
+ * The resulting frame \a diff will inherit these properties. The pixel values in 
+ * it will be the absolute of the difference of the 
+ * corresponding pixels in the two sources. For RGB frames, the difference
+ * is computed separated by color channels: p1 = (r11, g12, b13), 
+ * p2 = (r3, g11, b13) => (r8, g1, b0). For other pixel types, the 
+ * luminosity difference is measured and represented by a gray value.\n
+ * The minimum, maximum, median, and average error are stored in \a min, \a max,
+ * \a med, \a avg respectively. The standard deviation is stored in \a dev.\n
+ * If \a f1 and \a f2 are of type GRAY or YUV, then \a min, \a max, \a med, \a
+ * avg, and \a dev need only point to one integer or double. For RGB, they must
+ * point to three integers or doubles, to store the values for each channel
+ * separately.\n
+ * If any of \a diff, \a min, \a max, \a med, \a avg, \a dev is NULL, then the
+ * corresponding computation will not be done.
+ */
+void cvl_diffstat(const cvl_frame_t *f1, const cvl_frame_t *f2, 
+	cvl_frame_t **diff, uint8_t *min, uint8_t *max, uint8_t *med, double *avg, double *dev)
+{
+    cvl_assert(f1 != NULL);
+    cvl_assert(f2 != NULL);
+    cvl_assert(cvl_frame_width(f1) == cvl_frame_width(f2));
+    cvl_assert(cvl_frame_height(f1) == cvl_frame_height(f2));
+    cvl_assert(cvl_frame_pixel_type(f1) == cvl_frame_pixel_type(f2));
+
+    if ((unsigned long long)INT_MAX >= 
+	    ULLONG_MAX / ((unsigned long long)UINT8_MAX * (unsigned long long)UINT8_MAX))
+    {
+	/* This happens only if (sizeof(long long) < 2*sizeof(int)), which
+	 * should never be the case. */
+	cvl_msg_wrn("%s: arithmetic overflow might occur", __func__);
+    }
+    
+    int size = cvl_frame_size(f1);
+    bool rgb = (cvl_frame_pixel_type(f1) == CVL_PIXEL_RGB);
+    unsigned long long errsum[3];
+    unsigned long long errsumsq[3];
+    uint8_t *errvals[3];
+    
+    if (diff)
+    {
+	*diff = cvl_frame_new(cvl_frame_pixel_type(f1), cvl_frame_width(f1), cvl_frame_height(f1));
+    }
+    for (int j = 0; j < (rgb ? 3 : 1); j++)
+    {
+	if (min)
+	{
+	    min[j] = 0xff;
+	}
+	if (max)
+	{
+	    max[j] = 0;
+	}
+	if (med)
+	{
+	    errvals[j] = xmalloc(size * sizeof(uint8_t));
+	}
+	if (avg || dev)
+	{
+	    errsum[j] = 0;
+	}
+	if (dev)
+	{
+	    errsumsq[j] = 0;
+	}
+    }
+    
+    for (int i = 0; i < cvl_frame_size(f1); i++)
+    {
+	cvl_pixel_t p1 = cvl_frame_get_i(f1, i);
+	cvl_pixel_t p2 = cvl_frame_get_i(f2, i);
+	uint8_t pd[3];
+
+	if (cvl_frame_pixel_type(f1) == CVL_PIXEL_GRAY)
+	{
+	    pd[0] = abs((int)p1 - (int)p2);
+	    if (diff)
+	    {
+		cvl_frame_set_i(*diff, i, pd[0]);
+	    }
+	}
+	else if (cvl_frame_pixel_type(f1) == CVL_PIXEL_RGB)
+	{
+	    pd[0] = abs((int)cvl_pixel_rgb_to_r(p1) - (int)cvl_pixel_rgb_to_r(p2));
+	    pd[1] = abs((int)cvl_pixel_rgb_to_g(p1) - (int)cvl_pixel_rgb_to_g(p2));
+	    pd[2] = abs((int)cvl_pixel_rgb_to_b(p1) - (int)cvl_pixel_rgb_to_b(p2));
+	    if (diff)
+	    {
+		cvl_frame_set_i(*diff, i, cvl_pixel_rgb(pd[0], pd[1], pd[2]));
+	    }
+	}
+	else
+	{
+	    pd[0] = abs((int)cvl_pixel_yuv_to_y(p1) - (int)cvl_pixel_yuv_to_y(p2));
+	    if (diff)
+	    {
+		cvl_frame_set_i(*diff, i, cvl_pixel_yuv(pd[0] + 16, 128, 128));
+	    }
+	}
+	for (int j = 0; j < (rgb ? 3 : 1); j++)
+	{
+	    if (min && pd[j] < min[j])
+	    {
+		min[j] = pd[j];
+	    }
+	    if (max && pd[j] > max[j])
+	    {
+		max[j] = pd[j];
+	    }
+	    if (med)
+	    {
+		errvals[j][i] = pd[j];
+	    }
+	    if (avg || dev)
+	    {
+		errsum[j] += pd[j];
+	    }
+	    if (dev)
+	    {
+		errsumsq[j] += (int)pd[j] * (int)pd[j];
+	    }
+	}
+    }
+    if (med)
+    {
+	for (int j = 0; j < (rgb ? 3 : 1); j++)
+	{
+	    qsort(errvals[j], size, sizeof(uint8_t), (int (*)(const void *, const void *))cvl_uint8_cmp);
+	    med[j] = errvals[j][size / 2];
+	    free(errvals[j]);
+	}
+    }
+    if (avg)
+    {
+	for (int j = 0; j < (rgb ? 3 : 1); j++)
+	{
+	    avg[j] = (double)errsum[j] / (double)size;
+	}
+    }
+    if (dev)
+    {
+	for (int j = 0; j < (rgb ? 3 : 1); j++)
+	{
+	    dev[j] = sqrt(((double)size * (double)errsumsq[j] 
+			- ((double)errsum[j] * (double)errsum[j]))
+		    / ((double)size * (double)(size - 1)));
+	}
+    }
+}
+
+
 /**
  * \param f1		The first frame.
  * \param f2		The second frame.
@@ -76,33 +249,13 @@ cvl_frame_t *cvl_diff(const cvl_frame_t *f1, const cvl_frame_t *f2)
 {
     cvl_assert(f1 != NULL);
     cvl_assert(f2 != NULL);
+    cvl_assert(cvl_frame_width(f1) == cvl_frame_width(f2));
+    cvl_assert(cvl_frame_height(f1) == cvl_frame_height(f2));
+    cvl_assert(cvl_frame_pixel_type(f1) == cvl_frame_pixel_type(f2));
 
-    cvl_frame_t *d = cvl_frame_new(cvl_frame_pixel_type(f1), cvl_frame_width(f1), cvl_frame_height(f1));
-
-    for (int i = 0; i < cvl_frame_width(d) * cvl_frame_height(d); i++)
-    {
-	cvl_pixel_t p1 = cvl_frame_get_i(f1, i);
-	cvl_pixel_t p2 = cvl_frame_get_i(f2, i);
-	cvl_pixel_t pd;
-	if (cvl_frame_pixel_type(d) == CVL_PIXEL_GRAY)
-	{
-	    pd = abs((int)p1 - (int)p2);
-	}
-	else if (cvl_frame_pixel_type(d) == CVL_PIXEL_RGB)
-	{
-	    pd = cvl_pixel_rgb(
-	    	    abs((int)cvl_pixel_rgb_to_r(p1) - (int)cvl_pixel_rgb_to_r(p2)),
-		    abs((int)cvl_pixel_rgb_to_g(p1) - (int)cvl_pixel_rgb_to_g(p2)),
-		    abs((int)cvl_pixel_rgb_to_b(p1) - (int)cvl_pixel_rgb_to_b(p2)));
-	}
-	else
-	{
-	    pd = cvl_pixel_yuv(abs((int)cvl_pixel_yuv_to_y(p1) - (int)cvl_pixel_yuv_to_y(p2) + 16), 128, 128);
-	}
-	cvl_frame_set_i(d, i, pd);
-    }
-    
-    return d;
+    cvl_frame_t *diff;
+    cvl_diffstat(f1, f2, &diff, NULL, NULL, NULL, NULL, NULL);
+    return diff;
 }
 
 

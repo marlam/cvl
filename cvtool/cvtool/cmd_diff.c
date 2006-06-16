@@ -23,6 +23,7 @@
 #include "config.h"
 
 #include <stdbool.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
@@ -34,29 +35,30 @@ extern int errno;
 void cmd_diff_print_help(void)
 {
     cvl_msg_fmt_req(
-	    "diff [-o|--output=<file>] <file-1> <file-2>\n"
+	    "diff [-o|--output=<file>] [-s|--statistics] <file-1> <file-2>\n"
 	    "\n"
 	    "Shows the differences between the two sources. The sources must have the same "
 	    "pixel type, width, and height. This command produces frames of the same "
 	    "dimensions and of the same pixel type. Each pixel will be the absolute value "
-	    "of the difference of the corresponding pixels in the two sources. The difference "
-	    "is computed separated by color channels.\n"
-	    "In addition to the difference frames, the command will compute the "
-	    "sum of the absolute differences of all pixel values, divided by "
-	    "the number of pixels. The value will be printed to stderr, unless the output is redirected "
-	    "with the -o option. If the output is redirected to stdout (-), then only the difference values "
-	    "and no frames will be written to stdout. "
-	    "RGB and YUV frames produce three error values (one per channel), printed on "
-	    "a single line.");
+	    "of the difference of the corresponding pixels in the two sources. "
+	    "For RGB frames, the values will be computed for each channel separately.\n"
+	    "If --statistics is used, the command will also compute the minimum, maximum, average, and "
+	    "median error, and the standard deviation. For RGB frames, these values will be "
+	    "computed for each channel separately. For YUV frames, only the Y channel is considered.\n"
+	    "The output will be printed to stderr, unless it is redirected with the --output "
+	    "option. If the output is redirected to stdout (-), then only the statistics "
+	    "and no frames will be written to stdout.");
 }
 
 
 int cmd_diff(int argc, char *argv[])
 {
     cvl_option_file_t output = { NULL, "w", true };
+    cvl_option_bool_t statistics = { false, true };
     cvl_option_t options[] = 
     {
-	{ "output",  'o', CVL_OPTION_FILE, &output,  false },
+	{ "output",     'o', CVL_OPTION_FILE, &output,     false },
+	{ "statistics", 's', CVL_OPTION_BOOL, &statistics, false },
 	cvl_option_null
     };
     int first_argument;
@@ -65,14 +67,20 @@ int cmd_diff(int argc, char *argv[])
     cvl_frame_t *src1_frame, *src2_frame;
     cvl_io_info_t *diff_info;
     cvl_frame_t *diff_frame;
-    int size;
+    uint8_t min[3], max[3], med[3];
+    double avg[3], dev[3];    
     bool error;
 
     cvl_msg_set_command_name("%s", argv[0]);
     error = !cvl_getopt(argc, argv, options, 2, 2, &first_argument);
     if (!error)
     {
-	if (!(src1 = fopen(argv[first_argument], "r")))
+	if (output.value && !statistics.value)
+	{
+	    cvl_msg_err("cannot use --output without --statistics");
+	    error = true;
+	}
+	else if (!(src1 = fopen(argv[first_argument], "r")))
 	{
 	    cvl_msg_err("cannot open %s: %s", argv[first_argument], strerror(errno));
 	    error = true;
@@ -124,82 +132,45 @@ int cmd_diff(int argc, char *argv[])
 	    error = true;
 	    break;
 	}
-	diff_frame = cvl_diff(src1_frame, src2_frame);
-	size = cvl_frame_height(src1_frame) * cvl_frame_width(src1_frame);
-	if (cvl_frame_pixel_type(src1_frame) == CVL_PIXEL_GRAY)
+	if (statistics.value)
 	{
-	    unsigned long long errorsum = 0;
-	    for (int i = 0; i < size; i++)
+	    FILE *outstream = output.value ? output.value : stderr;
+	    int frameno = cvl_io_info_frame_counter(src1_info); 
+
+	    diff_frame = NULL;
+	    cvl_diffstat(src1_frame, src2_frame, 
+		    (output.value == stdout ? NULL : &diff_frame),
+		    min, max, med, avg, dev);
+	    if (cvl_frame_pixel_type(src1_frame) == CVL_PIXEL_RGB)
 	    {
-		unsigned long long error = cvl_frame_get_i(diff_frame, i);
-		if (ULLONG_MAX - errorsum < error)
-		{
-		    cvl_msg_err("cannot compute average error: arithmetic overflow");
-		    error = true;
-		    break;
-		}			
-		errorsum += error;
+		cvl_msg(outstream, CVL_MSG_REQ, "frame pair %d: minimum error      = %3d %3d %3d",
+			frameno, (int)min[0], (int)min[1], (int)min[2]);
+		cvl_msg(outstream, CVL_MSG_REQ, "frame pair %d: maximum error      = %3d %3d %3d",
+			frameno, (int)max[0], (int)max[1], (int)max[2]);
+		cvl_msg(outstream, CVL_MSG_REQ, "frame pair %d: median error       = %3d %3d %3d",
+			frameno, (int)med[0], (int)med[1], (int)med[2]);
+		cvl_msg(outstream, CVL_MSG_REQ, "frame pair %d: average error      = %.10g %.10g %.10g",
+			frameno, avg[0], avg[1], avg[2]);
+		cvl_msg(outstream, CVL_MSG_REQ, "frame pair %d: standard deviation = %.10g %.10g %.10g",
+			frameno, dev[0], dev[1], dev[2]);
 	    }
-	    cvl_msg(output.value ? output.value : stderr, CVL_MSG_REQ, 
-		    "%.20g", (double)errorsum / (double)size);
+	    else
+	    {
+		cvl_msg(outstream, CVL_MSG_REQ, "frame pair %d: minimum error      = %3d",
+			frameno, (int)min[0]);
+		cvl_msg(outstream, CVL_MSG_REQ, "frame pair %d: maximum error      = %3d",
+			frameno, (int)max[0]);
+		cvl_msg(outstream, CVL_MSG_REQ, "frame pair %d: median error       = %3d",
+			frameno, (int)med[0]);
+		cvl_msg(outstream, CVL_MSG_REQ, "frame pair %d: average error      = %.10g",
+			frameno, avg[0]);
+		cvl_msg(outstream, CVL_MSG_REQ, "frame pair %d: standard deviation = %.10g",
+			frameno, dev[0]);
+	    }
 	}
-	else if (cvl_frame_pixel_type(src1_frame) == CVL_PIXEL_RGB)
-	{
-	    unsigned long long errorsum0 = 0;
-	    unsigned long long errorsum1 = 0;
-	    unsigned long long errorsum2 = 0;
-	    for (int i = 0; i < size; i++)
-	    {
-		cvl_pixel_t diff = cvl_frame_get_i(diff_frame, i);
-		unsigned long long error0 = cvl_pixel_rgb_to_r(diff);
-		unsigned long long error1 = cvl_pixel_rgb_to_g(diff);
-		unsigned long long error2 = cvl_pixel_rgb_to_b(diff);
-		if (ULLONG_MAX - errorsum0 < error0
-			|| ULLONG_MAX - errorsum1 < error1
-			|| ULLONG_MAX - errorsum2 < error2)
-		{
-		    cvl_msg_err("cannot compute average error: arithmetic overflow");
-		    error = true;
-		    break;
-		}			
-		errorsum0 += error0;
-		errorsum1 += error1;
-		errorsum2 += error2;
-	    }
-	    cvl_msg(output.value ? output.value : stderr, CVL_MSG_REQ, 
-		    "%.20g %.20g %.20g", 
-		    (double)errorsum0 / (double)size,
-		    (double)errorsum1 / (double)size,
-		    (double)errorsum2 / (double)size);
-	}
-	else // (cvl_frame_pixel_type(src1_frame) == CVL_PIXEL_YUV)
-	{
-	    unsigned long long errorsum0 = 0;
-	    unsigned long long errorsum1 = 0;
-	    unsigned long long errorsum2 = 0;
-	    for (int i = 0; i < size; i++)
-	    {
-		cvl_pixel_t diff = cvl_frame_get_i(diff_frame, i);
-		unsigned long long error0 = cvl_pixel_yuv_to_y(diff);
-		unsigned long long error1 = cvl_pixel_yuv_to_u(diff);
-		unsigned long long error2 = cvl_pixel_yuv_to_v(diff);
-		if (ULLONG_MAX - errorsum0 < error0
-			|| ULLONG_MAX - errorsum1 < error1
-			|| ULLONG_MAX - errorsum2 < error2)
-		{
-		    cvl_msg_err("cannot compute average error: arithmetic overflow");
-		    error = true;
-		    break;
-		}			
-		errorsum0 += error0;
-		errorsum1 += error1;
-		errorsum2 += error2;
-	    }
-	    cvl_msg(output.value ? output.value : stderr, CVL_MSG_REQ, 
-		    "%.20g %.20g %.20g", 
-		    (double)errorsum0 / (double)size,
-		    (double)errorsum1 / (double)size,
-		    (double)errorsum2 / (double)size);
+	else
+	{		
+	    diff_frame = cvl_diff(src1_frame, src2_frame);
 	}
 	cvl_frame_free(src1_frame);
 	cvl_frame_free(src2_frame);
