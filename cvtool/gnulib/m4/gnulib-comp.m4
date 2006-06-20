@@ -130,13 +130,13 @@ AC_DEFUN([gl_FILE_LIST], [
   m4/error.m4
   m4/exitfail.m4
   m4/fatal-signal.m4
+  m4/full-header-path.m4
   m4/getopt.m4
   m4/glibc21.m4
   m4/iconv.m4
   m4/iconvme.m4
   m4/intmax_t.m4
   m4/inttostr.m4
-  m4/inttypes.m4
   m4/inttypes_h.m4
   m4/lib-ld.m4
   m4/lib-link.m4
