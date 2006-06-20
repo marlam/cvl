@@ -1,4 +1,5 @@
 Version 0.0.3 (not yet released):
+- Autoconf update: build-aux/c.m4 is not needed anymore.
 - cvtool: Enhanced diff command. It can now use cvl_diffstat() and print the
   resulting statistics.
 - CVL: Added new function cvl_diffstat() to compute simple statistics for the 
