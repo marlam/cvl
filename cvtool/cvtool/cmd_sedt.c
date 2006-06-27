@@ -53,11 +53,6 @@ void cmd_sedt_print_help(void)
 	    "input is less than sqrt(INT_MAX/2).");
 }
 
-bool write_int(char *s, size_t s_size, const int *i)
-{
-    return (snprintf(s, s_size, "%d", *i) < (int)s_size);
-}
-
 int cmd_sedt(int argc, char *argv[])
 {
     cvl_option_bool_t three_dimensional = { false, true };
@@ -117,8 +112,7 @@ int cmd_sedt(int argc, char *argv[])
 	    free(frames);
 	    for (int i = 0; i < depth; i++)
 	    {
-		if (!error && !cvl_field_write(stdout, edt[i],
-			    (bool (*)(char *, size_t, const void *))write_int))
+		if (!error && !cvl_field_write(stdout, edt[i]))
 		{
 		    error = true;
 		}
@@ -142,8 +136,7 @@ int cmd_sedt(int argc, char *argv[])
 	    cvl_frame_to_gray(frame);
 	    edt = cvl_sedt(frame);
 	    cvl_frame_free(frame);
-	    if (!cvl_field_write(stdout, edt,
-			(bool (*)(char *, size_t, const void *))write_int))
+	    if (!cvl_field_write(stdout, edt))
 	    {
 		cvl_field_free(edt);
 		error = true;

@@ -9,15 +9,15 @@ cvtool select 800-1250 < stream.yuv > nasa.y4m
 rm stream.yuv
 
 # Determine the optical flow in both directions
-cvtool opticalflow bm-sad    -k 8 -M 5 -D 0.01 -L 0.5 < nasa.y4m > flow-fw.txt
-cvtool opticalflow bm-sad -b -k 8 -M 5 -D 0.01 -L 0.5 < nasa.y4m > flow-bw.txt
+cvtool opticalflow bm-sad    -k 8 -M 5 -D 0.01 -L 0.5 < nasa.y4m > flow-fw.dat
+cvtool opticalflow bm-sad -b -k 8 -M 5 -D 0.01 -L 0.5 < nasa.y4m > flow-bw.dat
 # Improve the optical flow with a consistency check
-cvtool opticalflow cc -t 1 -f flow-bw.txt < flow-fw.txt > flow-fw-improved.txt
-cvtool opticalflow cc -t 1 -f flow-fw.txt < flow-bw.txt > flow-bw-improved.txt
+cvtool opticalflow cc -t 1 -f flow-bw.dat < flow-fw.dat > flow-fw-improved.dat
+cvtool opticalflow cc -t 1 -f flow-fw.dat < flow-bw.dat > flow-bw-improved.dat
 
 # Depth tracking
 cvtool trackdepth -n 451 -d 0,225,450 \
-	-f flow-fw-improved.txt -F flow-bw-improved.txt \
+	-f flow-fw-improved.dat -F flow-bw-improved.dat \
 	nasad000.pgm nasad225.pgm nasad450.pgm > nasad.pgm
 
 # Smooth the depth maps for better image quality

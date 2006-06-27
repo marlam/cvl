@@ -109,18 +109,15 @@ int cmd_vectors(int argc, char *argv[])
 	}
 	if (type.value == 0)
 	{
-	    error = !cvl_field_read(stdin, &field, 2 * sizeof(int), 
-		    (bool (*)(const char *, void *))cvl_vector2i_from_string);
+	    error = !cvl_field_read_knowntype(stdin, &field, 2 * sizeof(int));
 	}
 	else if (type.value == 1)
 	{
-	    error = !cvl_field_read(stdin, &field, 2 * sizeof(double), 
-		    (bool (*)(const char *, void *))cvl_vector2_from_string);
+	    error = !cvl_field_read_knowntype(stdin, &field, 2 * sizeof(double));
 	}
 	else
 	{
-	    error = !cvl_field_read(stdin, &field, 3 * sizeof(double), 
-		    (bool (*)(const char *, void *))cvl_vector3_from_string);
+	    error = !cvl_field_read_knowntype(stdin, &field, 3 * sizeof(double));
 	}
 	if (error)
 	{

@@ -316,23 +316,17 @@ int cmd_trackdepth(int argc, char *argv[])
 	    for (int i = 0; i < current_part_N - 1; i++)
 	    {
 		/* read forward flow field */
+		flow_fw = cvl_field_new(2 * sizeof(int), width, height);
 	    	if (cvl_field_stream_eof(flow_fw_file.value) 
-    			|| !cvl_field_read(flow_fw_file.value, &flow_fw, 2 * sizeof(int),
-			    (bool (*)(const char *, void *))cvl_vector2i_from_string))
+    			|| !cvl_field_read_known(flow_fw_file.value, flow_fw))
 		{
 		    cvl_msg_err("cannot read forward flow");
 		    error = true;
 		    goto exit;
 		}
-		if (cvl_field_width(flow_fw) != width || cvl_field_height(flow_fw) != height)
-		{
-		    cvl_msg_err("the flow fields must have the same dimensions as the depth maps");
-		    error = true;
-		    goto exit;
-		}
 		/* store forward flow field in temporary file */
 		cvl_msg_dbg("writing forward flow %d to temporary file", i);
-		if (!cvl_field_write_raw(tmp_flow_file, flow_fw))
+		if (!cvl_field_write(tmp_flow_file, flow_fw))
 		{
 		    error = true;
 		    goto exit;
@@ -360,8 +354,8 @@ int cmd_trackdepth(int argc, char *argv[])
 	    }
 	    cvl_trackdepth_init_first_trackmap(dO_field, (current_part_O_index == -1) ? NULL : depth_O);
 	    cvl_msg_dbg("writing depth-O map %d", current_part_N - 1);
-	    if (!cvl_field_seek_raw(dO_file, sizeof(int16_t), width, height, current_part_N - 1)
-		    || !cvl_field_write_raw(dO_file, dO_field))
+	    if (!cvl_field_seek(dO_file, sizeof(int16_t), width, height, current_part_N - 1)
+		    || !cvl_field_write(dO_file, dO_field))
 	    {
 	     	error = true;
     		goto exit;
@@ -374,13 +368,13 @@ int cmd_trackdepth(int argc, char *argv[])
 	    {
 		cvl_field_copy(dO_prev_field, dO_field);
 		/* read forward flow field */
-		if (!cvl_field_seek_raw(tmp_flow_file, 2 * sizeof(int), width, height, i))
+		if (!cvl_field_seek(tmp_flow_file, 2 * sizeof(int), width, height, i))
 		{
 		    error = true;
 		    goto exit;
 		}
 		flow_fw = cvl_field_new(2 * sizeof(int), width, height);
-		if (!cvl_field_read_raw(tmp_flow_file, flow_fw))
+		if (!cvl_field_read_known(tmp_flow_file, flow_fw))
 		{
 		    error = true;
 		    goto exit;
@@ -389,14 +383,14 @@ int cmd_trackdepth(int argc, char *argv[])
 		cvl_field_free(flow_fw);
 		flow_fw = NULL;
 		cvl_msg_dbg("writing depth-O map %d", i);
-	     	if (!cvl_field_seek_raw(dO_file, sizeof(int16_t), width, height, i)
-			|| !cvl_field_write_raw(dO_file, dO_field))
+	     	if (!cvl_field_seek(dO_file, sizeof(int16_t), width, height, i)
+			|| !cvl_field_write(dO_file, dO_field))
 		{
 		    error = true;
 		    goto exit;
 		}		
 	    }
-	    if (!cvl_field_seek_raw(dO_file, sizeof(int16_t), width, height, 0))
+	    if (!cvl_field_seek(dO_file, sizeof(int16_t), width, height, 0))
     	    {
 		error = true;
 		goto exit;
@@ -429,7 +423,7 @@ int cmd_trackdepth(int argc, char *argv[])
 	    }
 	    cvl_trackdepth_init_first_trackmap(dA_field, (current_part_A_index == -1) ? NULL : depth_A);
 	    cvl_msg_dbg("writing depth-A map %d", 0);
-	    if (!cvl_field_write_raw(dA_file, dA_field))
+	    if (!cvl_field_write(dA_file, dA_field))
 	    {
 		error = true;
 		goto exit;
@@ -441,17 +435,11 @@ int cmd_trackdepth(int argc, char *argv[])
 	    for (int i = 1; i < current_part_N; i++)
 	    {
 		cvl_field_copy(dA_prev_field, dA_field);
+		flow_bw = cvl_field_new(2 * sizeof(int), width, height);
 		/* read backward flow field */
 	    	if (cvl_field_stream_eof(flow_bw_file.value) 
-    			|| !cvl_field_read(flow_bw_file.value, &flow_bw, 2 * sizeof(int),
-			    (bool (*)(const char *, void *))cvl_vector2i_from_string))
+    			|| !cvl_field_read_known(flow_bw_file.value, flow_bw))
 		{
-		    error = true;
-		    goto exit;
-		}
-		if (cvl_field_width(flow_bw) != width || cvl_field_height(flow_bw) != height)
-		{
-		    cvl_msg_err("the flow fields must have the same dimensions as the depth maps");
 		    error = true;
 		    goto exit;
 		}
@@ -459,13 +447,13 @@ int cmd_trackdepth(int argc, char *argv[])
 		cvl_field_free(flow_bw);
 		flow_bw = NULL;
 		cvl_msg_dbg("writing depth-A map %d", i);
-		if (!cvl_field_write_raw(dA_file, dA_field))
+		if (!cvl_field_write(dA_file, dA_field))
 		{
 		    error = true;
 		    goto exit;
 		}
 	    }
-	    if (!cvl_field_seek_raw(dA_file, sizeof(int16_t), width, height, 0))
+	    if (!cvl_field_seek(dA_file, sizeof(int16_t), width, height, 0))
     	    {
 		error = true;
 		goto exit;
@@ -477,7 +465,7 @@ int cmd_trackdepth(int argc, char *argv[])
 	    cvl_msg_dbg("computing depth maps...");
 	    for (int i = 0; i < current_part_N; i++)
 	    {
-		if (!cvl_field_read_raw(dA_file, dA_field) || !cvl_field_read_raw(dO_file, dO_field))
+		if (!cvl_field_read_known(dA_file, dA_field) || !cvl_field_read_known(dO_file, dO_field))
 		{
 		    error = true;
 		    goto exit;

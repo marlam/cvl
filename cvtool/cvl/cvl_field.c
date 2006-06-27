@@ -46,9 +46,6 @@ extern int errno;
 #include "cvl/cvl_assert.h"
 #include "cvl/cvl_field.h"
 
-#define CVL_FIELD_IO_LINEBUFSIZE 512
-
-
 /**
  * \struct cvl_field_t
  * \brief A two-dimensional field.
@@ -57,6 +54,16 @@ extern int errno;
  * cvl_field.h cvl_field.h \endlink to manipulate fields.
  */
 
+/**
+ * \typedef cvl_field_type_t
+ * The type of data stored in a field.
+ */
+/** \var CVL_FIELD_INT
+ *  Integers, in the machine representation. */
+/** \var CVL_FIELD_FLOAT
+ *  Floats, in the machine representation. */
+/** \var CVL_FIELD_UNKNOWN
+ *  Arbitrary data. */
 
 /**
  * \param element_size	The size of the data elements of the field.
@@ -92,6 +99,53 @@ cvl_field_t *cvl_field_new(size_t element_size, int width, int height)
 	return field;
     }
 }
+
+/**
+ * \param nelem		Number of int components in one field element.
+ * \param width		The width.
+ * \param height	The height.
+ * \return 		The field.
+ */
+cvl_field_t *cvl_field_i_new(int nelem, int width, int height)
+{
+    cvl_assert(nelem >= 1);
+    cvl_assert(width > 0);
+    cvl_assert(height > 0);
+
+    if (!cvl_product_fits_in_size_t(nelem, sizeof(int)))
+    {
+	cvl_msg_err("field_i with nelement=%d would cause arithmetic overflow", nelem);
+	abort();
+    }
+    else
+    {
+	return cvl_field_new((size_t)nelem * sizeof(int), width, height);
+    }
+}
+
+/**
+ * \param nelem		Number of float components in one field element.
+ * \param width		The width.
+ * \param height	The height.
+ * \return 		The field.
+ */
+cvl_field_t *cvl_field_f_new(int nelem, int width, int height)
+{
+    cvl_assert(nelem >= 1);
+    cvl_assert(width > 0);
+    cvl_assert(height > 0);
+
+    if (!cvl_product_fits_in_size_t(nelem, sizeof(float)))
+    {
+	cvl_msg_err("field_f with nelement=%d would cause arithmetic overflow", nelem);
+	abort();
+    }
+    else
+    {
+	return cvl_field_new((size_t)nelem * sizeof(float), width, height);
+    }
+}
+
 
 /**
  * \param field		The field to be freed.
@@ -371,7 +425,7 @@ inline void cvl_field_set(cvl_field_t *field, int x, int y, const void *e)
  * The index refers to all lines of the field one after another, 
  * from top to bottom and left to right.
  */
-inline const float *cvl_field_getf_i(const cvl_field_t *field, int i)
+inline const float *cvl_field_f_get_i(const cvl_field_t *field, int i)
 {
     cvl_assert(field != NULL);
     cvl_assert(i >= 0);
@@ -390,7 +444,7 @@ inline const float *cvl_field_getf_i(const cvl_field_t *field, int i)
  * floats in one element.\n
  * Gets an element from a field by returning a pointer to it.
  */
-inline const float *cvl_field_getf(const cvl_field_t *field, int x, int y)
+inline const float *cvl_field_f_get(const cvl_field_t *field, int x, int y)
 {
     cvl_assert(field != NULL);
     cvl_assert(x >= 0);
@@ -412,7 +466,7 @@ inline const float *cvl_field_getf(const cvl_field_t *field, int x, int y)
  * Gets an element from a field by returning a pointer to it.
  * This function uses reflective indexing: arbitrary \a x and \a y values are accepted.
  */
-inline const float *cvl_field_getf_r(const cvl_field_t *field, int x, int y)
+inline const float *cvl_field_f_get_r(const cvl_field_t *field, int x, int y)
 {
     cvl_assert(field != NULL);
 
@@ -430,7 +484,7 @@ inline const float *cvl_field_getf_r(const cvl_field_t *field, int x, int y)
  * The index refers to all lines of the field one after another, 
  * from top to bottom and left to right.
  */
-inline const int *cvl_field_geti_i(const cvl_field_t *field, int i)
+inline const int *cvl_field_i_get_i(const cvl_field_t *field, int i)
 {
     cvl_assert(field != NULL);
     cvl_assert(i >= 0);
@@ -449,7 +503,7 @@ inline const int *cvl_field_geti_i(const cvl_field_t *field, int i)
  * ints in one element.\n
  * Gets an element from a field by returning a pointer to it.
  */
-inline const int *cvl_field_geti(const cvl_field_t *field, int x, int y)
+inline const int *cvl_field_i_get(const cvl_field_t *field, int x, int y)
 {
     cvl_assert(field != NULL);
     cvl_assert(x >= 0);
@@ -471,7 +525,7 @@ inline const int *cvl_field_geti(const cvl_field_t *field, int x, int y)
  * Gets an element from a field by returning a pointer to it.
  * This function uses reflective indexing: arbitrary \a x and \a y values are accepted.
  */
-inline const int *cvl_field_geti_r(const cvl_field_t *field, int x, int y)
+inline const int *cvl_field_i_get_r(const cvl_field_t *field, int x, int y)
 {
     cvl_assert(field != NULL);
 
@@ -548,25 +602,6 @@ void cvl_field_copy_rect(cvl_field_t *dst, int dst_x, int dst_y,
     }	
 }
 
-/* Internal function to convert a string to an integer. */
-bool cvl_field_read_getint(const char *s, int min, int max, char **p, int *x)
-{
-    long value;
-    
-    errno = 0;
-    value = strtol(s, p, 10);
-    if (*p == s || (**p != ' ' && **p != '\0') || errno == ERANGE 
-	    || value < (long)min || value > (long)max)
-    {
-	return false;
-    }
-    else
-    {
-	*x = (int)value;
-	return true;
-    }
-}
-
 /**
  * \param f	The input stream.
  * \return 	EOF (true) or not EOF (false).
@@ -592,121 +627,6 @@ bool cvl_field_stream_eof(FILE *f)
 }
 
 /**
- * \param f		The stream to read from.
- * \param field		The field will be stored here.
- * \param element_size	The size of one data element.
- * \param read_element	Function that converts a string to one element. Must return success or error.
- * \return		Success or error.
- * 
- * Reads a field from a stream. The type of the field must be known by the
- * caller, so that the necessary conversion function can be provided.
- */
-bool cvl_field_read(FILE *f, cvl_field_t **field, size_t element_size,
-	bool (*read_element)(const char *s, void *element))
-{
-    cvl_assert(f != NULL);
-    cvl_assert(field != NULL);
-    cvl_assert(element_size > 0);
-    cvl_assert(read_element != NULL);
-
-    char linebuf[CVL_FIELD_IO_LINEBUFSIZE];
-    size_t linelen;
-    char *p;
-    int width, height;
-    
-    *field = NULL;
-    if (!fgets(linebuf, CVL_FIELD_IO_LINEBUFSIZE, f))
-    {
-	cvl_msg_err("unexpected EOF or input error in CVL field");
-	return false;
-    }
-    linelen = strlen(linebuf);
-    if (linelen < 1 || linebuf[linelen - 1] != '\n')
-    {
-	cvl_msg_err("unexpected EOF in CVL field");
-	return false;
-    }
-    linebuf[--linelen] = '\0';
-    // Expect "CVL FIELD <width> <height>"
-    //        "... <width> * <height> lines with one element each ..."
-    if (strncmp(linebuf, "CVL FIELD ", 10) != 0
-	    || !cvl_field_read_getint(linebuf + 10, 1, INT_MAX, &p, &width)
-	    || !cvl_field_read_getint(p + 1, 1, INT_MAX, &p, &height)
-	    || *p != '\0')
-    { 
-	cvl_msg_err("invalid CVL field header");
-	return false;
-    }
-    *field = cvl_field_new(element_size, width, height);
-    for (int i = 0; i < width * height; i++)
-    {
-	if (!fgets(linebuf, CVL_FIELD_IO_LINEBUFSIZE, f))
-	{
-	    cvl_msg_err("unexpected EOF or input error in CVL field");
-	    cvl_field_free(*field);
-	    return false;
-	}
-	linelen = strlen(linebuf);
-    	if (linelen < 1 || linebuf[linelen - 1] != '\n')
-	{
-	    cvl_msg_err("unexpected EOF in CVL field");
-	    cvl_field_free(*field);
-	    return false;
-	}
-	linebuf[--linelen] = '\0';
-	if (!(read_element(linebuf, 
-			&((unsigned char *)((*field)->_p))[cvl_field_element_size(*field) * i])))
-	{
-	    cvl_msg_err("cannot read data element from CVL field input string");
-	    cvl_field_free(*field);
-	    return false;
-	}
-    }
-    return true;
-}
-
-/**
- * \param f		The stream to write the field to.
- * \param field		The field.
- * \param write_element	Function to convert one element into a fixed length string. Must return success or error.
- * \return		Success or error.
- *
- * Writes a field to a stream.
- */
-bool cvl_field_write(FILE *f, cvl_field_t *field,
-	bool (*write_element)(char *s, size_t s_size, const void *element))
-{
-    cvl_assert(f != NULL);
-    cvl_assert(field != NULL);
-    cvl_assert(write_element != NULL);
-
-    char linebuf[CVL_FIELD_IO_LINEBUFSIZE];
-    
-    if (fprintf(f, "CVL FIELD %d %d\n", 
-	    cvl_field_width(field),
-	    cvl_field_height(field)) < 0)
-    {
-	cvl_msg_err("cannot write CVL field header: %s", strerror(errno));
-	return false;
-    }
-    for (int i = 0; i < cvl_field_size(field); i++)
-    {
-	if (!write_element(linebuf, CVL_FIELD_IO_LINEBUFSIZE,
-    		    &((unsigned char *)(field->_p))[cvl_field_element_size(field) * i]))
-	{
-	    cvl_msg_err("cannot write data element to CVL field output string");
-	    return false;
-	}
-	if (fprintf(f, "%s\n", linebuf) < 0)
-	{
-	    cvl_msg_err("cannot write data element to CVL field: %s", strerror(errno));
-	    return false;
-	}
-    }
-    return true;
-}
-
-/**
  * \param f		The stream.
  * \param element_size	The size of a field element.
  * \param width		The field width.
@@ -717,11 +637,14 @@ bool cvl_field_write(FILE *f, cvl_field_t *field,
  * Seeks to the requested field in the file \a f that stores fields with 
  * the given \a element_size, \a width, and \a height in raw binary format.
  */
-bool cvl_field_seek_raw(FILE *f, size_t element_size, int width, int height, int newpos)
+bool cvl_field_seek(FILE *f, size_t element_size, int width, int height, int newpos)
 {
-    if (fseeko(f, newpos * width * height * element_size, SEEK_SET) != 0)
+    if (fseeko(f, newpos * 
+		(9 * sizeof(char) + sizeof(size_t) + 2 * sizeof(int)	// CVL_FIELD + ELEM_SIZE + W + H
+		 + width * height * element_size), 			// The data
+		SEEK_SET) != 0)
     {
-	cvl_msg_err("cannot seek in raw field file: %s", strerror(errno));
+	cvl_msg_err("cannot seek in field file: %s", strerror(errno));
 	return false;
     }
     else
@@ -730,46 +653,154 @@ bool cvl_field_seek_raw(FILE *f, size_t element_size, int width, int height, int
     }
 }
 
-/**
- * \param f		The stream to read from.
- * \param field		A preallocated field to read the data into.
- * \return		Success or error.
- * 
- * Reads a field in raw binary data form from a stream into the preallocated
- * field \a field. Exactly width*height*element_size bytes are read.
- */
-bool cvl_field_read_raw(FILE *f, cvl_field_t *field)
+/* Helper: Read the header of a CVL field. */
+static bool cvl_field_read_header(FILE *f, size_t *element_size, int *width, int *height)
 {
-    cvl_assert(f != NULL);
-    cvl_assert(field != NULL);
+    char magic[9];
 
-    size_t count = cvl_field_size(field);
-    if (fread(field->_p, cvl_field_element_size(field), count, f) != count)
+    if (fread(magic, sizeof(char), 9, f) != 9)
     {
-	cvl_msg_err("cannot read raw CVL field data: %s", strerror(errno));
+	cvl_msg_err("unexpected EOF or input error in CVL field");
+	return false;
+    }
+    if (strncmp(magic, "CVL_FIELD", 9) != 0)
+    {
+	cvl_msg_err("missing CVL_FIELD magic");
+	return false;
+    }
+    if (fread(element_size, sizeof(size_t), 1, f) != 1
+	    || fread(width, sizeof(int), 1, f) != 1
+	    || fread(height, sizeof(int), 1, f) != 1)
+    {
+	cvl_msg_err("unexpected EOF or input error in CVL field");
+	return false;
+    }
+    if (*element_size == 0 || *width <= 0 || *height <= 0)
+    {
+	cvl_msg_err("invalid type or dimensions of CVL field");
 	return false;
     }
     return true;
 }
 
 /**
- * \param f		The stream to write to.
- * \param field		The field to write.
+ * \param f		The stream to read from.
+ * \param field		The field will be stored here.
  * \return		Success or error.
  * 
- * Writes the field \a field into \a f in raw binary data form.
- * Exactly width*height*element_size bytes are written.
+ * Reads a field from a stream.
  */
-bool cvl_field_write_raw(FILE *f, const cvl_field_t *field)
+bool cvl_field_read(FILE *f, cvl_field_t **field)
 {
     cvl_assert(f != NULL);
     cvl_assert(field != NULL);
 
-    size_t count = cvl_field_size(field);
-    if (fwrite(field->_p, cvl_field_element_size(field), count, f) != count)
+    size_t element_size;
+    int width, height;
+
+    if (!cvl_field_read_header(f, &element_size, &width, &height))
     {
-	cvl_msg_err("cannot write raw CVL field data: %s", strerror(errno));
 	return false;
     }
+    *field = cvl_field_new(element_size, width, height);
+    if (fread((*field)->_p, element_size, width * height, f) != (size_t)(width * height))
+    {
+	cvl_msg_err("unexpected EOF or input error in CVL field");
+	return false;
+    }
+    return true;
+}
+
+/**
+ * \param f		The stream to read from.
+ * \param field		The field will be stored here.
+ * \param element_size	The size of elements in the field.
+ * \return		Success or error.
+ * 
+ * Reads a field from a stream. It is an error if the size of elements in the field does not
+ * match the expected \a element_size.
+ */
+bool cvl_field_read_knowntype(FILE *f, cvl_field_t **field, size_t element_size)
+{
+    cvl_assert(f != NULL);
+    cvl_assert(element_size > 0);
+    cvl_assert(field != NULL);
+
+    size_t tmp_element_size;
+    int width, height;
+
+    if (!cvl_field_read_header(f, &tmp_element_size, &width, &height))
+    {
+	return false;
+    }
+    if (tmp_element_size != element_size)
+    {
+	cvl_msg_err("wrong type of CVL field");
+	return false;
+    }
+    *field = cvl_field_new(element_size, width, height);
+    if (fread((*field)->_p, element_size, width * height, f) != (size_t)(width * height))
+    {
+	cvl_msg_err("unexpected EOF or input error in CVL field");
+	return false;
+    }
+    return true;
+}
+
+/**
+ * \param f		The stream to read from.
+ * \param field		The preallocated field.
+ * \return		Success or error.
+ * 
+ * Reads a field from a stream. It is an error if the field from the stream does
+ * not match the element size, width, or height of the preallocated field \a field.
+ */
+bool cvl_field_read_known(FILE *f, cvl_field_t *field)
+{
+    cvl_assert(f != NULL);
+    cvl_assert(field != NULL);
+
+    size_t element_size;
+    int width, height;
+
+    if (!cvl_field_read_header(f, &element_size, &width, &height))
+    {
+	return false;
+    }
+    if (fread(field->_p, element_size, width * height, f) != (size_t)(width * height))
+    {
+	cvl_msg_err("unexpected EOF or input error in CVL field");
+	return false;
+    }
+    return true;
+}
+
+/**
+ * \param f		The stream to write the field to.
+ * \param field		The field.
+ * \return		Success or error.
+ *
+ * Writes a field to a stream.
+ */
+bool cvl_field_write(FILE *f, const cvl_field_t *field)
+{
+    cvl_assert(f != NULL);
+    cvl_assert(field != NULL);
+
+    const char *magic = "CVL_FIELD";
+    size_t element_size = cvl_field_element_size(field);
+    int width = cvl_field_width(field);
+    int height = cvl_field_height(field);
+
+    if (fwrite(magic, sizeof(char), 9, f) != 9
+	    || fwrite(&element_size, sizeof(size_t), 1, f) != 1
+	    || fwrite(&width, sizeof(int), 1, f) != 1
+	    || fwrite(&height, sizeof(int), 1, f) != 1
+	    || fwrite(field->_p, element_size, width * height, f) != (size_t)(width * height))
+    {
+	cvl_msg_err("output error");
+	return false;
+    }
+
     return true;
 }

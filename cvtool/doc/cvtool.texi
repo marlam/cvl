@@ -1231,13 +1231,13 @@ separate file with the @code{--output} option.
 
 @example
 $ cvtool opticalflow bm-sad    -k 8 -M 5 -D 0.01 -L 0.5 \
-  < video.y4m > flow-fw.txt
+  < video.y4m > flow-fw.dat
 $ cvtool opticalflow bm-sad -b -k 8 -M 5 -D 0.01 -L 0.5 \
-  < video.y4m > flow-bw.txt
-$ cvtool opticalflow cc -t 2 -f flow-bw.txt \
-  < flow-fw.txt > flow-fw-improved.txt
-$ cvtool opticalflow cc -t 2 -f flow-fw.txt \
-  < flow-bw.txt > flow-bw-improved.txt
+  < video.y4m > flow-bw.dat
+$ cvtool opticalflow cc -t 2 -f flow-bw.dat \
+  < flow-fw.dat > flow-fw-improved.dat
+$ cvtool opticalflow cc -t 2 -f flow-fw.dat \
+  < flow-bw.dat > flow-bw-improved.dat
 @end example
 
 @noindent 
@@ -1397,7 +1397,7 @@ results. Exactly one depth map file must be given for each entry in the list.
 This command uses temporary files that can become quite large.
 
 @example
-$ cvtool trackdepth -n 26 -d 0,25 -f flow-fw.txt -F flow-bw.txt \
+$ cvtool trackdepth -n 26 -d 0,25 -f flow-fw.dat -F flow-bw.dat \
   depth00.pgm depth25.pgm < video.y4m > depth00-25.pgm
 @end example
 
@@ -1517,7 +1517,7 @@ field, but only one of 25 vectors is visualized. The default is
 @var{x=y=dx=dy=10}, @var{f=1.0}.
 
 @example
-$ cvtool vectors visualize -t 2i < flow-fw.txt > flow-fw.pgm
+$ cvtool vectors visualize -t 2i < flow-fw.dat > flow-fw.pgm
 @end example
 
 
@@ -1660,9 +1660,9 @@ First, we convert the video to YUV4MPEG2 format. Then, we extract frames 800-125
 The motion estimation in both forward and backward direction is done with the commands
 @example
 $ cvtool opticalflow bm-sad    -k 8 -M 5 -D 0.01 -L 0.5 \
-  < nasa.y4m > flow-fw.txt
+  < nasa.y4m > flow-fw.dat
 $ cvtool opticalflow bm-sad -b -k 8 -M 5 -D 0.01 -L 0.5 \
-  < nasa.y4m > flow-bw.txt
+  < nasa.y4m > flow-bw.dat
 @end example
 Beware: this can take up to several hours to compute! Better get some sleep in the meantime.
 
@@ -1685,7 +1685,7 @@ The result is shown in @ref{Figure nasacd000225450}.
 No we have everything that is necessary for depth tracking. The following
 command will produce a series of depth maps for frames 0-450 of the video:
 @example
-$ cvtool trackdepth -n 451 -d 0,225,450 -f flow-fw.txt -F flow-bw.txt \
+$ cvtool trackdepth -n 451 -d 0,225,450 -f flow-fw.dat -F flow-bw.dat \
   nasad000.pgm nasad225.pgm nasad450.pgm > nasad.pgm
 @end example
 If you view the resulting depth maps as a video, you will notice some errors in the tracking

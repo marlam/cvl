@@ -193,22 +193,30 @@ int cmd_opticalflow(int argc, char *argv[])
 	{
 	    double fraction;
 
-	    if (!cvl_field_read(stdin, &field1, 2 * sizeof(int),
-			(bool (*)(const char *, void *))cvl_vector2i_from_string))
+	    if (!cvl_field_read_knowntype(stdin, &field1, 2 * sizeof(int)))
 	    {
+		error = true;
 		break;
 	    }
-	    if (!cvl_field_read(verificationflow.value, &field2, 2 * sizeof(int),
-			(bool (*)(const char *, void *))cvl_vector2i_from_string))
+	    if (!cvl_field_read_knowntype(verificationflow.value, &field2, 2 * sizeof(int)))
 	    {
 		cvl_field_free(field1);
+		error = true;
+		break;
+	    }
+	    if (cvl_field_width(field1) != cvl_field_width(field2)
+		    || cvl_field_height(field1) != cvl_field_height(field2))
+	    {
+		cvl_field_free(field1);
+		cvl_field_free(field2);
+		cvl_msg_err("fields must have the same dimensions");
+		error = true;
 		break;
 	    }
 	    flowfield = cvl_opticalflow_cc(field1, field2, tolerance.value, &fraction);
 	    cvl_field_free(field1);
 	    cvl_field_free(field2);
-	    if (!cvl_field_write(stdout, flowfield, 
-			(bool (*)(char *, size_t, const void *))cvl_vector2i_to_string))
+	    if (!cvl_field_write(stdout, flowfield))
 	    {
 		cvl_field_free(flowfield);
 		error = true;
@@ -300,8 +308,7 @@ int cmd_opticalflow(int argc, char *argv[])
     	    }
 	    cvl_frame_free(frame1);
     	    frame1 = frame2;
-    	    if (!cvl_field_write(stdout, flowfield, 
-    			(bool (*)(char *, size_t, const void *))cvl_vector2i_to_string))
+    	    if (!cvl_field_write(stdout, flowfield))
     	    {
     		cvl_field_free(flowfield);
     		error = true;

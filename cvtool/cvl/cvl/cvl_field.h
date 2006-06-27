@@ -26,6 +26,13 @@
 #include <stdio.h>
 #include <stdbool.h>
 
+typedef enum 
+{ 
+    CVL_FIELD_INT, 
+    CVL_FIELD_FLOAT, 
+    CVL_FIELD_UNKNOWN 
+} cvl_field_type_t;
+
 typedef struct
 {
     size_t _element_size;
@@ -35,6 +42,8 @@ typedef struct
 } cvl_field_t;
 
 cvl_field_t *cvl_field_new(size_t element_size, int width, int height);
+cvl_field_t *cvl_field_i_new(int nelem, int width, int height);
+cvl_field_t *cvl_field_f_new(int nelem, int width, int height);
 void cvl_field_free(cvl_field_t *field);
 inline size_t cvl_field_element_size(const cvl_field_t *field);
 inline int cvl_field_width(const cvl_field_t *field);
@@ -54,25 +63,22 @@ inline const void *cvl_field_get_r(const cvl_field_t *field, int x, int y);
 inline void cvl_field_set_i(cvl_field_t *field, int i, const void *e);
 inline void cvl_field_set(cvl_field_t *field, int x, int y, const void *e);
 
-inline const float *cvl_field_getf_i(const cvl_field_t *field, int i);
-inline const float *cvl_field_getf(const cvl_field_t *field, int x, int y);
-inline const float *cvl_field_getf_r(const cvl_field_t *field, int x, int y);
-inline const int *cvl_field_geti_i(const cvl_field_t *field, int i);
-inline const int *cvl_field_geti(const cvl_field_t *field, int x, int y);
-inline const int *cvl_field_geti_r(const cvl_field_t *field, int x, int y);
+inline const float *cvl_field_f_get_i(const cvl_field_t *field, int i);
+inline const float *cvl_field_f_get(const cvl_field_t *field, int x, int y);
+inline const float *cvl_field_f_get_r(const cvl_field_t *field, int x, int y);
+inline const int *cvl_field_i_get_i(const cvl_field_t *field, int i);
+inline const int *cvl_field_i_get(const cvl_field_t *field, int x, int y);
+inline const int *cvl_field_i_get_r(const cvl_field_t *field, int x, int y);
 
 void cvl_field_fill_rect(cvl_field_t *field, int x, int y, int w, int h, const void *e);
 void cvl_field_copy_rect(cvl_field_t *dst, int dst_x, int dst_y, 
 	const cvl_field_t *src, int src_x, int src_y, int rwidth, int rheight);
 
 bool cvl_field_stream_eof(FILE *f);
-bool cvl_field_read(FILE *f, cvl_field_t **field, size_t element_size,
-	bool (*read_element)(const char *s, void *element));
-bool cvl_field_write(FILE *f, cvl_field_t *field,
-	bool (*write_element)(char *s, size_t s_size, const void *element));
-
-bool cvl_field_seek_raw(FILE *f, size_t element_size, int width, int height, int newpos);
-bool cvl_field_read_raw(FILE *f, cvl_field_t *field);
-bool cvl_field_write_raw(FILE *f, const cvl_field_t *field);
+bool cvl_field_seek(FILE *f, size_t element_size, int width, int height, int newpos);
+bool cvl_field_read(FILE *f, cvl_field_t **field);
+bool cvl_field_read_knowntype(FILE *f, cvl_field_t **field, size_t element_size);
+bool cvl_field_read_known(FILE *f, cvl_field_t *field);
+bool cvl_field_write(FILE *f, const cvl_field_t *field);
 
 #endif

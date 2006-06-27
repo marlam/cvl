@@ -3,6 +3,13 @@ Version 0.0.3 (not yet released):
   - diff:
     Can now print simple statistics.
 - New and improved CVL functionality:
+  - Simplified the handling of fields, especially the input/output:
+    - New convenience functions cvl_field_(i|f)_new() and cvl_field_(i|f)_get*()
+      for fields that store only floats or ints.
+    - Reworked cvl_field_read*(), cvl_field_write*().
+    - Fields are now always read and written in machine dependant raw format.
+      This simplifies and speeds up things, but field data is not guaranteed to be
+      interchangeable between different platforms anymore.
   - New function cvl_diffstat() to compute simple statistics for the differences
     between two frames.
   - New function cvl_sort_array_float().
@@ -12,9 +19,9 @@ Version 0.0.3 (not yet released):
     and dim_t arguments was changed.
   - New macro cvl_assert() and new function cvl_print_backtrace(). Both are 
     useful for debugging purposes.
-  - New convenience functions cvl_field_get(i|f)*() for fields that store 
-    only floats or ints.
 - Removed:
+  - Field input/output functions cvl_field_*_raw(). They are obsoleted by the
+    new cvl_field_read*() and cvl_field_write() functions.
 - Miscellaneous:
   - cvtool: Added a crash handler that prints a backtrace on SIGILL, 
     SIGFPE, and SIGSEGV, at least on platforms where this is supported.
