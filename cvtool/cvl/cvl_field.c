@@ -55,17 +55,6 @@ extern int errno;
  */
 
 /**
- * \typedef cvl_field_type_t
- * The type of data stored in a field.
- */
-/** \var CVL_FIELD_INT
- *  Integers, in the machine representation. */
-/** \var CVL_FIELD_FLOAT
- *  Floats, in the machine representation. */
-/** \var CVL_FIELD_UNKNOWN
- *  Arbitrary data. */
-
-/**
  * \param element_size	The size of the data elements of the field.
  * \param width		The width.
  * \param height	The height.

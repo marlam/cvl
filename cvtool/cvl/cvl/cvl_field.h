@@ -26,13 +26,6 @@
 #include <stdio.h>
 #include <stdbool.h>
 
-typedef enum 
-{ 
-    CVL_FIELD_INT, 
-    CVL_FIELD_FLOAT, 
-    CVL_FIELD_UNKNOWN 
-} cvl_field_type_t;
-
 typedef struct
 {
     size_t _element_size;
