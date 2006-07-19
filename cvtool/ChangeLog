@@ -1,5 +1,6 @@
 Version 0.0.4 (not yet released):
 - CVL: Add function cvl_field_array() to access the raw array data of a field.
+- Minor documentation improvements.
 
 Version 0.0.3:
 - Gnulib update.

@@ -1473,10 +1473,14 @@ The value of MAT pixels will be the squared euclidean distance
 to the next background pixel.
 
 @example
-# Calculate the 3D MAT of an object
-$ cvtool sedt --3d < object.pgm | cvtool mat --3d > mat.dat
+# Calculate the MAT of an object
+$ cvtool sedt < object.pgm | cvtool mat > mat.dat
 # Visualize the MAT
 $ cvtool fieldconv -i intfield -o gray -l 0 -h 1 < mat.dat > mat.pgm
+# Calculate the 3D MAT from volume data
+$ voltopgm < object.vol | cvtool sedt --3d | cvtool mat --3d | \
+  cvtool fieldconv -i intfield -o gray -l 0 -h 1 | \
+  pgmtovol > object.mat.vol
 @end example
 
 @noindent 
@@ -1516,10 +1520,15 @@ the 3D skeleton will be computed.
 Note that the 1-pixel-border of the input is ignored.
 
 @example
-# Calculate the 3D skeleton of an object
-$ cvtool skeleton --3d < object.pgm > skeleton.dat
+# Calculate the skeleton of an object
+$ cvtool skeleton < object.pgm > skeleton.dat
 # Visualize the skeleton
-$ cvtool fieldconv -i intfield -o gray -l 0 -h 1 < skeleton.dat > skeleton.pgm
+$ cvtool fieldconv -i intfield -o gray -l 0 -h 1 \
+  < skeleton.dat > skeleton.pgm
+# Calculate a 3D skeleton from volume data
+$ voltopgm < object.vol | cvtool skeleton --3d | \
+  cvtool fieldconv -i intfield -o gray -l 0 -h 1 | \
+  pgmtovol > object.skel.vol 
 @end example
 
 @noindent 
