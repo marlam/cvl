@@ -1,0 +1,21 @@
+Changes planned for 0.0.4
+=========================
+
+- Remove or replace vectors command
+- Replace foreach command with a similar command that does the same but also
+  allows to select frame ranges, similar to the select command
+
+
+
+Other plans
+===========
+
+- Add Sharpening (Unsharp masking, Laplace, ...)
+- Add frequency domain manipulations
+- Add Segmentation framework
+- Add corner detection
+- Add Marr/Hildreth edge detection
+- Add Hough transforms
+- Add Pyramid framework
+
+- Complete the texinfo manual for CVL
