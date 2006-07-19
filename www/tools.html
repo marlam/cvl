@@ -41,7 +41,7 @@
 <!-- content BEGIN -->
 <div id="content">
 
-<div class="content-section">Volume handling</div>
+<div class="content-section">Pgmvol: volume handling</div>
 <p>
 Some cvtool commands, like <code>sedt</code> or <code>skeleton</code>, can interpret
 a series of images as 3D volume data.
@@ -61,6 +61,15 @@ Pgmvol is available from the
 <a href="http://sourceforge.net/projects/cvtool/">SourceForge project page</a>
 and the 
 <a href="http://sourceforge.net/svn/?group_id=157871">Subversion repository</a> of cvtool.
+It provides two binaries:
+<ul>
+<li>pgmtovol - convert a series of PGM images to volume data</li>
+<li>voltopgm - convert volume data to a series of PGM images</li>
+</ul>
+</p>
+<p>
+Example:<br>
+<code>$ voltopgm < catenoid.vol | cvtool skeleton --3d | cvtool fieldconv -i intfield -o gray -l 0 -h 1 | pgmtovol > catenoid.skel.vol</code>
 </p>
 <br>
 
