@@ -1,3 +1,10 @@
+Version 0.0.4 (not yet released):
+- New and improved cvtool commands:
+- New and improved CVL functionality:
+  - New function cvl_field_array() to access the raw array data of a field.
+- Removed:
+- Miscellaneous:
+
 Version 0.0.3:
 - New and improved cvtool commands:
   - mat:

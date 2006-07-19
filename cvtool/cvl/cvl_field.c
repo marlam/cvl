@@ -206,6 +206,17 @@ inline int cvl_field_size(const cvl_field_t *field)
 /**
  * \param field		The field.
  * 
+ * Returns a pointer to the raw array data of the field, for direct access.
+ */
+void *cvl_field_array(cvl_field_t *field)
+{
+    return field->_p;
+}
+
+
+/**
+ * \param field		The field.
+ * 
  * Sets all elements in \a field to zero. Note that this may result in invalid
  * element data, depending on the type of the data stored in \a field.
  */
