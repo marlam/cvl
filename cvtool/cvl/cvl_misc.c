@@ -696,8 +696,7 @@ cvl_field_t **cvl_skeleton3d(cvl_frame_t * const *frames, int depth)
      * loop. */
     const int directions[6] = { 0, 4, 6, 2, 8, 10 };
     /* These values are needed for the gap computation for all 6 directions.
-     * Read the paper "Fast Skeletonization of Spatially Encoded Objects" and
-     * use pencil and a piece of paper to understand this. */
+     * See the paper "Fast Skeletonization of Spatially Encoded Objects". */
     const int gapdirs[6][8][2] = 
     { 
 	{ { 21, 14 }, { 7, 6 }, { 20, 16 }, { 12, 10 }, { 9, 8 }, { 23, 15 }, { 1, 2 }, { 22, 17 } },
@@ -719,12 +718,14 @@ cvl_field_t **cvl_skeleton3d(cvl_frame_t * const *frames, int depth)
     bool p;
     int chessboard_distance;
 
-    S = xnmalloc(depth, sizeof(cvl_field_t));
-    for (int i = 0; i < depth; i++)
+    S = xnmalloc(d, sizeof(cvl_field_t *));
+    for (int z = 0; z < d; z++)
     {
-	S[i] = cvl_field_new(sizeof(int), w, h);
+	S[z] = cvl_field_new(sizeof(int), w, h);
+	cvl_field_zero(S[z]);
     }
     L = xmalloc(w * h * d * sizeof(bool));
+    memset(L, 0, w * h * d * sizeof(bool));
     G = xmalloc(w * h * d * sizeof(bool));
     R = xmalloc(w * h * d * sizeof(bool));
     E = xmalloc(w * h * d * sizeof(bool));
@@ -739,11 +740,6 @@ cvl_field_t **cvl_skeleton3d(cvl_frame_t * const *frames, int depth)
     }
     
     chessboard_distance = 0;
-    for (int j = 0; j < d; j++)
-    {
-	cvl_field_zero(S[j]);
-    }
-    memset(L, 0, w * h * d * sizeof(bool));
     X_is_empty = false;
     do
     {
@@ -758,25 +754,30 @@ cvl_field_t **cvl_skeleton3d(cvl_frame_t * const *frames, int depth)
 		    for (int x = 1; x < w - 1; x++)
 		    {
 			/* G */
-			p = false;
-			for (int gapd = 0; gapd < 8; gapd++)
-			{
-			    p = p || (X[(z + dz[gapdirs[direction][gapd][0]]) * h * w 
-				    + (y + dy[gapdirs[direction][gapd][0]]) * w 
-				    + (x + dx[gapdirs[direction][gapd][0]])]
-				    && !(X[(z + dz[gapdirs[direction][gapd][1]]) * h * w 
-					+ (y + dy[gapdirs[direction][gapd][1]]) * w 
-					+ (x + dx[gapdirs[direction][gapd][1]])]));
-			}
 			p = X[z * h * w + y * w + x] 
-			    && !X[(z + dz[directions[direction]]) * h * w 
+			    && !X[(z + dz[directions[direction]]) * h * w
 			    + (y + dy[directions[direction]]) * w 
-			    + (x + dx[directions[direction]])]
-			    && p;
+			    + (x + dx[directions[direction]])];
+			if (p)
+			{
+			    bool pt = false;
+			    for (int gapd = 0; !pt && gapd < 8; gapd++)
+			    {
+				pt = pt || (X[(z + dz[gapdirs[direction][gapd][0]]) * h * w 
+				     	+ (y + dy[gapdirs[direction][gapd][0]]) * w 
+					+ (x + dx[gapdirs[direction][gapd][0]])]
+					&& !X[(z + dz[gapdirs[direction][gapd][1]]) * h * w 
+					+ (y + dy[gapdirs[direction][gapd][1]]) * w 
+					+ (x + dx[gapdirs[direction][gapd][1]])]);
+			    }
+			    p = p && pt;
+			}
 			G[z * h * w + y * w + x] = p;
 			/* E */
-			p = X[z * h * w + y * w + x] && X[(z + dz[directions[direction]]) * h * w 
-			    + (y + dy[directions[direction]]) * w + (x + dx[directions[direction]])];
+			p = X[z * h * w + y * w + x] 
+			    && X[(z + dz[directions[direction]]) * h * w 
+			    + (y + dy[directions[direction]]) * w 
+			    + (x + dx[directions[direction]])];
 			E[z * h * w + y * w + x] = p;
 		    }
 		}
@@ -788,10 +789,11 @@ cvl_field_t **cvl_skeleton3d(cvl_frame_t * const *frames, int depth)
 		    for (int x = 1; x < w - 1; x++)
 		    {
 			/* R */
-			p = X[z * h * w + y * w + x] && !(E[z * h * w + y * w + x] 
-				|| E[(z + dz[resdirs[direction]]) * h * w 
-				+ (y + dy[resdirs[direction]]) * w 
-				+ (x + dx[resdirs[direction]])]);
+			p = X[z * h * w + y * w + x] 
+			    && !(E[z * h * w + y * w + x] 
+			    	    || E[(z + dz[resdirs[direction]]) * h * w 
+			    	    + (y + dy[resdirs[direction]]) * w 
+			    	    + (x + dx[resdirs[direction]])]);
 			R[z * h * w + y * w + x] = p;
 			/* I */
 			p = I[z * h * w + y * w + x] || R[z * h * w + y * w + x] || G[z * h * w + y * w + x];
