@@ -65,6 +65,9 @@
 cvl_frame_t *cvl_frame_new(cvl_pixel_type_t pixel_type, int width, int height)
 {
     cvl_assert(width > 0 && height > 0);
+    cvl_assert(pixel_type == CVL_PIXEL_GRAY 
+	    || pixel_type == CVL_PIXEL_RGB
+	    || pixel_type == CVL_PIXEL_YUV);
 
     if (!cvl_product_fits_in_int(width, height)
 	    || !cvl_product_fits_in_size_t(width * height, sizeof(cvl_pixel_t)))
@@ -107,6 +110,11 @@ void cvl_frame_free(cvl_frame_t *frame)
  */
 inline void cvl_frame_set_pixel_type(cvl_frame_t *frame, cvl_pixel_type_t type)
 {
+    cvl_assert(frame != NULL);
+    cvl_assert(type == CVL_PIXEL_GRAY 
+	    || type == CVL_PIXEL_RGB
+	    || type == CVL_PIXEL_YUV);
+
     frame->_pixel_type = type;
 }
 
@@ -118,6 +126,8 @@ inline void cvl_frame_set_pixel_type(cvl_frame_t *frame, cvl_pixel_type_t type)
  */
 inline cvl_pixel_type_t cvl_frame_pixel_type(const cvl_frame_t *frame)
 {
+    cvl_assert(frame != NULL);
+
     return frame->_pixel_type;
 }
 
@@ -129,6 +139,8 @@ inline cvl_pixel_type_t cvl_frame_pixel_type(const cvl_frame_t *frame)
  */
 inline int cvl_frame_width(const cvl_frame_t *frame)
 {
+    cvl_assert(frame != NULL);
+
     return frame->_width;
 }
 
@@ -141,6 +153,8 @@ inline int cvl_frame_width(const cvl_frame_t *frame)
  */
 inline int cvl_frame_height(const cvl_frame_t *frame)
 {
+    cvl_assert(frame != NULL);
+
     return frame->_height;
 }
 
@@ -153,6 +167,8 @@ inline int cvl_frame_height(const cvl_frame_t *frame)
  */
 inline int cvl_frame_size(const cvl_frame_t *frame)
 {
+    cvl_assert(frame != NULL);
+
     return cvl_frame_width(frame) * cvl_frame_height(frame);
 }
 
@@ -165,7 +181,9 @@ inline int cvl_frame_size(const cvl_frame_t *frame)
  */
 void cvl_frame_zero(cvl_frame_t *frame)
 {
-    memset(frame->_p, 0, cvl_frame_width(frame) * cvl_frame_height(frame) * sizeof(cvl_pixel_t));
+    cvl_assert(frame != NULL);
+
+    memset(frame->_p, 0, cvl_frame_size(frame) * sizeof(cvl_pixel_t));
 }
 
 /**
@@ -177,11 +195,13 @@ void cvl_frame_zero(cvl_frame_t *frame)
  */
 void cvl_frame_copy(cvl_frame_t *dst, const cvl_frame_t *src)
 {
+    cvl_assert(dst != NULL);
+    cvl_assert(src != NULL);
     cvl_assert(cvl_frame_width(dst) == cvl_frame_width(src));
     cvl_assert(cvl_frame_height(dst) == cvl_frame_height(src));
 
     cvl_frame_set_pixel_type(dst, cvl_frame_pixel_type(src));
-    memcpy(dst->_p, src->_p, cvl_frame_width(src) * cvl_frame_height(src) * sizeof(cvl_pixel_t));
+    memcpy(dst->_p, src->_p, cvl_frame_size(src) * sizeof(cvl_pixel_t));
 }
 
 /**
@@ -192,6 +212,8 @@ void cvl_frame_copy(cvl_frame_t *dst, const cvl_frame_t *src)
  */
 cvl_frame_t *cvl_frame_clone(const cvl_frame_t *frame)
 {
+    cvl_assert(frame != NULL);
+
     cvl_frame_t *clone = cvl_frame_new(cvl_frame_pixel_type(frame),
 	    cvl_frame_width(frame), cvl_frame_height(frame));
     cvl_frame_copy(clone, frame);
@@ -308,7 +330,7 @@ void cvl_frame_to_gray(cvl_frame_t *frame)
     }
     else if (cvl_frame_pixel_type(frame) == CVL_PIXEL_RGB)
     {
-	for (int i = 0; i < cvl_frame_width(frame) * cvl_frame_height(frame); i++)
+	for (int i = 0; i < cvl_frame_size(frame); i++)
 	{
 	    cvl_frame_set_i(frame, i, cvl_pixel_rgb_to_gray(cvl_frame_get_i(frame, i)));
 	}
@@ -316,7 +338,7 @@ void cvl_frame_to_gray(cvl_frame_t *frame)
     }
     else if (cvl_frame_pixel_type(frame) == CVL_PIXEL_YUV)
     {
-	for (int i = 0; i < cvl_frame_width(frame) * cvl_frame_height(frame); i++)
+	for (int i = 0; i < cvl_frame_size(frame); i++)
 	{
 	    cvl_frame_set_i(frame, i, cvl_pixel_yuv_to_gray(cvl_frame_get_i(frame, i)));
 	}
@@ -336,7 +358,7 @@ void cvl_frame_to_rgb(cvl_frame_t *frame)
 
     if (cvl_frame_pixel_type(frame) == CVL_PIXEL_GRAY)
     {
-	for (int i = 0; i < cvl_frame_width(frame) * cvl_frame_height(frame); i++)
+	for (int i = 0; i < cvl_frame_size(frame); i++)
 	{
 	    cvl_frame_set_i(frame, i, cvl_pixel_gray_to_rgb(cvl_frame_get_i(frame, i)));
 	}
@@ -348,7 +370,7 @@ void cvl_frame_to_rgb(cvl_frame_t *frame)
     }
     else if (cvl_frame_pixel_type(frame) == CVL_PIXEL_YUV)
     {
-	for (int i = 0; i < cvl_frame_width(frame) * cvl_frame_height(frame); i++)
+	for (int i = 0; i < cvl_frame_size(frame); i++)
 	{
 	    cvl_frame_set_i(frame, i, cvl_pixel_yuv_to_rgb(cvl_frame_get_i(frame, i)));
 	}
@@ -368,7 +390,7 @@ void cvl_frame_to_yuv(cvl_frame_t *frame)
 
     if (cvl_frame_pixel_type(frame) == CVL_PIXEL_GRAY)
     {
-	for (int i = 0; i < cvl_frame_width(frame) * cvl_frame_height(frame); i++)
+	for (int i = 0; i < cvl_frame_size(frame); i++)
 	{
 	    cvl_frame_set_i(frame, i, cvl_pixel_gray_to_yuv(cvl_frame_get_i(frame, i)));
 	}
@@ -376,7 +398,7 @@ void cvl_frame_to_yuv(cvl_frame_t *frame)
     }
     else if (cvl_frame_pixel_type(frame) == CVL_PIXEL_RGB)
     {
-	for (int i = 0; i < cvl_frame_width(frame) * cvl_frame_height(frame); i++)
+	for (int i = 0; i < cvl_frame_size(frame); i++)
 	{
 	    cvl_frame_set_i(frame, i, cvl_pixel_rgb_to_yuv(cvl_frame_get_i(frame, i)));
 	}

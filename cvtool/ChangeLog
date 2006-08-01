@@ -1,4 +1,5 @@
 Version 0.0.4 (not yet released):
+- CVL: Various cleanups, minor fixes, and additional cvl_assert() calls.
 - CVL: Fix for cvl_skeleton3d(), memory savings for cvl_skeleton() and 
   cvl_skeleton3d().
 - CVL: Add functions cvl_field_array() and cvl_field_const_array() to access 

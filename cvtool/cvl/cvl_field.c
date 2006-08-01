@@ -199,6 +199,8 @@ inline int cvl_field_height(const cvl_field_t *field)
  */
 inline int cvl_field_size(const cvl_field_t *field)
 {
+    cvl_assert(field != NULL);
+
     return cvl_field_width(field) * cvl_field_height(field);
 }
 
@@ -210,6 +212,8 @@ inline int cvl_field_size(const cvl_field_t *field)
  */
 void *cvl_field_array(cvl_field_t *field)
 {
+    cvl_assert(field != NULL);
+
     return field->_p;
 }
 
@@ -220,6 +224,8 @@ void *cvl_field_array(cvl_field_t *field)
  */
 const void *cvl_field_const_array(const cvl_field_t *field)
 {
+    cvl_assert(field != NULL);
+
     return field->_p;
 }
 
@@ -250,9 +256,9 @@ void cvl_field_copy(cvl_field_t *dst, const cvl_field_t *src)
     cvl_assert(src != NULL);
     cvl_assert(cvl_field_width(dst) == cvl_field_width(src));
     cvl_assert(cvl_field_height(dst) == cvl_field_height(src));
+    cvl_assert(cvl_field_element_size(dst) == cvl_field_element_size(src));
 
-    memcpy(dst->_p, src->_p, cvl_field_width(src) * cvl_field_height(src) 
-	    * cvl_field_element_size(src));
+    memcpy(dst->_p, src->_p, cvl_field_size(src) * cvl_field_element_size(src));
 }
 
 /**
@@ -286,7 +292,7 @@ inline const void *cvl_field_get_i(const cvl_field_t *field, int i)
     cvl_assert(i >= 0);
     cvl_assert(i < cvl_field_size(field));
 
-    return &((unsigned char *)(field->_p))[cvl_field_element_size(field) * i];
+    return &((unsigned char *)cvl_field_const_array(field))[cvl_field_element_size(field) * i];
 }
 
 /**
@@ -342,7 +348,7 @@ inline void cvl_field_set_i(cvl_field_t *field, int i, const void *e)
     cvl_assert(i >= 0);
     cvl_assert(i < cvl_field_size(field));
 
-    memcpy(&((unsigned char *)(field->_p))[cvl_field_element_size(field) * i],
+    memcpy(&((unsigned char *)cvl_field_array(field))[cvl_field_element_size(field) * i],
 	    e, cvl_field_element_size(field));
 }
 
@@ -568,9 +574,17 @@ void cvl_field_copy_rect(cvl_field_t *dst, int dst_x, int dst_y,
  */
 bool cvl_field_seek(FILE *f, size_t element_size, int width, int height, int newpos)
 {
-    if (fseeko(f, newpos * 
-		(9 * sizeof(char) + sizeof(size_t) + 2 * sizeof(int)	// CVL_FIELD + ELEM_SIZE + W + H
-		 + width * height * element_size), 			// The data
+    cvl_assert(f != NULL);
+    cvl_assert(element_size >= 1);
+    cvl_assert(width > 0);
+    cvl_assert(height > 0);
+    cvl_assert(newpos >= 0);
+    cvl_assert(cvl_product_fits_in_int(width, height));
+    cvl_assert(cvl_product_fits_in_size_t(width * height, element_size));
+
+    if (fseeko(f, (off_t)newpos * (off_t)(
+		    9 * sizeof(char) + sizeof(size_t) + 2 * sizeof(int)	// CVL_FIELD + ELEM_SIZE + W + H
+		    + width * height * element_size), 			// The data
 		SEEK_SET) != 0)
     {
 	cvl_msg_err("cannot seek in field file: %s", strerror(errno));
@@ -585,6 +599,8 @@ bool cvl_field_seek(FILE *f, size_t element_size, int width, int height, int new
 /* Helper: Read the header of a CVL field. */
 static bool cvl_field_read_header(FILE *f, size_t *element_size, int *width, int *height)
 {
+    cvl_assert(f != NULL);
+
     char magic[9];
 
     if (fread(magic, sizeof(char), 9, f) != 9)
@@ -604,7 +620,9 @@ static bool cvl_field_read_header(FILE *f, size_t *element_size, int *width, int
 	cvl_msg_err("unexpected EOF or input error in CVL field");
 	return false;
     }
-    if (*element_size == 0 || *width <= 0 || *height <= 0)
+    if (*element_size == 0 || *width <= 0 || *height <= 0
+	    || !cvl_product_fits_in_int(*width, *height)
+	    || !cvl_product_fits_in_size_t(*width * *height, *element_size))
     {
 	cvl_msg_err("invalid type or dimensions of CVL field");
 	return false;
@@ -632,7 +650,7 @@ bool cvl_field_read(FILE *f, cvl_field_t **field)
 	return false;
     }
     *field = cvl_field_new(element_size, width, height);
-    if (fread((*field)->_p, element_size, width * height, f) != (size_t)(width * height))
+    if (fread(cvl_field_array(*field), element_size, width * height, f) != (size_t)(width * height))
     {
 	cvl_msg_err("unexpected EOF or input error in CVL field");
 	return false;
@@ -668,7 +686,7 @@ bool cvl_field_read_knowntype(FILE *f, cvl_field_t **field, size_t element_size)
 	return false;
     }
     *field = cvl_field_new(element_size, width, height);
-    if (fread((*field)->_p, element_size, width * height, f) != (size_t)(width * height))
+    if (fread(cvl_field_array(*field), element_size, width * height, f) != (size_t)(width * height))
     {
 	cvl_msg_err("unexpected EOF or input error in CVL field");
 	return false;
@@ -696,7 +714,17 @@ bool cvl_field_read_known(FILE *f, cvl_field_t *field)
     {
 	return false;
     }
-    if (fread(field->_p, element_size, width * height, f) != (size_t)(width * height))
+    if (cvl_field_element_size(field) != element_size
+	    || cvl_field_width(field) != width
+	    || cvl_field_height(field) != height)
+    {
+	cvl_msg_err("wrong type or dimensions of CVL field");
+	cvl_msg_err("es %d %d", element_size, cvl_field_element_size(field));
+	cvl_msg_err("w %d %d", width, cvl_field_width(field));
+	cvl_msg_err("h %d %d", height, cvl_field_height(field));
+	return false;
+    }
+    if (fread(cvl_field_array(field), element_size, width * height, f) != (size_t)(width * height))
     {
 	cvl_msg_err("unexpected EOF or input error in CVL field");
 	return false;
@@ -725,7 +753,8 @@ bool cvl_field_write(FILE *f, const cvl_field_t *field)
 	    || fwrite(&element_size, sizeof(size_t), 1, f) != 1
 	    || fwrite(&width, sizeof(int), 1, f) != 1
 	    || fwrite(&height, sizeof(int), 1, f) != 1
-	    || fwrite(field->_p, element_size, width * height, f) != (size_t)(width * height))
+	    || fwrite(cvl_field_const_array(field), element_size, 
+		width * height, f) != (size_t)(width * height))
     {
 	cvl_msg_err("output error");
 	return false;
