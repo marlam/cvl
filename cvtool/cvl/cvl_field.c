@@ -206,9 +206,19 @@ inline int cvl_field_size(const cvl_field_t *field)
 /**
  * \param field		The field.
  * 
- * Returns a pointer to the raw array data of the field, for direct access.
+ * Returns a pointer to the raw array data of the field, for direct read/write access.
  */
 void *cvl_field_array(cvl_field_t *field)
+{
+    return field->_p;
+}
+
+/**
+ * \param field		The field.
+ * 
+ * Returns a const pointer to the raw array data of the field, for direct read access.
+ */
+const void *cvl_field_const_array(const cvl_field_t *field)
 {
     return field->_p;
 }

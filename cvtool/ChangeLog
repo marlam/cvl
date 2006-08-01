@@ -1,7 +1,8 @@
 Version 0.0.4 (not yet released):
 - CVL: Fix for cvl_skeleton3d(), memory savings for cvl_skeleton() and 
   cvl_skeleton3d().
-- CVL: Add function cvl_field_array() to access the raw array data of a field.
+- CVL: Add functions cvl_field_array() and cvl_field_const_array() to access 
+  the raw array data of a field.
 - Minor documentation improvements.
 
 Version 0.0.3:

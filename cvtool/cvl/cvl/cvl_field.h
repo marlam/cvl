@@ -44,6 +44,7 @@ inline int cvl_field_height(const cvl_field_t *field);
 inline int cvl_field_size(const cvl_field_t *field);
 
 void *cvl_field_array(cvl_field_t *field);
+const void *cvl_field_const_array(const cvl_field_t *field);
 
 void cvl_field_zero(cvl_field_t *field);
 void cvl_field_copy(cvl_field_t *dst, const cvl_field_t *src);
