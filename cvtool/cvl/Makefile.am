@@ -50,3 +50,6 @@ nobase_include_HEADERS = \
 
 AM_CPPFLAGS = -I$(top_srcdir)/gnulib -I$(top_srcdir)/notgnulib \
 	-DLIBRARY_NAME=\"CVL\" -DCVL_DEBUG=$(CVL_DEBUG) -DGSL_RANGE_CHECK_OFF
+
+m4datadir = $(datadir)/aclocal
+dist_m4data_DATA = cvl.m4
