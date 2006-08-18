@@ -42,10 +42,7 @@ cvtool_SOURCES = cvtool.c crash.c crash.h \
 
 cvtool_LDADD = \
 	$(top_builddir)/cvl/libcvl.la \
-	$(top_builddir)/gnulib/libgnu.la \
 	$(top_builddir)/notgnulib/libnotgnu.la \
-	$(GSL_LIBS) \
-	$(CAIRO_LIBS)
+	$(top_builddir)/gnulib/libgnu.la
 
-AM_CPPFLAGS = -I$(top_srcdir)/gnulib -I$(top_srcdir)/notgnulib -I$(top_srcdir)/cvl
-AM_CFLAGS = -DPROGRAM_NAME=\"cvtool\" $(GSL_CFLAGS) $(CAIRO_CFLAGS)
+AM_CPPFLAGS = -I$(top_srcdir)/gnulib -I$(top_srcdir)/notgnulib -I$(top_srcdir)/cvl -DPROGRAM_NAME=\"cvtool\"

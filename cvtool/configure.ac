@@ -20,13 +20,13 @@ dnl Process this file with autoconf to produce a configure script.
 #   Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #
 
-AC_INIT(cvtool, 0.0.4, marlam@marlam.de)
-AC_CONFIG_SRCDIR(cvtool/cvtool.c)
-AC_CONFIG_AUX_DIR(build-aux)
-AC_CONFIG_MACRO_DIR(build-aux)
+AC_INIT([cvtool], [0.0.4], [marlam@marlam.de])
+AC_CONFIG_SRCDIR([cvtool/cvtool.c])
+AC_CONFIG_AUX_DIR([build-aux])
+AC_CONFIG_MACRO_DIR([build-aux])
 
 AM_INIT_AUTOMAKE
-AM_CONFIG_HEADER(config.h)
+AM_CONFIG_HEADER([config.h])
 
 AC_GNU_SOURCE
 AC_PROG_CC
@@ -36,20 +36,27 @@ AC_PROG_INSTALL
 AC_SYS_LARGEFILE
 gl_EARLY
 
-dnl cvl library version
+dnl CVL version preprocessor macros for cvl/cvl/cvl_version.h.in
+AC_SUBST([CVL_VERSION], [$PACKAGE_VERSION])
+AC_SUBST([CVL_VERSION_MAJOR], [`echo $CVL_VERSION | sed -e 's/\(.*\)\..*\..*/\1/'`])
+AC_SUBST([CVL_VERSION_MINOR], [`echo $CVL_VERSION | sed -e 's/.*\.\(.*\)\..*/\1/'`])
+AC_SUBST([CVL_VERSION_PATCH], [`echo $CVL_VERSION | sed -e 's/.*\..*\.\(.*\)/\1/'`])
+AC_SUBST([CVL_VERSION_NUMBER], [`printf "0x%02x%02x%02x" $CVL_VERSION_MAJOR $CVL_VERSION_MINOR $CVL_VERSION_PATCH`])
+
+dnl CVL library version
 dnl Library code modified:		REVISION++
 dnl Interfaces changed/added/removed:   CURRENT++	REVISION=0
 dnl Interfaces added: 			AGE++
 dnl Interfaces removed:			AGE=0
-AC_SUBST(LT_CURRENT, 3)
-AC_SUBST(LT_REVISION, 0)
-AC_SUBST(LT_AGE, 0)
+AC_SUBST([LT_CURRENT], [3])
+AC_SUBST([LT_REVISION], [0])
+AC_SUBST([LT_AGE], [0])
 
 dnl configure switches
-AC_ARG_ENABLE(cvl-debug, 
-  AC_HELP_STRING([--enable-cvl-debug], [Enable (costly) checks in CVL, for debugging purposes.]),
-  CVL_DEBUG=1, CVL_DEBUG=0)
-AC_SUBST(CVL_DEBUG)
+AC_ARG_ENABLE([cvl-debug], 
+  [AC_HELP_STRING([--enable-cvl-debug], [Enable (costly) checks in CVL, for debugging purposes.])],
+  [CVL_DEBUG=1], [CVL_DEBUG=0])
+AC_SUBST([CVL_DEBUG])
 
 dnl gnulib 
 gl_INIT
@@ -58,16 +65,41 @@ dnl notgnulib
 ngl_INIT
 
 dnl optional features
-AC_CHECK_FUNCS(backtrace sigaction)
-
-dnl pkg-config
-PKG_PROG_PKG_CONFIG
+AC_CHECK_FUNCS([backtrace sigaction])
 
 dnl GNU Scientific Library
-AM_PATH_GSL([1.6.0], [], [AC_MSG_ERROR(could not find required version of GSL)])
+AC_LIB_HAVE_LINKFLAGS([gslcblas], [], [#include <gsl/gsl_blas.h>],
+  [int x = cblas_ddot(0, 0, 0, 0, 0);])
+if test "$HAVE_LIBGSLCBLAS" != "yes"; then
+	AC_MSG_ERROR([could not find required version of GSL])
+else
+	LIBS="$LIBS $LIBGSLCBLAS"
+fi
+AC_LIB_HAVE_LINKFLAGS([gsl], [], [#include <gsl/gsl_version.h>],
+  [char *s = gsl_version;])
+if test "$HAVE_LIBGSL" != "yes"; then
+	AC_MSG_ERROR([could not find required version of GSL])
+else
+	LIBS="$LIBS $LIBGSL"
+fi
 
 dnl CAIRO
-PKG_CHECK_MODULES(CAIRO, cairo >= 1.0.2, [], [AC_MSG_ERROR(could not find required version of CAIRO)])
+AC_LIB_HAVE_LINKFLAGS([cairo], [], 
+  [#include <cairo/cairo-features.h>
+   #if CAIRO_VERSION_MAJOR < 1
+   CAIRO version too old
+   #endif],
+  [char *s = CAIRO_VERSION_STRING;])
+if test "$HAVE_LIBCAIRO" != "yes"; then
+	AC_MSG_ERROR([could not find required version of CAIRO])
+else
+	LIBS="$LIBS $LIBCAIRO"
+	gl_ABSOLUTE_HEADER([cairo/cairo-features.h])
+	CAIRO_INCLUDE_DIR=`echo $gl_cv_absolute_cairo_cairo_features_h \
+	| sed -e 's/\/cairo-features.h$//' -e 's/"//g' -e 's/^\/\/\//\//'`
+	CPPFLAGS="$CPPFLAGS -I $CAIRO_INCLUDE_DIR"
+fi
+
 
 dnl Global #defines for all source files
 AH_VERBATIM([UNUSED],
@@ -89,14 +121,7 @@ AH_VERBATIM([W32_NATIVE],
 #define W32_NATIVE 1
 #endif])
 
-CVL_LIBS="-L${libdir} -lcvl $GSL_LIBS $CAIRO_LIBS $LIBS"
-CVL_CFLAGS="-I${includedir} $GSL_CFLAGS $CAIRO_CFLAGS"
-AC_SUBST(CVL_LIBS)
-AC_SUBST(CVL_CFLAGS)
-
-AC_CONFIG_COMMANDS([chmod-config],[[chmod +x cvl/cvl-config]],[[]])
-
-AC_CONFIG_FILES(Makefile build-aux/Makefile gnulib/Makefile notgnulib/Makefile \
-	cvl/Makefile cvl/cvl-config cvl/cvl.pc cvl/cvl/cvl_version.h cvtool/Makefile \
-	doc/Makefile doc/doxy/Makefile tests/Makefile)
+AC_CONFIG_FILES([Makefile build-aux/Makefile gnulib/Makefile notgnulib/Makefile \
+	cvl/Makefile cvl/cvl/cvl_version.h cvtool/Makefile \
+	doc/Makefile doc/doxy/Makefile tests/Makefile])
 AC_OUTPUT

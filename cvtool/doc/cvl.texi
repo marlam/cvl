@@ -1,10 +1,10 @@
 \input texinfo   @c -*-texinfo-*-
 @afourpaper
 @setfilename cvl.info
-@set UPDATED July 18, 2006
+@set UPDATED August 18, 2006
 @set UPDATED-MONTH July 2006
-@set EDITION 0.0.3
-@set VERSION 0.0.3
+@set EDITION 0.0.4
+@set VERSION 0.0.4
 @settitle CVL @value{VERSION}
 
 @c Define new indices: for options (op) and commands (cm)
@@ -76,31 +76,18 @@ Include the header file @code{<cvl/cvl.h>} in your programs:
 
 Then compile and link your program with the appropriate flags:
 @example
-cc `cvl-config --cflags` `cvl-config --libs` -o myprog myprog.c
+cc -o myprog myprog.c -lcvl
 @end example
-
-The @code{cvl-config} script will take care that the header files
-will be found and that your program will be linked against the 
-GNU Scientific Library, too.
 
 If your project uses the GNU autotools, you can use the following
-in @code{configure.ac} to automatically get @code{CVL_CFLAGS} 
-and @code{CVL_LIBS} and verify that the requested version or a newer
-one is used:
+in @code{configure.ac} to search for e.g. CVL >= 1.2.10.
 @example
-AM_PATH_CVL("0.0.1")
+AM_LIBCVL([0x01020a], [], [AC_MSG_ERROR([Cannot find required version of CVL.])])
 @end example
-
-CVL provides a pkgconfig metadata file, so you can also use
-@code{pkg-config} to get the required information:
-@example
-cc `pkg-config --cflags cvl` `pkg-config --libs cvl` -o myprog myprog.c
-@end example
-or, for @code{configure.ac}:
-@example
-PKG_PROG_PKG_CONFIG
-PKG_CHECK_MODULES(CVL, cvl >= 0.0.1, [have_cvl=yes], [have_cvl=no])
-@end example
+You need to copy the @code{cvl.m4} file into your project, along with the following
+two prerequisites: @code{config.rpath} and @code{lib-link.m4}. Both are provided by
+gnulib @url{http://www.gnu.org/software/gnulib/}. You can download the files directly
+from the CVS repository @url{http://cvs.savannah.gnu.org/viewcvs/gnulib/gnulib/}.
 
 
 @node Concepts and overview

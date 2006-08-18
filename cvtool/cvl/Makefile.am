@@ -24,7 +24,7 @@ EXTRA_DIST = \
 
 libcvl_la_SOURCES = cvl.c
 libcvl_la_LDFLAGS = -version-info $(LT_CURRENT):$(LT_REVISION):$(LT_AGE)
-libcvl_la_LIBADD = $(top_builddir)/gnulib/libgnu.la $(top_builddir)/notgnulib/libnotgnu.la
+libcvl_la_LIBADD = $(top_builddir)/notgnulib/libnotgnu.la $(top_builddir)/gnulib/libgnu.la
 nobase_include_HEADERS = \
 	cvl/cvl_version.h \
 	cvl/cvl_msg.h \
@@ -48,14 +48,5 @@ nobase_include_HEADERS = \
 	cvl/cvl_misc.h \
 	cvl/cvl.h
 
-AM_CPPFLAGS = -I$(top_srcdir)/gnulib -I$(top_srcdir)/notgnulib
-AM_CFLAGS = -DLIBRARY_NAME=\"CVL\" -DCVL_DEBUG=$(CVL_DEBUG) $(GSL_CFLAGS) -DGSL_RANGE_CHECK_OFF $(CAIRO_CFLAGS)
-
-bin_SCRIPTS = cvl-config
-
-m4datadir = $(datadir)/aclocal
-dist_m4data_DATA = cvl.m4
-
-pkgconfigdir = $(libdir)/pkgconfig
-pkgconfig_DATA = cvl.pc
-DISTCLEANFILES = $(pkgconfig_DATA)
+AM_CPPFLAGS = -I$(top_srcdir)/gnulib -I$(top_srcdir)/notgnulib \
+	-DLIBRARY_NAME=\"CVL\" -DCVL_DEBUG=$(CVL_DEBUG) -DGSL_RANGE_CHECK_OFF

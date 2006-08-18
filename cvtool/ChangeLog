@@ -1,4 +1,13 @@
 Version 0.0.4 (not yet released):
+- CVL: remove cvl.pc (pkg-config file) and the cvl-config.script. Provide
+  a new cvl.m4 file with a AM_LIBCVL macro that is based on
+  AC_LIB_HAVE_LINKFLAGS.
+- Improvements for the build system:
+  - Quote arguments of M4 macros.
+  - Use AC_LIB_HAVE_LINKFLAGS to detect libraries. Do not use *-config scripts
+    or pkg-config. This avoids problems that are reported in this thread:
+    http://thread.gmane.org/gmane.comp.encryption.gpg.gnutls.devel/
+    1610/focus=1610 .
 - CVL: Various cleanups, minor fixes, and additional cvl_assert() calls.
 - CVL: Fix for cvl_skeleton3d(), memory savings for cvl_skeleton() and 
   cvl_skeleton3d().
