@@ -74,20 +74,23 @@ Include the header file @code{<cvl/cvl.h>} in your programs:
 #include <cvl/cvl.h>
 @end example
 
-Then compile and link your program with the appropriate flags:
+Then compile and link your program with the appropriate flags, similar to this:
 @example
-cc -o myprog myprog.c -lcvl
+cc -I/usr/include/cairo -o myprog myprog.c -lcvl
 @end example
+(The @code{-I} option is necessary to find the headers of the CAIRO graphics library.)
 
 If your project uses the GNU autotools, you can use the following
-in @code{configure.ac} to search for e.g. CVL >= 1.2.10.
+in @code{configure.ac} to search for e.g. CVL >= 1.2.10 and set @code{CPPFLAGS},
+@code{HAVE_LIBCVL}, @code{LIBCVL} and @code{LTLIBCVL} (if you use libtool) automatically:
 @example
 AM_LIBCVL([0x01020a], [], [AC_MSG_ERROR([Cannot find required version of CVL.])])
 @end example
 You need to copy the @code{cvl.m4} file into your project, along with the following
-two prerequisites: @code{config.rpath} and @code{lib-link.m4}. Both are provided by
-gnulib @url{http://www.gnu.org/software/gnulib/}. You can download the files directly
-from the CVS repository @url{http://cvs.savannah.gnu.org/viewcvs/gnulib/gnulib/}.
+three prerequisites: @code{config.rpath}, @code{lib-link.m4}, and @code{absolute-header.m4}. 
+All three are provided by gnulib @url{http://www.gnu.org/software/gnulib/}. 
+You can download the files directly from the gnulib CVS repository 
+@url{http://cvs.savannah.gnu.org/viewcvs/gnulib/gnulib/}.
 
 
 @node Concepts and overview

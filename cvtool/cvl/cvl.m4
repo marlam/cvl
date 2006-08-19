@@ -12,20 +12,20 @@ dnl and AC_SUBSTs HAVE_LIBCVL=no and LIBCVL and LTLIBCVL to empty.
 AC_DEFUN([AM_LIBCVL],
 [
   min_cvl_version="$1"
-  AC_MSG_CHECKING([for libcvl - version >= $min_cvl_version])
-  AC_LIB_HAVE_LINKFLAGS([cvl], [], [#include <cvl/cvl.h>],
+  gl_ABSOLUTE_HEADER([cairo/cairo-features.h])
+  CAIRO_INCLUDE_DIR=`echo $gl_cv_absolute_cairo_cairo_features_h \
+  | sed -e 's/\/cairo-features.h$//' -e 's/"//g' -e 's/^\/\/\//\//'`
+  CPPFLAGS="$CPPFLAGS -I$CAIRO_INCLUDE_DIR"
+  AC_LIB_HAVE_LINKFLAGS([cvl], [], 
     [
-      #if (LIBCVL_VERSION_NUMBER < $min_cvl_version)
+      #include <cvl/cvl.h>
+      #if (CVL_VERSION_NUMBER < $min_cvl_version)
 	libcvl version too old
-      #else
-        cvl_check_version(0);
       #endif
-    ])
+    ], [cvl_check_version(0);])
   if test "$HAVE_LIBCVL" = "yes"; then
-    AC_MSG_RESULT(yes)
     ifelse([$2], , :, [$2])
   else
-    AC_MSG_RESULT(no)
     ifelse([$3], , :, [$3])
   fi
 ])
