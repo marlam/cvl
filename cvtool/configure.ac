@@ -97,7 +97,7 @@ else
 	gl_ABSOLUTE_HEADER([cairo/cairo-features.h])
 	CAIRO_INCLUDE_DIR=`echo $gl_cv_absolute_cairo_cairo_features_h \
 	| sed -e 's/\/cairo-features.h$//' -e 's/"//g' -e 's/^\/\/\//\//'`
-	CPPFLAGS="$CPPFLAGS -I $CAIRO_INCLUDE_DIR"
+	CPPFLAGS="$CPPFLAGS -I$CAIRO_INCLUDE_DIR"
 fi
 
 
