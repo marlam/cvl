@@ -33,8 +33,6 @@
 
 #include "xalloc.h"
 
-#include "c99math.h"
-
 #include <cvl/cvl.h>
 
 
