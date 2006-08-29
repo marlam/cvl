@@ -23,7 +23,9 @@
 #ifndef CVL_FRAME_H
 #define CVL_FRAME_H
 
+#include "cvl_assert.h"
 #include "cvl_pixel.h"
+#include "cvl_math.h"
 #include "cvl_field.h"
 
 typedef struct
@@ -37,27 +39,113 @@ typedef struct
 cvl_frame_t *cvl_frame_new(cvl_pixel_type_t pixel_type, int width, int height);
 void cvl_frame_free(cvl_frame_t *frame);
 
-inline void cvl_frame_set_pixel_type(cvl_frame_t *frame, cvl_pixel_type_t type);
-inline cvl_pixel_type_t cvl_frame_pixel_type(const cvl_frame_t *frame);
-inline int cvl_frame_width(const cvl_frame_t *frame);
-inline int cvl_frame_height(const cvl_frame_t *frame);
-inline int cvl_frame_size(const cvl_frame_t *frame);
+void cvl_frame_set_pixel_type(cvl_frame_t *frame, cvl_pixel_type_t type);
+cvl_pixel_type_t cvl_frame_pixel_type(const cvl_frame_t *frame);
+int cvl_frame_width(const cvl_frame_t *frame);
+int cvl_frame_height(const cvl_frame_t *frame);
+int cvl_frame_size(const cvl_frame_t *frame);
 
 void cvl_frame_zero(cvl_frame_t *frame);
 void cvl_frame_copy(cvl_frame_t *dst, const cvl_frame_t *src);
 cvl_frame_t *cvl_frame_clone(const cvl_frame_t *frame);
 
-inline cvl_pixel_t cvl_frame_get(const cvl_frame_t *frame, int x, int y);
-inline cvl_pixel_t cvl_frame_get_r(const cvl_frame_t *frame, int x, int y);
-inline cvl_pixel_t cvl_frame_get_i(const cvl_frame_t *frame, int i);
+/**
+ * \param frame		The frame.
+ * \param i		The index of the pixel.
+ * \return		The pixel at index \a i. 
+ *
+ * Gets a pixel from a frame.
+ * The index refers to all lines of the frame one after another, 
+ * from top to bottom and left to right.
+ */
+extern inline cvl_pixel_t cvl_frame_get_i(const cvl_frame_t *frame, int i)
+{
+    cvl_assert(frame != NULL);
+    cvl_assert(i >= 0);
+    cvl_assert(i < cvl_frame_width(frame) * cvl_frame_height(frame));
 
-inline void cvl_frame_set(cvl_frame_t *frame, int x, int y, cvl_pixel_t p);
-inline void cvl_frame_set_i(cvl_frame_t *frame, int i, cvl_pixel_t p);
+    return frame->_p[i];
+}
+
+/**
+ * \param frame		The frame.
+ * \param x		The x coordinate.
+ * \param y		The y coordinate.
+ * \return		The pixel.
+ * 
+ * Gets a pixel from a frame.
+ */
+extern inline cvl_pixel_t cvl_frame_get(const cvl_frame_t *frame, int x, int y)
+{
+    cvl_assert(frame != NULL);
+    cvl_assert(x >= 0);
+    cvl_assert(x < cvl_frame_width(frame));
+    cvl_assert(y >= 0);
+    cvl_assert(y < cvl_frame_height(frame));
+    
+    return cvl_frame_get_i(frame, y * cvl_frame_width(frame) + x);
+}
+
+/**
+ * \param frame		The frame.
+ * \param x		The x coordinate.
+ * \param y		The y coordinate.
+ * \return		The pixel.
+ * 
+ * Gets a pixel from a frame, with reflective indexing: arbitrary \a x and \a y
+ * values are accepted.
+ */
+extern inline cvl_pixel_t cvl_frame_get_r(const cvl_frame_t *frame, int x, int y)
+{
+    cvl_assert(frame != NULL);
+    
+    return cvl_frame_get(frame, 
+	    cvl_reflect(x, cvl_frame_width(frame)),
+    	    cvl_reflect(y, cvl_frame_height(frame)));
+}
+
+/**
+ * \param frame		The frame.
+ * \param i		The index of the pixel.
+ * \param p		The pixel value.
+ * 
+ * Sets the pixel at index \a i in \a frame to \a p.
+ * The index refers to all lines of the frame one after another, from top to
+ * bottom and left to right.
+ */
+extern inline void cvl_frame_set_i(cvl_frame_t *frame, int i, cvl_pixel_t p)
+{
+    cvl_assert(frame != NULL);
+    cvl_assert(i >= 0);
+    cvl_assert(i < cvl_frame_width(frame) * cvl_frame_height(frame));
+
+    frame->_p[i] = p;
+}
+
+/**
+ * \param frame		The frame.
+ * \param x		The x coordinate.
+ * \param y		The y coordinate.
+ * \param p		The pixel value.
+ *
+ * Sets the pixel at \a x, \a y in \a frame to \a p.
+ */
+extern inline void cvl_frame_set(cvl_frame_t *frame, int x, int y, cvl_pixel_t p)
+{
+    cvl_assert(frame != NULL);
+    cvl_assert(x >= 0);
+    cvl_assert(x < cvl_frame_width(frame));
+    cvl_assert(y >= 0);
+    cvl_assert(y < cvl_frame_height(frame));
+    
+    cvl_frame_set_i(frame, y * cvl_frame_width(frame) + x, p);
+}
+
 
 void cvl_frame_to_gray(cvl_frame_t *frame);
 void cvl_frame_to_rgb(cvl_frame_t *frame);
 void cvl_frame_to_yuv(cvl_frame_t *frame);
-inline void cvl_frame_convert(cvl_frame_t *frame, cvl_pixel_type_t type);
+void cvl_frame_convert(cvl_frame_t *frame, cvl_pixel_type_t type);
 
 void cvl_frame_fill_rect(cvl_frame_t *frame, int x, int y, int w, int h, cvl_pixel_t p);
 

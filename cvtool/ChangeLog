@@ -1,4 +1,7 @@
 Version 0.0.4 (not yet released):
+- CVL: Reorganization:
+  - Move inline functions to header files (with "extern inline").
+  - Remove cvl.c, and compile the modules one by one, as it should be.
 - CVL: remove cvl.pc (pkg-config file) and the cvl-config.script. Provide
   a new cvl.m4 file with a AM_LIBCVL macro that is based on
   AC_LIB_HAVE_LINKFLAGS.

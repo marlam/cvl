@@ -689,12 +689,26 @@ typedef enum
     CVL_COLOR_LIGHTGREEN =	0x90ee90
 } cvl_color_t;
 
-inline cvl_pixel_t cvl_color_to_pixel(cvl_color_t color, cvl_pixel_type_t pixel_type);
+
+/**
+ * \param color		The color.
+ * \param pixel_type	The pixel type.
+ * \return		The pixel value.
+ *
+ * Converts a color to a pixel value that represents the color in the given
+ * pixel type.
+ */
+extern inline cvl_pixel_t cvl_color_to_pixel(cvl_color_t color, cvl_pixel_type_t pixel_type)
+{
+    return (pixel_type == CVL_PIXEL_RGB) ? color : 
+	((pixel_type == CVL_PIXEL_GRAY) ? cvl_pixel_rgb_to_gray(color) : cvl_pixel_rgb_to_yuv(color));
+}
+
 bool cvl_color_from_string(const char *s, cvl_color_t *color);
 
-inline void cvl_rgb_to_hsl(cvl_pixel_t rgb, float *H, float *S, float *L);
-inline cvl_pixel_t cvl_hsl_to_rgb(float H, float S, float L);
-inline void cvl_srgb_to_cielab(cvl_pixel_t srgb, float *L, float *a, float *b);
+void cvl_rgb_to_hsl(cvl_pixel_t rgb, float *H, float *S, float *L);
+cvl_pixel_t cvl_hsl_to_rgb(float H, float S, float L);
+void cvl_srgb_to_cielab(cvl_pixel_t srgb, float *L, float *a, float *b);
 
 void cvl_color_adjust(cvl_frame_t *frame, 
 	float hue, float saturation, float lightness, float contrast);

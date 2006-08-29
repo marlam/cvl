@@ -39,12 +39,16 @@
 
 #include "xalloc.h"
 
+#include "cvl/cvl_assert.h"
+#include "cvl/cvl_msg.h"
 #include "cvl/cvl_pixel.h"
-#include "cvl/cvl_field.h"
 #include "cvl/cvl_frame.h"
+#include "cvl/cvl_field.h"
 #include "cvl/cvl_color.h"
 #include "cvl/cvl_math.h"
-#include "cvl/cvl_assert.h"
+#include "cvl/cvl_filter.h"
+#include "cvl/cvl_misc.h"
+#include "cvl/cvl_vector.h"
 #include "cvl/cvl_opticalflow.h"
 
 

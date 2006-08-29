@@ -42,10 +42,11 @@ extern int errno;
 
 #include "xalloc.h"
 
+#include "cvl/cvl_assert.h"
 #include "cvl/cvl_math.h"
 #include "cvl/cvl_pixel.h"
 #include "cvl/cvl_frame.h"
-#include "cvl/cvl_assert.h"
+#include "cvl/cvl_misc.h"
 #include "cvl/cvl_color.h"
 
 
@@ -2155,20 +2156,6 @@ static cvl_color_table_entry_t cvl_color_table[] =
 static const size_t cvl_color_table_len = sizeof(cvl_color_table) / sizeof(cvl_color_table[0]);
 
 
-/**
- * \param color		The color.
- * \param pixel_type	The pixel type.
- * \return		The pixel value.
- *
- * Converts a color to a pixel value that represents the color in the given
- * pixel type.
- */
-inline cvl_pixel_t cvl_color_to_pixel(cvl_color_t color, cvl_pixel_type_t pixel_type)
-{
-    return (pixel_type == CVL_PIXEL_RGB) ? color : 
-	((pixel_type == CVL_PIXEL_GRAY) ? cvl_pixel_rgb_to_gray(color) : cvl_pixel_rgb_to_yuv(color));
-}
-
 /* A helper for cvl_color_from_string() */
 static int cvl_color_from_string_cmp(const cvl_color_table_entry_t *e1, const cvl_color_table_entry_t *e2)
 {
@@ -2306,7 +2293,7 @@ bool cvl_color_from_string(const char *s, cvl_color_t *color)
  *
  * Converts an RGB pixel into HSL values. All HSL values are from [0,1].
  */
-inline void cvl_rgb_to_hsl(cvl_pixel_t rgb, float *H, float *S, float *L)
+void cvl_rgb_to_hsl(cvl_pixel_t rgb, float *H, float *S, float *L)
 {
     int ri = cvl_pixel_rgb_to_r(rgb);
     int gi = cvl_pixel_rgb_to_g(rgb);
@@ -2395,7 +2382,7 @@ static inline int cvl_hsl_to_rgb_helper(float tmp2, float tmp1, float H)
  *
  * Converts a HSL value to a RGB pixel value.
  */
-inline cvl_pixel_t cvl_hsl_to_rgb(float H, float S, float L)
+cvl_pixel_t cvl_hsl_to_rgb(float H, float S, float L)
 {
     int r, g, b;
     float tmp1, tmp2;
@@ -2445,7 +2432,7 @@ static inline float cvl_srgb_to_cielab_f(float t)
  * Converts an RGB pixel into CIE L*a*b* values. The RGB values are interpreted
  * as sRGB values because an absolute color space is needed.
  */
-inline void cvl_srgb_to_cielab(cvl_pixel_t srgb, float *L, float *a, float *b)
+void cvl_srgb_to_cielab(cvl_pixel_t srgb, float *L, float *a, float *b)
 {
     // The CIE XYZ tristimulus values of D65, which is the reference white point of sRGB:
     const float Xn = 0.3127f;

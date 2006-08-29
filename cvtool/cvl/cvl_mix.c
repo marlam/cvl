@@ -30,10 +30,10 @@
 #include "config.h"
 
 
+#include "cvl/cvl_assert.h"
 #include "cvl/cvl_pixel.h"
 #include "cvl/cvl_frame.h"
-#include "cvl/cvl_math.h"
-#include "cvl/cvl_assert.h"
+#include "cvl/cvl_misc.h"
 #include "cvl/cvl_mix.h"
 
 #include "xalloc.h"

@@ -25,6 +25,10 @@
 
 #include <stdio.h>
 #include <stdbool.h>
+#include <string.h>
+
+#include "cvl_assert.h"
+#include "cvl_math.h"
 
 typedef struct
 {
@@ -38,10 +42,10 @@ cvl_field_t *cvl_field_new(size_t element_size, int width, int height);
 cvl_field_t *cvl_field_i_new(int nelem, int width, int height);
 cvl_field_t *cvl_field_f_new(int nelem, int width, int height);
 void cvl_field_free(cvl_field_t *field);
-inline size_t cvl_field_element_size(const cvl_field_t *field);
-inline int cvl_field_width(const cvl_field_t *field);
-inline int cvl_field_height(const cvl_field_t *field);
-inline int cvl_field_size(const cvl_field_t *field);
+size_t cvl_field_element_size(const cvl_field_t *field);
+int cvl_field_width(const cvl_field_t *field);
+int cvl_field_height(const cvl_field_t *field);
+int cvl_field_size(const cvl_field_t *field);
 
 void *cvl_field_array(cvl_field_t *field);
 const void *cvl_field_const_array(const cvl_field_t *field);
@@ -50,18 +54,220 @@ void cvl_field_zero(cvl_field_t *field);
 void cvl_field_copy(cvl_field_t *dst, const cvl_field_t *src);
 cvl_field_t *cvl_field_clone(const cvl_field_t *field);
 
-inline const void *cvl_field_get_i(const cvl_field_t *field, int i);
-inline const void *cvl_field_get(const cvl_field_t *field, int x, int y);
-inline const void *cvl_field_get_r(const cvl_field_t *field, int x, int y);
-inline void cvl_field_set_i(cvl_field_t *field, int i, const void *e);
-inline void cvl_field_set(cvl_field_t *field, int x, int y, const void *e);
+/**
+ * \param field		The field.
+ * \param i		The index of the element.
+ * \return 		A pointer to the element.
+ *
+ * Gets an element from a field by returning a pointer to it.
+ * The index refers to all lines of the field one after another, 
+ * from top to bottom and left to right.
+ */
+extern inline const void *cvl_field_get_i(const cvl_field_t *field, int i)
+{
+    cvl_assert(field != NULL);
+    cvl_assert(i >= 0);
+    cvl_assert(i < cvl_field_size(field));
 
-inline const float *cvl_field_f_get_i(const cvl_field_t *field, int i);
-inline const float *cvl_field_f_get(const cvl_field_t *field, int x, int y);
-inline const float *cvl_field_f_get_r(const cvl_field_t *field, int x, int y);
-inline const int *cvl_field_i_get_i(const cvl_field_t *field, int i);
-inline const int *cvl_field_i_get(const cvl_field_t *field, int x, int y);
-inline const int *cvl_field_i_get_r(const cvl_field_t *field, int x, int y);
+    return &((unsigned char *)cvl_field_const_array(field))[cvl_field_element_size(field) * i];
+}
+
+/**
+ * \param field		The field.
+ * \param x		The x coordinate.
+ * \param y		The y coordinate.
+ * \return 		A pointer to the element.
+ * 
+ * Gets an element from a field by returning a pointer to it.
+ */
+extern inline const void *cvl_field_get(const cvl_field_t *field, int x, int y)
+{
+    cvl_assert(field != NULL);
+    cvl_assert(x >= 0);
+    cvl_assert(x < cvl_field_width(field));
+    cvl_assert(y >= 0);
+    cvl_assert(y < cvl_field_height(field));
+
+    return cvl_field_get_i(field, y * cvl_field_width(field) + x);
+}
+
+/**
+ * \param field		The field.
+ * \param x		The x coordinate.
+ * \param y		The y coordinate.
+ * \return 		A pointer to the element.
+ * 
+ * Gets an element from a field by returning a pointer to it.
+ * This function uses reflective indexing: arbitrary \a x and \a y values are accepted.
+ */
+extern inline const void *cvl_field_get_r(const cvl_field_t *field, int x, int y)
+{
+    cvl_assert(field != NULL);
+
+    return cvl_field_get(field, 
+	    cvl_reflect(x, cvl_field_width(field)), 
+	    cvl_reflect(y, cvl_field_height(field)));
+}
+
+/**
+ * \param field		The field.
+ * \param i		The index of the element.
+ * \param e		The element.
+ *
+ * Sets the element at index \a i in \a field to \a e.
+ * The index refers to all lines of the field one after another, 
+ * from top to bottom and left to right.
+ */
+extern inline void cvl_field_set_i(cvl_field_t *field, int i, const void *e)
+{
+    cvl_assert(field != NULL);
+    cvl_assert(e != NULL);
+    cvl_assert(i >= 0);
+    cvl_assert(i < cvl_field_size(field));
+
+    memcpy(&((unsigned char *)cvl_field_array(field))[cvl_field_element_size(field) * i],
+	    e, cvl_field_element_size(field));
+}
+
+/**
+ * \param field		The field.
+ * \param x		The x coordinate.
+ * \param y		The y coordinate.
+ * \param e		The element. 
+ *
+ * Sets the element at \a x, \a y in \a field to \a e.
+ */
+extern inline void cvl_field_set(cvl_field_t *field, int x, int y, const void *e)
+{
+    cvl_assert(field != NULL);
+    cvl_assert(e != NULL);
+    cvl_assert(x >= 0);
+    cvl_assert(x < cvl_field_width(field));
+    cvl_assert(y >= 0);
+    cvl_assert(y < cvl_field_height(field));
+
+    cvl_field_set_i(field, y * cvl_field_width(field) + x, e);
+}
+
+
+/**
+ * \param field		The field.
+ * \param i		The index of the element.
+ * \return 		A pointer to the element.
+ *
+ * Convenience interface to cvl_field_get_i() for fields that store one or more
+ * floats in one element.\n
+ * Gets an element from a field by returning a pointer to it.
+ * The index refers to all lines of the field one after another, 
+ * from top to bottom and left to right.
+ */
+extern inline const float *cvl_field_f_get_i(const cvl_field_t *field, int i)
+{
+    cvl_assert(field != NULL);
+    cvl_assert(i >= 0);
+    cvl_assert(i < cvl_field_size(field));
+
+    return cvl_field_get_i(field, i);
+}
+
+/**
+ * \param field		The field.
+ * \param x		The x coordinate.
+ * \param y		The y coordinate.
+ * \return 		A pointer to the element.
+ * 
+ * Convenience interface to cvl_field_get() for fields that store one or more
+ * floats in one element.\n
+ * Gets an element from a field by returning a pointer to it.
+ */
+extern inline const float *cvl_field_f_get(const cvl_field_t *field, int x, int y)
+{
+    cvl_assert(field != NULL);
+    cvl_assert(x >= 0);
+    cvl_assert(x < cvl_field_width(field));
+    cvl_assert(y >= 0);
+    cvl_assert(y < cvl_field_height(field));
+
+    return cvl_field_get(field, x, y);
+}
+
+/**
+ * \param field		The field.
+ * \param x		The x coordinate.
+ * \param y		The y coordinate.
+ * \return 		A pointer to the element.
+ * 
+ * Convenience interface to cvl_field_get_r() for fields that store one or more
+ * floats in one element.\n
+ * Gets an element from a field by returning a pointer to it.
+ * This function uses reflective indexing: arbitrary \a x and \a y values are accepted.
+ */
+extern inline const float *cvl_field_f_get_r(const cvl_field_t *field, int x, int y)
+{
+    cvl_assert(field != NULL);
+
+    return cvl_field_get_r(field, x, y);
+}
+
+/**
+ * \param field		The field.
+ * \param i		The index of the element.
+ * \return 		A pointer to the element.
+ *
+ * Convenience interface to cvl_field_get_i() for fields that store one or more
+ * ints in one element.\n
+ * Gets an element from a field by returning a pointer to it.
+ * The index refers to all lines of the field one after another, 
+ * from top to bottom and left to right.
+ */
+extern inline const int *cvl_field_i_get_i(const cvl_field_t *field, int i)
+{
+    cvl_assert(field != NULL);
+    cvl_assert(i >= 0);
+    cvl_assert(i < cvl_field_size(field));
+
+    return cvl_field_get_i(field, i);
+}
+
+/**
+ * \param field		The field.
+ * \param x		The x coordinate.
+ * \param y		The y coordinate.
+ * \return 		A pointer to the element.
+ * 
+ * Convenience interface to cvl_field_get() for fields that store one or more
+ * ints in one element.\n
+ * Gets an element from a field by returning a pointer to it.
+ */
+extern inline const int *cvl_field_i_get(const cvl_field_t *field, int x, int y)
+{
+    cvl_assert(field != NULL);
+    cvl_assert(x >= 0);
+    cvl_assert(x < cvl_field_width(field));
+    cvl_assert(y >= 0);
+    cvl_assert(y < cvl_field_height(field));
+
+    return cvl_field_get(field, x, y);
+}
+
+/**
+ * \param field		The field.
+ * \param x		The x coordinate.
+ * \param y		The y coordinate.
+ * \return 		A pointer to the element.
+ * 
+ * Convenience interface to cvl_field_get_r() for fields that store one or more
+ * ints in one element.\n
+ * Gets an element from a field by returning a pointer to it.
+ * This function uses reflective indexing: arbitrary \a x and \a y values are accepted.
+ */
+extern inline const int *cvl_field_i_get_r(const cvl_field_t *field, int x, int y)
+{
+    cvl_assert(field != NULL);
+
+    return cvl_field_get_r(field, x, y);
+}
+
 
 void cvl_field_fill_rect(cvl_field_t *field, int x, int y, int w, int h, const void *e);
 void cvl_field_copy_rect(cvl_field_t *dst, int dst_x, int dst_y, 
