@@ -12,9 +12,6 @@ MAINTAINERCLEANFILES =
 
 AM_CPPFLAGS = -I$(top_srcdir)/gnulib
 
-# c99math
-libnotgnu_la_SOURCES += c99math.h c99math.c
-
 # isblank
 libnotgnu_la_SOURCES += isblank.h isblank.c
 

@@ -1,4 +1,8 @@
 Version 0.0.4 (not yet released):
+- Removed the notgnulib module c99math, because the functions fmin, fmax, and 
+  lround are now used in the public header file cvl_math.h, which cannot include
+  c99math.h. If these functions are still missing on a relevant platform, I'll
+  look into this again.
 - CVL: Reorganization:
   - Move inline functions to header files (with "extern inline").
   - Remove cvl.c, and compile the modules one by one, as it should be.
