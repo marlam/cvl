@@ -143,7 +143,7 @@ int main(int argc, char *argv[])
     {
 	int width = cvl_frame_width(frames[0]);
 	int height = cvl_frame_height(frames[0]);
-	int idummy[3] = { 0, 0, 0 };
+	int idummy[3] = { width, height, depth };
 	char cdummy = '\n';
 	
 	if (fprintf(stdout, "X: %d\nY: %d\nZ: %d\nVoxel-Size: 1\n.\n", width, height, depth) < 0

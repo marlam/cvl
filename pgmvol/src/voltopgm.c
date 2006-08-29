@@ -138,7 +138,7 @@ int main(int argc, char *argv[])
     }
  
     /* Read the volume data and write the images */
-    // read three dummy value + \n
+    // read three dummy values + \n
     int idummy[3];
     char cdummy;
     if (fread(idummy, sizeof(int), 3, stdin) != 3 || fread(&cdummy, sizeof(char), 1, stdin) != 1)
