@@ -24,8 +24,7 @@
  * \file cvl_field.h
  * \brief Fields.
  *
- * Functions to work with two-dimensional fields storing data of different
- * types.
+ * Functions to work with two-dimensional fields storing arbitrary data.
  */
 
 #include "config.h"

@@ -24,7 +24,7 @@
  * \file cvl_filter.h
  * \brief Filtering frames.
  *
- * Filtering frames: Gauss, Median, and Mean filter.
+ * Filtering frames.
  */
 
 #include "config.h"

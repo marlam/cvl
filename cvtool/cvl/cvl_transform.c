@@ -25,7 +25,7 @@
  * \brief Geometric transformations.
  *
  * Apply geometric transformations to frames: Mirroring, resizing, or affine
- * transformations such as rotation, scale, or shear.
+ * transformations such as rotate, scale, or shear.
  */
 
 #include "config.h"

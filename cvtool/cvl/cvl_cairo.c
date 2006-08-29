@@ -24,7 +24,7 @@
  * \file cvl_cairo.h
  * \brief Interface to the CAIRO graphics library.
  * 
- * These functions allow easy usage of the CAIRO graphics library on CVL frame.
+ * Functions that allow easy usage of the CAIRO graphics library with CVL frames.
  */
 
 #include "config.h"

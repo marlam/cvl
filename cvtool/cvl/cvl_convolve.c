@@ -24,7 +24,7 @@
  * \file cvl_convolve.h
  * \brief Applying convolution matrices.
  *
- * Applying convolution matrices to frames, separable or arbitrary.
+ * Applying convolution matrices to frames (separable or arbitrary).
  */
 
 #include "config.h"

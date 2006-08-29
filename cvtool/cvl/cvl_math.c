@@ -25,7 +25,7 @@
  * \brief Math related functions.
  *
  * Miscellaneous math related functions: Rounding, minimum and maximum, angles,
- * sorting, random numbers, and differentiation.
+ * sorting, random numbers, and so on.
  */
 
 #include "config.h"

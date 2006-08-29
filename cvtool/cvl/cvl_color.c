@@ -25,7 +25,7 @@
  * \brief Color handling. 
  *
  * Handling colors: Basic definitions, color related frame manipulation,
- * binarziation.
+ * binarization.
  */
 
 #include "config.h"
