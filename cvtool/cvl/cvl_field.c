@@ -503,7 +503,7 @@ bool cvl_field_read_known(FILE *f, cvl_field_t *field)
 	    || cvl_field_height(field) != height)
     {
 	cvl_msg_err("wrong type or dimensions of CVL field");
-	cvl_msg_err("es %d %d", element_size, cvl_field_element_size(field));
+	cvl_msg_err("es %d %d", (int)element_size, (int)cvl_field_element_size(field));
 	cvl_msg_err("w %d %d", width, cvl_field_width(field));
 	cvl_msg_err("h %d %d", height, cvl_field_height(field));
 	return false;
