@@ -1,4 +1,5 @@
 Version 0.0.4 (not yet released):
+- CVL, cvtool: Renamed "average" to "mean" where appropriate.
 - Removed the notgnulib module c99math, because the functions fmin, fmax, and 
   lround are now used in the public header file cvl_math.h, which cannot include
   c99math.h. If these functions are still missing on a relevant platform, I'll

@@ -17,8 +17,8 @@ $CVTOOL merge -o merge3.txt l.pnm m.pnm d.pnm > lmd.pnm
 $CVTOOL merge -o merge4.txt m.pnm d.pnm d.pnm > mdd.pnm 
 $CVTOOL merge -o merge5.txt l.pnm l.pnm m.pnm > llm.pnm 
 
-# average
-$CVTOOL filter average -3 -k 1 < rgb.pnm > x123.pnm 
+# mean
+$CVTOOL filter mean -3 -k 1 < rgb.pnm > x123.pnm 
 cmp 123.pnm x123.pnm 
 
 # min

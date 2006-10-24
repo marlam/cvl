@@ -42,7 +42,7 @@ void cmd_diff_print_help(void)
 	    "dimensions and of the same pixel type. Each pixel will be the absolute value "
 	    "of the difference of the corresponding pixels in the two sources. "
 	    "For RGB frames, the values will be computed for each channel separately.\n"
-	    "If --statistics is used, the command will also compute the minimum, maximum, average, and "
+	    "If --statistics is used, the command will also compute the minimum, maximum, mean, and "
 	    "median error, and the standard deviation. For RGB frames, these values will be "
 	    "computed for each channel separately. For YUV frames, only the Y channel is considered.\n"
 	    "The output will be printed to stderr, unless it is redirected with the --output "
@@ -68,7 +68,7 @@ int cmd_diff(int argc, char *argv[])
     cvl_io_info_t *diff_info;
     cvl_frame_t *diff_frame;
     uint8_t min[3], max[3], med[3];
-    double avg[3], dev[3];    
+    double mean[3], dev[3];    
     bool error;
 
     cvl_msg_set_command_name("%s", argv[0]);
@@ -140,7 +140,7 @@ int cmd_diff(int argc, char *argv[])
 	    diff_frame = NULL;
 	    cvl_diffstat(src1_frame, src2_frame, 
 		    (output.value == stdout ? NULL : &diff_frame),
-		    min, max, med, avg, dev);
+		    min, max, med, mean, dev);
 	    if (cvl_frame_pixel_type(src1_frame) == CVL_PIXEL_RGB)
 	    {
 		cvl_msg(outstream, CVL_MSG_REQ, "frame pair %d: minimum error      = %3d %3d %3d",
@@ -149,8 +149,8 @@ int cmd_diff(int argc, char *argv[])
 			frameno, (int)max[0], (int)max[1], (int)max[2]);
 		cvl_msg(outstream, CVL_MSG_REQ, "frame pair %d: median error       = %3d %3d %3d",
 			frameno, (int)med[0], (int)med[1], (int)med[2]);
-		cvl_msg(outstream, CVL_MSG_REQ, "frame pair %d: average error      = %.10g %.10g %.10g",
-			frameno, avg[0], avg[1], avg[2]);
+		cvl_msg(outstream, CVL_MSG_REQ, "frame pair %d: mean error         = %.10g %.10g %.10g",
+			frameno, mean[0], mean[1], mean[2]);
 		cvl_msg(outstream, CVL_MSG_REQ, "frame pair %d: standard deviation = %.10g %.10g %.10g",
 			frameno, dev[0], dev[1], dev[2]);
 	    }
@@ -162,8 +162,8 @@ int cmd_diff(int argc, char *argv[])
 			frameno, (int)max[0]);
 		cvl_msg(outstream, CVL_MSG_REQ, "frame pair %d: median error       = %3d",
 			frameno, (int)med[0]);
-		cvl_msg(outstream, CVL_MSG_REQ, "frame pair %d: average error      = %.10g",
-			frameno, avg[0]);
+		cvl_msg(outstream, CVL_MSG_REQ, "frame pair %d: mean error         = %.10g",
+			frameno, mean[0]);
 		cvl_msg(outstream, CVL_MSG_REQ, "frame pair %d: standard deviation = %.10g",
 			frameno, dev[0]);
 	    }

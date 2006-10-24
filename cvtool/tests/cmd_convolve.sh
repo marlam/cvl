@@ -7,7 +7,7 @@ $CVTOOL create -t rgb -n 1 -w 99 -h 99 -c 0x00ff00 > g.pnm
 $CVTOOL create -t rgb -n 1 -w 99 -h 99 -c 0x0000ff > b.pnm 
 $CVTOOL merge -o merge1.txt r.pnm g.pnm b.pnm > rgb.pnm 
 
-# do the same as the 3D average filter with k=1
+# do the same as the 3D mean filter with k=1
 $CVTOOL create -t rgb -n 1 -w 99 -h 99 -c 0xaa5500 > 1.pnm 
 $CVTOOL create -t rgb -n 1 -w 99 -h 99 -c 0x555555 > 2.pnm 
 $CVTOOL create -t rgb -n 1 -w 99 -h 99 -c 0x0055aa > 3.pnm 

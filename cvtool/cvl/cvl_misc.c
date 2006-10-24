@@ -151,7 +151,7 @@ int cvl_uint8_cmp(uint8_t *x1, uint8_t *x2)
  * \param min		Pointer to 1 (gray, yuv) or 3 (rgb) integers.
  * \param max		Pointer to 1 (gray, yuv) or 3 (rgb) integers.
  * \param med		Pointer to 1 (gray, yuv) or 3 (rgb) integers.
- * \param avg		Pointer to 1 (gray, yuv) or 3 (rgb) doubles.
+ * \param mean		Pointer to 1 (gray, yuv) or 3 (rgb) doubles.
  * \param dev		Pointer to 1 (gray, yuv) or 3 (rgb) doubles.
  *
  * Visualizes the differences between two frames, and computes some simple
@@ -163,17 +163,17 @@ int cvl_uint8_cmp(uint8_t *x1, uint8_t *x2)
  * is computed separated by color channels: p1 = (r11, g12, b13), 
  * p2 = (r3, g11, b13) => (r8, g1, b0). For other pixel types, the 
  * luminosity difference is measured and represented by a gray value.\n
- * The minimum, maximum, median, and average error are stored in \a min, \a max,
- * \a med, \a avg respectively. The standard deviation is stored in \a dev.\n
+ * The minimum, maximum, median, and mean error are stored in \a min, \a max,
+ * \a med, \a mean respectively. The standard deviation is stored in \a dev.\n
  * If \a f1 and \a f2 are of type GRAY or YUV, then \a min, \a max, \a med, \a
- * avg, and \a dev need only point to one integer or double. For RGB, they must
+ * mean, and \a dev need only point to one integer or double. For RGB, they must
  * point to three integers or doubles, to store the values for each channel
  * separately.\n
- * If any of \a diff, \a min, \a max, \a med, \a avg, \a dev is NULL, then the
+ * If any of \a diff, \a min, \a max, \a med, \a mean, \a dev is NULL, then the
  * corresponding computation will not be done.
  */
 void cvl_diffstat(const cvl_frame_t *f1, const cvl_frame_t *f2, 
-	cvl_frame_t **diff, uint8_t *min, uint8_t *max, uint8_t *med, double *avg, double *dev)
+	cvl_frame_t **diff, uint8_t *min, uint8_t *max, uint8_t *med, double *mean, double *dev)
 {
     cvl_assert(f1 != NULL);
     cvl_assert(f2 != NULL);
@@ -213,7 +213,7 @@ void cvl_diffstat(const cvl_frame_t *f1, const cvl_frame_t *f2,
 	{
 	    errvals[j] = xmalloc(size * sizeof(uint8_t));
 	}
-	if (avg || dev)
+	if (mean || dev)
 	{
 	    errsum[j] = 0;
 	}
@@ -269,7 +269,7 @@ void cvl_diffstat(const cvl_frame_t *f1, const cvl_frame_t *f2,
 	    {
 		errvals[j][i] = pd[j];
 	    }
-	    if (avg || dev)
+	    if (mean || dev)
 	    {
 		errsum[j] += pd[j];
 	    }
@@ -288,11 +288,11 @@ void cvl_diffstat(const cvl_frame_t *f1, const cvl_frame_t *f2,
 	    free(errvals[j]);
 	}
     }
-    if (avg)
+    if (mean)
     {
 	for (int j = 0; j < (rgb ? 3 : 1); j++)
 	{
-	    avg[j] = (double)errsum[j] / (double)size;
+	    mean[j] = (double)errsum[j] / (double)size;
 	}
     }
     if (dev)

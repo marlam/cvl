@@ -67,8 +67,8 @@
  */
 /** \var CVL_DIBR_FILL_NONE
  * No filling. */
-/** \var CVL_DIBR_FILL_AVG
- * Use average of the border colors. */
+/** \var CVL_DIBR_FILL_MEAN
+ * Use mean of the border colors. */
 /** \var CVL_DIBR_FILL_NEAR
  * Use color of the nearer border. */
 /** \var CVL_DIBR_FILL_FAR
@@ -77,8 +77,8 @@
  * Use linear color gradient. */
 
 
-/* A helper function to compute the average of two pixels. */
-static inline cvl_pixel_t cvl_dibr_pixel_average(cvl_pixel_type_t pixel_type, cvl_pixel_t p1, cvl_pixel_t p2)
+/* A helper function to compute the mean of two pixels. */
+static inline cvl_pixel_t cvl_dibr_pixel_mean(cvl_pixel_type_t pixel_type, cvl_pixel_t p1, cvl_pixel_t p2)
 {
     cvl_pixel_t p;
     
@@ -177,9 +177,9 @@ static int cvl_dibr_fill_hole(cvl_frame_t *frame, int offset, int *mask, int l, 
 	{
 	    p = cvl_color_to_pixel(CVL_COLOR_WHITE, cvl_frame_pixel_type(frame));
 	}
-	else if (technique == CVL_DIBR_FILL_AVG)
+	else if (technique == CVL_DIBR_FILL_MEAN)
 	{
-	    p = cvl_dibr_pixel_average(cvl_frame_pixel_type(frame), p1, p2);
+	    p = cvl_dibr_pixel_mean(cvl_frame_pixel_type(frame), p1, p2);
 	}
 	else if (technique == CVL_DIBR_FILL_NEAR)
 	{

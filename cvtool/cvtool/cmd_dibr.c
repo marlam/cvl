@@ -38,14 +38,14 @@ void cmd_dibr_print_help(void)
 {
     cvl_msg_fmt_req(
 	    "dibr -d|--depth=<depthsource> -b|--b=<b> [-p|--position=<p>] "
-	    "[-z|--zps=<z>] [-h|--hole-filling=none|average|near|far|linear]\n"
+	    "[-z|--zps=<z>] [-h|--hole-filling=none|mean|near|far|linear]\n"
 	    "\n"
 	    "Builds stereo images from a source view and corresponding depth maps. b is "
 	    "the \"eye\" distance in pixels. The position of the source view must be in "
 	    "[-1,+1], where -1 means left view, +1 means right view, and 0 means "
 	    "intermediate view (this is the default). zps is the zero parallax setting. "
 	    "It must be in [0,1]; the default is 0. "
-	    "The hole filling method can be none, average color (default), color of "
+	    "The hole filling method can be none, mean color (default), color of "
 	    "nearer/farther neighbor pixel, or linear color gradient.");
 }
 
@@ -56,7 +56,7 @@ int cmd_dibr(int argc, char *argv[])
     cvl_option_int_t b = { -1, 0, INT_MAX };
     cvl_option_double_t position = { 0.0, -1.0, true, +1.0, true };
     cvl_option_double_t zps = { 0.0, 0.0, true, 1.0, true };
-    const char *hole_filling_names[] = { "none", "average", "near", "far", "linear", NULL };
+    const char *hole_filling_names[] = { "none", "mean", "near", "far", "linear", NULL };
     cvl_option_name_t hole_filling = { 1, hole_filling_names };
     cvl_option_t options[] =
     {

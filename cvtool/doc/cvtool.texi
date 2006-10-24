@@ -1070,8 +1070,8 @@ $ cvtool draw -u -f "Serif" -F 0.1,0.1 -j center -J center \
 @node filter
 @subsection filter
 @cmindex filter
-@code{filter average [-3|--3d] -k|--k=@var{k}}@*
-@code{filter average [-3|--3d] -x|--k-x=@var{kx} -y|--k-y=@var{ky}
+@code{filter mean [-3|--3d] -k|--k=@var{k}}@*
+@code{filter mean [-3|--3d] -x|--k-x=@var{kx} -y|--k-y=@var{ky}
 [-t|--k-t=@var{kt}]}@*
 @code{filter min [-3|--3d] -k|--k=@var{k}}@*
 @code{filter min [-3|--3d] -x|--k-x=@var{kx} -y|--k-y=@var{ky}
@@ -1121,7 +1121,7 @@ kernel must be an odd number in each dimension.
 
 @example
 # Both commands are equivalent to 2D smoothing with the 
-# average filter with k=1:
+# mean filter with k=1:
 $ cvtool convolve -K 3x3:1,1,1,1,1,1,1,1,1 < in.pnm > out.pnm
 $ cvtool convolve -X 3:1,1,1 -Y 3:1,1,1    < in.pnm > out.pnm
 @end example
@@ -1289,7 +1289,7 @@ two sources.  For RGB frames, the values will be computed for each channel
 separately.
 
 If @option{--statistics} is used, the command will also compute the minimum,
-maximum, average, and median error, and the standard deviation. For RGB frames,
+maximum, mean, and median error, and the standard deviation. For RGB frames,
 these values will be computed for each channel separately. For YUV frames, only
 the Y channel is considered.  The output will be printed to @code{stderr}, unless it
 is redirected with the @option{--output} option. If the output is redirected to
@@ -1302,7 +1302,7 @@ $ cvtool diff -s -o - red.pnm green.pnm
 frame pair 1: minimum error      = 255 255 0
 frame pair 1: maximum error      = 255 255 0
 frame pair 1: median error       = 255 255 0
-frame pair 1: average error      = 255 255 0
+frame pair 1: mean error         = 255 255 0
 frame pair 1: standard deviation = 0 0 0
 @end example
 
@@ -1320,7 +1320,7 @@ frame pair 1: standard deviation = 0 0 0
 @subsection dibr
 @cmindex dibr
 @code{dibr -d|--depth=@var{depthsource} -b|--b=@var{b} [-p|--position=@var{p}]
-[-z|--zps=@var{z}] [-h|--hole-filling=none|average|near|far|linear]}
+[-z|--zps=@var{z}] [-h|--hole-filling=none|mean|near|far|linear]}
 
 @noindent
 Builds stereo images from a source view and corresponding depth maps.
@@ -1329,7 +1329,7 @@ Builds stereo images from a source view and corresponding depth maps.
 be in [-1,+1], where -1 means left view, +1 means right view, and 0 means
 intermediate view (this is the default). @var{zps} is the zero parallax
 setting. It must be in [0,1]; the default is 0. The hole filling method can be
-none, average color (default), color of nearer/farther neighbor pixel, or
+none, mean color (default), color of nearer/farther neighbor pixel, or
 linear color gradient.
 
 @example
@@ -1688,7 +1688,7 @@ cameras, in pixels.
 To compute the left and right view, objects have to be moved to left and right.
 No information is available about the background that becomes visible when
 moving a near object.  This causes disocclusion holes in the left and right
-view.  These holes are normally filled with a simple average color technique.
+view.  These holes are normally filled with a simple mean color technique.
 To make them visible, use the option @code{--hole-filling=none}.
 
 Disocclusion holes always degrade the image quality in comparison to the

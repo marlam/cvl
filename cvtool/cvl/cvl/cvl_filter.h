@@ -29,14 +29,14 @@ double cvl_filter_gauss_k_to_sigma(int k);
 int cvl_filter_gauss_sigma_to_k(double sigma);
 
 cvl_frame_t *cvl_filter_gauss(const cvl_frame_t *frame, int k_h, int k_v, double sigma_h, double sigma_v);
-cvl_frame_t *cvl_filter_average(const cvl_frame_t *frame, int k_h, int k_v);
+cvl_frame_t *cvl_filter_mean(const cvl_frame_t *frame, int k_h, int k_v);
 cvl_frame_t *cvl_filter_min(const cvl_frame_t *frame, int k_h, int k_v);
 cvl_frame_t *cvl_filter_max(const cvl_frame_t *frame, int k_h, int k_v);
 cvl_frame_t *cvl_filter_median(const cvl_frame_t *frame, int k_h, int k_v);
 
 cvl_frame_t *cvl_filter3d_gauss(cvl_frame_t * const *frames, 
 	int k_h, int k_v, int k_t, double sigma_h, double sigma_v, double sigma_t);
-cvl_frame_t *cvl_filter3d_average(cvl_frame_t * const *frames, int k_h, int k_v, int k_t);
+cvl_frame_t *cvl_filter3d_mean(cvl_frame_t * const *frames, int k_h, int k_v, int k_t);
 cvl_frame_t *cvl_filter3d_min(cvl_frame_t * const *frames, int k_h, int k_v, int k_t);
 cvl_frame_t *cvl_filter3d_max(cvl_frame_t * const *frames, int k_h, int k_v, int k_t);
 cvl_frame_t *cvl_filter3d_median(cvl_frame_t * const *frames, int k_h, int k_v, int k_t);

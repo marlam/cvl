@@ -138,11 +138,11 @@ cvl_frame_t *cvl_filter_gauss(const cvl_frame_t *frame, int k_h, int k_v, double
  * \param k_v		Mask size in vertical direction.
  * \return		The filtered frame.
  *
- * Applies average filtering to the given frame.
+ * Applies mean filtering to the given frame.
  * The number of matrix columns will be 2k_h+1, the number of rows will
  * be 2k_v+1. All pixel types are supported.
  */
-cvl_frame_t *cvl_filter_average(const cvl_frame_t *frame, int k_h, int k_v)
+cvl_frame_t *cvl_filter_mean(const cvl_frame_t *frame, int k_h, int k_v)
 {
     cvl_assert(frame != NULL);
     cvl_assert(k_h >= 0);
@@ -392,11 +392,11 @@ cvl_frame_t *cvl_filter3d_gauss(cvl_frame_t * const *frames,
  * \param k_t		Mask size in temporal direction.
  * \return		The filtered frame.
  *
- * Applies average filtering.
+ * Applies mean filtering.
  * See cvl_convolve3d_separable() for a description of \a frames.
  * The kernel size will be (2k_t+1)x(2k_v+1)x(2k_h+1).
  */
-cvl_frame_t *cvl_filter3d_average(cvl_frame_t * const *frames, int k_h, int k_v, int k_t)
+cvl_frame_t *cvl_filter3d_mean(cvl_frame_t * const *frames, int k_h, int k_v, int k_t)
 {
     cvl_assert(k_h >= 0);
     cvl_assert(k_v >= 0);

@@ -34,8 +34,8 @@
 void cmd_filter_print_help(void)
 {
     cvl_msg_fmt_req(
-	    "filter average [-3|--3d] -k|--k=<k>\n"
-	    "filter average [-3|--3d] -x|--k-x=<kx> -y|--k-y=<ky> [-t|--k-t=<kt>]\n"
+	    "filter mean [-3|--3d] -k|--k=<k>\n"
+	    "filter mean [-3|--3d] -x|--k-x=<kx> -y|--k-y=<ky> [-t|--k-t=<kt>]\n"
 	    "filter min [-3|--3d] -k|--k=<k>\n"
 	    "filter min [-3|--3d] -x|--k-x=<kx> -y|--k-y=<ky> [-t|--k-t=<kt>]\n"
 	    "filter max [-3|--3d] -k|--k=<k>\n"
@@ -59,7 +59,7 @@ void cmd_filter_print_help(void)
 
 int cmd_filter(int argc, char *argv[])
 {
-    typedef enum { FILTER_AVERAGE, FILTER_MIN, FILTER_MAX, FILTER_MEDIAN, FILTER_GAUSS } subcommand_t;
+    typedef enum { FILTER_MEAN, FILTER_MIN, FILTER_MAX, FILTER_MEDIAN, FILTER_GAUSS } subcommand_t;
     subcommand_t subcommand;
     cvl_option_bool_t three_dimensional = { false, true };
     cvl_option_int_t k = { 0, 1, CVL_MASKSIZE_K_MAX };
@@ -70,7 +70,7 @@ int cmd_filter(int argc, char *argv[])
     cvl_option_double_t sx = { -1.0, 0.0, false, DBL_MAX, true };
     cvl_option_double_t sy = { -1.0, 0.0, false, DBL_MAX, true };
     cvl_option_double_t st = { -1.0, 0.0, false, DBL_MAX, true };
-    cvl_option_t average_options[] = 
+    cvl_option_t mean_options[] = 
     {
 	{ "3d",      '3', CVL_OPTION_BOOL,   &three_dimensional, false },
 	{ "k",       'k', CVL_OPTION_INT,    &k,                 false },
@@ -79,9 +79,9 @@ int cmd_filter(int argc, char *argv[])
 	{ "k-t",     't', CVL_OPTION_INT,    &kt,                false },
 	cvl_option_null
     };
-    cvl_option_t *min_options = average_options;
-    cvl_option_t *max_options = average_options;
-    cvl_option_t *median_options = average_options;
+    cvl_option_t *min_options = mean_options;
+    cvl_option_t *max_options = mean_options;
+    cvl_option_t *median_options = mean_options;
     cvl_option_t gauss_options[] = 
     {
 	{ "3d",      '3', CVL_OPTION_BOOL,   &three_dimensional, false },
@@ -105,11 +105,11 @@ int cmd_filter(int argc, char *argv[])
 	cvl_msg_err("missing subcommand");
 	error = true;
     }
-    else if (strcmp(argv[1], "average") == 0)
+    else if (strcmp(argv[1], "mean") == 0)
     {
-	subcommand = FILTER_AVERAGE;
+	subcommand = FILTER_MEAN;
 	cvl_msg_set_command_name("%s %s", argv[0], argv[1]);
-	error = !cvl_getopt(argc - 1, &(argv[1]), average_options, 0, 0, NULL);
+	error = !cvl_getopt(argc - 1, &(argv[1]), mean_options, 0, 0, NULL);
 	if (!error)
 	{
 	    if (kt.value > 0)
@@ -362,9 +362,9 @@ int cmd_filter(int argc, char *argv[])
 	    }
 		
 	    // Process the present frame
-	    if (subcommand == FILTER_AVERAGE)
+	    if (subcommand == FILTER_MEAN)
 	    {
-		new_frame = cvl_filter3d_average(framebuf, kx.value, ky.value, kt.value);
+		new_frame = cvl_filter3d_mean(framebuf, kx.value, ky.value, kt.value);
 	    }
 	    else if (subcommand == FILTER_MIN)
 	    {
@@ -414,9 +414,9 @@ int cmd_filter(int argc, char *argv[])
 		error = true;
 		break;
 	    }
-	    if (subcommand == FILTER_AVERAGE)
+	    if (subcommand == FILTER_MEAN)
 	    {
-		new_frame = cvl_filter_average(frame, kx.value, ky.value);
+		new_frame = cvl_filter_mean(frame, kx.value, ky.value);
 	    }
 	    else if (subcommand == FILTER_MIN)
 	    {

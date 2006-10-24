@@ -30,7 +30,7 @@
 typedef enum
 {
     CVL_DIBR_FILL_NONE   = 0,
-    CVL_DIBR_FILL_AVG    = 1,
+    CVL_DIBR_FILL_MEAN   = 1,
     CVL_DIBR_FILL_NEAR   = 2,
     CVL_DIBR_FILL_FAR    = 3,
     CVL_DIBR_FILL_LINEAR = 4

@@ -9,6 +9,7 @@ Version 0.0.4 (not yet released):
   - The cvl.pc pkg-config file and the cvl-config script used by the replaced
     AM_PATH_CVL macro. Use AM_LIBCVL instead.
 - Miscellaneous:
+  - Renamed "average" to "mean" where appropriate.
 
 Version 0.0.3:
 - New and improved cvtool commands:
