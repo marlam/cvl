@@ -1,4 +1,4 @@
-Version 0.0.4 (not yet released):
+Version 0.1.0:
 - cvtool: Added the wallis subcommand to the filter command.
 - CVL: Aded cvl_filter_wallis() and cvl_filter3d_wallis().
 - Add "extern inline" functions to the corresponding .c files so that the

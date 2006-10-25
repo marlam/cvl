@@ -1,10 +1,10 @@
 \input texinfo   @c -*-texinfo-*-
 @afourpaper
 @setfilename cvl.info
-@set UPDATED August 18, 2006
+@set UPDATED October 25, 2006
 @set UPDATED-MONTH July 2006
-@set EDITION 0.0.4
-@set VERSION 0.0.4
+@set EDITION 0.1.0
+@set VERSION 0.1.0
 @settitle CVL @value{VERSION}
 
 @c Define new indices: for options (op) and commands (cm)

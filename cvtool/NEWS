@@ -1,4 +1,4 @@
-Version 0.0.4 (not yet released):
+Version 0.1.0:
 - New and improved cvtool commands:
   - New subcommand "wallis" for the filter command.
 - New and improved CVL functionality:
