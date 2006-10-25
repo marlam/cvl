@@ -14,7 +14,7 @@ AC_GNU_SOURCE
 AC_PROG_CC
 AC_PROG_CC_C99
 
-AM_LIBCVL([0x000004], [], [AC_MSG_ERROR(could not find required version of CVL)])
+AM_LIBCVL([0x000100], [], [AC_MSG_ERROR(could not find required version of CVL)])
 LIBS="$LIBS $LIBCVL"
 
 AH_VERBATIM([W32_NATIVE],
