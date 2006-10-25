@@ -28,6 +28,7 @@ libcvl_la_SOURCES = \
 	cvl_msg.c \
 	cvl_math.c \
 	cvl_getopt.c \
+	cvl_pixel.c \
 	cvl_vector.c \
 	cvl_field.c \
 	cvl_frame.c \

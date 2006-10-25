@@ -2156,6 +2156,20 @@ static cvl_color_table_entry_t cvl_color_table[] =
 static const size_t cvl_color_table_len = sizeof(cvl_color_table) / sizeof(cvl_color_table[0]);
 
 
+/**
+ * \param color		The color.
+ * \param pixel_type	The pixel type.
+ * \return		The pixel value.
+ *
+ * Converts a color to a pixel value that represents the color in the given
+ * pixel type.
+ */
+cvl_pixel_t cvl_color_to_pixel(cvl_color_t color, cvl_pixel_type_t pixel_type)
+{
+    return (pixel_type == CVL_PIXEL_RGB) ? color : 
+	((pixel_type == CVL_PIXEL_GRAY) ? cvl_pixel_rgb_to_gray(color) : cvl_pixel_rgb_to_yuv(color));
+}
+
 /* A helper for cvl_color_from_string() */
 static int cvl_color_from_string_cmp(const cvl_color_table_entry_t *e1, const cvl_color_table_entry_t *e2)
 {

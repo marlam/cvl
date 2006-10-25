@@ -32,12 +32,6 @@
 void cvl_cairo_start(cvl_frame_t *frame, cairo_t **cr, cvl_pixel_type_t *original_pixel_type);
 void cvl_cairo_stop(cvl_frame_t *frame, cairo_t *cr, cvl_pixel_type_t original_pixel_type);
 
-/**
- * \param cr		CAIRO drawing context.
- * \param color		CVL color.
- *
- * Shortcut to call cairo_set_source_rgb() with a CVL color.
- */
 extern inline void cvl_cairo_set_source_rgb(cairo_t *cr, cvl_color_t color)
 {
     cvl_pixel_t rgb = cvl_color_to_pixel(color, CVL_PIXEL_RGB);

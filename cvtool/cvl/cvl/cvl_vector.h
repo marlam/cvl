@@ -28,100 +28,46 @@
 
 #include "cvl_frame.h"
 
-bool cvl_vector2i_to_string(char *s, size_t s_size, const int *v);
-bool cvl_vector2i_from_string(const char *s, int *v);
-
-/**
- * \param dst		The destination vector.
- * \param src		The source vector.
- *
- * Copies a vector from \a src to \a dst.
- */
 extern inline void cvl_vector2i_copy(int *dst, const int *src)
 {
     dst[0] = src[0];
     dst[1] = src[1];
 }
 
-/**
- * \param v		The vector.
- *
- * Zeroes a vector.
- */
 extern inline void cvl_vector2i_zero(int *v)
 {
     v[0] = 0;
     v[1] = 0;
 }
 
-/**
- * \param result	The result.
- * \param a		A vector.
- * \param b		A vector.
- *
- * Adds two vectors.
- */
 extern inline void cvl_vector2i_add(int *result, const int *a, const int *b)
 {
     result[0] = a[0] + b[0];
     result[1] = a[1] + b[1];
 }
 
-/**
- * \param result	The result.
- * \param a		A vector.
- * \param b		A vector.
- *
- * Subracts two vectors.
- */
 extern inline void cvl_vector2i_sub(int *result, const int *a, const int *b)
 {
     result[0] = a[0] - b[0];
     result[1] = a[1] - b[1];
 }
 
-/**
- * \param v		The vector.
- * \param lambda	The scalar.
- *
- * Scales a vector.
- */
 extern inline void cvl_vector2i_scale(int *v, float lambda)
 {
     v[0] = cvl_iround(v[0] * lambda);
     v[1] = cvl_iround(v[1] * lambda);
 }
 
-/**
- * \param a		A vector.
- * \param b		A vector.
- * \return		The result.
- *
- * Multiplies two vectors.
- */
 extern inline int cvl_vector2i_mul(const int *a, const int *b)
 {
     return (a[0] * b[0] + a[1] * b[1]);
 }
 
-/**
- * \param v		The vector.
- * \return		The norm.
- *
- * Computes the euclidean norm of a vector.
- */
 extern inline float cvl_vector2i_norm_euc(const int *v)
 {
     return sqrtf(cvl_vector2i_mul(v, v));
 }
 
-/**
- * \param a		A vector.
- * \param b		A vector.
- * \return		The distance.
- *
- * Computes the geodesic distance between two vectors.
- */
 extern inline float cvl_vector2i_dist_arc(const int *a, const int *b)
 {
     float x = (float)cvl_vector2i_mul(a, b) / (cvl_vector2i_norm_euc(a) * cvl_vector2i_norm_euc(b));
@@ -136,13 +82,6 @@ extern inline float cvl_vector2i_dist_arc(const int *a, const int *b)
     return acosf(x);
 }
 
-/**
- * \param a		A vector.
- * \param b		A vector.
- * \return		The distance.
- *
- * Computes the euclidean distance between two vectors.
- */
 extern inline float cvl_vector2i_dist_euc(const int *a, const int *b)
 {
     int d[2];
@@ -153,122 +92,56 @@ extern inline float cvl_vector2i_dist_euc(const int *a, const int *b)
 cvl_frame_t *cvl_vector2i_visualize(const cvl_field_t *field, 
 	int sample_x, int sample_y, int dist_x, int dist_y, float factor);
 
-bool cvl_vector2_to_string(char *s, size_t s_size, const float *v);
-bool cvl_vector2_from_string(const char *s, float *v);
-
-/**
- * \param dst		The destination vector.
- * \param src		The source vector.
- *
- * Copies a vector from \a src to \a dst.
- */
 extern inline void cvl_vector2_copy(float *dst, const float *src)
 {
     dst[0] = src[0];
     dst[1] = src[1];
 }
 
-/**
- * \param v		The vector.
- *
- * Zeroes a vector.
- */
 extern inline void cvl_vector2_zero(float *v)
 {
     v[0] = 0.0f;
     v[1] = 0.0f;
 }
 
-/**
- * \param a		A vector.
- * \param b		A vector.
- * \param epsilon	The tolerance.
- *
- * Tests if two vectors are equal, with a given tolerance.
- */
 extern inline bool cvl_vector2_equal(const float *a, const float *b, float epsilon)
 {
     return (fabsf(a[0] - b[0]) < epsilon && fabs(a[1] - b[1]) < epsilon);
 }
 
-/**
- * \param result	The result.
- * \param a		A vector.
- * \param b		A vector.
- *
- * Adds two vectors.
- */
 extern inline void cvl_vector2_add(float *result, const float *a, const float *b)
 {
     result[0] = a[0] + b[0];
     result[1] = a[1] + b[1];
 }
 
-/**
- * \param result	The result.
- * \param a		A vector.
- * \param b		A vector.
- *
- * Subracts two vectors.
- */
 extern inline void cvl_vector2_sub(float *result, const float *a, const float *b)
 {
     result[0] = a[0] - b[0];
     result[1] = a[1] - b[1];
 }
 
-/**
- * \param v		The vector.
- * \param lambda	The scalar.
- *
- * Scales a vector.
- */
 extern inline void cvl_vector2_scale(float *v, float lambda)
 {
     v[0] *= lambda;
     v[1] *= lambda;
 }
 
-/**
- * \param a		A vector.
- * \param b		A vector.
- * \return		The result.
- *
- * Multiplies two vectors.
- */
 extern inline float cvl_vector2_mul(const float *a, const float *b)
 {
     return (a[0] * b[0] + a[1] * b[1]);
 }
 
-/**
- * \param v		The vector.
- * \return		The norm.
- *
- * Computes the euclidean norm of a vector.
- */
 extern inline float cvl_vector2_norm_euc(const float *v)
 {
     return sqrtf(cvl_vector2_mul(v, v));
 }
 
-/**
- * \param v		The vector.
- * 
- * Scales a vector to length 1.
- */
 extern inline void cvl_vector2_normalize(float *v)
 {
     cvl_vector2_scale(v, 1.0f / cvl_vector2_norm_euc(v));
 }
 
-/**
- * \param a		A vector.
- * \param b		A vector.
- * \return		The distance.
- *
- * Computes the geodesic distance between two vectors.
- */
 extern inline float cvl_vector2_dist_arc(const float *a, const float *b)
 {
     float x = cvl_vector2_mul(a, b) / (cvl_vector2_norm_euc(a) * cvl_vector2_norm_euc(b));
@@ -283,13 +156,6 @@ extern inline float cvl_vector2_dist_arc(const float *a, const float *b)
     return acosf(x);
 }
 
-/**
- * \param a		A vector.
- * \param b		A vector.
- * \return		The distance.
- *
- * Computes the euclidean distance between two vectors.
- */
 extern inline float cvl_vector2_dist_euc(const float *a, const float *b)
 {
     float d[2];
@@ -300,15 +166,6 @@ extern inline float cvl_vector2_dist_euc(const float *a, const float *b)
 cvl_frame_t *cvl_vector2_visualize(const cvl_field_t *field, 
 	int sample_x, int sample_y, int dist_x, int dist_y, float factor);
 
-bool cvl_vector3_to_string(char *s, size_t s_size, const float *v);
-bool cvl_vector3_from_string(const char *s, float *v);
-
-/**
- * \param dst		The destination vector.
- * \param src		The source vector.
- *
- * Copies a vector from \a src to \a dst.
- */
 extern inline void cvl_vector3_copy(float *dst, const float *src)
 {
     dst[0] = src[0];
@@ -316,11 +173,6 @@ extern inline void cvl_vector3_copy(float *dst, const float *src)
     dst[2] = src[2];
 }
 
-/**
- * \param v		The vector.
- *
- * Zeroes a vector.
- */
 extern inline void cvl_vector3_zero(float *v)
 {
     v[0] = 0.0f;
@@ -328,25 +180,11 @@ extern inline void cvl_vector3_zero(float *v)
     v[2] = 0.0f;
 }
 
-/**
- * \param a		A vector.
- * \param b		A vector.
- * \param epsilon	The tolerance.
- *
- * Tests if two vectors are equal, with a given tolerance.
- */
 extern inline bool cvl_vector3_equal(const float *a, const float *b, float epsilon)
 {
     return (fabsf(a[0] - b[0]) < epsilon && fabsf(a[1] - b[1]) < epsilon && fabsf(a[2] - b[2]) < epsilon);
 }
 
-/**
- * \param result	The result.
- * \param a		A vector.
- * \param b		A vector.
- *
- * Adds two vectors.
- */
 extern inline void cvl_vector3_add(float *result, const float *a, const float *b)
 {
     result[0] = a[0] + b[0];
@@ -354,13 +192,6 @@ extern inline void cvl_vector3_add(float *result, const float *a, const float *b
     result[2] = a[2] + b[2];
 }
 
-/**
- * \param result	The result.
- * \param a		A vector.
- * \param b		A vector.
- *
- * Subracts two vectors.
- */
 extern inline void cvl_vector3_sub(float *result, const float *a, const float *b)
 {
     result[0] = a[0] - b[0];
@@ -368,12 +199,6 @@ extern inline void cvl_vector3_sub(float *result, const float *a, const float *b
     result[2] = a[2] - b[2];
 }
 
-/**
- * \param v		The vector.
- * \param lambda	The scalar.
- *
- * Scales a vector.
- */
 extern inline void cvl_vector3_scale(float *v, float lambda)
 {
     v[0] *= lambda;
@@ -381,25 +206,11 @@ extern inline void cvl_vector3_scale(float *v, float lambda)
     v[2] *= lambda;
 }
 
-/**
- * \param a		A vector.
- * \param b		A vector.
- * \return		The result.
- *
- * Multiplies two vectors.
- */
 extern inline float cvl_vector3_mul(const float *a, const float *b)
 {
     return (a[0] * b[0] + a[1] * b[1] + a[2] * b[2]);
 }
 
-/**
- * \param result	The result.
- * \param a		A vector.
- * \param b		A vector.
- *
- * Computes the cross product of two vectors.
- */
 extern inline void cvl_vector3_crossproduct(float *result, const float *a, const float *b)
 {
     result[0] = a[1] * b[2] - a[2] * b[1];
@@ -407,34 +218,16 @@ extern inline void cvl_vector3_crossproduct(float *result, const float *a, const
     result[2] = a[0] * b[1] - a[1] * b[0];
 }
 
-/**
- * \param v		The vector.
- * \return		The norm.
- *
- * Computes the euclidean norm of a vector.
- */
 extern inline float cvl_vector3_norm_euc(const float *v)
 {
     return sqrtf(cvl_vector3_mul(v, v));
 }
 
-/**
- * \param v		The vector.
- * 
- * Scales a vector to length 1.
- */
 extern inline void cvl_vector3_normalize(float *v)
 {
     cvl_vector3_scale(v, 1.0f / cvl_vector3_norm_euc(v));
 }
 
-/**
- * \param a		A vector.
- * \param b		A vector.
- * \return		The distance.
- *
- * Computes the geodesic distance between two vectors.
- */
 extern inline float cvl_vector3_dist_arc(const float *a, const float *b)
 {
     float x = cvl_vector3_mul(a, b) / (cvl_vector3_norm_euc(a) * cvl_vector3_norm_euc(b));
@@ -449,13 +242,6 @@ extern inline float cvl_vector3_dist_arc(const float *a, const float *b)
     return acosf(x);
 }
 
-/**
- * \param a		A vector.
- * \param b		A vector.
- * \return		The distance.
- *
- * Computes the euclidean distance between two vectors.
- */
 extern inline float cvl_vector3_dist_euc(const float *a, const float *b)
 {
     float d[3];

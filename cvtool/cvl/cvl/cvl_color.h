@@ -690,14 +690,6 @@ typedef enum
 } cvl_color_t;
 
 
-/**
- * \param color		The color.
- * \param pixel_type	The pixel type.
- * \return		The pixel value.
- *
- * Converts a color to a pixel value that represents the color in the given
- * pixel type.
- */
 extern inline cvl_pixel_t cvl_color_to_pixel(cvl_color_t color, cvl_pixel_type_t pixel_type)
 {
     return (pixel_type == CVL_PIXEL_RGB) ? color : 

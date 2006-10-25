@@ -43,6 +43,66 @@
 
 
 /**
+ * \param frame		The frame.
+ * \param x		x coordinate at which the derivate should be computed.
+ * \param y		y coordinate at which the derivate should be computed.
+ * \param fx		Place where the first partial derivate will be stored.
+ * \param fy		Place where the second partial derivate will be stored.
+ *
+ * Computes the derivative using the Sobel method.
+ * \a x must be in [1, width - 2], and \a y must be in [1, height - 2].
+ * Use cvl_differentiate_sobel_r() to compute the derivative at arbitrary
+ * coordinates.
+ */
+void cvl_differentiate_sobel(const cvl_frame_t *frame, int x, int y, int *fx, int *fy)
+{
+    *fx = cvl_iroundf((float)(
+		(- 1 * (int)cvl_frame_get(frame, x - 1, y - 1) 
+		 + 1 * (int)cvl_frame_get(frame, x + 1, y - 1)
+		 - 2 * (int)cvl_frame_get(frame, x - 1, y    ) 
+		 + 2 * (int)cvl_frame_get(frame, x + 1, y    )
+		 - 1 * (int)cvl_frame_get(frame, x - 1, y + 1) 
+		 + 1 * (int)cvl_frame_get(frame, x + 1, y + 1))) / 4.0f);
+    *fy = cvl_iroundf((float)(
+		(+ 1 * (int)cvl_frame_get(frame, x - 1, y - 1) 
+		 - 1 * (int)cvl_frame_get(frame, x - 1, y + 1)
+		 + 2 * (int)cvl_frame_get(frame, x    , y - 1) 
+		 - 2 * (int)cvl_frame_get(frame, x    , y + 1)
+		 + 1 * (int)cvl_frame_get(frame, x + 1, y - 1) 
+		 - 1 * (int)cvl_frame_get(frame, x + 1, y + 1))) / 4.0f);
+}
+
+/**
+ * \param frame		The frame.
+ * \param x		x coordinate at which the derivate should be computed.
+ * \param y		y coordinate at which the derivate should be computed.
+ * \param fx		Place where the first partial derivate will be stored.
+ * \param fy		Place where the second partial derivate will be stored.
+ *
+ * Computes the derivate using the Sobel method.
+ * This function accepts arbitrary \a x and \a y values because it uses reflective
+ * indexing. This comes at the cost of slightly higher computation costs.
+ * See also cvl_differentiate_sobel().
+ */
+void cvl_differentiate_sobel_r(const cvl_frame_t *frame, int x, int y, int *fx, int *fy)
+{
+    *fx = cvl_iroundf((float)(
+		(- 1 * (int)cvl_frame_get_r(frame, x - 1, y - 1) 
+		 + 1 * (int)cvl_frame_get_r(frame, x + 1, y - 1)
+		 - 2 * (int)cvl_frame_get_r(frame, x - 1, y    ) 
+		 + 2 * (int)cvl_frame_get_r(frame, x + 1, y    )
+		 - 1 * (int)cvl_frame_get_r(frame, x - 1, y + 1) 
+		 + 1 * (int)cvl_frame_get_r(frame, x + 1, y + 1))) / 4.0f);
+    *fy = cvl_iroundf((float)(
+		(+ 1 * (int)cvl_frame_get_r(frame, x - 1, y - 1) 
+		 - 1 * (int)cvl_frame_get_r(frame, x - 1, y + 1)
+		 + 2 * (int)cvl_frame_get_r(frame, x    , y - 1) 
+		 - 2 * (int)cvl_frame_get_r(frame, x    , y + 1)
+		 + 1 * (int)cvl_frame_get_r(frame, x + 1, y - 1) 
+		 - 1 * (int)cvl_frame_get_r(frame, x + 1, y + 1))) / 4.0f);
+}
+
+/**
  * \param frame			A graylevel frame.
  * \param edge_dir_field	A field to store edge directions in, or NULL.
  * \return 			A graylevel frame containing the edges.

@@ -27,18 +27,6 @@
 #include "cvl_frame.h"
 #include "cvl_math.h"
 
-/**
- * \param frame		The frame.
- * \param x		x coordinate at which the derivate should be computed.
- * \param y		y coordinate at which the derivate should be computed.
- * \param fx		Place where the first partial derivate will be stored.
- * \param fy		Place where the second partial derivate will be stored.
- *
- * Computes the derivative using the Sobel method.
- * \a x must be in [1, width - 2], and \a y must be in [1, height - 2].
- * Use cvl_differentiate_sobel_r() to compute the derivative at arbitrary
- * coordinates.
- */
 extern inline void cvl_differentiate_sobel(const cvl_frame_t *frame, int x, int y, int *fx, int *fy)
 {
     *fx = cvl_iroundf((float)(
@@ -57,18 +45,6 @@ extern inline void cvl_differentiate_sobel(const cvl_frame_t *frame, int x, int 
 		 - 1 * (int)cvl_frame_get(frame, x + 1, y + 1))) / 4.0f);
 }
 
-/**
- * \param frame		The frame.
- * \param x		x coordinate at which the derivate should be computed.
- * \param y		y coordinate at which the derivate should be computed.
- * \param fx		Place where the first partial derivate will be stored.
- * \param fy		Place where the second partial derivate will be stored.
- *
- * Computes the derivate using the Sobel method.
- * This function accepts arbitrary \a x and \a y values because it uses reflective
- * indexing. This comes at the cost of slightly higher computation costs.
- * See also cvl_differentiate_sobel().
- */
 extern inline void cvl_differentiate_sobel_r(const cvl_frame_t *frame, int x, int y, int *fx, int *fy)
 {
     *fx = cvl_iroundf((float)(
