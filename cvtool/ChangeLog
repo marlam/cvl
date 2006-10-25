@@ -1,4 +1,6 @@
 Version 0.0.4 (not yet released):
+- cvtool: Added the wallis subcommand to the filter command.
+- CVL: Aded cvl_filter_wallis() and cvl_filter3d_wallis().
 - Add "extern inline" functions to the corresponding .c files so that the
   symbols are always in the library.
 - CVL, cvtool: Renamed "average" to "mean" where appropriate.

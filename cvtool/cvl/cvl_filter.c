@@ -303,6 +303,117 @@ cvl_frame_t *cvl_filter_median(const cvl_frame_t *frame, int k_h, int k_v)
 }
 
 /**
+ * \param frame		The frame.
+ * \param k_h		Mask size in horizontal direction.
+ * \param k_v		Mask size in vertical direction.
+ * \param m		Desired mean in window.
+ * \param s		Desired standard deviation in window.
+ * \param g		Gain factor.
+ * \param r		Mean proportionality factor, between 0 and 1.
+ * \return		The filtered frame.
+ *
+ * Applies the Wallis filter to the given frame.
+ * The number of matrix columns will be 2k_h+1, the number of rows will
+ * be 2k_v+1. All pixel types are supported.\n
+ * The Wallis filter enhances contrast. Color images are processed in the
+ * luminance component.\n
+ * See also: "Digital Image Processing" by W.K. Pratt, 2nd edition, Wiley NY
+ * 1991, pp. 307-308.
+ */
+cvl_frame_t *cvl_filter_wallis(const cvl_frame_t *frame, int k_h, int k_v, 
+	double m, double s, double g, double r)
+{
+    cvl_assert(frame != NULL);
+    cvl_assert(k_h >= 0);
+    cvl_assert(k_v >= 0);
+    cvl_assert(m >= 0.0 && m <= 255.0);
+    cvl_assert(s >= 0.0 && s <= 255.0);
+    cvl_assert(g >= 0.0);
+    cvl_assert(r >= 0.0 && r <= 1.0);
+
+    int mask_size = (2 * k_h + 1) * (2 * k_v + 1);
+    cvl_frame_t *tmp_frame, *new_frame;
+    bool original_pixel_type_is_rgb = (cvl_frame_pixel_type(frame) == CVL_PIXEL_RGB);
+    if (original_pixel_type_is_rgb)
+    {
+	tmp_frame = cvl_frame_clone(frame);
+	cvl_frame_convert(tmp_frame, CVL_PIXEL_YUV);
+	new_frame = cvl_frame_new(CVL_PIXEL_YUV,
+		cvl_frame_width(frame), cvl_frame_height(frame));
+    }
+    else
+    {
+	tmp_frame = (cvl_frame_t *)frame;
+	new_frame = cvl_frame_new(cvl_frame_pixel_type(frame), 
+		cvl_frame_width(frame), cvl_frame_height(frame));
+    }
+
+    for (int y = 0; y < cvl_frame_height(tmp_frame); y++)
+    {
+	for (int x = 0; x < cvl_frame_width(tmp_frame); x++)
+	{
+	    // Compute local mean and standard deviation
+	    unsigned int ps = 0;
+	    unsigned int ps2 = 0;
+	    for (int r = - k_v; r <= k_v; r++)
+	    {
+		for (int c = - k_h; c <= k_h; c++)
+		{
+		    cvl_pixel_t p = cvl_frame_get_r(tmp_frame, x + c, y + r);
+		    if (cvl_frame_pixel_type(tmp_frame) == CVL_PIXEL_GRAY)
+		    {
+			ps += p;
+			ps2 += p * p;
+		    }
+		    else // CVL_PIXEL_YUV
+		    {
+			cvl_pixel_t y = cvl_pixel_yuv_to_y(p);
+			ps += y;
+			ps2 += y * y;
+		    }
+		}
+	    }
+	    double lm = (double)ps / (double)mask_size;
+	    double ls = sqrt(((double)mask_size * (double)ps2
+			- ((double)ps * (double)ps))
+		    / ((double)mask_size * (double)(mask_size - 1)));
+	    // Set new value
+	    cvl_pixel_t po = cvl_frame_get(tmp_frame, x, y);
+	    cvl_pixel_t pn;
+	    if (cvl_frame_pixel_type(tmp_frame) == CVL_PIXEL_GRAY)
+	    {
+		pn = 255 - cvl_pixel_clip(cvl_iround(
+			    ((double)po - m) * ((g * s) / (g * ls - s)) + (r * m + (1.0 - r) * lm)));
+	    }
+	    else
+	    {
+		cvl_pixel_t yo = cvl_pixel_yuv_to_y(po);
+		cvl_pixel_t yn = cvl_pixel_clip(cvl_iround(
+      			    ((double)yo - m) * ((g * s) / (g * ls - s)) + (r * m + (1.0 - r) * lm)));
+		if (yn < 16)
+		{
+		    yn = 16;
+		}
+		else if (yn > 235)
+		{
+		    yn = 235;
+		}
+		yn = 251 - yn;
+		pn = cvl_pixel_yuv(yn, cvl_pixel_yuv_to_u(po), cvl_pixel_yuv_to_v(po));
+	    }
+    	    cvl_frame_set(new_frame, x, y, pn);
+	}
+    }
+    
+    if (original_pixel_type_is_rgb)
+    {
+	cvl_frame_free(tmp_frame);
+	cvl_frame_convert(new_frame, CVL_PIXEL_RGB);
+    }
+    return new_frame;
+}
+
+/**
  * \param frames	The frames.
  * \param k_h		Mask size in horizontal direction.
  * \param k_v		Mask size in vertical direction.
@@ -653,6 +764,157 @@ cvl_frame_t *cvl_filter3d_median(cvl_frame_t * const *frames, int k_h, int k_v, 
 		    (int (*)(const void *, const void *))cvl_filter_median_maskcmp);
 	    cvl_frame_set(new_frame, x, y, mask[2 * (masklen / 2)]);
 	}
+    }
+    return new_frame;
+}
+
+/**
+ * \param frames	The frames.
+ * \param k_h		Mask size in horizontal direction.
+ * \param k_v		Mask size in vertical direction.
+ * \param k_t		Mask size in temporal direction.
+ * \param m		Desired mean in window.
+ * \param s		Desired standard deviation in window.
+ * \param g		Gain factor.
+ * \param r		Mean proportionality factor, between 0 and 1.
+ * \return		The filtered frame.
+ *
+ * Applies the Wallis filter to the given frames.
+ * See cvl_convolve3d_separable() for a description of \a frames.
+ * The kernel size will be (2k_t+1)x(2k_v+1)x(2k_h+1). All pixel types are supported.\n
+ * The Wallis filter enhances contrast. Color images are processed in the
+ * luminance component.\n
+ * See also: "Digital Image Processing" by W.K. Pratt, 2nd edition, Wiley NY
+ * 1991, pp. 307-308.
+ */
+cvl_frame_t *cvl_filter3d_wallis(cvl_frame_t * const *frames, int k_h, int k_v, int k_t,
+	double m, double s, double g, double r)
+{
+    cvl_assert(k_h >= 0);
+    cvl_assert(k_v >= 0);
+    cvl_assert(k_t >= 0);
+    cvl_assert(frames != NULL);
+    cvl_assert(frames[k_t] != NULL);
+    cvl_assert(m >= 0.0 && m <= 255.0);
+    cvl_assert(s >= 0.0 && s <= 255.0);
+    cvl_assert(g >= 0.0);
+    cvl_assert(r >= 0.0 && r <= 1.0);
+
+    cvl_frame_t *framebuf[2 * k_t + 1];
+    bool original_pixel_type_is_rgb = (cvl_frame_pixel_type(frames[k_t]) == CVL_PIXEL_RGB);
+    cvl_frame_t *new_frame = cvl_frame_new(
+	    original_pixel_type_is_rgb ? CVL_PIXEL_YUV : cvl_frame_pixel_type(frames[k_t]),
+	    cvl_frame_width(frames[k_t]), cvl_frame_height(frames[k_t]));
+    int mask_size = (2 * k_h + 1) * (2 * k_v + 1) * (2 * k_t + 1);
+    
+    // Use reflective indexing to fill the frame buffer
+    int future_frames = 0;
+    while (future_frames < k_t && frames[k_t + future_frames + 1])
+    {
+	future_frames++;
+    }
+    int past_frames = 0;
+    while (past_frames < k_t && frames[k_t - past_frames - 1])
+    {
+	past_frames++;
+    }
+    int known_frames = past_frames + 1 + future_frames;
+    int first_known = k_t - past_frames;
+    for (int i = 0; i < 2 * k_t + 1; i++)
+    {
+	if (i < k_t - past_frames || i > k_t + future_frames)
+	{
+    	    if (original_pixel_type_is_rgb)
+    	    {
+		framebuf[i] = cvl_frame_clone(frames[cvl_reflect(i - first_known, known_frames) + first_known]);
+		cvl_frame_convert(framebuf[i], CVL_PIXEL_YUV);
+    	    }
+    	    else
+    	    {
+		framebuf[i] = (cvl_frame_t *)(frames[cvl_reflect(i - first_known, known_frames) + first_known]);
+    	    }
+	}
+	else
+	{
+    	    if (original_pixel_type_is_rgb)
+    	    {
+		framebuf[i] = cvl_frame_clone(frames[i]);
+		cvl_frame_convert(framebuf[i], CVL_PIXEL_YUV);
+    	    }
+    	    else
+    	    {
+		framebuf[i] = (cvl_frame_t *)(frames[i]);
+	    }
+	}
+    }
+
+    for (int y = 0; y < cvl_frame_height(frames[k_t]); y++)
+    {
+	for (int x = 0; x < cvl_frame_width(frames[k_t]); x++)
+	{
+	    // Compute local mean and standard deviation
+	    unsigned int ps = 0;
+	    unsigned int ps2 = 0;
+	    for (int t = - k_t; t <= k_t; t++)
+	    {
+		for (int r = - k_v; r <= k_v; r++)
+		{
+		    for (int c = - k_h; c <= k_h; c++)
+		    {
+			cvl_pixel_t p = cvl_frame_get_r(framebuf[t + k_t], x + c, y + r);
+			if (cvl_frame_pixel_type(frames[k_t]) == CVL_PIXEL_GRAY)
+			{
+			    ps += p;
+			    ps2 += p * p;
+			}
+			else // CVL_PIXEL_YUV
+			{
+			    cvl_pixel_t y = cvl_pixel_yuv_to_y(p);
+			    ps += y;
+			    ps2 += y * y;
+			}
+		    }
+		}
+	    }
+	    double lm = (double)ps / (double)mask_size;
+	    double ls = sqrt(((double)mask_size * (double)ps2
+			- ((double)ps * (double)ps))
+		    / ((double)mask_size * (double)(mask_size - 1)));
+	    // Set new value
+	    cvl_pixel_t po = cvl_frame_get(framebuf[k_t], x, y);
+	    cvl_pixel_t pn;
+	    if (cvl_frame_pixel_type(frames[k_t]) == CVL_PIXEL_GRAY)
+	    {
+		pn = 255 - cvl_pixel_clip(cvl_iround(
+			    ((double)po - m) * ((g * s) / (g * ls - s)) + (r * m + (1.0 - r) * lm)));
+	    }
+	    else
+	    {
+		cvl_pixel_t yo = cvl_pixel_yuv_to_y(po);
+		cvl_pixel_t yn = cvl_pixel_clip(cvl_iround(
+      			    ((double)yo - m) * ((g * s) / (g * ls - s)) + (r * m + (1.0 - r) * lm)));
+		if (yn < 16)
+		{
+		    yn = 16;
+		}
+		else if (yn > 235)
+		{
+		    yn = 235;
+		}
+		yn = 251 - yn;
+		pn = cvl_pixel_yuv(yn, cvl_pixel_yuv_to_u(po), cvl_pixel_yuv_to_v(po));
+	    }
+    	    cvl_frame_set(new_frame, x, y, pn);
+	}
+    }
+    
+    if (original_pixel_type_is_rgb)
+    {
+	for (int i = 0; i < 2 * k_t + 1; i++)
+	{
+	    cvl_frame_free(framebuf[i]);
+	}
+	cvl_frame_convert(new_frame, CVL_PIXEL_RGB);
     }
     return new_frame;
 }

@@ -42,6 +42,10 @@ void cmd_filter_print_help(void)
 	    "filter max [-3|--3d] -x|--k-x=<kx> -y|--k-y=<ky> [-t|--k-t=<kt>]\n"
 	    "filter median [-3|--3d] -k|--k=<k>\n"
 	    "filter median [-3|--3d] -x|--k-x=<kx> -y|--k-y=<ky> [-t|--k-t=<kt>]\n"
+	    "filter wallis [-3|--3d] -k|--k=<k> "
+	    "-m|--mean=<m> -s|--stddev=<s> -g|--gain=<g> -r|--ratio=<r>\n"
+	    "filter wallis [-3|--3d] -x|--k-x=<kx> -y|--k-y=<ky> [-t|--k-t=<kt>] "
+	    "-m|--mean=<m> -s|--stddev=<s> -g|--gain=<g> -r|--ratio=<r>\n"
 	    "filter gauss [-3|--3d] -k|--k=<k>\n"
 	    "filter gauss [-3|--3d] -s|--sigma=<s>\n"
 	    "filter gauss [-3|--3d] -x|--k-x=<kx> -y|--k-y=<ky> [-t|--k-t=<kt>]\n"
@@ -59,7 +63,7 @@ void cmd_filter_print_help(void)
 
 int cmd_filter(int argc, char *argv[])
 {
-    typedef enum { FILTER_MEAN, FILTER_MIN, FILTER_MAX, FILTER_MEDIAN, FILTER_GAUSS } subcommand_t;
+    typedef enum { FILTER_MEAN, FILTER_MIN, FILTER_MAX, FILTER_MEDIAN, FILTER_WALLIS, FILTER_GAUSS } subcommand_t;
     subcommand_t subcommand;
     cvl_option_bool_t three_dimensional = { false, true };
     cvl_option_int_t k = { 0, 1, CVL_MASKSIZE_K_MAX };
@@ -70,6 +74,10 @@ int cmd_filter(int argc, char *argv[])
     cvl_option_double_t sx = { -1.0, 0.0, false, DBL_MAX, true };
     cvl_option_double_t sy = { -1.0, 0.0, false, DBL_MAX, true };
     cvl_option_double_t st = { -1.0, 0.0, false, DBL_MAX, true };
+    cvl_option_double_t wallis_m = { -1.0, 0.0, true, 255.0, true };
+    cvl_option_double_t wallis_s = { -1.0, 0.0, true, 255.0, true };
+    cvl_option_double_t wallis_g = { -1.0, 0.0, true, DBL_MAX, true };
+    cvl_option_double_t wallis_r = { -1.0, 0.0, true, 1.0, true };
     cvl_option_t mean_options[] = 
     {
 	{ "3d",      '3', CVL_OPTION_BOOL,   &three_dimensional, false },
@@ -82,6 +90,19 @@ int cmd_filter(int argc, char *argv[])
     cvl_option_t *min_options = mean_options;
     cvl_option_t *max_options = mean_options;
     cvl_option_t *median_options = mean_options;
+    cvl_option_t wallis_options[] =
+    {
+	{ "3d",      '3', CVL_OPTION_BOOL,   &three_dimensional, false },
+	{ "k",       'k', CVL_OPTION_INT,    &k,                 false },
+	{ "k-x",     'x', CVL_OPTION_INT,    &kx,                false },
+	{ "k-y",     'y', CVL_OPTION_INT,    &ky,                false },
+	{ "k-t",     't', CVL_OPTION_INT,    &kt,                false },
+	{ "mean",    'm', CVL_OPTION_DOUBLE, &wallis_m,          true  },
+	{ "stddev",  's', CVL_OPTION_DOUBLE, &wallis_s,          true  },
+	{ "gain",    'g', CVL_OPTION_DOUBLE, &wallis_g,          true  },
+	{ "ratio",   'r', CVL_OPTION_DOUBLE, &wallis_r,          true  },
+	cvl_option_null
+    };
     cvl_option_t gauss_options[] = 
     {
 	{ "3d",      '3', CVL_OPTION_BOOL,   &three_dimensional, false },
@@ -188,6 +209,32 @@ int cmd_filter(int argc, char *argv[])
 	subcommand = FILTER_MEDIAN;
 	cvl_msg_set_command_name("%s %s", argv[0], argv[1]);
 	error = !cvl_getopt(argc - 1, &(argv[1]), median_options, 0, 0, NULL);
+	if (!error)
+	{
+	    if (kt.value > 0)
+	    {
+		three_dimensional.value = true;
+	    }
+	    if (k.value > 0 && (kx.value > 0 || ky.value > 0 || kt.value > 0))
+	    {
+		cvl_msg_err("kernel size is overdetermined");
+		error = true;
+	    }
+	    else if (k.value <= 0)
+	    {
+		if (kx.value <= 0 || ky.value <= 0 || (three_dimensional.value && kt.value <= 0))
+		{
+		    cvl_msg_err("kernel size is underdetermined");
+		    error = true;
+		}
+	    }
+	}
+    }
+    else if (strcmp(argv[1], "wallis") == 0)
+    {
+	subcommand = FILTER_WALLIS;
+	cvl_msg_set_command_name("%s %s", argv[0], argv[1]);
+	error = !cvl_getopt(argc - 1, &(argv[1]), wallis_options, 0, 0, NULL);
 	if (!error)
 	{
 	    if (kt.value > 0)
@@ -378,6 +425,11 @@ int cmd_filter(int argc, char *argv[])
 	    {
 		new_frame = cvl_filter3d_median(framebuf, kx.value, ky.value, kt.value);
 	    }
+	    else if (subcommand == FILTER_WALLIS)
+	    {
+		new_frame = cvl_filter3d_wallis(framebuf, kx.value, ky.value, kt.value,
+			wallis_m.value, wallis_s.value, wallis_g.value, wallis_r.value);
+	    }
 	    else // (subcommand == FILTER_GAUSS)
 	    {
 		new_frame = cvl_filter3d_gauss(framebuf, kx.value, ky.value, kt.value,
@@ -429,6 +481,11 @@ int cmd_filter(int argc, char *argv[])
 	    else if (subcommand == FILTER_MEDIAN)
 	    {
 		new_frame = cvl_filter_median(frame, kx.value, ky.value);
+	    }
+	    else if (subcommand == FILTER_WALLIS)
+	    {
+		new_frame = cvl_filter_wallis(frame, kx.value, ky.value,
+			wallis_m.value, wallis_s.value, wallis_g.value, wallis_r.value);
 	    }
 	    else // (subcommand == FILTER_GAUSS)
 	    {

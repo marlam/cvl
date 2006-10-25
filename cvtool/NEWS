@@ -1,6 +1,8 @@
 Version 0.0.4 (not yet released):
 - New and improved cvtool commands:
+  - New subcommand "wallis" for the filter command.
 - New and improved CVL functionality:
+  - New functions cvl_filter_wallis() and cvl_filter3d_wallis().
   - New functions cvl_field_array() and cvl_field_const_array() to access the 
     raw array data of a field.
   - A new AM_LIBCVL macro, defined in cvl.m4. This depends on lib-link.m4 and

@@ -33,6 +33,10 @@ cmp llm.pnm xllm.pnm
 $CVTOOL filter median -3 -k 1 < rgb.pnm > xrgb.pnm 
 cmp rgb.pnm xrgb.pnm 
 
+# wallis
+$CVTOOL filter wallis -k 2 -m 210 -s 20 -g 7 -r 1 < rgb.pnm > /dev/null
+$CVTOOL filter wallis -3 -k 1 -m 80 -s 5 -g 1 -r 0.5 < rgb.pnm > /dev/null
+
 # gauss
 $CVTOOL filter gauss -x 1 -y 2 -t 3 --sigma-x=0.5 --sigma-y=1.0 --sigma-t=1.5 < rgb.pnm > /dev/null 
 
