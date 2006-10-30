@@ -1847,9 +1847,10 @@ ascending alphabetical order.
 Finally, automake must know about the new file, so @code{cmd_foo.c} must be added to 
 @code{cvtool_SOURCES} in Makefile.am.
 
-Simple existing commands such as @code{cmd_flip.c} or @code{cmd_cut.c} can serve 
-as examples on how to use CVL features and the @code{cvtool_getopt()} function defined
-in @file{option.[ch]}.
+Simple existing commands such as @code{cmd_flip.c} or @code{cmd_cut.c} can
+serve as examples on how to use @code{cvl_getopt()} to parse the command line,
+@code{cvl_io_read()} and @code{cvl_io_write()} to read and write frames, and
+other CVL functions to process the frames.
 
 Once the new command works, a test script @file{cmd_foo.sh} should be added to the 
 @file{tests} subdirectory (look at the existing scripts for examples), and the 
