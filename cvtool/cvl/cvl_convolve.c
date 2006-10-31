@@ -333,7 +333,7 @@ cvl_frame_t *cvl_convolve3d_separable(cvl_frame_t * const *frames,
 	    for (int z = -kt; z <= kt; z++)
 	    {
     		cvl_convolve_sum_helper1(cvl_frame_pixel_type(new_frame), 
-			cvl_frame_get_r(framebuf[z + kt], x, y), 
+			cvl_frame_get(framebuf[z + kt], x, y), 
 			t[z + kt], sum);
 	    }
 	    cvl_frame_set(tmp1_frame, x, y, 
