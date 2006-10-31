@@ -180,31 +180,53 @@ cvl_frame_t *cvl_filter_min(const cvl_frame_t *frame, int k_h, int k_v)
     cvl_assert(k_h >= 0);
     cvl_assert(k_v >= 0);
 
+    cvl_frame_t *tmp_frame = cvl_frame_new(cvl_frame_pixel_type(frame), 
+	    cvl_frame_width(frame), cvl_frame_height(frame));
     cvl_frame_t *new_frame = cvl_frame_new(cvl_frame_pixel_type(frame), 
 	    cvl_frame_width(frame), cvl_frame_height(frame));
     
-    for (int y = 0; y < cvl_frame_height(frame); y++)
+    /* h */
+    for (int x = 0; x < cvl_frame_width(frame); x++)
     {
-	for (int x = 0; x < cvl_frame_width(frame); x++)
+	for (int y = 0; y < cvl_frame_height(frame); y++)
+	{
+	    int min_g = 0xff + 1;
+	    cvl_pixel_t min_p = 0;
+	    for (int c = - k_h; c <= k_h; c++)
+    	    {
+		cvl_pixel_t p = cvl_frame_get_r(frame, x + c, y);
+		int g = cvl_pixel_to_gray(p, cvl_frame_pixel_type(frame));
+		if (g < min_g)
+		{
+		    min_g = g;
+		    min_p = p;
+		}			
+	    }
+	    cvl_frame_set(tmp_frame, x, y, min_p);
+	}
+    }
+    /* v */
+    for (int x = 0; x < cvl_frame_width(frame); x++)
+    {
+	for (int y = 0; y < cvl_frame_height(frame); y++)
 	{
 	    int min_g = 0xff + 1;
 	    cvl_pixel_t min_p = 0;
 	    for (int r = - k_v; r <= k_v; r++)
-	    {
-		for (int c = - k_h; c <= k_h; c++)
+    	    {
+		cvl_pixel_t p = cvl_frame_get_r(tmp_frame, x, y + r);
+		int g = cvl_pixel_to_gray(p, cvl_frame_pixel_type(frame));
+		if (g < min_g)
 		{
-		    cvl_pixel_t p = cvl_frame_get_r(frame, x + c, y + r);
-		    int g = cvl_pixel_to_gray(p, cvl_frame_pixel_type(frame));
-		    if (g < min_g)
-		    {
-			min_g = g;
-			min_p = p;
-		    }			
-		}
+		    min_g = g;
+		    min_p = p;
+		}			
 	    }
 	    cvl_frame_set(new_frame, x, y, min_p);
 	}
     }
+    
+    cvl_frame_free(tmp_frame);
     return new_frame;
 }
 
@@ -224,31 +246,53 @@ cvl_frame_t *cvl_filter_max(const cvl_frame_t *frame, int k_h, int k_v)
     cvl_assert(k_h >= 0);
     cvl_assert(k_v >= 0);
 
+    cvl_frame_t *tmp_frame = cvl_frame_new(cvl_frame_pixel_type(frame), 
+	    cvl_frame_width(frame), cvl_frame_height(frame));
     cvl_frame_t *new_frame = cvl_frame_new(cvl_frame_pixel_type(frame), 
 	    cvl_frame_width(frame), cvl_frame_height(frame));
     
-    for (int y = 0; y < cvl_frame_height(frame); y++)
+    /* h */
+    for (int x = 0; x < cvl_frame_width(frame); x++)
     {
-	for (int x = 0; x < cvl_frame_width(frame); x++)
+	for (int y = 0; y < cvl_frame_height(frame); y++)
+	{
+	    int max_g = 0x00 - 1;
+	    cvl_pixel_t max_p = 0;
+	    for (int c = - k_h; c <= k_h; c++)
+    	    {
+		cvl_pixel_t p = cvl_frame_get_r(frame, x + c, y);
+		int g = cvl_pixel_to_gray(p, cvl_frame_pixel_type(frame));
+		if (g > max_g)
+		{
+		    max_g = g;
+		    max_p = p;
+		}			
+	    }
+	    cvl_frame_set(tmp_frame, x, y, max_p);
+	}
+    }
+    /* v */
+    for (int x = 0; x < cvl_frame_width(frame); x++)
+    {
+	for (int y = 0; y < cvl_frame_height(frame); y++)
 	{
 	    int max_g = 0x00 - 1;
 	    cvl_pixel_t max_p = 0;
 	    for (int r = - k_v; r <= k_v; r++)
-	    {
-		for (int c = - k_h; c <= k_h; c++)
+    	    {
+		cvl_pixel_t p = cvl_frame_get_r(tmp_frame, x, y + r);
+		int g = cvl_pixel_to_gray(p, cvl_frame_pixel_type(frame));
+		if (g > max_g)
 		{
-		    cvl_pixel_t p = cvl_frame_get_r(frame, x + c, y + r);
-		    int g = cvl_pixel_to_gray(p, cvl_frame_pixel_type(frame));
-		    if (g > max_g)
-		    {
-			max_g = g;
-			max_p = p;
-		    }			
-		}
+		    max_g = g;
+		    max_p = p;
+		}			
 	    }
 	    cvl_frame_set(new_frame, x, y, max_p);
 	}
     }
+    
+    cvl_frame_free(tmp_frame);
     return new_frame;
 }
 
@@ -557,6 +601,10 @@ cvl_frame_t *cvl_filter3d_min(cvl_frame_t * const *frames, int k_h, int k_v, int
     cvl_assert(frames[k_t] != NULL);
 
     const cvl_frame_t *framebuf[2 * k_t + 1];
+    cvl_frame_t *tmp1_frame = cvl_frame_new(cvl_frame_pixel_type(frames[k_t]), 
+	    cvl_frame_width(frames[k_t]), cvl_frame_height(frames[k_t]));
+    cvl_frame_t *tmp2_frame = cvl_frame_new(cvl_frame_pixel_type(frames[k_t]), 
+	    cvl_frame_width(frames[k_t]), cvl_frame_height(frames[k_t]));
     cvl_frame_t *new_frame = cvl_frame_new(cvl_frame_pixel_type(frames[k_t]), 
 	    cvl_frame_width(frames[k_t]), cvl_frame_height(frames[k_t]));
     
@@ -586,31 +634,69 @@ cvl_frame_t *cvl_filter3d_min(cvl_frame_t * const *frames, int k_h, int k_v, int
 	}
     }
 
-    for (int y = 0; y < cvl_frame_height(new_frame); y++)
+    /* t */
+    for (int x = 0; x < cvl_frame_width(new_frame); x++)
     {
-	for (int x = 0; x < cvl_frame_width(new_frame); x++)
+	for (int y = 0; y < cvl_frame_height(new_frame); y++)
 	{
 	    int min_g = 0xff + 1;
 	    cvl_pixel_t min_p = 0;
-	    for (int t = - k_t; t <= k_t; t++)
-	    {
-		for (int r = - k_v; r <= k_v; r++)
+	    for (int z = - k_t; z <= k_t; z++)
+    	    {
+		cvl_pixel_t p = cvl_frame_get(framebuf[z + k_t], x, y);
+		int g = cvl_pixel_to_gray(p, cvl_frame_pixel_type(frames[k_t]));
+		if (g < min_g)
 		{
-		    for (int c = - k_h; c <= k_h; c++)
-		    {
-			cvl_pixel_t p = cvl_frame_get_r(framebuf[t + k_t], x + c, y + r);
-			int g = cvl_pixel_to_gray(p, cvl_frame_pixel_type(framebuf[t + k_t]));
-			if (g < min_g)
-			{
-			    min_g = g;
-			    min_p = p;
-			}		
-		    }
-		}
+		    min_g = g;
+		    min_p = p;
+		}			
+	    }
+	    cvl_frame_set(tmp1_frame, x, y, min_p);
+	}
+    }
+    /* h */
+    for (int x = 0; x < cvl_frame_width(new_frame); x++)
+    {
+	for (int y = 0; y < cvl_frame_height(new_frame); y++)
+	{
+	    int min_g = 0xff + 1;
+	    cvl_pixel_t min_p = 0;
+	    for (int c = - k_h; c <= k_h; c++)
+    	    {
+		cvl_pixel_t p = cvl_frame_get_r(tmp1_frame, x + c, y);
+		int g = cvl_pixel_to_gray(p, cvl_frame_pixel_type(frames[k_t]));
+		if (g < min_g)
+		{
+		    min_g = g;
+		    min_p = p;
+		}			
+	    }
+	    cvl_frame_set(tmp2_frame, x, y, min_p);
+	}
+    }
+    /* v */
+    for (int x = 0; x < cvl_frame_width(new_frame); x++)
+    {
+	for (int y = 0; y < cvl_frame_height(new_frame); y++)
+	{
+	    int min_g = 0xff + 1;
+	    cvl_pixel_t min_p = 0;
+	    for (int r = - k_v; r <= k_v; r++)
+    	    {
+		cvl_pixel_t p = cvl_frame_get_r(tmp2_frame, x, y + r);
+		int g = cvl_pixel_to_gray(p, cvl_frame_pixel_type(frames[k_t]));
+		if (g < min_g)
+		{
+		    min_g = g;
+		    min_p = p;
+		}			
 	    }
 	    cvl_frame_set(new_frame, x, y, min_p);
 	}
     }
+    
+    cvl_frame_free(tmp1_frame);
+    cvl_frame_free(tmp2_frame);
     return new_frame;
 }
 
@@ -634,6 +720,10 @@ cvl_frame_t *cvl_filter3d_max(cvl_frame_t * const *frames, int k_h, int k_v, int
     cvl_assert(frames[k_t] != NULL);
 
     const cvl_frame_t *framebuf[2 * k_t + 1];
+    cvl_frame_t *tmp1_frame = cvl_frame_new(cvl_frame_pixel_type(frames[k_t]), 
+	    cvl_frame_width(frames[k_t]), cvl_frame_height(frames[k_t]));
+    cvl_frame_t *tmp2_frame = cvl_frame_new(cvl_frame_pixel_type(frames[k_t]), 
+	    cvl_frame_width(frames[k_t]), cvl_frame_height(frames[k_t]));
     cvl_frame_t *new_frame = cvl_frame_new(cvl_frame_pixel_type(frames[k_t]), 
 	    cvl_frame_width(frames[k_t]), cvl_frame_height(frames[k_t]));
     
@@ -663,31 +753,69 @@ cvl_frame_t *cvl_filter3d_max(cvl_frame_t * const *frames, int k_h, int k_v, int
 	}
     }
 
-    for (int y = 0; y < cvl_frame_height(new_frame); y++)
+    /* t */
+    for (int x = 0; x < cvl_frame_width(new_frame); x++)
     {
-	for (int x = 0; x < cvl_frame_width(new_frame); x++)
+	for (int y = 0; y < cvl_frame_height(new_frame); y++)
 	{
 	    int max_g = 0x00 - 1;
 	    cvl_pixel_t max_p = 0;
-	    for (int t = - k_t; t <= k_t; t++)
-	    {
-		for (int r = - k_v; r <= k_v; r++)
+	    for (int z = - k_t; z <= k_t; z++)
+    	    {
+		cvl_pixel_t p = cvl_frame_get(framebuf[z + k_t], x, y);
+		int g = cvl_pixel_to_gray(p, cvl_frame_pixel_type(frames[k_t]));
+		if (g > max_g)
 		{
-		    for (int c = - k_h; c <= k_h; c++)
-		    {
-			cvl_pixel_t p = cvl_frame_get_r(framebuf[t + k_t], x + c, y + r);
-			int g = cvl_pixel_to_gray(p, cvl_frame_pixel_type(framebuf[t + k_t]));
-			if (g > max_g)
-			{
-			    max_g = g;
-			    max_p = p;
-			}		
-		    }
+		    max_g = g;
+		    max_p = p;
+		}
+	    }
+	    cvl_frame_set(tmp1_frame, x, y, max_p);
+	}
+    }
+    /* h */
+    for (int x = 0; x < cvl_frame_width(new_frame); x++)
+    {
+	for (int y = 0; y < cvl_frame_height(new_frame); y++)
+	{
+	    int max_g = 0x00 - 1;
+	    cvl_pixel_t max_p = 0;
+	    for (int c = - k_h; c <= k_h; c++)
+    	    {
+		cvl_pixel_t p = cvl_frame_get_r(tmp1_frame, x + c, y);
+		int g = cvl_pixel_to_gray(p, cvl_frame_pixel_type(frames[k_t]));
+		if (g > max_g)
+		{
+		    max_g = g;
+		    max_p = p;
+		}
+	    }
+	    cvl_frame_set(tmp2_frame, x, y, max_p);
+	}
+    }
+    /* v */
+    for (int x = 0; x < cvl_frame_width(new_frame); x++)
+    {
+	for (int y = 0; y < cvl_frame_height(new_frame); y++)
+	{
+	    int max_g = 0x00 - 1;
+	    cvl_pixel_t max_p = 0;
+	    for (int r = - k_v; r <= k_v; r++)
+    	    {
+		cvl_pixel_t p = cvl_frame_get_r(tmp2_frame, x, y + r);
+		int g = cvl_pixel_to_gray(p, cvl_frame_pixel_type(frames[k_t]));
+		if (g > max_g)
+		{
+		    max_g = g;
+		    max_p = p;
 		}
 	    }
 	    cvl_frame_set(new_frame, x, y, max_p);
 	}
     }
+    
+    cvl_frame_free(tmp1_frame);
+    cvl_frame_free(tmp2_frame);
     return new_frame;
 }
 
