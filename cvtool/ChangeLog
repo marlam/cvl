@@ -1,4 +1,5 @@
 Version 0.1.0:
+- Gnulib update.
 - CVL: Use filter separation for the min and max filters to improve
   performance.
 - cvtool: Added the wallis subcommand to the filter command.

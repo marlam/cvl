@@ -1,3 +1,4 @@
+# DO NOT EDIT! GENERATED AUTOMATICALLY!
 # Copyright (C) 2004-2006 Free Software Foundation, Inc.
 #
 # This file is free software, distributed under the terms of the GNU
@@ -19,25 +20,40 @@
 # any checks for libraries, header files, types and library functions.
 AC_DEFUN([gl_EARLY],
 [
+  m4_pattern_forbid([^gl_[A-Z]])dnl the gnulib macro namespace
+  m4_pattern_allow([^gl_ES$])dnl a valid locale name
+  m4_pattern_allow([^gl_LIBOBJS$])dnl a variable
+  m4_pattern_allow([^gl_LTLIBOBJS$])dnl a variable
   AC_REQUIRE([AC_PROG_RANLIB])
   AC_REQUIRE([AC_GNU_SOURCE])
+  AC_REQUIRE([gl_USE_SYSTEM_EXTENSIONS])
 ])
 
 # This macro should be invoked from ./configure.ac, in the section
 # "Check for header files, types and library functions".
 AC_DEFUN([gl_INIT],
 [
+  m4_pushdef([AC_LIBOBJ], m4_defn([gl_LIBOBJ]))
+  m4_pushdef([AC_REPLACE_FUNCS], m4_defn([gl_REPLACE_FUNCS]))
   AM_CONDITIONAL([GL_COND_LIBTOOL], [true])
+  gl_cond_libtool=true
+  gl_source_base='gnulib'
   gl_FUNC_ALLOCA
   gl_ERROR
   gl_EXITFAIL
+  dnl gl_USE_SYSTEM_EXTENSIONS must be added quite early to configure.ac.
   gl_FATAL_SIGNAL
   gl_GETOPT
   AM_ICONV
   gl_ICONVME
+  if test $gl_cond_libtool = false; then
+    gl_ltlibdeps="$gl_ltlibdeps $LTLIBICONV"
+    gl_libdeps="$gl_libdeps $LIBICONV"
+  fi
   gl_INTTOSTR
   gl_LOCALCHARSET
   gl_PIPE
+  gl_SIGNALBLOCKING
   gl_SIZE_MAX
   gl_STDARG_H
   AM_STDBOOL_H
@@ -55,7 +71,33 @@ AC_DEFUN([gl_INIT],
   gl_XSIZE
   gl_XSTRNDUP
   gl_XVASPRINTF
+  m4_popdef([AC_REPLACE_FUNCS])
+  m4_popdef([AC_LIBOBJ])
+  AC_CONFIG_COMMANDS_PRE([
+    gl_libobjs=
+    gl_ltlibobjs=
+    if test -n "$gl_LIBOBJS"; then
+      # Remove the extension.
+      sed_drop_objext='s/\.o$//;s/\.obj$//'
+      for i in `for i in $gl_LIBOBJS; do echo "$i"; done | sed "$sed_drop_objext" | sort | uniq`; do
+        gl_libobjs="$gl_libobjs $i.$ac_objext"
+        gl_ltlibobjs="$gl_ltlibobjs $i.lo"
+      done
+    fi
+    AC_SUBST([gl_LIBOBJS], [$gl_libobjs])
+    AC_SUBST([gl_LTLIBOBJS], [$gl_ltlibobjs])
+  ])
 ])
+
+# Like AC_LIBOBJ, except that the module name goes
+# into gl_LIBOBJS instead of into LIBOBJS.
+AC_DEFUN([gl_LIBOBJ],
+  [gl_LIBOBJS="$gl_LIBOBJS $1.$ac_objext"])
+
+# Like AC_REPLACE_FUNCS, except that the module name goes
+# into gl_LIBOBJS instead of into LIBOBJS.
+AC_DEFUN([gl_REPLACE_FUNCS],
+  [AC_CHECK_FUNCS([$1], , [gl_LIBOBJ($ac_func)])])
 
 # This macro records the list of files which have been installed by
 # gnulib-tool and may be removed by future gnulib-tool invocations.
@@ -94,6 +136,8 @@ AC_DEFUN([gl_FILE_LIST], [
   lib/printf-parse.h
   lib/ref-add.sin
   lib/ref-del.sin
+  lib/sigprocmask.c
+  lib/sigprocmask.h
   lib/size_max.h
   lib/stdbool_.h
   lib/stdint_.h
@@ -107,11 +151,13 @@ AC_DEFUN([gl_FILE_LIST], [
   lib/strpbrk.h
   lib/strverscmp.c
   lib/strverscmp.h
+  lib/uinttostr.c
   lib/umaxtostr.c
   lib/vasnprintf.c
   lib/vasnprintf.h
   lib/vasprintf.c
   lib/vasprintf.h
+  lib/verify.h
   lib/w32spawn.h
   lib/wait-process.c
   lib/wait-process.h
@@ -130,6 +176,7 @@ AC_DEFUN([gl_FILE_LIST], [
   m4/eoverflow.m4
   m4/error.m4
   m4/exitfail.m4
+  m4/extensions.m4
   m4/fatal-signal.m4
   m4/getopt.m4
   m4/glibc21.m4
@@ -144,22 +191,20 @@ AC_DEFUN([gl_FILE_LIST], [
   m4/localcharset.m4
   m4/longdouble.m4
   m4/longlong.m4
+  m4/onceonly_2_57.m4
   m4/pipe.m4
   m4/sig_atomic_t.m4
   m4/signalblocking.m4
-  m4/signed.m4
   m4/size_max.m4
   m4/stdarg.m4
   m4/stdbool.m4
   m4/stdint.m4
   m4/stdint_h.m4
   m4/strdup.m4
-  m4/strerror_r.m4
   m4/strndup.m4
   m4/strnlen.m4
   m4/strpbrk.m4
   m4/strverscmp.m4
-  m4/uintmax_t.m4
   m4/ulonglong.m4
   m4/unistd_h.m4
   m4/vasnprintf.m4

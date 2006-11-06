@@ -17,9 +17,7 @@
    Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.  */
 
 
-#ifdef HAVE_CONFIG_H
-# include <config.h>
-#endif
+#include <config.h>
 
 /* Specification.  */
 #include "fatal-signal.h"
@@ -27,9 +25,9 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <signal.h>
-#include <string.h>
 #include <unistd.h>
 
+#include "sigprocmask.h"
 #include "xalloc.h"
 
 #define SIZEOF(a) (sizeof(a) / sizeof(a[0]))
@@ -74,6 +72,10 @@ static int fatal_signals[] =
 #endif
 #ifdef SIGXFSZ
     SIGXFSZ,
+#endif
+    /* Woe32 signals.  */
+#ifdef SIGBREAK
+    SIGBREAK,
 #endif
     0
   };
@@ -201,12 +203,17 @@ at_fatal_signal (action_t action)
 	 because then the cleanup() function could access an already
 	 deallocated array.  */
       actions_entry_t *old_actions = actions;
+      size_t old_actions_allocated = actions_allocated;
       size_t new_actions_allocated = 2 * actions_allocated;
       actions_entry_t *new_actions =
-	xmalloc (new_actions_allocated * sizeof (actions_entry_t));
+	XNMALLOC (new_actions_allocated, actions_entry_t);
+      size_t k;
 
-      memcpy (new_actions, old_actions,
-	      actions_allocated * sizeof (actions_entry_t));
+      /* Don't use memcpy() here, because memcpy takes non-volatile arguments
+	 and is therefore not guaranteed to complete all memory stores before
+	 the next statement.  */
+      for (k = 0; k < old_actions_allocated; k++)
+	new_actions[k] = old_actions[k];
       actions = new_actions;
       actions_allocated = new_actions_allocated;
       /* Now we can free the old actions array.  */
@@ -224,8 +231,6 @@ at_fatal_signal (action_t action)
 
 /* ========================================================================= */
 
-
-#if HAVE_POSIX_SIGNALBLOCKING
 
 static sigset_t fatal_signal_set;
 
@@ -263,20 +268,3 @@ unblock_fatal_signals ()
   init_fatal_signal_set ();
   sigprocmask (SIG_UNBLOCK, &fatal_signal_set, NULL);
 }
-
-#else
-
-/* Don't bother caring about the old systems which don't have POSIX signal
-   blocking.  */
-
-void
-block_fatal_signals ()
-{
-}
-
-void
-unblock_fatal_signals ()
-{
-}
-
-#endif

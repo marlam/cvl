@@ -30,11 +30,11 @@ AM_CONFIG_HEADER([config.h])
 
 AC_GNU_SOURCE
 AC_PROG_CC
+gl_EARLY
 AC_PROG_CC_C99
 AC_PROG_LIBTOOL
 AC_PROG_INSTALL
 AC_SYS_LARGEFILE
-gl_EARLY
 
 dnl CVL version preprocessor macros for cvl/cvl/cvl_version.h.in
 AC_SUBST([CVL_VERSION], [$PACKAGE_VERSION])
