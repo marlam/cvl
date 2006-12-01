@@ -43,18 +43,11 @@
 
 <div class="content-section">Platforms</div>
 <p>
-Cvtool is written in C99 and uses POSIX features where C99 is not sufficient. The included CVL 
-is written in pure C99. Therefore, portability is not much of a problem: any system with a C99
-compiler and POSIX support will do.
-</p><p>
-The main target platforms are the free operating systems GNU/Linux and Free/Net/OpenBSD.
-Proprietary systems that fulfill the requirements above are automatically supported, too. Broken
-proprietary systems (without C99 or POSIX support) can be supported through the use of 
-<a href="http://www.gnu.org/software/gnulib/">gnulib</a> modules and the GNU autotools, 
-but only if a user of such a system is willing to write and maintain the workarounds needed on his
-platform. 
-</p><p>
 So far, cvtool has been tested on GNU/Linux, NetBSD, Solaris, and Windows.
+</p><p>
+Cvtool is written in C99 and uses POSIX features where C99 is not sufficient. 
+Systems that lack C99 or POSIX features are supported through the use of
+<a href="http://www.gnu.org/software/gnulib/">gnulib</a> modules and the GNU autotools.
 </p>
 <br>
 
