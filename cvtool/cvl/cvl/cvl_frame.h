@@ -49,6 +49,7 @@ void cvl_frame_zero(cvl_frame_t *frame);
 void cvl_frame_copy(cvl_frame_t *dst, const cvl_frame_t *src);
 cvl_frame_t *cvl_frame_clone(const cvl_frame_t *frame);
 
+cvl_pixel_t cvl_frame_get_i(const cvl_frame_t *frame, int i);
 extern inline cvl_pixel_t cvl_frame_get_i(const cvl_frame_t *frame, int i)
 {
     cvl_assert(frame != NULL);
@@ -58,6 +59,7 @@ extern inline cvl_pixel_t cvl_frame_get_i(const cvl_frame_t *frame, int i)
     return frame->_p[i];
 }
 
+cvl_pixel_t cvl_frame_get(const cvl_frame_t *frame, int x, int y);
 extern inline cvl_pixel_t cvl_frame_get(const cvl_frame_t *frame, int x, int y)
 {
     cvl_assert(frame != NULL);
@@ -69,6 +71,7 @@ extern inline cvl_pixel_t cvl_frame_get(const cvl_frame_t *frame, int x, int y)
     return cvl_frame_get_i(frame, y * cvl_frame_width(frame) + x);
 }
 
+cvl_pixel_t cvl_frame_get_r(const cvl_frame_t *frame, int x, int y);
 extern inline cvl_pixel_t cvl_frame_get_r(const cvl_frame_t *frame, int x, int y)
 {
     cvl_assert(frame != NULL);
@@ -78,6 +81,7 @@ extern inline cvl_pixel_t cvl_frame_get_r(const cvl_frame_t *frame, int x, int y
     	    cvl_reflect(y, cvl_frame_height(frame)));
 }
 
+void cvl_frame_set_i(cvl_frame_t *frame, int i, cvl_pixel_t p);
 extern inline void cvl_frame_set_i(cvl_frame_t *frame, int i, cvl_pixel_t p)
 {
     cvl_assert(frame != NULL);
@@ -87,6 +91,7 @@ extern inline void cvl_frame_set_i(cvl_frame_t *frame, int i, cvl_pixel_t p)
     frame->_p[i] = p;
 }
 
+void cvl_frame_set(cvl_frame_t *frame, int x, int y, cvl_pixel_t p);
 extern inline void cvl_frame_set(cvl_frame_t *frame, int x, int y, cvl_pixel_t p)
 {
     cvl_assert(frame != NULL);

@@ -37,61 +37,73 @@ typedef enum
     CVL_PIXEL_YUV  = 2
 } cvl_pixel_type_t;
 
+cvl_pixel_t cvl_pixel_clip(int x);
 extern inline cvl_pixel_t cvl_pixel_clip(int x)
 {
     return (x < 0 ? 0 : (x > 255) ? 255 : x);
 }
 
+cvl_pixel_t cvl_pixel_clamp(int xmin, int xmax, int x);
 extern inline cvl_pixel_t cvl_pixel_clamp(int xmin, int xmax, int x)
 {
     return cvl_iround((double)((x - xmin) * 255) / (double)(xmax - xmin));
 }
 
+cvl_pixel_t cvl_pixel_gray(cvl_pixel_t gray);
 extern inline cvl_pixel_t cvl_pixel_gray(cvl_pixel_t gray)
 {
     return (gray & 0xff);
 }
 
+cvl_pixel_t cvl_pixel_yuv(cvl_pixel_t y, cvl_pixel_t u, cvl_pixel_t v);
 extern inline cvl_pixel_t cvl_pixel_yuv(cvl_pixel_t y, cvl_pixel_t u, cvl_pixel_t v)
 {
     return (y << 16) | (u << 8) | v;
 }
 
+cvl_pixel_t cvl_pixel_rgb(cvl_pixel_t r, cvl_pixel_t g, cvl_pixel_t b);
 extern inline cvl_pixel_t cvl_pixel_rgb(cvl_pixel_t r, cvl_pixel_t g, cvl_pixel_t b)
 {
     return (r << 16) | (g << 8) | b;
 }
 
+cvl_pixel_t cvl_pixel_gray_to_rgb(cvl_pixel_t gray);
 extern inline cvl_pixel_t cvl_pixel_gray_to_rgb(cvl_pixel_t gray)
 {
     return cvl_pixel_rgb(gray, gray, gray);
 }
 
+cvl_pixel_t cvl_pixel_gray_to_yuv(cvl_pixel_t gray);
 extern inline cvl_pixel_t cvl_pixel_gray_to_yuv(cvl_pixel_t gray)
 {
     return cvl_pixel_yuv((((int)cvl_pixel_gray(gray) * 220) >> 8) + 16, 128, 128);
 }
 
+cvl_pixel_t cvl_pixel_rgb_to_r(cvl_pixel_t rgb);
 extern inline cvl_pixel_t cvl_pixel_rgb_to_r(cvl_pixel_t rgb)
 {
     return (rgb >> 16) & 0xff;
 }
 
+cvl_pixel_t cvl_pixel_rgb_to_g(cvl_pixel_t rgb);
 extern inline cvl_pixel_t cvl_pixel_rgb_to_g(cvl_pixel_t rgb)
 {
     return (rgb >> 8) & 0xff;
 }
 
+cvl_pixel_t cvl_pixel_rgb_to_b(cvl_pixel_t rgb);
 extern inline cvl_pixel_t cvl_pixel_rgb_to_b(cvl_pixel_t rgb)
 {
     return rgb & 0xff;
 }
 
+cvl_pixel_t cvl_pixel_rgb_to_gray(cvl_pixel_t rgb);
 extern inline cvl_pixel_t cvl_pixel_rgb_to_gray(cvl_pixel_t rgb)
 {
     return ((cvl_pixel_rgb_to_r(rgb) + cvl_pixel_rgb_to_g(rgb) + cvl_pixel_rgb_to_b(rgb)) / 3);
 }
 
+cvl_pixel_t cvl_pixel_rgb_to_yuv(cvl_pixel_t rgb);
 extern inline cvl_pixel_t cvl_pixel_rgb_to_yuv(cvl_pixel_t rgb)
 {
     int r = cvl_pixel_rgb_to_r(rgb);
@@ -103,26 +115,31 @@ extern inline cvl_pixel_t cvl_pixel_rgb_to_yuv(cvl_pixel_t rgb)
     return cvl_pixel_yuv(y, u, v);
 }
 
+cvl_pixel_t cvl_pixel_yuv_to_y(cvl_pixel_t yuv);
 extern inline cvl_pixel_t cvl_pixel_yuv_to_y(cvl_pixel_t yuv)
 {
     return (yuv >> 16) & 0xff;
 }
 
+cvl_pixel_t cvl_pixel_yuv_to_u(cvl_pixel_t yuv);
 extern inline cvl_pixel_t cvl_pixel_yuv_to_u(cvl_pixel_t yuv)
 {
     return (yuv >> 8) & 0xff;
 }
 
+cvl_pixel_t cvl_pixel_yuv_to_v(cvl_pixel_t yuv);
 extern inline cvl_pixel_t cvl_pixel_yuv_to_v(cvl_pixel_t yuv)
 {
     return yuv & 0xff;
 }
 
+cvl_pixel_t cvl_pixel_yuv_to_gray(cvl_pixel_t yuv);
 extern inline cvl_pixel_t cvl_pixel_yuv_to_gray(cvl_pixel_t yuv)
 {
     return cvl_pixel_gray((cvl_pixel_clip((int)cvl_pixel_yuv_to_y(yuv) - 16) * 298) >> 8);
 }
 
+cvl_pixel_t cvl_pixel_yuv_to_rgb(cvl_pixel_t yuv);
 extern inline cvl_pixel_t cvl_pixel_yuv_to_rgb(cvl_pixel_t yuv)
 {
     int c = cvl_pixel_yuv_to_y(yuv) - 16;
@@ -134,6 +151,7 @@ extern inline cvl_pixel_t cvl_pixel_yuv_to_rgb(cvl_pixel_t yuv)
     return cvl_pixel_rgb(r, g, b);
 }
 
+cvl_pixel_t cvl_pixel_to_gray(cvl_pixel_t p, cvl_pixel_type_t type);
 extern inline cvl_pixel_t cvl_pixel_to_gray(cvl_pixel_t p, cvl_pixel_type_t type)
 {
     return (type == CVL_PIXEL_GRAY ? p 
@@ -141,6 +159,7 @@ extern inline cvl_pixel_t cvl_pixel_to_gray(cvl_pixel_t p, cvl_pixel_type_t type
 		: cvl_pixel_yuv_to_gray(p)));
 }
     
+cvl_pixel_t cvl_pixel_to_rgb(cvl_pixel_t p, cvl_pixel_type_t type);
 extern inline cvl_pixel_t cvl_pixel_to_rgb(cvl_pixel_t p, cvl_pixel_type_t type)
 {
     return (type == CVL_PIXEL_RGB ? p 
@@ -148,6 +167,7 @@ extern inline cvl_pixel_t cvl_pixel_to_rgb(cvl_pixel_t p, cvl_pixel_type_t type)
 		: cvl_pixel_yuv_to_rgb(p)));
 }
     
+cvl_pixel_t cvl_pixel_to_yuv(cvl_pixel_t p, cvl_pixel_type_t type);
 extern inline cvl_pixel_t cvl_pixel_to_yuv(cvl_pixel_t p, cvl_pixel_type_t type)
 {
     return (type == CVL_PIXEL_YUV ? p 
@@ -155,6 +175,7 @@ extern inline cvl_pixel_t cvl_pixel_to_yuv(cvl_pixel_t p, cvl_pixel_type_t type)
 		: cvl_pixel_rgb_to_yuv(p)));
 }
 
+cvl_pixel_t cvl_pixel_convert(cvl_pixel_type_t dst_type, cvl_pixel_t p, cvl_pixel_type_t src_type);
 extern inline cvl_pixel_t cvl_pixel_convert(cvl_pixel_type_t dst_type, cvl_pixel_t p, cvl_pixel_type_t src_type)
 {
     return (dst_type == CVL_PIXEL_GRAY ? cvl_pixel_to_gray(p, src_type)

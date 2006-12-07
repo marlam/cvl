@@ -27,6 +27,7 @@
 #include "cvl_frame.h"
 #include "cvl_math.h"
 
+void cvl_differentiate_sobel(const cvl_frame_t *frame, int x, int y, int *fx, int *fy);
 extern inline void cvl_differentiate_sobel(const cvl_frame_t *frame, int x, int y, int *fx, int *fy)
 {
     *fx = cvl_iroundf((float)(
@@ -45,6 +46,7 @@ extern inline void cvl_differentiate_sobel(const cvl_frame_t *frame, int x, int 
 		 - 1 * (int)cvl_frame_get(frame, x + 1, y + 1))) / 4.0f);
 }
 
+void cvl_differentiate_sobel_r(const cvl_frame_t *frame, int x, int y, int *fx, int *fy);
 extern inline void cvl_differentiate_sobel_r(const cvl_frame_t *frame, int x, int y, int *fx, int *fy)
 {
     *fx = cvl_iroundf((float)(

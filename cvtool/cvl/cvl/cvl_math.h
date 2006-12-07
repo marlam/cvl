@@ -34,71 +34,85 @@
 bool cvl_product_fits_in_int(int a, int b);
 bool cvl_product_fits_in_size_t(size_t a, size_t b);
 
+int cvl_iround(double x);
 extern inline int cvl_iround(double x)
 {
     return (int)lround(x);
 }
 
+int cvl_iroundf(float x);
 extern inline int cvl_iroundf(float x)
 {
     return (int)lroundf(x);
 }
 
+double cvl_min(double a, double b);
 extern inline double cvl_min(double a, double b)
 {
     return fmin(a, b);
 }
 
+double cvl_max(double a, double b);
 extern inline double cvl_max(double a, double b)
 {
     return fmax(a, b);
 }
 
+int cvl_mini(int a, int b);
 extern inline int cvl_mini(int a, int b)
 {
     return (a < b ? a : b);
 }
 
+int cvl_maxi(int a, int b);
 extern inline int cvl_maxi(int a, int b)
 {
     return (a > b ? a : b);
 }
 
+double cvl_min3(double a, double b, double c);
 extern inline double cvl_min3(double a, double b, double c)
 {
     return cvl_min(cvl_min(a, b), c);
 }
 
+double cvl_max3(double a, double b, double c);
 extern inline double cvl_max3(double a, double b, double c)
 {
     return cvl_max(cvl_max(a, b), c);
 }
 
+int cvl_min3i(int a, int b, int c);
 extern inline int cvl_min3i(int a, int b, int c)
 {
     return cvl_mini(cvl_mini(a, b), c);
 }
 
+int cvl_max3i(int a, int b, int c);
 extern inline int cvl_max3i(int a, int b, int c)
 {
     return cvl_maxi(cvl_maxi(a, b), c);
 }
 
+double cvl_min4(double a, double b, double c, double d);
 extern inline double cvl_min4(double a, double b, double c, double d)
 {
     return cvl_min(cvl_min(a, b), cvl_min(c, d));
 }
 
+double cvl_max4(double a, double b, double c, double d);
 extern inline double cvl_max4(double a, double b, double c, double d)
 {
     return cvl_max(cvl_max(a, b), cvl_max(c, d));
 }
 
+int cvl_min4i(int a, int b, int c, int d);
 extern inline int cvl_min4i(int a, int b, int c, int d)
 {
     return cvl_mini(cvl_mini(a, b), cvl_mini(c, d));
 }
 
+int cvl_max4i(int a, int b, int c, int d);
 extern inline int cvl_max4i(int a, int b, int c, int d)
 {
     return cvl_maxi(cvl_maxi(a, b), cvl_maxi(c, d));
@@ -107,6 +121,7 @@ extern inline int cvl_max4i(int a, int b, int c, int d)
 int cvl_gcd(int a, int b);
 int cvl_lcm(int a, int b);
 
+int cvl_reflect(int c, int bound);
 extern inline int cvl_reflect(int c, int bound)
 {
     cvl_assert(bound > 0);
@@ -125,6 +140,7 @@ extern inline int cvl_reflect(int c, int bound)
     return r;
 }
 
+int cvl_wrap(int c, int bound);
 extern inline int cvl_wrap(int c, int bound)
 {
     cvl_assert(bound > 0);
@@ -137,6 +153,7 @@ extern inline int cvl_wrap(int c, int bound)
     return w;
 }
 
+int cvl_clamp(int c, int bound);
 extern inline int cvl_clamp(int c, int bound)
 {
     cvl_assert(bound > 0);
@@ -152,16 +169,19 @@ extern inline int cvl_clamp(int c, int bound)
     return c;
 }
 
+double cvl_deg_to_rad(double x);
 extern inline double cvl_deg_to_rad(double x)
 {
     return (x * (M_PI / 180.0));
 }
 
+double cvl_rad_to_deg(double x);
 extern inline double cvl_rad_to_deg(double x)
 {
     return (x * (180.0 / M_PI));
 }
 
+double cvl_angle_normalize_1(double a);
 extern inline double cvl_angle_normalize_1(double a)
 {
     a = a / (2.0 * M_PI);
@@ -169,6 +189,7 @@ extern inline double cvl_angle_normalize_1(double a)
     return (a * 2.0 * M_PI);
 }
 
+double cvl_angle_normalize_2(double a);
 extern inline double cvl_angle_normalize_2(double a)
 {
     a = (a + M_PI) / (2.0 * M_PI);

@@ -54,6 +54,7 @@ void cvl_field_zero(cvl_field_t *field);
 void cvl_field_copy(cvl_field_t *dst, const cvl_field_t *src);
 cvl_field_t *cvl_field_clone(const cvl_field_t *field);
 
+const void *cvl_field_get_i(const cvl_field_t *field, int i);
 extern inline const void *cvl_field_get_i(const cvl_field_t *field, int i)
 {
     cvl_assert(field != NULL);
@@ -63,6 +64,7 @@ extern inline const void *cvl_field_get_i(const cvl_field_t *field, int i)
     return &((unsigned char *)cvl_field_const_array(field))[cvl_field_element_size(field) * i];
 }
 
+const void *cvl_field_get(const cvl_field_t *field, int x, int y);
 extern inline const void *cvl_field_get(const cvl_field_t *field, int x, int y)
 {
     cvl_assert(field != NULL);
@@ -74,6 +76,7 @@ extern inline const void *cvl_field_get(const cvl_field_t *field, int x, int y)
     return cvl_field_get_i(field, y * cvl_field_width(field) + x);
 }
 
+const void *cvl_field_get_r(const cvl_field_t *field, int x, int y);
 extern inline const void *cvl_field_get_r(const cvl_field_t *field, int x, int y)
 {
     cvl_assert(field != NULL);
@@ -83,6 +86,7 @@ extern inline const void *cvl_field_get_r(const cvl_field_t *field, int x, int y
 	    cvl_reflect(y, cvl_field_height(field)));
 }
 
+void cvl_field_set_i(cvl_field_t *field, int i, const void *e);
 extern inline void cvl_field_set_i(cvl_field_t *field, int i, const void *e)
 {
     cvl_assert(field != NULL);
@@ -94,6 +98,7 @@ extern inline void cvl_field_set_i(cvl_field_t *field, int i, const void *e)
 	    e, cvl_field_element_size(field));
 }
 
+void cvl_field_set(cvl_field_t *field, int x, int y, const void *e);
 extern inline void cvl_field_set(cvl_field_t *field, int x, int y, const void *e)
 {
     cvl_assert(field != NULL);
@@ -106,6 +111,7 @@ extern inline void cvl_field_set(cvl_field_t *field, int x, int y, const void *e
     cvl_field_set_i(field, y * cvl_field_width(field) + x, e);
 }
 
+const float *cvl_field_f_get_i(const cvl_field_t *field, int i);
 extern inline const float *cvl_field_f_get_i(const cvl_field_t *field, int i)
 {
     cvl_assert(field != NULL);
@@ -115,6 +121,7 @@ extern inline const float *cvl_field_f_get_i(const cvl_field_t *field, int i)
     return cvl_field_get_i(field, i);
 }
 
+const float *cvl_field_f_get(const cvl_field_t *field, int x, int y);
 extern inline const float *cvl_field_f_get(const cvl_field_t *field, int x, int y)
 {
     cvl_assert(field != NULL);
@@ -126,6 +133,7 @@ extern inline const float *cvl_field_f_get(const cvl_field_t *field, int x, int 
     return cvl_field_get(field, x, y);
 }
 
+const float *cvl_field_f_get_r(const cvl_field_t *field, int x, int y);
 extern inline const float *cvl_field_f_get_r(const cvl_field_t *field, int x, int y)
 {
     cvl_assert(field != NULL);
@@ -133,6 +141,7 @@ extern inline const float *cvl_field_f_get_r(const cvl_field_t *field, int x, in
     return cvl_field_get_r(field, x, y);
 }
 
+const int *cvl_field_i_get_i(const cvl_field_t *field, int i);
 extern inline const int *cvl_field_i_get_i(const cvl_field_t *field, int i)
 {
     cvl_assert(field != NULL);
@@ -142,6 +151,7 @@ extern inline const int *cvl_field_i_get_i(const cvl_field_t *field, int i)
     return cvl_field_get_i(field, i);
 }
 
+const int *cvl_field_i_get(const cvl_field_t *field, int x, int y);
 extern inline const int *cvl_field_i_get(const cvl_field_t *field, int x, int y)
 {
     cvl_assert(field != NULL);
@@ -153,6 +163,7 @@ extern inline const int *cvl_field_i_get(const cvl_field_t *field, int x, int y)
     return cvl_field_get(field, x, y);
 }
 
+const int *cvl_field_i_get_r(const cvl_field_t *field, int x, int y);
 extern inline const int *cvl_field_i_get_r(const cvl_field_t *field, int x, int y)
 {
     cvl_assert(field != NULL);

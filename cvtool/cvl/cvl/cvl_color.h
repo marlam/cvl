@@ -690,6 +690,7 @@ typedef enum
 } cvl_color_t;
 
 
+cvl_pixel_t cvl_color_to_pixel(cvl_color_t color, cvl_pixel_type_t pixel_type);
 extern inline cvl_pixel_t cvl_color_to_pixel(cvl_color_t color, cvl_pixel_type_t pixel_type)
 {
     return (pixel_type == CVL_PIXEL_RGB) ? color : 
