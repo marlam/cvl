@@ -1,4 +1,5 @@
 Version 0.1.1:
+- cvtool: Various fixes for the fieldconv command.
 - Re-add doxygen documentation for inlinable functions.
 
 Version 0.1.0:

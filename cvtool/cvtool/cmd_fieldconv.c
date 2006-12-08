@@ -89,8 +89,8 @@ int cmd_fieldconv(int argc, char *argv[])
     cvl_option_name_t outtype = { -1, outtype_names };
     cvl_option_int_t l = { 0, INT_MIN, INT_MAX };
     cvl_option_int_t h = { 255, INT_MIN, INT_MAX };
-    cvl_option_double_t L = { 0.0, FLT_MIN, true, FLT_MAX, true };
-    cvl_option_double_t H = { 1.0, FLT_MIN, true, FLT_MAX, true };
+    cvl_option_double_t L = { 0.0, -FLT_MAX, true, FLT_MAX, true };
+    cvl_option_double_t H = { 1.0, -FLT_MAX, true, FLT_MAX, true };
     cvl_option_t options[] = 
     { 
 	{ "input",      'i', CVL_OPTION_NAME,   &intype,  true  },
@@ -198,16 +198,16 @@ int cmd_fieldconv(int argc, char *argv[])
 		}
 		if (use_float)
 	    	{
-		    valf[0] = (float)valp[0] / (float)255.0;
-		    valf[1] = (float)valp[1] / (float)255.0;
-		    valf[2] = (float)valp[1] / (float)255.0;
+		    valf[0] = (float)valp[0] / 255.0f;
+		    valf[1] = (float)valp[1] / 255.0f;
+		    valf[2] = (float)valp[2] / 255.0f;
 		    cvl_field_set_i(tmpfield, i, valf);
     		}
 		else
 		{
 		    vali[0] = valp[0];
 		    vali[1] = valp[1];
-		    vali[2] = valp[1];
+		    vali[2] = valp[2];
 		    cvl_field_set_i(tmpfield, i, vali);
 		}
 	    }
