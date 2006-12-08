@@ -20,7 +20,7 @@ dnl Process this file with autoconf to produce a configure script.
 #   Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #
 
-AC_INIT([cvtool], [0.1.0], [marlam@marlam.de])
+AC_INIT([cvtool], [0.1.1], [marlam@marlam.de])
 AC_CONFIG_SRCDIR([cvtool/cvtool.c])
 AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_MACRO_DIR([build-aux])
