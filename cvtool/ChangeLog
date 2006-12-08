@@ -1,3 +1,6 @@
+Version 0.1.1:
+- Re-add doxygen documentation for inlinable functions.
+
 Version 0.1.0:
 - Gnulib update.
 - CVL: Use filter separation for the min and max filters to improve
