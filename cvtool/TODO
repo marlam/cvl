@@ -1,0 +1,34 @@
+Bugfixes
+=========
+
+- Implement Median filter for big filter sizes by means of texture sorting?
+
+
+Missing features
+================
+
+- Finish rewrite of CVL for the GPU.
+
+- Restore most/all of the cvtool-0.1.0 functionality.
+  Currently missing commands:
+  binarize
+  equalize
+  opticalflow
+  dibr
+  stereoview
+  trackdepth
+  mat
+  skeleton
+  sedt
+
+- Improve the CVL and cvtool manuals.
+
+
+Wishlist
+========
+
+- Add frequency domain manipulations (Fourier, Wavelets)
+- Add Segmentation framework
+- Add corner detection
+- Add Marr/Hildreth edge detection
+- Add Hough transforms

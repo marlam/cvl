@@ -1,0 +1,204 @@
+\input texinfo   @c -*-texinfo-*-
+@afourpaper
+@setfilename cvl.info
+@set UPDATED August 31, 2007
+@set UPDATED-MONTH August 2007
+@set EDITION 0.2.0
+@set VERSION 0.2.0
+@settitle CVL @value{VERSION}
+
+@c Define new indices: for options (op) and commands (cm)
+@defcodeindex op
+@defcodeindex cm
+
+@finalout
+@copying
+This manual was last updated @value{UPDATED} for version
+@value{VERSION} of CVL.
+
+Copyright @copyright{} 2005, 2006, 2007 Martin Lambers
+
+@quotation
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License, Version 1.2 or
+any later version published by the Free Software Foundation; with no
+Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts.  A
+copy of the license is included in the section entitled ``GNU Free
+Documentation License''.
+@end quotation
+@end copying
+
+@dircategory Individual utilities
+@direntry
+* CVL: (CVL).	A computer vision library.
+@end direntry
+
+@titlepage
+@title CVL
+@subtitle A computer vision library
+@subtitle version @value{VERSION}, @value{UPDATED}
+@author Martin Lambers (@email{marlam@@marlam.de})
+@page
+@vskip 0pt plus 1filll
+@insertcopying
+@end titlepage
+
+@contents
+
+@ifnottex
+@node Top
+@top CVL
+@insertcopying
+@end ifnottex
+
+@menu
+* Using CVL::
+* Concepts and overview::
+* API reference::
+* Copying Information::
+@end menu
+
+
+@node Using CVL
+@chapter Using CVL
+
+The usage of CVL is best demonstrated with a small example program.
+@example
+#include <stdio.h>
+
+#include <cvl/cvl.h>
+
+int main(void)
+@{
+    cvl_gl_context_t *gl_context;
+    cvl_frame_t *input_frame, *output_frame;
+
+    /* Create a GL context on display ":0" and activate it. */
+    gl_context = cvl_gl_context_new(":0");
+    if (!gl_context)
+    @{
+        fprintf(stderr, "Cannot create GL context.\n");
+        return 1;
+    @}
+
+    /* Initialize CVL. */
+    cvl_init();
+
+    /* Read frame, process it, and write it. */
+    cvl_read_pnm(stdin, &input_frame);
+    output_frame = cvl_frame_new_tpl(input_frame);
+    cvl_gauss(output_frame, input_frame, 1, 1, 1.0f, 1.0f);
+    cvl_frame_free(input_frame);
+    cvl_write_pnm(stdout, output_frame);
+    cvl_frame_free(output_frame);
+
+    /* Check for errors in one of the cvl_*() functions. */
+    if (cvl_error())
+    @{
+        fprintf(stderr, "CVL error message: %s\n", cvl_error_msg());
+        cvl_deinit();
+        cvl_gl_context_free(gl_context);
+        return 1;
+    @}
+
+    /* Cleanup. */
+    cvl_deinit();
+    cvl_gl_context_free(gl_context);
+
+    return 0;
+@}
+@end example
+
+This example reads a NetPBM image from standard input, applies a 3x3 Gauss
+filter to it, and writes the result to standard output.
+
+It can be compiled and linked with the following command:
+@example
+gcc -o cvl_example cvl_example.c -lcvl
+@end example
+
+If you want to use Autoconf, use the following @code{configure.ac} snippet to
+test for CVL:
+@example
+AC_LIB_HAVE_LINKFLAGS([cvl], [],
+        [#include <cvl/cvl.h>
+         #if CVL_VERSION_MAJOR < 0 || CVL_VERSION_MINOR < 2 || CVL_VERSION_PATCH < 0
+         CVL version too old
+         #endif],
+        [cvl_init();])
+if test "$HAVE_LIBCVL" != "yes"; then
+        AC_MSG_ERROR([could not find CVL >= 0.2.0])
+fi
+@end example
+Then link your application with CVL by adding @code{$(LIBCVL)} to the
+appropriate line in the application's @code{Makefile.am}.
+
+The @code{AC_LIB_HAVE_LINKFLAGS} macro automatically adds an
+@samp{--with-libcvl-prefix} option to the configure script, handles library
+dependencies automatically and works fine with cross compilers. It comes as
+part of GNU gettext.
+
+
+@node Concepts and overview
+@chapter Concepts and overview
+
+CVL aims to be a simple to use, general purpose library that is useful in the
+context of computer vision. Its features include
+@itemize
+@item Support for NetPBM (pbm, pgm, ppm, pnm, pam) and PFS files.
+@item Support for images with up to four channels consisting of
+integer (@code{uint8_t}) or floating point (@code{float}) data.
+@item Support for the color formats luminance, XYZ, HSL, RGB and for arbitrary
+data formats.
+@item Support for various standard filters, image blending and layering, and 
+geometric transformations.
+@item Support for high dynamic range (HDR) image handling, e.g. tone mapping.
+@end itemize
+
+Some of the concepts of CVL can already be seen in the example program from the
+previous section:
+@itemize
+@item CVL stores images (or possibly arbitrary data) in frames
+(@code{cvl_frame_t}).
+@item CVL filter functions like @code{cvl_gauss()} write into existing frames.
+Frames can be created by reading them, by using other frames as templates, or
+by giving all parameters explicitly.
+@item CVL needs an active GL context. This does not need to be created by
+@code{cvl_gl_context_new()}. Any GL context can be used, but CVL expects that
+it can use this context exclusively. If you want to mix CVL and GL calls (for
+example to render CVL frames), use @code{cvl_gl_state_save()}, then setup the
+GL context and use it as you like, and call @code{cvl_gl_state_restore()} when
+you're done. Afterwards, continue to use the context for CVL.
+@item After @code{cvl_init()} was called, CVL uses an error state to return
+information about errors. This state can be queried with the @code{cvl_error()}
+function. If a CVL function is called while an error state is set, the function
+will do nothing and return immediately. This way, it is possible to defer error
+checking until after a group of CVL function calls. The error state can be reset
+with @code{cvl_error_reset()}.
+@end itemize
+
+
+@node API reference
+@chapter API reference
+
+The API reference is provided in HTML format in the separate directory 
+@code{cvl-reference}.
+
+
+@node Copying Information
+@appendix Copying Information
+
+@menu
+* GNU Free Documentation License::   License for copying this manual.
+* GNU GPL::                          License for copying the program.
+@end menu
+
+@node GNU Free Documentation License
+@unnumberedsec GNU Free Documentation License
+@include fdl.texi
+@node GNU GPL
+@unnumberedsec GNU GPL
+@include gpl.texi
+
+
+@bye

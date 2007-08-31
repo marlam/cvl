@@ -1,0 +1,14 @@
+CVL is a library for image and data processing using graphics processing units
+(GPUs). 
+
+CVL supports both netpbm images and pfs images and data, e.g. high dynamic
+range images. It uses OpenGL to process data on the GPU. CVL requires the
+GLEW library and a graphics driver that supports OpenGL 2.1. It currently
+works on GNU/Linux and Windows systems. 
+
+CVL is bundled with cvtool, a command line tool that aims to make all of CVL's
+functionality available as filters. It integrates well with other tools like
+netpbm and pfstools.
+
+For more information, read the documentation in the doc subdirectory, or visit
+the homepage: http://cvtool.sourceforge.net/.

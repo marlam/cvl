@@ -1,0 +1,3 @@
+Version 0.2.0:
+- Complete rewrite. OpenGL is now used to delegate the processing tasks to the
+  GPU. Floating point data is supported.

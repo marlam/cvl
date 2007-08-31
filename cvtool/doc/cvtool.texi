@@ -1,0 +1,1305 @@
+\input texinfo   @c -*-texinfo-*-
+@afourpaper
+@setfilename cvtool.info
+@set UPDATED August 31, 2007
+@set UPDATED-MONTH August 2007
+@set EDITION 0.2.0
+@set VERSION 0.2.0
+@settitle cvtool @value{VERSION}
+
+@c Define new index for commands
+@defcodeindex cm
+
+@finalout
+@copying
+This manual was last updated @value{UPDATED} for version
+@value{VERSION} of cvtool.
+
+Copyright @copyright{} 2005, 2006, 2007 Martin Lambers
+
+@quotation
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License, Version 1.2 or
+any later version published by the Free Software Foundation; with no
+Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts.  A
+copy of the license is included in the section entitled ``GNU Free
+Documentation License''.
+@end quotation
+@end copying
+
+@dircategory Individual utilities
+@direntry
+* cvtool: (cvtool).	A computer vision tool.
+@end direntry
+
+@titlepage
+@title cvtool
+@subtitle A computer vision tool
+@subtitle version @value{VERSION}, @value{UPDATED}
+@author Martin Lambers (@email{marlam@@marlam.de})
+@page
+@vskip 0pt plus 1filll
+@insertcopying
+@end titlepage
+
+@contents
+
+@ifnottex
+@node Top
+@top cvtool
+@insertcopying
+@end ifnottex
+
+@menu
+* Overview::
+* Commands::
+* Command index::
+* Copying Information::
+@end menu
+
+
+@node Overview
+@chapter Overview
+
+@menu
+* Concept::
+* Supported file types::
+* Output::
+* Global options::
+* Common parameters::
+* Environment::
+* Exit codes::
+@end menu
+
+@node Concept
+@section Concept
+
+Cvtool is a filter that manipulates one or more images (called frames): it
+reads frames from standard input and writes the manipulated frames to standard
+output. It can read and write streams of NetPBM (pbm, pgm, ppm, pnm, pam) and
+PFS frames.
+
+Cvtool integrates all its functionality into a single binary, and makes
+it available through commands such as @code{rotate}, @code{filter}, and 
+others.
+
+The following command scales a NetPBM frame by a factor of 3:
+@example
+$ cvtool scale --factor 3.0 < input.ppm > output.ppm
+@end example
+
+This is how one would select a rectangle from an PFS frame stream:
+@example
+$ cvtool cut --left 10 --top 10 --width 100 --height 100 \
+  < input.pfs > output.pfs
+@end example
+
+@code{cvtool help} prints a list of available commands, and 
+@code{cvtool help cmd} prints help for the command @code{cmd}.
+
+
+@node Supported file types
+@section Supported file types
+
+Due to the use of OpenGL textures to store frame data, some limitations apply:
+@itemize
+@item The maximum frame size is limited by the OpenGL maximum texture size.
+@item The maximum number of channels in a frame is 4.
+@end itemize
+
+@subsection NetPBM formats: @samp{pnm}
+
+All NetPBM image formats (pbm, pgm, ppm, pnm, pam) are supported, except for
+their old "plain" variants. Multiple images in one file are supported. They may
+differ in size and type.
+
+If the input images use more than 8 bit per channel, they are treated as 
+floating point images.
+
+@subsection PFS format: @samp{pfs}
+
+Cvtool supports the PFS format used by
+@url{pfstools,http://www.mpi-inf.mpg.de/resources/pfstools/}.
+
+Currently, cvtool ignore channel tags. This will be fixed in a future version.
+
+@node Output
+@section Output
+
+Cvtool normally prints messages to @code{stderr}. It prepends messages with its
+name, the level of information, and the name of the command.
+
+The level of information is @code{DBG} for debugging messages, @code{INF} for
+informational messages, @code{WRN} for warnings, @code{ERR} for error
+messages, and @code{REQ} for requested information. Normally, cvtool prints only 
+messages of level @code{INF} or higher, but this can be changed with 
+@option{--quiet} and @option{--verbose}; see below.
+
+Some commands, for example @command{info}, print special information messages
+that the user explicitly requests. Such special messages have the level
+@code{REQ}, and can usually be redirected using the @option{--output} option.
+In this case, no additional information will be prepended to the messages.
+
+The special filename @code{-} means standard output (@code{stdout}).
+Redirecting messages to @code{stdout} is only allowed when no frames are
+written to @code{stdout}.
+
+
+@node Global options
+@section Global options
+
+@table @code
+@item -q|--quiet
+Reduces the amount of output: only messages with level @code{WRN} 
+and higher will be printed.
+
+@item -v|--verbose
+Increases the amount of output: all messages will be printed, even those
+with level @code{DBG}. This will include progress information in many
+cases, but much of the output is really only useful for debugging purposes.
+@end table
+
+@node Common parameters
+@section Common parameters
+
+@subsection Arrays and Matrices
+
+Some commands need arrays of integer or floating point values as parameters.
+Matrices are treated as two-dimensional arrays. Higher dimensions are also
+possible.
+
+All of these array types are treated the same: the first part of the argument
+determines the number of dimensions of the array and its size in each
+dimension. The second part lists all values, separated by commas.
+
+If the command requests an array or matrix of fixed dimension and size (or of
+dimension 1 and arbitrary size), then the first part can be omitted: only the
+value list is necessary in this case.
+
+Examples:
+@itemize
+@item An array with three integer values
+@example
+3:1,1,1
+@end example
+@item An array with five floating point values
+@example
+5:1.2,1.3,0.7,0.5,0.0
+1.2,1.3,0.7,0.5,0.0
+@end example
+@item A 3x3 matrix array with integer values
+@example
+3x3:1,2,3,4,5,6,7,8,9
+@end example
+@item A three-dimensional array with floating point values
+@example
+2x2x2:1.11,1.12,1.21,1.22,2.11,2.12,2.21,2.22
+@end example
+@end itemize
+
+@subsection Colors
+
+Colors can be given in one of three forms:
+@enumerate
+@item SVG color names@*
+The SVG 1.1 specification of the W3C defines 147 color names.  Cvtool
+accepts each of these names, case insensitively.  The full list can be found
+here: @url{http://www.w3.org/TR/SVG11/types.html}.
+@item Hex triplets@*
+The RGB components of a color can be specified directly as a hex triplet:
+@code{0xrrggbb}.  For example, @code{0x00ff00} is green, @code{0xffffff} is
+white, and @code{0x000000} is black.
+@item Decimal values@*
+The RGB components of a color can be specified as decimal values, prepended
+with r, g, or b.  For example, @code{g255} is green (the red and blue
+components default to zero), @code{r255g255b255} is white, and @code{r0g0b0} is
+black.
+@end enumerate
+
+@node Environment
+@section Environment
+
+@table @env
+@item TMPDIR
+Directory to create temporary files in.
+@item COLUMNS
+Cvtool tries to format its messages so that they do not use more than the given
+number of columns.  If this variable is unset, a default of 80 will be used.
+@end table
+
+@node Exit codes
+@section Exit codes
+
+Cvtool returns @code{0} on success and @code{1} on error.
+
+
+@node Commands
+@chapter Commands
+
+@menu
+* Informational Commands::
+* Stream Manipulation::
+* Resizing Frames::
+* Transforming Frames::
+* Mixing Frames::
+* Color Manipulation::
+* Drawing::
+* Filtering Frames::
+* Detecting Image Features::
+* Comparing Frames::
+* High Dynamic Range (HDR) Images::
+* Miscellaneous::
+@end menu
+
+@node Informational Commands
+@section Informational Commands
+
+@menu
+* help::
+* version::
+* info::
+@end menu
+
+@node help
+@subsection help
+@cmindex help
+@code{help [@var{command}]}
+
+@noindent
+Print general or command specific help.
+
+@node version
+@subsection version
+@cmindex version
+@code{version}
+
+@noindent
+Print version information.
+
+@node info
+@subsection info
+@cmindex info
+@code{info [-s|--statistics] [-S|--single] [-o|--output=@var{file}]}
+
+@noindent
+Print information about frames in the input stream.
+If @samp{--single} is used, the command exits after the first frame has been
+processed.  If @samp{--statistics} is used, additional statistics about the
+frame contents are printed.  The output can be redirected to a file or to
+standard output (-) using the @samp{--output} option.@*
+The following information will be printed: STREAM (pfs or pnm), CHANNELS (0-4),
+FORMAT (luminance or color), TYPE (uint8 or float), WIDTH, HEIGHT.@*
+Statistics are computed for each available channel c: CHc_MIN, CHc_MAX,
+CHc_MEAN, CHc_MEDIAN, CHc_STDDEVIATION.@*
+
+@example
+$ cvtool info < file.pnm
+cvtool: [REQ] info: STREAM=pnm CHANNELS=3 FORMAT=color TYPE=uint8 WIDTH=394 HEIGHT=454
+$ eval `cvtool info -o - < file.pnm`
+$ echo $WIDTH
+394
+@end example
+
+
+@node Stream Manipulation
+@section Stream Manipulation
+
+@menu
+* combine::
+* convert::
+* create::
+* foreach::
+* merge::
+* reverse::
+* select::
+* split::
+@end menu
+
+@node combine
+@subsection combine
+@cmindex combine
+@code{combine [-m|--method=(lr|leftright)|(tb|topbottom)]
+[-j|--justify=(left|top)|center|(right|bottom)] [-c|--color=@var{color}]
+@var{file@dots{}}}
+
+@noindent
+Combine the given files by placing the frames side by side (@samp{leftright})
+or one below the other (@samp{topbottom}).
+
+The default is @samp{leftright}. If the frames have different sizes, then the
+smaller ones have to be aligned with the biggest one. The default is to center
+them. The remaining space will be filled with the given color; the default is
+black.
+
+@example
+$ cvtool combine left.pnm right.pnm > lr.pnm
+$ cvtool combine -m tb \
+  <(cvtool combine a.pnm b.pnm) \
+  <(cvtool combine c.pnm d.pnm) \
+  > 2x2.pnm
+@end example
+
+@node convert
+@subsection convert
+@cmindex convert
+@code{convert [-t|--type=uint8|float] [-f|--format=lum|color]}
+
+@noindent
+Converts the input frames to another type and format. The default is to keep
+the input type and format. The output will be PNM for type uint8 and PFS
+for type float.
+
+@example
+$ cvtool convert -t float < in.pnm > out.pfs
+@end example
+
+@node create
+@subsection create
+@cmindex create
+@code{create [-t|--type=uint8|float] [-f|--format=lum|color] [-n|--n=@var{n}] 
+-w|--width=@var{w} -h|--height=@var{h} [-c|--color=<color>]}
+
+@noindent
+Create n (default 1) frames with the given format (default color) and the given
+type (default uint8). The frames will have the given width and height, and they
+will be filled with the given color (default black). The resulting stream type
+will be PNM if the type is uint8, and PFS otherwise.
+
+@example
+$ cvtool create -t uint8 -f lum -w 720 -h 576 > out.pgm
+$ cvtool create -t float -f color -w 10 -h 10 -c green > green.pfs
+@end example
+
+@node foreach
+@subsection foreach
+@cmindex foreach
+@code{foreach [-s|--shell=@var{shell}] [-n|--n=@var{n}] @var{cmd}}
+
+@noindent
+Execute the given command for every frame. 
+
+The command is expected to read @var{n} frames from standard input (default is
+@var{n}=1), and write an arbitrary number (including zero) of frames to
+standard output. The original frame(s) that were given to the command are
+replaced by the output of the command. The frames that the command produces are
+converted to the format of the original frames. The foreach command replaces
+the following special strings in the command @var{cmd} before executing the
+command: @code{%N} (replaced with frame number), @code{%W} (replaced with frame
+width), and @code{%H} (replaced with frame height). If @var{n} is greater than
+1, these values refer to the first frame that is piped to the command.  The
+command @var{cmd} is executed by passing it to the system shell.  The default
+is @samp{/bin/sh -c} on most systems. This can be overridden with the
+@option{--shell} option. It expects a string with zero or one spaces: The first
+part of the string is the shell, the second part (if any) is the first option
+to the shell. The next option will then be the command to execute.
+
+@example
+# Rotate a video. Resize after rotation to keep the original dimensions.
+$ cvtool foreach 'cvtool rotate -a %N | cvtool resize -w 352 -h 240' \
+  < video.pnm > rotating-video.pnm
+@end example
+
+@node merge
+@subsection merge
+@cmindex merge
+@code{merge [-s|--shuffle] [-o|--output=@var{file}] @var{file@dots{}}}
+
+@noindent
+Merges files into one stream, in the given order.
+
+If @code{--shuffle} is used, the order will be randomized. The file names will
+be printed to stderr in the order they are merged. If @code{--output} is used,
+the file names will be written to the given file instead.
+
+@example
+$ ls
+frame000.pnm frame001.pnm frame002.pnm
+$ cvtool merge frame*.pnm > video.pnm
+@end example
+
+@node reverse
+@subsection reverse
+@cmindex reverse
+@code{reverse}
+
+@noindent
+Reverses the order of the frames in the stream.
+
+This requires a temporary file that is big enough to hold the complete input
+stream.
+
+@example
+$ cvtool reverse < video.pnm > oediv.pnm
+@end example
+
+@node select
+@subsection select
+@cmindex select
+@code{select [-d|--drop] [-f|--fps=@var{fps}] @var{range@dots{}}}
+
+@noindent
+Selects frames from a stream.
+
+By default, frames in the given ranges are kept and all others dropped. With
+@code{--drop}, frames in the given ranges are dropped and all others kept.
+
+A range must be of the following form: @var{l}-@var{h} (from @var{l} to
+@var{h}), -@var{h} (from beginning to @var{h}), @var{l}- (from @var{l} to end),
+@var{l} (only @var{l}), or - (everything).  Each start and end point can be a
+frame number (counting from 0) or a time in the format
+[hours:]minutes:seconds[.fraction]. In short: if it contains a colon, it's a
+time. Time ranges can only be used if the @samp{--fps} option is used to specify
+the number of frames per second.@*
+IMPORTANT: If you use frame number ranges, the high frame number is inclusive:
+the frame with this number will be dropped/kept. If you use time ranges, the
+high time is exclusive and marks the first frame that will not be dropped/kept.
+
+@example
+# Drop the frames 0 to 124 from the stream (with a framerate of 25 fps,
+# these are the first five seconds).
+$ cvtool select --drop 0-124 < in.pnm > out.pnm
+
+# Drop the first 5 seconds of the stream (with a framerate of 25 fps,
+# these are the frames 0 to 124. The frame at 0:05, with the frame 
+# number 125, will be the first that is kept!)
+$ cvtool select --fps 25 --drop 0:00-0:05 < in.pnm > out.pnm
+
+# Keep the second 5-minutes-block and drop all the rest. Both 
+# commands are equivalent.
+$ cvtool select --fps 25 5:00-10:00 < in.pnm > out.pnm
+$ cvtool select --fps 25 --drop -5:00 10:00- < in.pnm > out.pnm
+@end example
+
+@node split
+@subsection split
+@cmindex split
+@code{split [-n|--n=@var{n}] [-t|--template=@var{template}] [-b|--backwards]
+[-s|--start=@var{i}]}
+
+@noindent
+Split the input stream into multiple files.
+
+Each new files contains @var{n} frames (default is @var{n}=1). The filename
+will be generated from the template: the template must contain exactly one
+appearance of the character @code{%}. This character must be followed by one of
+the digits @code{1} through @code{9}. The digit must be followed by the
+uppercase character @code{N}. This special string @code{%xN} will be replaced
+by the number of the first frame of the stream contained in this file. The
+number will be left-padded with zeros until its width is at least @code{x}
+characters. The default template is @samp{frame-%6N}.@*
+A start number i for the first frame can be given, and the frames can be
+counted backwards. If the frames are counted backwards, a start number is
+required, because negative frame numbers are not accepted.
+
+@example
+$ cvtool split -t frame%3N.pnm < ../video.pnm
+$ ls
+frame000.pnm frame001.pnm frame002.pnm
+$ cvtool split -s 99 -b -t img%2N.pnm < ../video.pnm
+$ ls
+img99.pnm img98.pnm img97.pnm
+@end example
+
+
+@node Resizing Frames
+@section Resizing Frames
+
+@menu
+* resize::
+* cut::
+@end menu
+
+@node resize
+@subsection resize
+@cmindex resize
+@code{resize -w|--width=@var{w} -h|--height=@var{h} [-x|--x-offset=@var{x}]
+[-y|--y-offset=@var{y}] [-c|--color=@var{color}]}
+
+@noindent
+Resize the frames to the given new width and height.
+
+Place the original frame contents at the position (@var{x},@var{y}) relative to
+the new frame (these offsets may be negative). If no or an incomplete position
+is given, compute the missing part(s) so that the old contents are centered on
+the new frame. Fill holes that might result with the given color (default is
+black).
+
+@example
+# Add a green border of 10 pixels to a 352x240 frame
+$ cvtool resize -w 372 -h 260 -c green < img.pnm > img2.pnm
+@end example
+
+@node cut
+@subsection cut
+@cmindex cut
+@code{cut -l|--left=@var{l} -t|--top=@var{t} -w|--width=@var{w}
+-h|--height=@var{h}}
+
+@noindent
+Only let the given rectangle through; cut the rest of each frame.
+
+@example
+$ cvtool cut -l 0 -t 0 -w 10 -h 10 < in.pnm > out.pnm
+@end example
+
+
+@node Transforming Frames
+@section Transforming Frames
+
+Most geometric transformation commands support the option
+@samp{--interpolation} to choose one of the following interpolation types:
+@itemize
+@item @code{none}: No interpolation / Nearest Neighbor.
+@item @code{bilinear}: Bilinear interpolation.
+@item @code{biquadratic}: Biquadratic interpolation.
+@item @code{bicubic}: Default bicubic interpolation (Mitchell-Netravali).
+@item @code{bicubic-b-spline}: Bicubic B-Spline interpolation.
+@item @code{bicubic-cr-spline}: Bicubic Catmull-Rom Spline interpolation.
+@end itemize
+The default interpolation type is @code{bilinear}.
+
+@menu
+* affine::
+* flip::
+* flop::
+* rotate::
+* scale::
+* shear::
+@end menu
+
+@node affine
+@subsection affine
+@cmindex affine
+@code{affine -m|--matrix=@var{2x2-matrix} [-c|--color=@var{color}]
+[-i|--interpolation=@var{i}]}
+
+@noindent
+Apply the affine tranformation defined by the given matrix (4 floating point
+values separated by commas) to the frames.  The frame dimensions will be
+adapted so that the resulting frame will fit. Possible holes will be filled
+with the given color; the default is black.
+
+@example
+$ cvtool affine -m 2.0,0.1,0.75,1.0 < in.pnm > out.pnm
+@end example
+
+@node flip
+@subsection flip
+@cmindex flip
+@code{flip}
+
+@noindent
+Flip frames (left/right).
+
+@example
+$ cvtool flip < in.pnm > out.pnm
+@end example
+
+@node flop
+@subsection flop
+@cmindex flop
+@code{flop}
+
+@noindent
+Flop frames (top/bottom).
+
+@example
+$ cvtool flop < in.pnm > out.pnm
+@end example
+
+@node rotate
+@subsection rotate
+@cmindex rotate
+@code{rotate -a|--angle=@var{angle} [-c|--color=@var{color}]
+[-i|--interpolation=@var{i}]}
+
+@noindent
+Rotate frames with the given angle (in degrees), counterclockwise.
+
+The dimensions of the rotated frame will be big enough to hold all informations
+from the source.  "Holes" will be filled with the given color; the default is
+black.
+
+@example
+$ cvtool rotate -a -45 < in.pnm > out.pnm
+@end example
+
+@node scale
+@subsection scale
+@cmindex scale
+@code{scale [-w|--width=@var{w}] [-h|--height=@var{h}]
+[-i|--interpolation=@var{i}]}@*
+@code{scale -x|--factor-x=@var{factor-x} -y|--factor-y=@var{factor-y}
+[-i|--interpolation=@var{i}}@*
+@code{scale -f|--factor=@var{factor} [-i|--interpolation=@var{i}]}
+
+@noindent
+Scale frames to new size. 
+
+First form: Give new width and/or height. If one value is missing, it is
+computed from the other so that the aspect ratio remains the same.
+
+Second form: Give scale factors for width and height.
+
+Third form: Give one scale factor for both width and height.
+
+@example
+# The following three commands do the same for a 400x200 frame:
+$ cvtool scale -w 100 -h 50    < in.pnm > out.pnm
+$ cvtool scale -x 0.25 -y 0.25 < in.pnm > out.pnm
+$ cvtool scale -f 0.25         < in.pnm > out.pnm
+@end example
+
+@node shear
+@subsection shear
+@cmindex shear
+@code{shear [-x|--shear-x=@var{angle-x}] [-y|--shear-y=@var{angle-y}]
+[-c|--color=@var{color}] [-i|--interpolation=@var{i}]}
+
+@noindent
+Shear frames in horizontal and/or vertical direction.
+
+The frames are sheared with the given angle(s) from (-90,90).  Negative angles
+shear clockwise. "Holes" will be filled with the given color; the default is
+black.
+
+@example
+$ cvtool shear -x 20 -y 10 < in.pnm > out.pnm
+@end example
+
+
+@node Mixing Frames
+@section Mixing Frames
+
+@menu
+* blend::
+* layer::
+@end menu
+
+@node blend
+@subsection blend
+@cmindex blend
+@code{blend -s|--source=@var{file} [-a|--alpha=@var{file}] [-S|--single]
+[-x|--x=@var{x}] [-y|--y=@var{y}]}
+
+@noindent
+Blends the source into the frame stream, using an alpha map.
+
+With no alpha map, the source is simply copied into the frames. @var{x} and
+@var{y} specify the position that the source should be copied to. The default
+is (0,0). Positions outside of the frames are possible: parts of the source
+that do not fit into the frames will be ignored. When @option{--single} is
+used, only the first frame of the source will be used; this frame will be
+copied into all frames of the stream.
+
+@example
+$ cvtool blend --single -s logo.pnm -a logo-alpha.pgm -x 700 -y 0 \
+  < video.pnm > video-with-logo.pnm
+@end example
+
+@node layer
+@subsection layer
+@cmindex layer
+@code{layer -m|--mode=min|max|median|or|and|xor|diff|add|xadd|sub|xsub|mul|div file@dots{}}
+
+@noindent
+Layers the frames from the given files on top of each other, using the given
+mode.  
+
+Layering will be done for each channel separately.  The input frames may differ
+in size. In this case, they will be implicitly scaled to a common size.
+Graylevel frames have
+
+The modes are as follows:
+@itemize
+@item @code{min}: Use minimum value.
+@item @code{max}: Use maximum value.
+@item @code{median}: Use median value.
+@item @code{or}: Bitwise or.
+@item @code{and}: Bitwise and.
+@item @code{xor}: Bitwise xor.
+@item @code{diff}: Use difference between maximum and minimum value.
+@item @code{add}: Use sum of values.
+@item @code{xadd}: Use sum of values. The ranges are transformed so that the
+results fit in [0,1]. Example for two layers: X = (A/2) + (B/2).
+@item @code{sub}: Subtract values from the first value.
+@item @code{xsub}: Subtract values from the first value. The ranges are
+transformed so that the results fit in [0,1]. Example for two layers: X =
+(A/2) - (B/2) + 1/2.
+@item @code{mul}: Multiply values.
+@item @code{div}: Divide values.
+@end itemize
+
+@example
+$ cvtool layer --mode=or red.pnm green.pnm blue.pnm \
+  > allchannels.pnm
+@end example
+
+@node Color Manipulation
+@section Color Manipulation
+
+@menu
+* channel::
+* color::
+* gamma::
+* invert::
+@end menu
+
+@node channel
+@subsection channel
+@cmindex channel
+@code{channel [-r|--reverse] -c|--channel=0|1|2|r|g|b}
+
+@noindent
+Extract the given channel from the input, and write it into luminance output.
+When channel is r, g, or b, then the input is converted to RGB format first.
+When @samp{--reverse} is used, the luminance of the input is written into the
+given channel of an RGB frame, and the other channels are set to zero.
+
+@example
+$ cvtool channel -c r < color.ppm > red.pgm
+$ cvtool channel -r -c r < red.pgm > color-red-only.ppm
+@end example
+
+@node color
+@subsection color
+@cmindex color
+@code{color [-h|--hue=@var{h}] [-s|--saturation=@var{s}]
+[-l|--lightness=@var{l}] [-c|--contrast=@var{c}]
+[-g|--gamma=(@var{g}|@var{gr},@var{gg},@var{gb})]}
+
+@noindent
+Color adjustment.
+
+Hue, saturation, lightness, and constrast are manipulated in the HSL (Hue,
+Saturation, Lightness) color space. @var{h} is an additive constant to the hue
+angle, in degrees. @var{s}, @var{l}, @var{c} measure the relative change in
+saturation, lightness, contrast: -1 means the result will be zero, 0 means the
+result will be the same as the original, and +1 means that the result will be
+two times as high as the original. Values greater than +1 are possible. For
+example, s = -1 will convert the input frames to graylevels. See the
+@url{http://en.wikipedia.org/wiki/HLS_color_space,Wikipedia entry for HSL color
+space} for more information.
+
+@example
+$ cvtool color -h 120 < red.pnm > green.pnm
+$ cvtool color -h 120 < green.pnm > blue.pnm
+$ cvtool color -h 120 < blue.pnm > red.pnm
+$ cvtool color -s -1 < colored.pnm > gray.pnm
+$ cvtool color -l +1 < dark.pnm > light.pnm
+@end example
+
+@node gamma
+@subsection gamma
+@cmindex gamma
+@code{gamma}
+
+@noindent
+Gamma correction.
+
+@example
+$ cvtool gamma -g 2.2 < dark.pnm > bright.pnm
+@end example
+
+@node invert
+@subsection invert
+@cmindex invert
+@code{invert}
+
+@noindent
+Invert input frames.
+
+@example
+$ cvtool invert < in.pnm > out.pnm
+@end example
+
+
+@node Drawing
+@section Drawing
+
+@menu
+* draw::
+@end menu
+
+@node draw
+@subsection draw
+@cmindex draw
+@code{draw 
+[-w|--width=@var{width}] 
+[-d|--dash=@var{dash-specification}] 
+[-l|--line-cap=butt|round|square] 
+[-L|--line-join=miter|round|bevel] 
+[-s|--border-style=none|color|pattern|multipattern|linear-gradient|radial-gradient]
+[-c|--border-color=@var{color}] 
+[-p|--border-pattern=@var{file}] 
+[-g|--border-gradient=@var{gradient-specification}] 
+[-S|--fill-style=none|color|pattern|multipattern|linear-gradient|radial-gradient]
+[-C|--fill-color=@var{color}] 
+[-P|--fill-pattern=@var{file}]
+[-G|--fill-gradient=@var{gradient-specification}]
+[-f|--font-family=@var{font}] 
+[-t|--font-slant=normal|italic|oblique] 
+[-W|--font-weight=normal|bold] 
+[-F|--font-size=@var{size}|@var{size-x},@var{size-y}] 
+[-j|--justify-x=left|right|center] 
+[-J|--justify-y=bottom|top|center] 
+[-a|--antialias] 
+[-u|--unit]
+@var{command@dots{}}}
+
+@noindent
+Draw simple geometric forms, lines and curves, and/or text.
+
+The style for the object lines and the filling can be specified separately; it
+is either @samp{none} (line/filling is not drawn), @samp{color} (solid color),
+@samp{pattern} (a pattern read from a file), @samp{multipattern} (a different
+pattern for each input frame, all read from a file), @samp{linear-gradient} (a
+linear gradient), or @samp{radial-gradient} (a radial gradient).  The default
+is the solid color black for lines and no filling.
+
+A linear gradient specification @code{x0,y0,color0,x1,y1,color1} defines a
+gradient along the line from start point @code{x0,y0} (with color @code{color0}
+to end point @code{x1,y1} (with color @code{color1}). Any number of additional
+color stops can be added by appending an offset value and its associated color
+to the gradient specification. The offsets must be between 0.0 and 1.0 and
+describe the position on the gradient line, where 0.0 is the start point and
+1.0 is the end point.
+
+A radial gradient specification @code{x0,y0,r0,color0,x1,y1,r1,color1} defines
+a gradient from the start cirlce @code{x0,y0,r0} with color @code{color0} to
+the end circle @code{x1,y1,r1} with color @code{color1}. Additional stops can
+be added in the same way as for linear gradients.
+
+The style of lines can be further adjusted with the @option{--width},
+@option{--dash}, @option{--line-cap}, and @option{--line-join} options. The
+@option{--width} option selects the line width; it is 2.0 by default. The
+@option{--dash} takes a list of values that specify alternating lengths for
+"line on" and "line off" segments of a line. If only one value is given, these
+lengths are equal.  The @option{--line-cap} option selects the style of line
+and curve ends.  The @option{--line-join} options selects the style of the
+meeting point of two line or curve segments.
+
+Antialiasing can be turned on (default) and off with @option{--antialias}.
+
+If @option{--unit} is given, then all coordinates and sizes on the command line
+refer to a frame of size 1x1. All values are then scaled so that they match the
+real frame dimensions. For example, the point (0.5,0.5) will always be in the
+middle of a frame, regardless of the frame dimensions.
+
+Text is drawn relative to the current drawing position (previously set with 
+@code{move_to}, for example). By default, the current drawing position sets the
+bottom left point of the first character of the text. This can be changed with
+the @option{--justify-x} and @option{--justify-y} options. 
+The font family, slant, weight, and size can be chosen. Note that you may not
+get an error message if @option{--font-family} fails to set the given font,
+because the underlying library may not report this error.  If you use two
+values for the font size, then the first applies to the horizontal direction
+and the second to the vertical direction, so that you can scale the font
+asymmetrically.
+
+A drawing command consists of a command name and parameter sets that define one
+or more instances of the command.
+
+Simple geometric forms:
+@itemize @asis
+@item @code{rectangle @var{topleft-x},@var{topleft-y},@var{width},@var{height} [@dots{}]}@*
+Draw a rectangle.
+@item @code{circle @var{center-x},@var{center-y},@var{radius} [@dots{}]}@*
+Draw a circle.
+@item @code{ellipse @var{rect-topleft-x},@var{rect-topleft-y},@var{width},@var{height} [@dots{}]}@*
+Draw an ellipse in the given enclosing rectangle.
+@item @code{arc @var{center-x},@var{center-y},@var{radius},@var{start-angle},@var{stop-angle}}@*
+Draw a part of a circle, from the given start angle to the given stop angle.
+@end itemize
+
+Text:
+@itemize @asis
+@item @code{text @var{string}}@*
+Print the string at the current drawing position.
+@end itemize
+
+Lines and curves:
+@itemize @asis
+@item @code{move_to @var{x},@var{y} [@dots{}]}@*
+Move current point.
+@item @code{line_to @var{x},@var{y} [@dots{}]}@*
+Draw a line from the old current point to the new current point.
+@item @code{curve_to @var{x0},@var{y0},@var{x1},@var{y1},@var{x2},@var{y2} [@dots{}]}@*
+Draw a curve from the old current point to the new current point @var{x2},@var{y2}, Using
+the control points @var{x0},@var{y0} and @var{x1},@var{y1}.
+@item @code{rel_move_to @var{dx},@var{dy} [@dots{}]}@*
+Move the current point using relative coordinates.
+@item @code{rel_line_to @var{dx},@var{dy} [@dots{}]}@*
+Draw a line using relative coordinates.
+@item @code{rel_curve_to @var{dx0},@var{dy0},@var{dx1},@var{dy1},@var{dx2},@var{dy2} [@dots{}]}@*
+Draw a curve using relative coordinates.
+@item @code{close}@*
+Close the currnet line/curve figure: draw a line from the current point to the start point of 
+the figure and combine start and end point into one point.
+@end itemize
+
+Open lines and curves will automatically be closed when drawing geometric forms or text.
+
+The draw command is only a simple interface to the excellent
+@url{http://www.cairographics.org/,CAIRO} graphics library.  Much of the
+@url{http://www.cairographics.org/documentation,CAIRO documentation} is useful
+for this command, too, especially the @url{http://www.cairographics.org/FAQ,FAQ}.
+
+@example
+# Draw two green circles with a line width of 5.
+$ cvtool draw -w 5 -c green circle 50,50,40 50,50,20 \
+  < blank.pnm > circle.pnm
+# The same, but filled with linear gradient from red to yellow to blue.
+$ cvtool draw -w 5 -S linear-gradient \
+  -G 10,50,red,90,50,blue,0.5,yellow circle 50,50,40 50,50,20 \
+  < blank.pnm > circle.pnm
+# Display one video inside another video in the form of a circle.
+$ cvtool draw -s none -S multipattern -P video2.pnm circle 50,50,40 \
+  < video1.onm > out.pnm
+# Print a string exactly centered in the middle of blank.pnm.
+$ cvtool draw -u -f "Serif" -F 0.1,0.1 -j center -J center \
+  move_to 0.5,0.5 text "Hello world" \
+  < blank.pnm > text.pnm
+@end example
+
+
+@node Filtering Frames
+@section Filtering Frames
+
+@menu
+* gauss::
+* mean::
+* median::
+* min::
+* max::
+* convolve::
+* laplace::
+* unsharpmask::
+@end menu
+
+@node gauss
+@subsection gauss
+@cmindex gauss
+@code{filter gauss [-3|--3d] -k|--k=@var{k}}@*
+@code{filter gauss [-3|--3d] -s|--sigma=@var{s}}@*
+@code{filter gauss [-3|--3d] -x|--k-x=@var{kx} -y|--k-y=@var{ky}
+[-t|--k-t=@var{kt}]}@*
+@code{filter gauss [-3|--3d] [-k|--k=@var{k}] [-x|--k-x=@var{kx}]
+[-y|--k-y=@var{ky}] [-t|--k-t=@var{kt}] [-s|--sigma=@var{s}]
+[--sigma-x=@var{sx}] [--sigma-y=@var{sy}] [--sigma-t=@var{st}]}
+
+@noindent
+Filter framess with a Gauss filter, in 2D or 3D (with the third dimension being
+the time). The kernel size can be given for each dimension, or once for all. It
+will be (2@var{kx}+1)x(2@var{ky}+1)[x(2@var{kt}+1)]. Different values for each
+direction lead to asymmetric filtering.  
+The gauss filter can be specified by
+the sigma value(s): the mask size will be computed so that roughly 95% of the
+mass lies within the resulting mask. It is also possible to specify both sigma
+and k.
+
+@example
+$ cvtool gauss --3d -k 3 < video.pnm > smoothed-video.pnm
+@end example
+
+@node mean
+@subsection mean
+@cmindex mean
+@code{filter mean [-3|--3d] -k|--k=@var{k}}@*
+@code{filter mean [-3|--3d] -x|--k-x=@var{kx} -y|--k-y=@var{ky}
+[-t|--k-t=@var{kt}]}@*
+
+@noindent
+Filter frames with a Mean filter, in 2D or 3D (with the third dimension being
+the time). The kernel size can be given for each dimension, or once for all. It
+will be (2@var{kx}+1)x(2@var{ky}+1)[x(2@var{kt}+1)]. Different values for each
+direction lead to asymmetric filtering.  
+
+@example
+$ cvtool mean -k 2 < in.pnm > out.pnm
+@end example
+
+@node median
+@subsection median
+@cmindex median
+@code{filter median [-a|--approximated] [-3|--3d] -k|--k=@var{k}}@*
+@code{filter median [-a|--approximated] [-3|--3d] -x|--k-x=@var{kx} -y|--k-y=@var{ky}
+[-t|--k-t=@var{kt}]}@*
+
+@noindent
+Filter frames with a Median filter, in 2D or 3D (with the third dimension being
+the time). The kernel size can be given for each dimension, or once for all. It
+will be (2@var{kx}+1)x(2@var{ky}+1)[x(2@var{kt}+1)]. Different values for each
+direction lead to asymmetric filtering.  
+
+If the @var{--approxmated} option is given, then the median will be approximated.
+This helps to allow larger mask sizes.
+
+@example
+$ cvtool median -a -k 2 < in.pnm > out.pnm
+@end example
+
+@node min
+@subsection min
+@cmindex min
+@code{filter min [-3|--3d] -k|--k=@var{k}}@*
+@code{filter min [-3|--3d] -x|--k-x=@var{kx} -y|--k-y=@var{ky}
+[-t|--k-t=@var{kt}]}@*
+
+@noindent
+Filter frames with a Minimum filter, in 2D or 3D (with the third dimension being
+the time). The kernel size can be given for each dimension, or once for all. It
+will be (2@var{kx}+1)x(2@var{ky}+1)[x(2@var{kt}+1)]. Different values for each
+direction lead to asymmetric filtering.  
+
+@example
+$ cvtool min -k 2 < in.pnm > out.pnm
+@end example
+
+@node max
+@subsection max
+@cmindex max
+@code{filter max [-3|--3d] -k|--k=@var{k}}@*
+@code{filter max [-3|--3d] -x|--k-x=@var{kx} -y|--k-y=@var{ky}
+[-t|--k-t=@var{kt}]}@*
+
+@noindent
+Filter frames with a Maximum filter, in 2D or 3D (with the third dimension being
+the time). The kernel size can be given for each dimension, or once for all. It
+will be (2@var{kx}+1)x(2@var{ky}+1)[x(2@var{kt}+1)]. Different values for each
+direction lead to asymmetric filtering.  
+
+@example
+$ cvtool max -k 2 < in.pnm > out.pnm
+@end example
+
+@node convolve
+@subsection convolve
+@cmindex convolve
+@code{convolve -K|--kernel=@var{K}}@*
+@code{convolve -X|--vector-x=@var{X} -Y|--vector-y=@var{Y}
+[-T|--vector-t=@var{T}]}
+
+@noindent
+Convolve frames with the given convolution kernel.
+
+Both 2D and 3D kernels are accepted (the third dimension is the time). If the
+kernel is separable, the vectors that generate it can be given instead, to
+reduce computation costs. All kernel elements must be integers. The size of the
+kernel must be an odd number in each dimension.
+
+@example
+# Both commands are equivalent to 2D smoothing with the 
+# mean filter with k=1:
+$ cvtool convolve -K 3x3:1,1,1,1,1,1,1,1,1 < in.pnm > out.pnm
+$ cvtool convolve -X 3:1,1,1 -Y 3:1,1,1    < in.pnm > out.pnm
+@end example
+
+@node laplace
+@subsection laplace
+@cmindex laplace
+@code{laplace [-c|--c=@var{c}]}
+
+@noindent
+Sharpens the input frames using the Laplace operator.
+
+The sharpness factor @var{c} must be greater than or equal to zero. Larger values
+increase the effect. The default is 0.5.
+
+@example
+$ cvtool laplace -c 0.7 < smooth.pnm > sharp.pnm
+@end example
+
+@node unsharpmask
+@subsection unsharpmask
+@cmindex unsharpmask
+@code{unsharpmask -u|--unsharp=@var{file} [-c|--c=@var{c}]}
+
+@noindent
+Sharpens the input frames using unsharp masking.
+
+The unsharp version of the input frames must be given using the
+@samp{--unsharp} option.
+It can be produced using e.g. a 3x3 Gauss filter. The sharpness parameter
+@var{c} must be from (0.5, 1.0). The default is 0.7.
+
+@example
+$ cvtool unsharpmask -u smoothsmooth.pnm -c 0.7 < smooth.pnm > sharp.pnm
+@end example
+
+
+@node Detecting Image Features
+@section Detecting Image Features
+
+@menu
+* edge::
+@end menu
+
+@node edge
+@subsection edge
+@cmindex edge
+@code{edge sobel}@*
+@code{edge canny -s|--sigma=@var{sigma} -l|--low=@var{l} -h|--high=@var{h}}
+
+@noindent
+Detect edges.
+
+Sobel will generate graylevel frames: the brighter a point, the stronger the
+edge.
+
+Canny will generate binary frames. The @var{sigma} parameter is for Gauss
+smoothing.  @var{l} and @var{h} are used for Hysterese thresholding; both must
+be from [0,1].
+
+If the input is PFS, then the output will be PFS too and will contain both a
+channel containing the edge strengths and a channel containing the edge
+directions. If the input is PNM, then the output will be graylevel frames
+containing only the strength information.
+
+@example
+$ cvtool edge sobel < in.pgm > gray-edges.pgm
+$ cvtool edge canny -s 1.2 -l 4 -h 8 < in.pgm > bw-edges.pgm
+@end example
+
+
+@node Comparing Frames
+@section Comparing Frames
+
+@menu
+* diff::
+@end menu
+
+@node diff
+@subsection diff
+@cmindex diff
+@code{diff [-s|--statistics] [-o|--output=@var{file}] @var{file-1} @var{file-2}}
+
+@noindent
+Shows the differences between the two sources. 
+
+The sources must have the same pixel type, width, and height. This command
+produces frames of the same dimensions and of the same pixel type. Each pixel
+will be the absolute value of the difference of the corresponding pixels in the
+two sources.  For RGB frames, the values will be computed for each channel
+separately.
+
+If @option{--statistics} is used, the command will also compute the minimum,
+maximum, mean, and median error, and the standard deviation. For RGB frames,
+these values will be computed for each channel separately. For YUV frames, only
+the Y channel is considered.  The output will be printed to @code{stderr}, unless it
+is redirected with the @option{--output} option. If the output is redirected to
+@code{stdout} (-), then only the statistics and no frames will be written to @code{stdout}.
+
+@example 
+$ cvtool create -w 10 -h 10 -c r255g0b0 > red.pnm
+$ cvtool create -w 10 -h 10 -c r0g255b0 > green.pnm
+$ cvtool diff -s -o - red.pnm green.pnm
+frame pair 0: minimum error      = 1.0000 1.0000 0.0000
+frame pair 0: maximum error      = 1.0000 1.0000 0.0000
+frame pair 0: median error       = 1.0000 1.0000 0.0000
+frame pair 0: mean error         = 0.9600 0.9600 0.0000
+frame pair 0: standard deviation = 0.1969 0.1969 0.0000
+@end example
+
+
+@node High Dynamic Range (HDR) Images
+@section High Dynamic Range (HDR) Images
+
+@menu
+* tonemap::
+@end menu
+
+@node tonemap
+@subsection tonemap
+@cmindex tonemap
+@code{tonemap -m|--method=drago03  [-l|--max-absolute-luminance=@var{l}] [--max-display-luminance=@var{d}] [--bias=@var{b}]}
+@code{tonemap -m|--method=durand02 [-l|--max-absolute-luminance=@var{l}] [--sigma-spatial=@var{ss}] [--sigma-color=@var{sc}] [--base-contrast=@var{bc}]}
+
+@noindent
+Tone map frames. 
+
+High dynamic range (HDR) frames are read from standard input, and low dynamic
+range (LDR) frames are written to standard output.  See the original papers for
+a description of the parameters.
+
+The default for the maximum absolute luminance is to get it from the file (if specified), or else 150.0.
+
+The defaults for drago03 are @var{d}=200.0, @var{b}=0.85.
+
+The defaults for durand02 are @var{ss}=0.3, @var{sc}=0.4, @var{bc}=2.0. The
+results of this method need to be gamma corrected!
+
+
+See also:
+@itemize @asis
+@item For general information:@*
+E. Reinhard, G. Ward, S. Pattanaik, and P. Debevec. High Dynamic
+Range Imaging: Acquisition, Display and Image-based Lighting. @cite{Morgan Kaufmann}, 2005.
+@item For the @code{drago03} method:@*
+F. Drago, K. Myszkowski, T. Annen and N. Chiba. Adaptive Logarithmic Mapping For Displaying High Contrast Scenes.
+@cite{Proc. Eurographics 2003}.
+@item For the @code{durand02} method:@*
+F. Durand and J. Dorsey. Fast Bilateral Filtering for the Display of 
+High-Dynamic-Range Images. @cite{Proc. ACM SIGGRAPH 2002}, pp. 257-266.
+@end itemize
+
+@node Miscellaneous
+@section Miscellaneous
+
+@menu
+* visualize::
+@end menu
+
+@node visualize
+@subsection visualize
+@cmindex visualize
+@code{visualize scalar [-p|--pseudo-color] [-m|--min=@var{m}] [-M|--max=@var{M}] [-l|--log=@var{base}]}@*
+@code{visualize vector2 -m|--mode=color}@*
+@code{visualize vector2 -m|--mode=needle [-x|--sample-x=@var{x}] [-y|--sample-y=@var{y}] [-X|--dist-x=@var{dx}]
+[-Y|--dist-y=@var{dy}] [-f|--factor=@var{f}]}
+
+@code{visualize scalar}: Visualizes scalar values by transforming values from
+[@var{m},@var{M}] to [0,1] and writing the result as graylevel frames. @var{M}
+and @var{m} are automatically determined from the input if they are not given.
+By default, the transformation is linear. If @samp{--log} is given, then the
+transformation will use the logarithm with the given base. If
+@samp{--pseudo-color} is given, then pseudo colors are used instead of gray
+levels.
+
+@code{visualize vector2}: Reads vector fields and visualizes them.
+Visualization as colors: Each of the x,y,z components, which range from -1 to
+1, are transformed to R,G,B values that range from 0 to 1.  Visualization as
+needle diagrams: Every @var{x}-th vector in horizontal direction and every
+@var{y}-th vector in vertical direction will be represented by a needle. The
+needles will have a distance of @var{dx} pixels in horizontal and @var{dy}
+pixels in vertical direction.  The needle length is the length of the vector
+after it was scaled with the factor @var{f}. The default values are
+@var{x}=@var{y}=@var{dx}=@var{dy}=10, @var{f}=1.0.
+
+
+@node Command index
+@appendix Command index
+@menu
+* Command index
+@end menu
+
+@printindex cm
+
+
+@node Copying Information
+@appendix Copying Information
+
+@menu
+* GNU Free Documentation License::   License for copying this manual.
+* GNU GPL::                          License for copying the program.
+@end menu
+
+@node GNU Free Documentation License
+@unnumberedsec GNU Free Documentation License
+@include fdl.texi
+@node GNU GPL
+@unnumberedsec GNU GPL
+@include gpl.texi
+
+
+@bye
