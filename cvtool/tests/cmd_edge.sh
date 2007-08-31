@@ -4,7 +4,7 @@
 
 $CVTOOL create -h 1 -w 1 > dummy.pnm 
 
-$CVTOOL edge sobel 			< dummy.pnm > /dev/null 
-$CVTOOL edge canny -s 1.0 -l 10 -h 30	< dummy.pnm > /dev/null 
+$CVTOOL edge -m sobel 				< dummy.pnm > /dev/null 
+$CVTOOL edge -m canny -s 1.0 -l 0.1 -h 0.3	< dummy.pnm > /dev/null 
 
 cmd_tests_cleanup
