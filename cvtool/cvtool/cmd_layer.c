@@ -3,7 +3,7 @@
  * 
  * This file is part of cvtool, a computer vision tool.
  *
- * Copyright (C) 2006  Martin Lambers <marlam@marlam.de>
+ * Copyright (C) 2006, 2007  Martin Lambers <marlam@marlam.de>
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -16,8 +16,7 @@
  *   GNU General Public License for more details.
  *
  *   You should have received a copy of the GNU General Public License
- *   along with this program; if not, write to the Free Software Foundation,
- *   Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "config.h"
@@ -25,23 +24,21 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
+#include <errno.h>
 
 #include <cvl/cvl.h>
 
-#include "xalloc.h"
+#include "mh.h"
 
 
 void cmd_layer_print_help(void)
 {
-    cvl_msg_fmt_req(
+    mh_msg_fmt_req(
 	    "layer -m|--mode=min|max|median|or|and|xor|diff|add|xadd|sub|xsub|mul|div file...\n"
 	    "\n"
 	    "Layers the frames from the given files on top of each other, using the given mode. "
-	    "Layering will be done for each channel separately. Graylevel frames have only one "
-	    "channel. Color frames have the channels R, G, and B. Graylevel layering is only done "
-	    "if all input frames are graylevel. The input frames may differ in size. In this case, "
-	    "the result will be big enough to hold all input frames, and the input frames are centered "
-	    "on the result.");
+	    "Layering will be done for each channel separately. The input frames may differ in size. "
+	    "In this case, they will be implicitly scaled to a common size.");
 }
 
 
@@ -50,147 +47,79 @@ int cmd_layer(int argc, char *argv[])
     /* these names correspond to the cvl_layer_mode_t values */
     const char *mode_names[] = { "min", "max", "median", "or", "and", "xor", 
 	"diff", "add", "xadd", "sub", "xsub", "mul", "div", NULL };
-    cvl_option_name_t mode = { -1, mode_names };
-    cvl_option_t options[] = 
+    mh_option_name_t mode = { -1, mode_names };
+    mh_option_t options[] = 
     { 
-	{ "mode", 'm', CVL_OPTION_NAME, &mode, true },
-	cvl_option_null 
+	{ "mode", 'm', MH_OPTION_NAME, &mode, true },
+	mh_option_null 
     };
     int first_argument;
     int number_of_files;
     FILE **f;
-    cvl_io_info_t **input_infos;
-    cvl_io_info_t *output_info;
+    cvl_stream_type_t stream_type;
     cvl_frame_t **input_frames;
-    int *offset_x;
-    int *offset_y;
     cvl_frame_t *frame;
     bool error;
 
-    cvl_msg_set_command_name("%s", argv[0]);
-    if (!cvl_getopt(argc, argv, options, 1, -1, &first_argument))
+    mh_msg_set_command_name("%s", argv[0]);
+    if (!mh_getopt(argc, argv, options, 1, -1, &first_argument))
     {
 	return 1;
     }
-    error = false;
     number_of_files = argc - first_argument;
     
-    f = xmalloc(number_of_files * sizeof(FILE *));
-    input_infos = xmalloc(number_of_files * sizeof(cvl_io_info_t *));
+    f = mh_alloc(number_of_files * sizeof(FILE *));
+    error = false;
     for (int i = 0; i < number_of_files; i++)
     {
 	if (!(f[i] = fopen(argv[first_argument + i], "r")))
 	{
-	    cvl_msg_err("cannot open %s: %s", argv[first_argument + i], strerror(errno));
+	    mh_msg_err("Cannot open %s: %s", argv[first_argument + i], strerror(errno));
 	    error = true;
 	}
-	input_infos[i] = cvl_io_info_new();
     }
-    input_frames = xmalloc(number_of_files * sizeof(cvl_frame_t *));
-    offset_x = xmalloc(number_of_files * sizeof(int));
-    offset_y = xmalloc(number_of_files * sizeof(int));
+    input_frames = mh_alloc(number_of_files * sizeof(cvl_frame_t *));
     
-    output_info = cvl_io_info_new();
-    if (!error)
+    while (!error && !cvl_error())
     {
-	cvl_io_info_link_output_to_input(output_info, input_infos[0]);
-    }
-
-    while (!error)
-    {
-	// Stop on EOF
-	bool eof = false;
-	for (int i = 0; i < number_of_files; i++)
-	{
-	    if (cvl_io_eof(f[i]))
-	    {
-		eof = true;
-		break;
-	    }
-	}
-	if (eof)
-	{
-	    break;
-	}
-	
 	// Read frames, determine max width and height.
 	int maxwidth = 0;
 	int maxheight = 0;
+	bool stop = false;
 	for (int i = 0; i < number_of_files; i++)
 	{
-	    if (!cvl_io_read(f[i], input_infos[i], &(input_frames[i])))
+	    cvl_read(f[i], i == 0 ? &stream_type : NULL, &(input_frames[i]));
+	    if (!input_frames[i])
 	    {
-		error = true;
+		for (int j = 0; j < i; j++)
+		    cvl_frame_free(input_frames[i]);
+		stop = true;
 		break;
 	    }
 	    if (cvl_frame_width(input_frames[i]) > maxwidth)
-	    {
 		maxwidth = cvl_frame_width(input_frames[i]);
-	    }
 	    if (cvl_frame_height(input_frames[i]) > maxheight)
-	    {
 		maxheight = cvl_frame_height(input_frames[i]);
-	    }
 	}
-	if (error)
-	{
+	if (stop)
 	    break;
-	}
 	
-	/* Determine the output pixel type */
-	cvl_pixel_type_t output_pixel_type = CVL_PIXEL_GRAY;
-	for (int i = 0; i < number_of_files; i++)
-	{
-	    if (cvl_frame_pixel_type(input_frames[i]) != CVL_PIXEL_GRAY)
-	    {
-		output_pixel_type = CVL_PIXEL_RGB;
-		break;
-	    }
-	}
-	if (output_pixel_type != CVL_PIXEL_GRAY)
-	{
-	    for (int i = 0; i < number_of_files; i++)
-	    {
-		cvl_frame_to_rgb(input_frames[i]);
-	    }
-	}
-
 	// Layer the frames
-	frame = cvl_frame_new(output_pixel_type, maxwidth, maxheight);
+	frame = cvl_frame_new(maxwidth, maxheight, cvl_frame_channels(input_frames[0]),
+		cvl_frame_format(input_frames[0]), cvl_frame_type(input_frames[0]), CVL_TEXTURE);
+	cvl_layer(frame, input_frames, number_of_files, mode.value);
 	for (int i = 0; i < number_of_files; i++)
-	{
-	    offset_x[i] = maxwidth / 2 - cvl_frame_width(input_frames[i]) / 2;
-	    offset_y[i] = maxheight / 2 - cvl_frame_height(input_frames[i]) / 2;
-	}
-	cvl_layer(frame, mode.value, input_frames, offset_x, offset_y, number_of_files);	
-	for (int i = 0; i < number_of_files; i++)
-	{
 	    cvl_frame_free(input_frames[i]);
-	}
 
 	// Output
-	if (!cvl_io_write(stdout, output_info, frame))
-	{
-	    cvl_frame_free(frame);
-	    error = true;
-	    break;
-	}
+	cvl_write(stdout, stream_type, frame);
 	cvl_frame_free(frame);
     }
 
     for (int i = 0; i < number_of_files; i++)
-    {
 	if (f[i])
-	{
 	    fclose(f[i]);
-	}
-	cvl_io_info_free(input_infos[i]);
-    }
     free(f);
-    free(input_infos);
     free(input_frames);
-    free(offset_x);
-    free(offset_y);
-    cvl_io_info_free(output_info);
-    return error ? 1 : 0;
+    return error || cvl_error() ? 1 : 0;
 }

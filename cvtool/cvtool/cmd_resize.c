@@ -3,7 +3,7 @@
  * 
  * This file is part of cvtool, a computer vision tool.
  *
- * Copyright (C) 2005, 2006  Martin Lambers <marlam@marlam.de>
+ * Copyright (C) 2005, 2006, 2007  Martin Lambers <marlam@marlam.de>
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -16,8 +16,7 @@
  *   GNU General Public License for more details.
  *
  *   You should have received a copy of the GNU General Public License
- *   along with this program; if not, write to the Free Software Foundation,
- *   Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "config.h"
@@ -28,10 +27,11 @@
 
 #include <cvl/cvl.h>
 
+#include "mh.h"
 
 void cmd_resize_print_help(void)
 {
-    cvl_msg_fmt_req(
+    mh_msg_fmt_req(
 	    "resize -w|--width=<w> -h|--height=<h> [-x|--x-offset=<x>] [-y|--y-offset=<y>] "
 	    "[-c|--color=<color>]\n"
 	    "\n"
@@ -42,52 +42,49 @@ void cmd_resize_print_help(void)
 	    "Holes are filled with the given color (default is black).");
 }
 
+static bool check_color(const char *s)
+{
+    return (cvl_color_from_string(s) != CVL_COLOR_INVALID);
+}
 
 int cmd_resize(int argc, char *argv[])
 {
-    cvl_option_int_t w = { 0, 1, INT_MAX };
-    cvl_option_int_t h = { 0, 1, INT_MAX };
-    cvl_option_int_t x = { INT_MIN, INT_MIN + 1, INT_MAX };
-    cvl_option_int_t y = { INT_MIN, INT_MIN + 1, INT_MAX };
-    cvl_option_color_t color = { CVL_COLOR_BLACK };
-    cvl_option_t options[] =
+    mh_option_int_t w = { 0, 1, INT_MAX };
+    mh_option_int_t h = { 0, 1, INT_MAX };
+    mh_option_int_t x = { INT_MIN, INT_MIN + 1, INT_MAX };
+    mh_option_int_t y = { INT_MIN, INT_MIN + 1, INT_MAX };
+    mh_option_string_t c = { (char *)"black", check_color };
+    mh_option_t options[] =
     {
-	{ "width",      'w', CVL_OPTION_INT,   &w,     true },
-	{ "height",     'h', CVL_OPTION_INT,   &h,     true },
-	{ "x-offset",   'x', CVL_OPTION_INT,   &x,     false },
-	{ "y-offset",   'y', CVL_OPTION_INT,   &y,     false },
-	{ "color",      'c', CVL_OPTION_COLOR, &color, false },
-	cvl_option_null
+	{ "width",      'w', MH_OPTION_INT,    &w, true  },
+	{ "height",     'h', MH_OPTION_INT,    &h, true  },
+	{ "x-offset",   'x', MH_OPTION_INT,    &x, false },
+	{ "y-offset",   'y', MH_OPTION_INT,    &y, false },
+	{ "color",      'c', MH_OPTION_STRING, &c, false },
+	mh_option_null
     };
     bool compute_x;
     bool compute_y;
-    cvl_io_info_t *input_info;
-    cvl_io_info_t *output_info;
+    cvl_stream_type_t stream_type;
     cvl_frame_t *frame;
     cvl_frame_t *newframe;
-    bool error;
-
+    cvl_color_t color;
+    float fillval[4];
     
-    cvl_msg_set_command_name("%s", argv[0]);
-    if (!cvl_getopt(argc, argv, options, 0, 0, NULL))
+    mh_msg_set_command_name("%s", argv[0]);
+    if (!mh_getopt(argc, argv, options, 0, 0, NULL))
     {
 	return 1;
     }
     compute_x = (x.value == INT_MIN);
     compute_y = (y.value == INT_MIN);
+    color = cvl_color_from_string(c.value);
 
-    input_info = cvl_io_info_new();
-    output_info = cvl_io_info_new();
-    cvl_io_info_link_output_to_input(output_info, input_info);
-
-    error = false;
-    while (!cvl_io_eof(stdin))
+    while (!cvl_error())
     {
-	if (!cvl_io_read(stdin, input_info, &frame))
-	{
-	    error = true;
+	cvl_read(stdin, &stream_type, &frame);
+	if (!frame)
 	    break;
-	}
 	if (compute_x)
 	{
 	    x.value = (w.value - cvl_frame_width(frame)) / 2;
@@ -96,20 +93,15 @@ int cmd_resize(int argc, char *argv[])
 	{
 	    y.value = (h.value - cvl_frame_height(frame)) / 2;
 	}
-	newframe = cvl_resize(frame, color.value, w.value, h.value, x.value, y.value);
+	newframe = cvl_frame_new(w.value, h.value, cvl_frame_channels(frame), 
+		cvl_frame_format(frame), cvl_frame_type(frame), CVL_TEXTURE);
+	cvl_frame_set_taglist(newframe, cvl_taglist_copy(cvl_frame_taglist(frame)));
+	cvl_color_to_float(color, cvl_frame_format(frame), fillval);
+	cvl_resize(newframe, frame, x.value, y.value, fillval);
 	cvl_frame_free(frame);
-	cvl_io_info_set_width(output_info, cvl_frame_width(newframe));
-	cvl_io_info_set_height(output_info, cvl_frame_height(newframe));
-	if (!cvl_io_write(stdout, output_info, newframe))
-	{
-	    cvl_frame_free(newframe);
-	    error = true;
-	    break;
-	}
+	cvl_write(stdout, stream_type, newframe);
 	cvl_frame_free(newframe);
     }
 
-    cvl_io_info_free(input_info);
-    cvl_io_info_free(output_info);
-    return error ? 1 : 0;
+    return cvl_error() ? 1 : 0;
 }

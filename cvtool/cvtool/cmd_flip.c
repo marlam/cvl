@@ -3,7 +3,7 @@
  * 
  * This file is part of cvtool, a computer vision tool.
  *
- * Copyright (C) 2005, 2006  Martin Lambers <marlam@marlam.de>
+ * Copyright (C) 2005, 2006, 2007  Martin Lambers <marlam@marlam.de>
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -16,8 +16,7 @@
  *   GNU General Public License for more details.
  *
  *   You should have received a copy of the GNU General Public License
- *   along with this program; if not, write to the Free Software Foundation,
- *   Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "config.h"
@@ -28,54 +27,42 @@
 
 #include <cvl/cvl.h>
 
+#include "mh.h"
+
 
 void cmd_flip_print_help(void)
 {
-    cvl_msg_fmt_req(
+    mh_msg_fmt_req(
 	    "flip\n"
 	    "\n"
-	    "Flip frames (left/right).");
+	    "Flip frames vertically.");
 }
 
 
 int cmd_flip(int argc, char *argv[] UNUSED)
 {
-    cvl_option_t options[] = { cvl_option_null };
-    cvl_io_info_t *input_info;    
-    cvl_io_info_t *output_info;
+    mh_option_t options[] = { mh_option_null };
+    cvl_stream_type_t stream_type;
     cvl_frame_t *frame, *flipped_frame;
-    bool error;
 
-    cvl_msg_set_command_name("%s", argv[0]);    
-    if (!cvl_getopt(argc, argv, options, 0, 0, NULL))
+    mh_msg_set_command_name("%s", argv[0]);    
+    if (!mh_getopt(argc, argv, options, 0, 0, NULL))
     {
 	return 1;
     }
 
-    input_info = cvl_io_info_new();
-    output_info = cvl_io_info_new();
-    cvl_io_info_link_output_to_input(output_info, input_info);
-
-    error = false;
-    while (!cvl_io_eof(stdin))
+    while (!cvl_error())
     {
-	if (!cvl_io_read(stdin, input_info, &frame))
-	{
-	    error = true;
+	cvl_read(stdin, &stream_type, &frame);
+	if (!frame)
 	    break;
-	}
-	flipped_frame = cvl_flip(frame);
+	flipped_frame = cvl_frame_new_tpl(frame);
+	cvl_frame_set_taglist(flipped_frame, cvl_taglist_copy(cvl_frame_taglist(frame)));
+	cvl_flip(flipped_frame, frame);
 	cvl_frame_free(frame);
-	if (!cvl_io_write(stdout, output_info, flipped_frame))
-	{
-	    cvl_frame_free(flipped_frame);
-	    error = true;
-	    break;
-	}
+	cvl_write(stdout, stream_type, flipped_frame);
 	cvl_frame_free(flipped_frame);
     }
 
-    cvl_io_info_free(input_info);
-    cvl_io_info_free(output_info);
-    return error ? 1 : 0;
+    return cvl_error() ? 1 : 0;
 }

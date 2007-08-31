@@ -3,7 +3,7 @@
  * 
  * This file is part of cvtool, a computer vision tool.
  *
- * Copyright (C) 2005, 2006  Martin Lambers <marlam@marlam.de>
+ * Copyright (C) 2005, 2006, 2007  Martin Lambers <marlam@marlam.de>
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -16,8 +16,7 @@
  *   GNU General Public License for more details.
  *
  *   You should have received a copy of the GNU General Public License
- *   along with this program; if not, write to the Free Software Foundation,
- *   Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "config.h"
@@ -30,12 +29,14 @@
 
 #include <cvl/cvl.h>
 
+#include "mh.h"
+
 
 void cmd_shear_print_help(void)
 {
-    cvl_msg_fmt_req(
-	    "shear [-x|--shear-x=<angle-x>] [-y|--shear-y=<angle-y>] "
-	    "[-c|--color=<color>] [-i|--interpolation=none|bilinear]\n"
+    mh_msg_fmt_req(
+	    "shear [-x|--shear-x=<angle-x>] [-y|--shear-y=<angle-y>] [-c|--color=<color>] "
+	    "[-i|--interpolation=none|bilinear|biquadratic|bicubic|bicubic-b-spline|bicubic-cr-spline]\n"
 	    "\n"
 	    "Shear frames in horizontal and/or vertical direction, with the given "
 	    "angle(s) from (-90,90). Negative angles shear clockwise. "
@@ -43,63 +44,54 @@ void cmd_shear_print_help(void)
 	    "is black. The default interpolation type is bilinear.");
 }
 
+static bool check_color(const char *s)
+{
+    return (cvl_color_from_string(s) != CVL_COLOR_INVALID);
+}
 
 int cmd_shear(int argc, char *argv[])
 {
-    cvl_option_double_t ax = { 0.0, -90.0, false, 90.0, false };
-    cvl_option_double_t ay = { 0.0, -90.0, false, 90.0, false };
-    cvl_option_color_t color = { CVL_COLOR_BLACK };
-    const char *interpolation_names[] = { "none", "bilinear", NULL };
-    cvl_option_name_t interpolation = { 1, interpolation_names };
-    cvl_option_t options[] = 
+    mh_option_float_t ax = { 0.0, -90.0, false, 90.0, false };
+    mh_option_float_t ay = { 0.0, -90.0, false, 90.0, false };
+    mh_option_string_t c = { (char *)"black", check_color };
+    const char *interpolation_names[] = { "none", "bilinear", "biquadratic", 
+	"bicubic", "bicubic-b-spline", "bicubic-cr-spline", NULL };
+    mh_option_name_t interpolation = { 1, interpolation_names };
+    mh_option_t options[] = 
     {
-	{ "shear-x",       'x', CVL_OPTION_DOUBLE, &ax,            false },
-	{ "shear-y",       'y', CVL_OPTION_DOUBLE, &ay,            false },
-	{ "color",         'c', CVL_OPTION_COLOR, &color,         false },
-	{ "interpolation", 'i', CVL_OPTION_NAME,  &interpolation, false },
-	cvl_option_null
+	{ "shear-x",       'x', MH_OPTION_FLOAT,  &ax,            false },
+	{ "shear-y",       'y', MH_OPTION_FLOAT,  &ay,            false },
+	{ "color",         'c', MH_OPTION_STRING, &c,             false },
+	{ "interpolation", 'i', MH_OPTION_NAME,   &interpolation, false },
+	mh_option_null
     };
-    cvl_io_info_t *input_info;
-    cvl_io_info_t *output_info;
+    cvl_color_t color;
+    cvl_stream_type_t stream_type;
     cvl_frame_t *frame;
     cvl_frame_t *sheared_frame;
-    bool error;
+    float fillval[4];
 
-    
-    cvl_msg_set_command_name("%s", argv[0]);
-    if (!cvl_getopt(argc, argv, options, 0, 0, NULL))
+    mh_msg_set_command_name("%s", argv[0]);
+    if (!mh_getopt(argc, argv, options, 0, 0, NULL))
     {
 	return 1;
     }
-    ax.value = cvl_deg_to_rad(ax.value);
-    ay.value = cvl_deg_to_rad(ay.value);
+    color = cvl_color_from_string(c.value);
+    ax.value = mh_deg_to_rad(ax.value);
+    ay.value = mh_deg_to_rad(ay.value);
 
-    input_info = cvl_io_info_new();
-    output_info = cvl_io_info_new();
-    cvl_io_info_link_output_to_input(output_info, input_info);
-
-    error = false;
-    while (!cvl_io_eof(stdin))
+    while (!cvl_error())
     {
-	if (!cvl_io_read(stdin, input_info, &frame))
-	{
-	    error = true;
+	cvl_read(stdin, &stream_type, &frame);
+	if (!frame)
 	    break;
-	}
-    	sheared_frame = cvl_shear(frame, interpolation.value, color.value, ax.value, ay.value); 
+	cvl_color_to_float(color, cvl_frame_format(frame), fillval);
+    	sheared_frame = cvl_shear(frame, ax.value, ay.value, interpolation.value, fillval); 
+	cvl_frame_set_taglist(sheared_frame, cvl_taglist_copy(cvl_frame_taglist(frame)));
 	cvl_frame_free(frame);
-	cvl_io_info_set_width(output_info, cvl_frame_width(sheared_frame));
-	cvl_io_info_set_height(output_info, cvl_frame_height(sheared_frame));
-	if (!cvl_io_write(stdout, output_info, sheared_frame))
-	{
-	    cvl_frame_free(sheared_frame);
-	    error = true;
-	    break;
-	}
+	cvl_write(stdout, stream_type, sheared_frame);
 	cvl_frame_free(sheared_frame);
     }
 
-    cvl_io_info_free(input_info);
-    cvl_io_info_free(output_info);
-    return error ? 1 : 0;
+    return cvl_error() ? 1 : 0;
 }

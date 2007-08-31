@@ -3,7 +3,7 @@
  * 
  * This file is part of cvtool, a computer vision tool.
  *
- * Copyright (C) 2006  Martin Lambers <marlam@marlam.de>
+ * Copyright (C) 2006, 2007  Martin Lambers <marlam@marlam.de>
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -16,35 +16,51 @@
  *   GNU General Public License for more details.
  *
  *   You should have received a copy of the GNU General Public License
- *   along with this program; if not, write to the Free Software Foundation,
- *   Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "config.h"
 
+#if !HAVE_LIBCAIRO
+
+#include "mh.h"
+
+void cmd_draw_print_help(void)
+{
+    mh_msg_fmt_req("This version of " PACKAGE_NAME " was compiled without support for the draw command.");
+}
+
+int cmd_draw(int argc UNUSED, char *argv[] UNUSED)
+{
+    mh_msg_fmt_err("This version of " PACKAGE_NAME " was compiled without support for the draw command.");
+    return 1;
+}
+
+#else // HAVE_LIBCAIRO
+
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <locale.h>
 #include <string.h>
 #include <ctype.h>
 #include <float.h>
 #include <math.h>
 #include <errno.h>
-extern int errno;
-
-#include <cvl/cvl.h>
 
 #include <cairo.h>
 
-#include "xalloc.h"
-#include "xstrndup.h"
+#include <cvl/cvl.h>
 
-#include "string_to_utf8.h"
+#include "mh.h"
+
+#include "striconv.h"
+#include "localcharset.h"
 
 
 void cmd_draw_print_help(void)
 {
-    cvl_msg_fmt_req(
+    mh_msg_fmt_req(
 	    "draw "
 	    "[-w|--width=<w>] "
 	    "[-d|--dash=<on0,off0,...>] "
@@ -89,6 +105,41 @@ void cmd_draw_print_help(void)
 	    "rel_curve_to <dx0,dy0,dx1,dy1,dx2,dy2> [...]\n"
 	    "close\n"
 	    "Lines and curves will implicitly be closed when drawing geometric forms or text.");
+}
+
+
+/* Converts a string from the character set of the users locale to UTF-8.
+ * This function returns a pointer to an allocated string, or NULL if the
+ * conversion fails and default_value is NULL. If the conversion fails and
+ * default_value is not NULL, then the allocated string will be a duplicate of
+ * the default_value string.
+ * This function tries to determine the users character set regardless of the
+ * current locale settings of this process, so that it works as expected for
+ * programs that do not use setlocale() at all. */
+char *string_to_utf8(const char *s, const char *default_value)
+{
+    char *locale_bak;
+    char *result;
+    
+    locale_bak = setlocale(LC_CTYPE, NULL);
+    if (locale_bak)
+    {
+	locale_bak = mh_strdup(locale_bak);
+	setlocale(LC_CTYPE, "");
+    }
+    if (!(result = str_iconv(s, locale_charset(), "UTF-8")))
+    {
+	if (default_value)
+	{
+	    result = mh_strdup(default_value);
+	}
+    }
+    if (locale_bak)
+    {
+	setlocale(LC_CTYPE, locale_bak);
+	free(locale_bak);
+    }
+    return result;
 }
 
 
@@ -147,7 +198,7 @@ static bool get_params(const draw_cmd_t *cmd, const char *s, double *d)
     
     if (cmd->params_len > 0 && !s)
     {
-	cvl_msg_err("missing parameters for %s", cmd->name);
+	mh_msg_err("missing parameters for %s", cmd->name);
 	return false;
     }
     p = s;
@@ -157,7 +208,7 @@ static bool get_params(const draw_cmd_t *cmd, const char *s, double *d)
 	value = strtod(p, &q);
 	if (q == p || *q != (i == cmd->params_len - 1 ? '\0' : ',') || errno == ERANGE) 
 	{
-	    cvl_msg_err("invalid parameters %s for %s", s, cmd->name);
+	    mh_msg_err("invalid parameters %s for %s", s, cmd->name);
 	    return false;
 	}
 	d[i] = value;
@@ -197,7 +248,7 @@ static bool parse_draw_cmds(char *argv[],
 		    (int (*)(const void *, const void *))draw_cmd_cmp);
     	    if (!current_cmd)
 	    {
-		cvl_msg_err("invalid drawing command %s", argv[arg]);
+		mh_msg_err("invalid drawing command %s", argv[arg]);
 		error = true;
 		break;
 	    }
@@ -212,20 +263,20 @@ static bool parse_draw_cmds(char *argv[],
 	}
 	else // state == PARAMS
 	{
-	    *cmd_list = xnrealloc(*cmd_list, ++(*cmd_list_len), sizeof(draw_cmd_t *));
+	    *cmd_list = mh_realloc(*cmd_list, mh_alloc_mul(++(*cmd_list_len), sizeof(draw_cmd_t *)));
 	    (*cmd_list)[*cmd_list_len - 1] = current_cmd;
 	    if (current_cmd->type == DRAW_TEXT)
 	    {
 		// Special handling of the text command
 		string_list_len += 1;
-		*string_list = xnrealloc(*string_list, string_list_len, sizeof(char *));
+		*string_list = mh_realloc(*string_list, mh_alloc_mul(string_list_len, sizeof(char *)));
 		(*string_list)[string_list_len - 1] = argv[arg];
 	    }
 	    else
 	    {
 		// All other commands take lists of doubles as arguments
 		params_list_len += current_cmd->params_len;
-		*params_list = xnrealloc(*params_list, params_list_len, sizeof(double));
+		*params_list = mh_realloc(*params_list, mh_alloc_mul(params_list_len, sizeof(double)));
 		error = !get_params(current_cmd, argv[arg], 
 			*params_list + params_list_len - current_cmd->params_len);
 	    }
@@ -270,8 +321,8 @@ static bool parse_gradient(const char *s, bool radial, cairo_pattern_t **gradien
     
     error = false;
     stops = 2;
-    stop_offsets = xmalloc(stops * sizeof(double));
-    stop_colors = xmalloc(stops * sizeof(cvl_color_t));
+    stop_offsets = mh_alloc(stops * sizeof(double));
+    stop_colors = mh_alloc(stops * sizeof(cvl_color_t));
     p = s;
     for (int i = 0; i < 2 && !error; i++)
     {
@@ -305,8 +356,8 @@ static bool parse_gradient(const char *s, bool radial, cairo_pattern_t **gradien
 	    error = true;
 	    break;
 	}
-	tmpstr = xstrndup(p, q - p);
-	if (!cvl_color_from_string(tmpstr, stop_colors + i))
+	tmpstr = mh_strndup(p, q - p);
+	if ((stop_colors[i] = cvl_color_from_string(tmpstr)) == CVL_COLOR_INVALID)
 	{
 	    error = true;	    
 	}
@@ -318,8 +369,8 @@ static bool parse_gradient(const char *s, bool radial, cairo_pattern_t **gradien
     while (*p != '\0' && !error)
     {
 	stops++;
-	stop_offsets = xrealloc(stop_offsets, stops * sizeof(double));
-	stop_colors = xrealloc(stop_colors, stops * sizeof(cvl_color_t));
+	stop_offsets = mh_realloc(stop_offsets, stops * sizeof(double));
+	stop_colors = mh_realloc(stop_colors, stops * sizeof(cvl_color_t));
 	stop_offsets[stops - 1] = strtod(p, &q);
 	if (q == p || *q != ',' || errno == ERANGE 
 		|| stop_offsets[stops - 1] < 0.0 || stop_offsets[stops - 1] > 1.0)
@@ -333,8 +384,8 @@ static bool parse_gradient(const char *s, bool radial, cairo_pattern_t **gradien
 	    error = true;
 	    break;
 	}
-	tmpstr = xstrndup(p, q - p);
-	if (!cvl_color_from_string(tmpstr, stop_colors + stops - 1))
+	tmpstr = mh_strndup(p, q - p);
+	if ((stop_colors[stops - 1] = cvl_color_from_string(tmpstr)) == CVL_COLOR_INVALID)
 	{
 	    error = true;	    
 	}
@@ -343,7 +394,7 @@ static bool parse_gradient(const char *s, bool radial, cairo_pattern_t **gradien
     }
     if (error)
     {
-	cvl_msg_err("invalid %s gradient %s", radial ? "radial" : "linear", s);
+	mh_msg_err("invalid %s gradient %s", radial ? "radial" : "linear", s);
     }
     else
     {
@@ -357,11 +408,11 @@ static bool parse_gradient(const char *s, bool radial, cairo_pattern_t **gradien
 	}
 	for (int i = 0; i < stops; i++)
 	{
-	    cvl_pixel_t rgb = cvl_color_to_pixel(stop_colors[i], CVL_PIXEL_RGB);
+	    uint8_t r = (stop_colors[i] >> 16) & 0xff;
+	    uint8_t g = (stop_colors[i] >> 8) & 0xff;
+	    uint8_t b = stop_colors[i] & 0xff;
 	    cairo_pattern_add_color_stop_rgb(*gradient, stop_offsets[i], 
-		    (double)cvl_pixel_rgb_to_r(rgb) / 255.0,
-		    (double)cvl_pixel_rgb_to_g(rgb) / 255.0,
-		    (double)cvl_pixel_rgb_to_b(rgb) / 255.0);
+		    (double)r / 255.0, (double)g / 255.0, (double)b / 255.0);
 	}
     }
     free(stop_offsets);
@@ -370,9 +421,76 @@ static bool parse_gradient(const char *s, bool radial, cairo_pattern_t **gradien
 }
 
 
+/*
+ * \param frame		The frame.
+ * \return		The CAIRO drawing context.
+ *
+ * Initializes a CAIRO drawing context for the given frame. The frame must be
+ * in #CVL_RGB format.
+ * The idea is to call this function, then use CAIRO to work on the frame, and then call
+ * stop_cairo() when finished.
+ * Do not use CVL functions on the frame while in CAIRO mode.
+ */
+cairo_t *start_cairo(cvl_frame_t *frame)
+{
+    mh_assert(frame != NULL);
+
+    cairo_surface_t *surface;
+    cairo_t *cr;
+
+    void *p = mh_alloc(mh_alloc_mul3(cvl_frame_width(frame), cvl_frame_height(frame), 
+		4 * sizeof(unsigned char)));
+    glBindTexture(GL_TEXTURE_2D, cvl_frame_texture(frame));
+    glGetTexImage(GL_TEXTURE_2D, 0, GL_BGRA, GL_UNSIGNED_BYTE, p);
+
+    surface = cairo_image_surface_create_for_data(
+	    p, CAIRO_FORMAT_RGB24, 
+	    cvl_frame_width(frame), cvl_frame_height(frame),
+	    cvl_frame_width(frame) * 4 * sizeof(unsigned char));
+    cr = cairo_create(surface);
+    return cr;
+}
+
+/*
+ * \param frame 	The frame.
+ * \param cr		The CAIRO drawing context.
+ *
+ * Destroys \a cr and stores CAIROs changes in \a frame.
+ * See also start_cairo().
+ */
+void stop_cairo(cvl_frame_t *frame, cairo_t *cr)
+{
+    mh_assert(frame != NULL);
+    mh_assert(cr != NULL);
+
+    cairo_surface_t *surface = cairo_get_target(cr);
+    void *p = cairo_image_surface_get_data(surface);
+
+    glBindTexture(GL_TEXTURE_2D, cvl_frame_texture(frame));
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 
+	    cvl_frame_width(frame), cvl_frame_height(frame),
+	    0, GL_BGRA, GL_UNSIGNED_BYTE, p);
+
+    cairo_destroy(cr);
+    cairo_surface_destroy(surface);
+    free(p);
+}
+
+
 /* 
  * The draw command 
  */
+
+static bool check_color(const char *s)
+{
+    return (cvl_color_from_string(s) != CVL_COLOR_INVALID);
+}
+
+static bool has_more_data(FILE *f)
+{
+    int c;
+    return ((c = fgetc(f)) != EOF && ungetc(c, f) != EOF);
+}
 
 int cmd_draw(int argc, char *argv[])
 {
@@ -380,84 +498,80 @@ int cmd_draw(int argc, char *argv[])
 	STYLE_LINEAR_GRADIENT = 4, STYLE_RADIAL_GRADIENT = 5} style_t;
     const char *style_names[] = { "none", "color", "pattern", "multipattern", 
 	"linear-gradient", "radial-gradient", NULL };
-    cvl_option_name_t s = { STYLE_COLOR, style_names };
-    cvl_option_color_t c = { CVL_COLOR_BLACK };
-    cvl_option_file_t p = { NULL, "r", false };
-    cvl_option_string_t g = { NULL, NULL };
-    cvl_option_name_t S = { STYLE_NONE, style_names };
-    cvl_option_color_t C = { CVL_COLOR_BLACK };
-    cvl_option_file_t P = { NULL, "r", false };
-    cvl_option_string_t G = { NULL, NULL };
-    cvl_option_double_t w = { 2.0, 0.0, true, DBL_MAX, true };
-    cvl_option_double_array_t d = { NULL, 0, NULL, 1, NULL };
+    mh_option_name_t s = { STYLE_COLOR, style_names };
+    mh_option_string_t c = { (char *)"black", check_color };
+    mh_option_file_t p = { NULL, "r", false };
+    mh_option_string_t g = { NULL, NULL };
+    mh_option_name_t S = { STYLE_NONE, style_names };
+    mh_option_string_t C = { (char *)"black", check_color };
+    mh_option_file_t P = { NULL, "r", false };
+    mh_option_string_t G = { NULL, NULL };
+    mh_option_double_t w = { 2.0, 0.0, true, DBL_MAX, true };
+    mh_option_double_array_t d = { NULL, 0, NULL, 1, NULL };
     const char *l_names[] = { "butt", "round", "square", NULL };
-    cvl_option_name_t l = { 0, l_names };
+    mh_option_name_t l = { 0, l_names };
     const char *L_names[] = { "miter", "round", "bevel", NULL };
-    cvl_option_name_t L = { 0, L_names };
-    cvl_option_bool_t a = { true, true };
-    cvl_option_bool_t u = { false, true };
-    cvl_option_string_t f = { (char *)"Serif", NULL };
+    mh_option_name_t L = { 0, L_names };
+    mh_option_bool_t a = { true, true };
+    mh_option_bool_t u = { false, true };
+    mh_option_string_t f = { (char *)"Serif", NULL };
     typedef enum { SLANT_NORMAL = 0, SLANT_ITALIC = 1, SLANT_OBLIQUE = 2 } slant_t;
     const char *slant_names[] = { "normal", "italic", "oblique", NULL };
-    cvl_option_name_t t = { SLANT_NORMAL, slant_names };
+    mh_option_name_t t = { SLANT_NORMAL, slant_names };
     typedef enum { WEIGHT_NORMAL = 0, WEIGHT_BOLD } weight_t;
     const char *weight_names[] = { "normal", "bold", NULL };
-    cvl_option_name_t W = { WEIGHT_NORMAL, weight_names };
-    cvl_option_double_array_t F = { NULL, 0, NULL, 1, NULL };
+    mh_option_name_t W = { WEIGHT_NORMAL, weight_names };
+    mh_option_double_array_t F = { NULL, 0, NULL, 1, NULL };
     typedef enum { JUSTIFY_X_LEFT = 0, JUSTIFY_X_RIGHT = 1, JUSTIFY_X_CENTER = 2 } justify_x_t;
     const char *justify_x_names[] = { "left", "right", "center", NULL };
-    cvl_option_name_t j = { JUSTIFY_X_LEFT, justify_x_names };
+    mh_option_name_t j = { JUSTIFY_X_LEFT, justify_x_names };
     typedef enum { JUSTIFY_Y_BOTTOM = 0, JUSTIFY_Y_TOP = 1, JUSTIFY_Y_CENTER = 2 } justify_y_t;
     const char *justify_y_names[] = { "bottom", "top", "center", NULL };
-    cvl_option_name_t J = { JUSTIFY_Y_BOTTOM, justify_y_names };
-    cvl_option_t options[] = 
+    mh_option_name_t J = { JUSTIFY_Y_BOTTOM, justify_y_names };
+    mh_option_t options[] = 
     { 
-	{ "border-style",    's', CVL_OPTION_NAME,         &s, false },
-	{ "border-color",    'c', CVL_OPTION_COLOR,        &c, false },
-	{ "border-pattern",  'p', CVL_OPTION_FILE,         &p, false },
-	{ "border-gradient", 'g', CVL_OPTION_STRING,       &g, false },
-	{ "fill-style",      'S', CVL_OPTION_NAME,         &S, false },
-	{ "fill-color",      'C', CVL_OPTION_COLOR,        &C, false },
-	{ "fill-pattern",    'P', CVL_OPTION_FILE,         &P, false },
-	{ "fill-gradient",   'G', CVL_OPTION_STRING,       &G, false },
-	{ "width",           'w', CVL_OPTION_DOUBLE,       &w, false },
-	{ "dash",            'd', CVL_OPTION_DOUBLE_ARRAY, &d, false },
-	{ "line-cap",        'l', CVL_OPTION_NAME,         &l, false },
-	{ "line-join",       'L', CVL_OPTION_NAME,         &L, false },
-	{ "font-family",     'f', CVL_OPTION_STRING,       &f, false },
-	{ "font-slant",      't', CVL_OPTION_NAME,         &t, false },
-	{ "font-weight",     'W', CVL_OPTION_NAME,         &W, false },
-	{ "font-size",       'F', CVL_OPTION_DOUBLE_ARRAY, &F, false },
-	{ "justify-x",       'j', CVL_OPTION_NAME,         &j, false },
-	{ "justify-y",       'J', CVL_OPTION_NAME,         &J, false },
-	{ "antialias",       'a', CVL_OPTION_BOOL,         &a, false },
-	{ "unit",            'u', CVL_OPTION_BOOL,         &u, false },
-	cvl_option_null 
+	{ "border-style",    's', MH_OPTION_NAME,         &s, false },
+	{ "border-color",    'c', MH_OPTION_STRING,       &c, false },
+	{ "border-pattern",  'p', MH_OPTION_FILE,         &p, false },
+	{ "border-gradient", 'g', MH_OPTION_STRING,       &g, false },
+	{ "fill-style",      'S', MH_OPTION_NAME,         &S, false },
+	{ "fill-color",      'C', MH_OPTION_STRING,       &C, false },
+	{ "fill-pattern",    'P', MH_OPTION_FILE,         &P, false },
+	{ "fill-gradient",   'G', MH_OPTION_STRING,       &G, false },
+	{ "width",           'w', MH_OPTION_DOUBLE,       &w, false },
+	{ "dash",            'd', MH_OPTION_DOUBLE_ARRAY, &d, false },
+	{ "line-cap",        'l', MH_OPTION_NAME,         &l, false },
+	{ "line-join",       'L', MH_OPTION_NAME,         &L, false },
+	{ "font-family",     'f', MH_OPTION_STRING,       &f, false },
+	{ "font-slant",      't', MH_OPTION_NAME,         &t, false },
+	{ "font-weight",     'W', MH_OPTION_NAME,         &W, false },
+	{ "font-size",       'F', MH_OPTION_DOUBLE_ARRAY, &F, false },
+	{ "justify-x",       'j', MH_OPTION_NAME,         &j, false },
+	{ "justify-y",       'J', MH_OPTION_NAME,         &J, false },
+	{ "antialias",       'a', MH_OPTION_BOOL,         &a, false },
+	{ "unit",            'u', MH_OPTION_BOOL,         &u, false },
+	mh_option_null 
     };
     int first_argument;
     draw_cmd_t **cmd_list = NULL;			// initialize to shut up compiler warning
     int cmd_list_len = 0;				// initialize to shut up compiler warning
     double *params_list = NULL;				// initialize to shut up compiler warning
     char **string_list = NULL;				// initialize to shut up compiler warning
-    cvl_io_info_t *input_info;
-    cvl_io_info_t *output_info;
     cvl_frame_t *frame;
-    cvl_io_info_t *border_pattern_input_info = NULL;	// initialize to shut up compiler warning
     cvl_frame_t *border_pattern_frame;
-    cairo_t *border_pattern_cr;
-    cvl_pixel_type_t border_pattern_opt;
+    cairo_t *border_pattern_cr = NULL;			// initialize to shut up compiler warning
     cairo_pattern_t *border_gradient;
-    cvl_io_info_t *fill_pattern_input_info = NULL;	// initialize to shut up compiler warning
     cvl_frame_t *fill_pattern_frame;
-    cairo_t *fill_pattern_cr;
-    cvl_pixel_type_t fill_pattern_opt;
+    cairo_t *fill_pattern_cr = NULL;			// initialize to shut up compiler warning
     cairo_pattern_t *fill_gradient;
     cairo_matrix_t font_size_matrix;
     char *font_family_utf8;
+    cvl_stream_type_t stream_type;
+    cvl_format_t format;
     bool error;
 
-    cvl_msg_set_command_name("%s", argv[0]);    
-    error = !cvl_getopt(argc, argv, options, 1, -1, &first_argument);
+    mh_msg_set_command_name("%s", argv[0]);    
+    error = !mh_getopt(argc, argv, options, 1, -1, &first_argument);
     if (!error && d.value)
     {
 	bool found_val_greater_zero = false;
@@ -475,21 +589,21 @@ int cmd_draw(int argc, char *argv[])
 	}
 	if (error || !found_val_greater_zero)
 	{
-	    cvl_msg_err("invalid dash specification");
+	    mh_msg_err("Invalid dash specification");
 	    free(d.value);
 	    error = true;
 	}
     }
     if (!error && (s.value == STYLE_PATTERN || s.value == STYLE_MULTIPATTERN) && !p.value)
     {
-	cvl_msg_err("no border pattern file specified");
+	mh_msg_err("No border pattern file specified");
 	error = true;
     }
     if (!error && (s.value == STYLE_LINEAR_GRADIENT || s.value == STYLE_RADIAL_GRADIENT))
     {
 	if (!g.value)
 	{
-	    cvl_msg_err("no border gradient specified");
+	    mh_msg_err("No border gradient specified");
 	    error = true;
 	}
 	else
@@ -499,14 +613,14 @@ int cmd_draw(int argc, char *argv[])
     }
     if (!error && (S.value == STYLE_PATTERN || S.value == STYLE_MULTIPATTERN) && !P.value)
     {
-	cvl_msg_err("no fill pattern file specified");
+	mh_msg_err("No fill pattern file specified");
 	error = true;
     }
     if (!error && (S.value == STYLE_LINEAR_GRADIENT || S.value == STYLE_RADIAL_GRADIENT))
     {
 	if (!G.value)
 	{
-	    cvl_msg_err("no fill gradient specified");
+	    mh_msg_err("No fill gradient specified");
 	    error = true;
 	}
 	else
@@ -522,7 +636,7 @@ int cmd_draw(int argc, char *argv[])
 		    || F.value[0] <= 0.0
 		    || (F.value_sizes[0] == 2 && F.value[1] <= 0.0))
 	    {
-		cvl_msg_err("invalid font size");
+		mh_msg_err("Invalid font size");
 		error = true;		    
 	    }
 	    cairo_matrix_init_scale(&font_size_matrix, F.value[0], F.value[F.value_sizes[0] == 1 ? 0 : 1]);
@@ -546,59 +660,56 @@ int cmd_draw(int argc, char *argv[])
 	return 1;
     }
 
-    input_info = cvl_io_info_new();
-    output_info = cvl_io_info_new();
-    cvl_io_info_link_output_to_input(output_info, input_info);
-
     if (s.value == STYLE_PATTERN || s.value == STYLE_MULTIPATTERN)
     {
-	border_pattern_input_info = cvl_io_info_new();
 	if (s.value == STYLE_PATTERN)
 	{
-	    if (!cvl_io_read(p.value, border_pattern_input_info, &border_pattern_frame))
+	    cvl_read(p.value, NULL, &border_pattern_frame);
+	    if (!border_pattern_frame)
 	    {
-		cvl_msg_err("cannot read border pattern");
+		mh_msg_err("Cannot read border pattern");
 		error = true;
 	    }
 	    else
 	    {
-		cvl_cairo_start(border_pattern_frame, &border_pattern_cr, &border_pattern_opt);
+		cvl_convert_format_inplace(border_pattern_frame, CVL_RGB);
+		border_pattern_cr = start_cairo(border_pattern_frame);
 	    }
 	}
     }
     if (S.value == STYLE_PATTERN || S.value == STYLE_MULTIPATTERN)
     {
-	fill_pattern_input_info = cvl_io_info_new();
 	if (S.value == STYLE_PATTERN)
 	{
-	    if (!cvl_io_read(P.value, fill_pattern_input_info, &fill_pattern_frame))
+	    cvl_read(P.value, NULL, &fill_pattern_frame);
+	    if (!fill_pattern_frame)
 	    {
-		cvl_msg_err("cannot read fill pattern");
+		mh_msg_err("Cannot read fill pattern");
 		error = true;
 	    }
 	    else
 	    {
-		cvl_cairo_start(fill_pattern_frame, &fill_pattern_cr, &fill_pattern_opt);
+		cvl_convert_format_inplace(fill_pattern_frame, CVL_RGB);
+		fill_pattern_cr = start_cairo(fill_pattern_frame);
 	    }
 	}
     }
 
-    while (!error 
-	    && !cvl_io_eof(stdin) 
-	    && !(s.value == STYLE_MULTIPATTERN && cvl_io_eof(p.value))
-	    && !(S.value == STYLE_MULTIPATTERN && cvl_io_eof(P.value)))
+    while (!error && !cvl_error()
+	    && has_more_data(stdin) 
+	    && !(s.value == STYLE_MULTIPATTERN && !has_more_data(p.value))
+	    && !(S.value == STYLE_MULTIPATTERN && !has_more_data(P.value)))
     {
 	/* Input */
-	if (!cvl_io_read(stdin, input_info, &frame))
-	{
-	    error = true;
+	cvl_read(stdin, &stream_type, &frame);
+	if (!frame)
 	    break;
-	}
+	format = cvl_frame_format(frame);
+	cvl_convert_format_inplace(frame, CVL_RGB);
 
 	/* Draw with CAIRO */
 	cairo_t *cr;
-	cvl_pixel_type_t original_pixel_type;
-	cvl_cairo_start(frame, &cr, &original_pixel_type);
+	cr = start_cairo(frame);
 	double *params = NULL;		// initialize to shut up compiler warning
 	int params_index = 0;
 	char *string;
@@ -662,7 +773,7 @@ int cmd_draw(int argc, char *argv[])
 		case DRAW_ARC:
 		    cairo_close_path(cr);
 		    cairo_arc_negative(cr, params[0], params[1], params[2],
-			    - cvl_deg_to_rad(params[3]), - cvl_deg_to_rad(params[4]));
+			    - mh_deg_to_rad(params[3]), - mh_deg_to_rad(params[4]));
 		    cairo_close_path(cr);
 		    break;
 
@@ -723,7 +834,11 @@ int cmd_draw(int argc, char *argv[])
 	}
 	if (S.value == STYLE_COLOR)
 	{
-	    cvl_cairo_set_source_rgb(cr, C.value);
+	    cvl_color_t color = cvl_color_from_string(C.value);
+	    uint8_t r = (color >> 16) & 0xff;
+	    uint8_t g = (color >> 8) & 0xff;
+	    uint8_t b = color & 0xff;
+	    cairo_set_source_rgb(cr, (double)r / 255.0, (double)g / 255.0, (double)b / 255.0);
 	    cairo_fill_preserve(cr);	    
 	}
 	else if (S.value == STYLE_PATTERN)
@@ -734,18 +849,19 @@ int cmd_draw(int argc, char *argv[])
 	}
 	else if (S.value == STYLE_MULTIPATTERN)
 	{
-	    if (!cvl_io_read(P.value, fill_pattern_input_info, &fill_pattern_frame))
+	    cvl_read(P.value, NULL, &fill_pattern_frame);
+	    if (!fill_pattern_frame)
 	    {
-		cvl_msg_err("cannot read fill pattern");
+		mh_msg_err("Cannot read fill pattern");
 		error = true;
 	    }
 	    else
 	    {
-		cvl_cairo_start(fill_pattern_frame, &fill_pattern_cr, &fill_pattern_opt);
+		fill_pattern_cr = start_cairo(fill_pattern_frame);
 		cairo_set_source_surface(cr, cairo_get_target(fill_pattern_cr), 0.0, 0.0);
 		cairo_pattern_set_extend(cairo_get_source(cr), CAIRO_EXTEND_REPEAT);
 		cairo_fill_preserve(cr);
-		cvl_cairo_stop(fill_pattern_frame, fill_pattern_cr, fill_pattern_opt);
+		stop_cairo(fill_pattern_frame, fill_pattern_cr);
 		cvl_frame_free(fill_pattern_frame);
 	    }
 	}
@@ -757,7 +873,11 @@ int cmd_draw(int argc, char *argv[])
 	}
 	if (s.value == STYLE_COLOR)
 	{
-	    cvl_cairo_set_source_rgb(cr, c.value);
+	    cvl_color_t color = cvl_color_from_string(c.value);
+	    uint8_t r = (color >> 16) & 0xff;
+	    uint8_t g = (color >> 8) & 0xff;
+	    uint8_t b = color & 0xff;
+	    cairo_set_source_rgb(cr, (double)r / 255.0, (double)g / 255.0, (double)b / 255.0);
 	    cairo_stroke_preserve(cr);
 	}	
 	else if (s.value == STYLE_PATTERN)
@@ -768,18 +888,19 @@ int cmd_draw(int argc, char *argv[])
 	}
 	else if (s.value == STYLE_MULTIPATTERN)
 	{
-	    if (!cvl_io_read(p.value, border_pattern_input_info, &border_pattern_frame))
+	    cvl_read(p.value, NULL, &border_pattern_frame);
+	    if (!border_pattern_frame)
 	    {
-		cvl_msg_err("cannot read border pattern");
+		mh_msg_err("Cannot read border pattern");
 		error = true;
 	    }
 	    else
 	    {
-		cvl_cairo_start(border_pattern_frame, &border_pattern_cr, &border_pattern_opt);
+		border_pattern_cr = start_cairo(border_pattern_frame);
 		cairo_set_source_surface(cr, cairo_get_target(border_pattern_cr), 0.0, 0.0);
 		cairo_pattern_set_extend(cairo_get_source(cr), CAIRO_EXTEND_REPEAT);
 		cairo_stroke_preserve(cr);
-		cvl_cairo_stop(border_pattern_frame, border_pattern_cr, border_pattern_opt);
+		stop_cairo(border_pattern_frame, border_pattern_cr);
 		cvl_frame_free(border_pattern_frame);
 	    }
 	}
@@ -791,20 +912,20 @@ int cmd_draw(int argc, char *argv[])
 	}
 	if (cairo_status(cr))
 	{
-	    cvl_msg_err("CAIRO error: %s", cairo_status_to_string(cairo_status(cr)));
+	    mh_msg_err("CAIRO error: %s", cairo_status_to_string(cairo_status(cr)));
 	    error = true;
 	}
-	cvl_cairo_stop(frame, cr, original_pixel_type);
+	stop_cairo(frame, cr);
 
 	/* Output */
-	if (!error && !cvl_io_write(stdout, output_info, frame))
+	if (!error)
 	{
-	    cvl_frame_free(frame);
-	    error = true;
-	    break;
+	    cvl_convert_format_inplace(frame, format);
+	    cvl_write(stdout, stream_type, frame);
 	}
 	cvl_frame_free(frame);
     }
+    error = error || cvl_error();
 
     free(cmd_list);
     free(params_list);
@@ -812,28 +933,26 @@ int cmd_draw(int argc, char *argv[])
     {
 	if (s.value == STYLE_PATTERN)
 	{
-	    cvl_cairo_stop(border_pattern_frame, border_pattern_cr, border_pattern_opt);
+	    stop_cairo(border_pattern_frame, border_pattern_cr);
 	    cvl_frame_free(border_pattern_frame);
 	}
-	cvl_io_info_free(border_pattern_input_info);
 	fclose(p.value);
     }
     if (S.value == STYLE_PATTERN || S.value == STYLE_MULTIPATTERN)
     {
 	if (S.value == STYLE_PATTERN)
 	{
-	    cvl_cairo_stop(fill_pattern_frame, fill_pattern_cr, fill_pattern_opt);
+	    stop_cairo(fill_pattern_frame, fill_pattern_cr);
 	    cvl_frame_free(fill_pattern_frame);
 	}
-	cvl_io_info_free(fill_pattern_input_info);
 	fclose(P.value);
     }
     free(font_family_utf8);
-    cvl_io_info_free(input_info);
-    cvl_io_info_free(output_info);
     free(d.value);
     free(d.value_sizes);
     free(F.value);
     free(F.value_sizes);
     return error ? 1 : 0;
 }
+
+#endif // HAVE_LIBCAIRO

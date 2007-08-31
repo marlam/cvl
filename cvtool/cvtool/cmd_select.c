@@ -3,7 +3,7 @@
  * 
  * This file is part of cvtool, a computer vision tool.
  *
- * Copyright (C) 2005, 2006  Martin Lambers <marlam@marlam.de>
+ * Copyright (C) 2005, 2006, 2007  Martin Lambers <marlam@marlam.de>
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -16,13 +16,13 @@
  *   GNU General Public License for more details.
  *
  *   You should have received a copy of the GNU General Public License
- *   along with this program; if not, write to the Free Software Foundation,
- *   Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "config.h"
 
 #include <math.h>
+#include <float.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
@@ -31,15 +31,15 @@
 #include <limits.h>
 #include <ctype.h>
 
-#include "xalloc.h"
-
 #include <cvl/cvl.h>
+
+#include "mh.h"
 
 
 void cmd_select_print_help(void)
 {
-    cvl_msg_fmt_req(
-	    "select [-d|--drop] <range>...\n"
+    mh_msg_fmt_req(
+	    "select [-d|--drop] [-f|--fps=<fps>] <range>...\n"
 	    "\n"
 	    "Selects frames from a stream. "
 	    "By default, frames in the given ranges are kept and all others "
@@ -48,8 +48,9 @@ void cmd_select_print_help(void)
 	    "beginning to <h>), <l>- (from <l> to end), <l> (only <l>), or - (everything). "
 	    "Each start and end point can be a frame number (counting from 0) or a time in "
 	    "the format [hours:]minutes:seconds[.fraction]. In short: if it contains a colon, "
-	    "it's a time. Time ranges can only be used for YUV4MPEG2 streams with known frame "
-	    "rate. IMPORTANT: If you use frame number ranges, the high frame number is inclusive: "
+	    "it's a time. Time ranges can only be used if the --fps option is used to specify the "
+	    "number of frames per second.\n"
+	    "IMPORTANT: If you use frame number ranges, the high frame number is inclusive: "
 	    "the frame with this number will be dropped/kept. If you use time ranges, the high "
 	    "time is exclusive and marks the first frame that will not be dropped/kept.");
 }
@@ -98,15 +99,15 @@ char *my_strrnchr(char *s, size_t l, char c)
  * or equal to zero.
  * If it contains a colon, it must be a date in the format [H:]M:S[.fract]
  * (hours, minutes, seconds, and fraction of a second), which will be used to
- * compute a frame number with the given framerate (both framerate1 and
- * framerate2 must not be zero in this case, or else -1 is returned).
+ * compute a frame number with the given framerate (fps must be greater than
+ * zero in this case, or else -1 is returned).
  * If it is neither of these, -2 is returned.
  * If 'frameno_type' is FRAMENO_HIGH and the relevant part of 'str' is a time
  * instead of an integer, the resulting frame number will be decreased by one
  * (if it was bigger than zero). 
  */
 
-long string2frameno(char *str, int framerate1, int framerate2, int frameno_type)
+long string2frameno(char *str, float fps, int frameno_type)
 {
     size_t l;
     char *p;
@@ -115,7 +116,7 @@ long string2frameno(char *str, int framerate1, int framerate2, int frameno_type)
     int hours;
     int minutes;
     int seconds;
-    double fraction;
+    float fraction;
 
     l = strlen(str);
     if (!(sp = my_strrnchr(str, l, ':')))
@@ -134,7 +135,7 @@ long string2frameno(char *str, int framerate1, int framerate2, int frameno_type)
     }
     else
     {
-	if (framerate1 == 0 || framerate2 == 0)
+	if (fps <= 0.0f)
 	{
 	    /* unknown framerate => we cannot compute frame numbers */
 	    return -1;
@@ -182,8 +183,7 @@ long string2frameno(char *str, int framerate1, int framerate2, int frameno_type)
 	    fraction = 0.0;
 	}
 
-	n = lround(((double)(hours * 3600 + minutes * 60 + seconds) + fraction) 
-		* (double)framerate1 / (double)framerate2);
+	n = lroundf(((float)(hours * 3600 + minutes * 60 + seconds) + fraction) * fps);
 	if (n > 0 && frameno_type == FRAMENO_HIGH)
 	{
 	    n--;
@@ -207,7 +207,7 @@ long string2frameno(char *str, int framerate1, int framerate2, int frameno_type)
  * 'framerate' is needed to convert time values to frame numbers.
  */
 
-framerange_t string2framerange(char *s, int framerate1, int framerate2)
+framerange_t string2framerange(char *s, float fps)
 {
     char *p;
     framerange_t r;
@@ -224,7 +224,7 @@ framerange_t string2framerange(char *s, int framerate1, int framerate2)
 	else
 	{
 	    /* -<h> */
-	    r.high = string2frameno(s + 1, framerate1, framerate2, FRAMENO_HIGH);
+	    r.high = string2frameno(s + 1, fps, FRAMENO_HIGH);
 	}
     }
     else
@@ -232,12 +232,12 @@ framerange_t string2framerange(char *s, int framerate1, int framerate2)
 	if (!(p = my_strrnchr(s, l, '-')))
 	{
 	    /* <l> */
-	    r.low = r.high = string2frameno(s, framerate1, framerate2, FRAMENO_LOW);
+	    r.low = r.high = string2frameno(s, fps, FRAMENO_LOW);
 	}
 	else
 	{
 	    *p = '\0';
-	    r.low = string2frameno(s, framerate1, framerate2, FRAMENO_LOW);
+	    r.low = string2frameno(s, fps, FRAMENO_LOW);
 	    *p = '-';
 	    if ((size_t)(p - s + 1) == l)
 	    {
@@ -247,7 +247,7 @@ framerange_t string2framerange(char *s, int framerate1, int framerate2)
 	    else
 	    {
 		/* <l>-<h> */
-		r.high = string2frameno(p + 1, framerate1, framerate2, FRAMENO_HIGH);
+		r.high = string2frameno(p + 1, fps, FRAMENO_HIGH);
 	    }
 	}
     }
@@ -263,13 +263,13 @@ framerange_t string2framerange(char *s, int framerate1, int framerate2)
  * The numbers in the array may be -1, which means the frame range was invalid.
  */
 
-void strings2framerangelist(char *s[], int len, int framerate1, int framerate2, framerange_t **ranges)
+void strings2framerangelist(char *s[], int len, float fps, framerange_t **ranges)
 {
 
-    *ranges = xmalloc(len * sizeof(framerange_t));
+    *ranges = mh_alloc(len * sizeof(framerange_t));
     for (int i = 0; i < len; i++)
     {
-	(*ranges)[i] = string2framerange(s[i], framerate1, framerate2);
+	(*ranges)[i] = string2framerange(s[i], fps);
     }
 }
 	
@@ -368,136 +368,93 @@ bool frameno_in_range(framerange_t *ranges, int ranges_len, int *ranges_index, l
 
 int cmd_select(int argc, char *argv[])
 {
-    cvl_option_bool_t drop = { false, true };
-    cvl_option_t options[] =
+    mh_option_bool_t drop = { false, true };
+    mh_option_float_t fps = { 0.0, 0.0, false, FLT_MAX, true };
+    mh_option_t options[] =
     {
-	{ "drop", 'd', CVL_OPTION_BOOL, &drop, false },
-	cvl_option_null
+	{ "drop", 'd', MH_OPTION_BOOL,  &drop, false },
+	{ "fps",  'f', MH_OPTION_FLOAT, &fps,  false },
+	mh_option_null
     };
     int first_argument;		/* index in argv where the first range string is stored */
-    bool ranges_parsed;
     framerange_t *ranges;	/* array of frame ranges */
     int ranges_len;		/* length of this array */
     int ranges_index;		/* index to this array */
     long frameno;		/* the current frame number */
     long dropcounter;		/* number of dropped frames so far */
-    cvl_io_info_t *input_info;    
-    int framerate1, framerate2;
-    cvl_io_info_t *output_info;
     cvl_frame_t *frame;
+    cvl_stream_type_t stream_type;
     bool keep_frame;
-    bool error;
 
     
-    cvl_msg_set_command_name("%s", argv[0]);
-    if (!cvl_getopt(argc, argv, options, 1, -1, &first_argument))
+    mh_msg_set_command_name("%s", argv[0]);
+    if (!mh_getopt(argc, argv, options, 1, -1, &first_argument))
     {
 	return 1;
     }
     ranges_len = argc - first_argument;
-    cvl_msg_dbg("%d ranges on the command line", ranges_len);
-    
-    input_info = cvl_io_info_new();
-    output_info = cvl_io_info_new();
-    cvl_io_info_link_output_to_input(output_info, input_info);
 
-    ranges = NULL;
-    ranges_parsed = NULL;
-    error = false;
+    mh_msg_dbg("%d ranges on the command line", ranges_len);
+    if (fps.value >= 0.0f)
+	mh_msg_dbg("Frame rate is %.4f fps", fps.value);
+    else
+	mh_msg_dbg("Frame rate is unknown");
+    strings2framerangelist(argv + first_argument, ranges_len, fps.value, &ranges);
+    for (int i = 0; i < ranges_len; i++)
+    {
+	if (ranges[i].low == -1 || ranges[i].high == -1)
+	{
+	    mh_msg_err("Cannot use time ranges when frame rate is unknown");
+	    free(ranges);
+	    return 1;
+	}
+	else if (ranges[i].low < 0 || ranges[i].high < 0 || ranges[i].low > ranges[i].high)
+	{
+	    mh_msg_err("Image range %d is invalid", i + 1);
+	    free(ranges);
+	    return 1;
+	}
+    }
+    ranges_len = normalize_frameranges(ranges, ranges_len);
+    mh_msg_dbg("%d ranges left after merging overlapping ranges", ranges_len);
+    for (int i = 0; i < ranges_len; i++)
+    {
+	if (ranges[i].high == LONG_MAX)
+	    mh_msg_dbg("Image range %d: %ld - end", i, ranges[i].low);
+	else
+	    mh_msg_dbg("Image range %d: %ld - %ld", i, ranges[i].low, ranges[i].high);
+    }
+    
     frameno = 0;
     dropcounter = 0;
     ranges_index = 0;
-    while (!cvl_io_eof(stdin))
+    while (!cvl_error())
     {
-	if (!cvl_io_read(stdin, input_info, &frame))
-	{
-	    error = true;
+	cvl_read(stdin, &stream_type, &frame);
+	if (!frame)
 	    break;
-	}
-	
-	if (!ranges_parsed)
-	{
-	    cvl_io_info_framerate(input_info, &framerate1, &framerate2);
-	    if (framerate1 != 0 && framerate2 != 0)
-	    {
-		cvl_msg_dbg("frame rate is %d/%d fps (~%.2f)",
-		     	framerate1, framerate2, (double)framerate1 / (double)framerate2);
-	    }
-	    else
-	    {
-		cvl_msg_dbg("frame rate is unknown");
-	    }
-	    strings2framerangelist(argv + first_argument, ranges_len, 
-		    framerate1, framerate2, &ranges);
-	    for (int i = 0; i < ranges_len; i++)
-	    {
-		if (ranges[i].low == -1 || ranges[i].high == -1)
-		{
-		    cvl_msg_err("cannot use time ranges when frame rate is unknown");
-		    error = true;
-		    break;
-		}
-	     	else if (ranges[i].low < 0 || ranges[i].high < 0 || ranges[i].low > ranges[i].high)
-		{
-		    cvl_msg_err("frame range %d is invalid", i + 1);
-		    error = true;
-		    break;
-		}
-	    }
-	    if (error)
-	    {
-		cvl_frame_free(frame);
-		break;
-	    }
-	    ranges_len = normalize_frameranges(ranges, ranges_len);
-	    cvl_msg_dbg("%d ranges left after merging overlapping ranges", ranges_len);
-	    for (int i = 0; i < ranges_len; i++)
-	    {
-		if (ranges[i].high == LONG_MAX)
-		{
-		    cvl_msg_dbg("frame range %d: %ld - end", i, ranges[i].low);
-		}
-		else
-		{
-		    cvl_msg_dbg("frame range %d: %ld - %ld", i, ranges[i].low, ranges[i].high);
-		}
-	    }
-	    ranges_parsed = true;
-	}
 
 	if (frameno_in_range(ranges, ranges_len, &ranges_index, frameno))
-	{
 	    keep_frame = !drop.value;
-	}
 	else
-	{
 	    keep_frame = drop.value;
-	}
 
 	if (keep_frame)
 	{
-	    //cvl_msg_dbg("keeping frame %ld", frameno);
-	    if (!cvl_io_write(stdout, output_info, frame))
-	    {
-		cvl_frame_free(frame);
-		error = true;
-		break;
-	    }
+	    //mh_msg_dbg("Keeping frame %ld", frameno);
+	    cvl_write(stdout, stream_type, frame);
 	}
 	else
 	{
-	    //cvl_msg_dbg("dropping frame %ld", frameno);
+	    //mh_msg_dbg("Dropping frame %ld", frameno);
 	    dropcounter++;
 	}
 	cvl_frame_free(frame);
-
 	frameno++;
     }
-    cvl_msg_dbg("%ld frames processed, %ld kept, %ld dropped", 
+    mh_msg_dbg("%ld frames processed, %ld kept, %ld dropped", 
 	    frameno, frameno - dropcounter, dropcounter);
 
     free(ranges);
-    cvl_io_info_free(input_info);
-    cvl_io_info_free(output_info);
-    return error ? 1 : 0;
+    return cvl_error() ? 1 : 0;
 }

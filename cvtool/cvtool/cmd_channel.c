@@ -3,7 +3,7 @@
  * 
  * This file is part of cvtool, a computer vision tool.
  *
- * Copyright (C) 2005, 2006  Martin Lambers <marlam@marlam.de>
+ * Copyright (C) 2005, 2006, 2007  Martin Lambers <marlam@marlam.de>
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -16,8 +16,7 @@
  *   GNU General Public License for more details.
  *
  *   You should have received a copy of the GNU General Public License
- *   along with this program; if not, write to the Free Software Foundation,
- *   Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "config.h"
@@ -28,107 +27,75 @@
 
 #include <cvl/cvl.h>
 
+#include "mh.h"
+
 
 void cmd_channel_print_help(void)
 {
-    cvl_msg_fmt_req(
-	    "channel [-r|--reverse] -c|--channel=r|g|b\n"
+    mh_msg_fmt_req(
+	    "channel [-r|--reverse] -c|--channel=0|1|2|r|g|b\n"
 	    "\n"
-	    "Interpret the input frames as RGB frames, extract the given channel, and write "
-	    "it into gray frames. When --reverse is used, the input is interpreted as graylevel frames, "
-	    "and then converted to RGB frames by copying the graylevel values into the given channel "
-	    "and setting the other two channels to zero.");
+	    "Extract the given channel from the input, and write it into luminance "
+	    "output. When channel is r, g, or b, then the input is converted to RGB format first. "
+	    "When --reverse is used, the luminance of the input is written into the given channel "
+	    "of an RGB frame, and the other channels are set to zero.");
 }
 
 
 int cmd_channel(int argc, char *argv[])
 {
-    cvl_option_bool_t reverse = { false, true };
-    const char *channel_names[] = { "r", "g", "b", NULL };
-    cvl_option_name_t channel = { -1, channel_names };
-    cvl_option_t options[] = 
+    mh_option_bool_t r = { false, true };
+    const char *channel_names[] = { "0", "1", "2", "3", "r", "g", "b", NULL };
+    mh_option_name_t c = { -1, channel_names };
+    mh_option_t options[] = 
     { 
-	{ "reverse", 'r', CVL_OPTION_BOOL, &reverse, false },
-	{ "channel", 'c', CVL_OPTION_NAME, &channel, true },
-	cvl_option_null 
+	{ "reverse", 'r', MH_OPTION_BOOL, &r, false },
+	{ "channel", 'c', MH_OPTION_NAME, &c, true },
+	mh_option_null 
     };
-    cvl_io_info_t *input_info;    
-    cvl_io_info_t *output_info;
     cvl_frame_t *frame;
-    bool error;
 
-    cvl_msg_set_command_name("%s", argv[0]);
-    if (!cvl_getopt(argc, argv, options, 0, 0, NULL))
+    mh_msg_set_command_name("%s", argv[0]);
+    if (!mh_getopt(argc, argv, options, 0, 0, NULL))
     {
 	return 1;
     }
 
-    input_info = cvl_io_info_new();
-    output_info = cvl_io_info_new();
-    cvl_io_info_link_output_to_input(output_info, input_info);
-
-    error = false;
-    while (!cvl_io_eof(stdin))
+    while (!cvl_error())
     {
-	if (!cvl_io_read(stdin, input_info, &frame))
-	{
-	    error = true;
+	cvl_read(stdin, NULL, &frame);
+	if (!frame)
 	    break;
-	}
-	if (!reverse.value)
+	cvl_frame_t *newframe;
+	if (r.value)
 	{
-	    cvl_frame_to_rgb(frame);
-	    for (int i = 0; i < cvl_frame_width(frame) * cvl_frame_height(frame); i++)
-	    {
-		cvl_pixel_t p = cvl_frame_get_i(frame, i);
-	    	if (channel.value == 0)
-    		{
-		    p = cvl_pixel_rgb_to_r(p);
-		}
-		else if (channel.value == 1)
-		{
-		    p = cvl_pixel_rgb_to_g(p);
-		}
-		else
-		{
-		    p = cvl_pixel_rgb_to_b(p);
-		}
-		cvl_frame_set_i(frame, i, p);
-	    }
-    	    cvl_frame_set_pixel_type(frame, CVL_PIXEL_GRAY);
+	    cvl_frame_t *r = (c.value == 0 || c.value == 4 ? frame : NULL);
+	    cvl_frame_t *g = (c.value == 1 || c.value == 5 ? frame : NULL);
+	    cvl_frame_t *b = (c.value == 2 || c.value == 6 ? frame : NULL);
+	    newframe = cvl_frame_new(cvl_frame_width(frame), cvl_frame_height(frame),
+		    3, CVL_RGB, cvl_frame_format(frame), CVL_TEXTURE);
+	    cvl_frame_set_taglist(newframe, cvl_taglist_copy(cvl_frame_taglist(frame)));
+	    cvl_channel_combine(newframe, r, g, b, NULL);
 	}
 	else
 	{
-	    cvl_frame_to_gray(frame);
-	    for (int i = 0; i < cvl_frame_width(frame) * cvl_frame_height(frame); i++)
+	    newframe = cvl_frame_new_tpl(frame);
+	    cvl_frame_set_taglist(newframe, cvl_taglist_copy(cvl_frame_taglist(frame)));
+	    cvl_frame_set_format(newframe, CVL_LUM);
+	    if (c.value >= 4)
 	    {
-		cvl_pixel_t p = cvl_frame_get_i(frame, i);
-	    	if (channel.value == 0)
-    		{
-		    p = cvl_pixel_rgb(p, 0, 0);
-		}
-		else if (channel.value == 1)
-		{
-		    p = cvl_pixel_rgb(0, p, 0);
-		}
-		else
-		{
-		    p = cvl_pixel_rgb(0, 0, p);
-		}
-		cvl_frame_set_i(frame, i, p);
+		cvl_convert_format_inplace(frame, CVL_RGB);
+    		cvl_channel_extract(newframe, frame, c.value - 4);
 	    }
-    	    cvl_frame_set_pixel_type(frame, CVL_PIXEL_RGB);
-	}
-	if (!cvl_io_write(stdout, output_info, frame))
-	{
-	    cvl_frame_free(frame);
-	    error = true;
-	    break;
+	    else
+	    {
+		cvl_channel_extract(newframe, frame, c.value);
+	    }
 	}
 	cvl_frame_free(frame);
+	cvl_write(stdout, cvl_frame_type(frame) == CVL_UINT8 ? CVL_PNM : CVL_PFS, newframe);
+	cvl_frame_free(newframe);
     }
 
-    cvl_io_info_free(input_info);
-    cvl_io_info_free(output_info);
-    return error ? 1 : 0;
+    return cvl_error() ? 1 : 0;
 }

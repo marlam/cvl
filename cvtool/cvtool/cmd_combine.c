@@ -3,7 +3,7 @@
  * 
  * This file is part of cvtool, a computer vision tool.
  *
- * Copyright (C) 2005, 2006  Martin Lambers <marlam@marlam.de>
+ * Copyright (C) 2005, 2006, 2007  Martin Lambers <marlam@marlam.de>
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -16,8 +16,7 @@
  *   GNU General Public License for more details.
  *
  *   You should have received a copy of the GNU General Public License
- *   along with this program; if not, write to the Free Software Foundation,
- *   Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "config.h"
@@ -28,16 +27,15 @@
 #include <string.h>
 #include <stdlib.h>
 #include <errno.h>
-extern int errno;
 
 #include <cvl/cvl.h>
 
-#include "xalloc.h"
+#include "mh.h"
 
 
 void cmd_combine_print_help(void)
 {
-    cvl_msg_fmt_req(
+    mh_msg_fmt_req(
 	    "combine [-m|--method=(lr|leftright)|(tb|topbottom)] [-j|--justify=(left|top)|center|(right|bottom)] "
 	    "[-c|--color=<color>] file...\n"
 	    "\n"
@@ -47,112 +45,128 @@ void cmd_combine_print_help(void)
 	    "center them. The remaining space will be filled with the given color; the default is black.");
 }
 
+static bool check_color(const char *s)
+{
+    return (cvl_color_from_string(s) != CVL_COLOR_INVALID);
+}
 
 int cmd_combine(int argc, char *argv[])
 {
     const char *method_names[] = { "lr", "leftright", "tb", "topbottom", NULL };
-    cvl_option_name_t method = { 0, method_names };
+    mh_option_name_t method = { 0, method_names };
     const char *justify_names[] = { "left", "top", "center", "bottom", "right", NULL };
-    cvl_option_name_t justify = { 2, justify_names };
-    cvl_option_color_t color = { CVL_COLOR_BLACK };
-    cvl_option_t options[] = 
+    mh_option_name_t justify = { 2, justify_names };
+    mh_option_string_t color_string = { (char *)"black", check_color };
+    mh_option_t options[] = 
     {
-	{ "method",   'm', CVL_OPTION_NAME,  &method,  false },
-	{ "justify",  'j', CVL_OPTION_NAME,  &justify, false },
-	{ "color",    'c', CVL_OPTION_COLOR, &color,   false },
-	cvl_option_null
+	{ "method",   'm', MH_OPTION_NAME,   &method,       false },
+	{ "justify",  'j', MH_OPTION_NAME,   &justify,      false },
+	{ "color",    'c', MH_OPTION_STRING, &color_string, false },
+	mh_option_null
     };
-    cvl_io_info_t *combined_info;
-    cvl_frame_t *combined_frame;
+    cvl_color_t color;
     int first_argument;
     int number_of_files;
-    cvl_io_info_t **input_info;
+    cvl_stream_type_t stream_type;
+    bool stream_type_known;
     FILE **f;
-    cvl_frame_t **frame;
+    cvl_frame_t **frames;
+    cvl_frame_t *combined_frame;
     bool error;
-
-    cvl_msg_set_command_name("%s", argv[0]);
-    if (!cvl_getopt(argc, argv, options, 1, -1, &first_argument))
+    bool eof;
+    
+    mh_msg_set_command_name("%s", argv[0]);
+    if (!mh_getopt(argc, argv, options, 1, -1, &first_argument))
     {
 	return 1;
     }
 
+    color = cvl_color_from_string(color_string.value);
+
     number_of_files = argc - first_argument;
-    f = xmalloc(number_of_files * sizeof(FILE *));
-    input_info = xmalloc(number_of_files * sizeof(cvl_io_info_t *));
+    f = mh_alloc(number_of_files * sizeof(FILE *));
     for (int i = 0; i < number_of_files; i++)
     {
-	input_info[i] = cvl_io_info_new();
 	if (!(f[i] = fopen(argv[first_argument + i], "r")))
 	{
-	    cvl_msg_err("cannot open %s: %s", argv[first_argument + i], strerror(errno));
+	    mh_msg_err("cannot open %s: %s", argv[first_argument + i], strerror(errno));
 	    for (int j = 0; j < i; j++)
-	    {
-		cvl_io_info_free(input_info[j]);
 		fclose(f[j]);
-	    }
-	    free(input_info);
 	    free(f);
 	    return 1;
 	}
     }
-    frame = xmalloc(number_of_files * sizeof(cvl_frame_t *));
-    combined_info = cvl_io_info_new();
-    cvl_io_info_link_output_to_input(combined_info, input_info[0]);
+    frames = mh_alloc(number_of_files * sizeof(cvl_frame_t *));
     
+    stream_type_known = false;
     error = false;
+    eof = false;
     for (;;)
     {
-	/* check for EOF */
-	bool eof = false;
+	/* Read one frame from each file */
 	for (int i = 0; i < number_of_files; i++)
 	{
-	    if (cvl_io_eof(f[i]))
+	    if (!stream_type_known)
 	    {
-		eof = true;
+		cvl_read(f[i], &stream_type, &(frames[i]));
+		stream_type_known = true;
+	    }
+	    else
+	    {
+		cvl_read(f[i], NULL, &(frames[i]));
+	    }
+	    error = cvl_error();
+    	    eof = !error && !frames[i];
+	    if (error || eof)
+	    {
+		for (int j = 0; j < i; i++)
+		    cvl_frame_free(frames[j]);
 		break;
 	    }
 	}
-	if (eof)
-	{
-	    break;
-	}
-
-	/* read one frame from each file */
-	for (int i = 0; i < number_of_files; i++)
-	{
-    	    if (!cvl_io_read(f[i], input_info[i], &(frame[i])))
-    	    {
-		for (int j = 0; j < i; i++)
-		{
-		    cvl_frame_free(frame[j]);
-		}
-    		error = true;
-    		break;
-    	    }
-	}
-	if (error)
+	if (error || eof)
 	{
 	    break;
 	}
 	
-	/* determine the lowest usable pixel type */
-	cvl_pixel_type_t combined_pixel_type = CVL_PIXEL_GRAY;
+	/* Determine the lowest usable channels, format, and type */
+	int combined_channels = 1;
 	for (int i = 0; i < number_of_files; i++)
 	{
-	    if (cvl_frame_pixel_type(frame[i]) == CVL_PIXEL_YUV)
+	    if (cvl_frame_channels(frames[i]) >= combined_channels)
 	    {
-		combined_pixel_type = CVL_PIXEL_YUV;
+		combined_channels = cvl_frame_channels(frames[i]);
 	    }
-	    else if (cvl_frame_pixel_type(frame[i]) == CVL_PIXEL_RGB)
+	}
+	cvl_format_t combined_format = CVL_LUM;
+	for (int i = 0; i < number_of_files; i++)
+	{
+	    if (cvl_frame_format(frames[i]) == CVL_RGB)
 	    {
-		combined_pixel_type = CVL_PIXEL_RGB;
+		combined_format = CVL_RGB;
+	    }
+	    else if (cvl_frame_format(frames[i]) == CVL_UNKNOWN)
+	    {
+		combined_format = CVL_UNKNOWN;
+		break;	// worst case
+	    }
+	    else // other color formats
+	    {
+		combined_format = CVL_XYZ;
+	    }
+	}
+	cvl_type_t combined_type = CVL_UINT8;
+	for (int i = 0; i < number_of_files; i++)
+	{
+	    if (cvl_frame_type(frames[i]) != CVL_UINT8)
+	    {
+		combined_type = CVL_FLOAT;
 		break;	// worst case
 	    }
 	}
-	/* convert the fill color to this pixel type */
-	cvl_pixel_t fillpixel = cvl_color_to_pixel(color.value, combined_pixel_type);
 
+	float fillval[4];
+	cvl_color_to_float(color, combined_format, fillval);
 	if (method.value < 2)
 	{
 	    /* leftright */
@@ -160,77 +174,78 @@ int cmd_combine(int argc, char *argv[])
 	    int combined_height = 0;
 	    for (int i = 0; i < number_of_files; i++)
 	    {
-		cvl_frame_convert(frame[i], combined_pixel_type);
-		if (INT_MAX - cvl_frame_width(frame[i]) < combined_width)
+		cvl_convert_format_inplace(frames[i], combined_format);
+		if (INT_MAX - cvl_frame_width(frames[i]) < combined_width)
 		{
-		    cvl_msg_err("combined frame would be too big");
+		    mh_msg_err("Combined frame would be too big");
 		    error = true;
 		    break;
 		}
-		combined_width += cvl_frame_width(frame[i]);
-		if (cvl_frame_height(frame[i]) > combined_height)
+		combined_width += cvl_frame_width(frames[i]);
+		if (cvl_frame_height(frames[i]) > combined_height)
 		{
-		    combined_height = cvl_frame_height(frame[i]);
+		    combined_height = cvl_frame_height(frames[i]);
 		}		
 	    }
 	    if (error)
 	    {
 		break;
 	    }
-    	    combined_frame = cvl_frame_new(combined_pixel_type, combined_width, combined_height);
+    	    combined_frame = cvl_frame_new(combined_width, combined_height, combined_channels,
+		    combined_format, combined_type, CVL_TEXTURE);
 	    int x_offset = 0;
 	    for (int i = 0; i < number_of_files; i++)
 	    {
 		if (justify.value < 2)		// top
 		{
-		    /* the frame */
-		    cvl_frame_copy_rect(combined_frame, x_offset, 0, 
-			    frame[i], 0, 0, cvl_frame_width(frame[i]), cvl_frame_height(frame[i]));
-		    /* the bottom rectangle */
-		    if (combined_height - cvl_frame_height(frame[i]) > 0)
+		    /* The frame */
+		    cvl_copy_rect(combined_frame, x_offset, 0, 
+			    frames[i], 0, 0, cvl_frame_width(frames[i]), cvl_frame_height(frames[i]));
+		    /* The bottom rectangle */
+		    if (combined_height - cvl_frame_height(frames[i]) > 0)
 		    {
-			cvl_frame_fill_rect(combined_frame, x_offset, cvl_frame_height(frame[i]),
-				cvl_frame_width(frame[i]), combined_height - cvl_frame_height(frame[i]),
-				fillpixel);
+			cvl_fill_rect(combined_frame, x_offset, cvl_frame_height(frames[i]),
+				cvl_frame_width(frames[i]), combined_height - cvl_frame_height(frames[i]),
+				fillval);
 		    }
 		}
 		else if (justify.value == 2)	// center
 		{
-		    int lines_to_fill = combined_height - cvl_frame_height(frame[i]);
-		    /* the top rectangle */
+		    int lines_to_fill = combined_height - cvl_frame_height(frames[i]);
+		    /* The top rectangle */
 		    if (lines_to_fill / 2 > 0)
 		    {
-			cvl_frame_fill_rect(combined_frame, x_offset, 0,
-				cvl_frame_width(frame[i]), lines_to_fill / 2,
-				fillpixel);
+			cvl_fill_rect(combined_frame, x_offset, 0,
+				cvl_frame_width(frames[i]), lines_to_fill / 2,
+				fillval);
 		    }
-		    /* the frame */
-		    cvl_frame_copy_rect(combined_frame, x_offset, lines_to_fill / 2,
-			    frame[i], 0, 0, cvl_frame_width(frame[i]), cvl_frame_height(frame[i]));
-		    /* the bottom rectangle */
-		    if (combined_height - cvl_frame_height(frame[i]) - (lines_to_fill / 2) > 0)
+		    /* The frame */
+		    cvl_copy_rect(combined_frame, x_offset, lines_to_fill / 2,
+			    frames[i], 0, 0, cvl_frame_width(frames[i]), cvl_frame_height(frames[i]));
+		    /* The bottom rectangle */
+		    if (combined_height - cvl_frame_height(frames[i]) - (lines_to_fill / 2) > 0)
 		    {
-			cvl_frame_fill_rect(combined_frame, 
-				x_offset, cvl_frame_height(frame[i]) + (lines_to_fill / 2),
-				cvl_frame_width(frame[i]), 
-				combined_height - cvl_frame_height(frame[i]) - (lines_to_fill / 2),
-				fillpixel);
+			cvl_fill_rect(combined_frame, 
+				x_offset, cvl_frame_height(frames[i]) + (lines_to_fill / 2),
+				cvl_frame_width(frames[i]), 
+				combined_height - cvl_frame_height(frames[i]) - (lines_to_fill / 2),
+				fillval);
 		    }
 		}
 		else				// bottom
 		{
-		    /* the top rectangle */
-		    if (combined_height - cvl_frame_height(frame[i]) > 0)
+		    /* The top rectangle */
+		    if (combined_height - cvl_frame_height(frames[i]) > 0)
 		    {
-			cvl_frame_fill_rect(combined_frame, x_offset, 0,
-				cvl_frame_width(frame[i]), combined_height - cvl_frame_height(frame[i]),
-				fillpixel);
+			cvl_fill_rect(combined_frame, x_offset, 0,
+				cvl_frame_width(frames[i]), combined_height - cvl_frame_height(frames[i]),
+				fillval);
 		    }
-		    /* the frame */
-		    cvl_frame_copy_rect(combined_frame, x_offset, combined_height - cvl_frame_height(frame[i]), 
-			    frame[i], 0, 0, cvl_frame_width(frame[i]), cvl_frame_height(frame[i]));
+		    /* The frame */
+		    cvl_copy_rect(combined_frame, x_offset, combined_height - cvl_frame_height(frames[i]), 
+			    frames[i], 0, 0, cvl_frame_width(frames[i]), cvl_frame_height(frames[i]));
 		}
-		x_offset += cvl_frame_width(frame[i]);
+		x_offset += cvl_frame_width(frames[i]);
 	    }
 	}
 	else
@@ -240,108 +255,102 @@ int cmd_combine(int argc, char *argv[])
 	    int combined_height = 0;
 	    for (int i = 0; i < number_of_files; i++)
 	    {
-		cvl_frame_convert(frame[i], combined_pixel_type);
-		if (INT_MAX - cvl_frame_height(frame[i]) < combined_height)
+		cvl_convert_format_inplace(frames[i], combined_format);
+		if (INT_MAX - cvl_frame_height(frames[i]) < combined_height)
 		{
-		    cvl_msg_err("combined frame would be too big");
+		    mh_msg_err("Combined frame would be too big");
 		    error = true;
 		    break;
 		}
-		combined_height += cvl_frame_height(frame[i]);
-		if (cvl_frame_width(frame[i]) > combined_width)
+		combined_height += cvl_frame_height(frames[i]);
+		if (cvl_frame_width(frames[i]) > combined_width)
 		{
-		    combined_width = cvl_frame_width(frame[i]);
+		    combined_width = cvl_frame_width(frames[i]);
 		}		
 	    }
 	    if (error)
 	    {
 		break;
 	    }
-	    combined_frame = cvl_frame_new(combined_pixel_type, combined_width, combined_height);
+    	    combined_frame = cvl_frame_new(combined_width, combined_height, combined_channels, 
+		    combined_format, combined_type, CVL_TEXTURE);
 	    int y_offset = 0;
 	    for (int i = 0; i < number_of_files; i++)
 	    {
 		if (justify.value < 2)		// left
 		{
-		    /* the frame */
-		    cvl_frame_copy_rect(combined_frame, 0, y_offset, 
-			    frame[i], 0, 0, cvl_frame_width(frame[i]), cvl_frame_height(frame[i]));
-		    /* the right rectangle */
-		    if (combined_width - cvl_frame_width(frame[i]) > 0)
+		    /* The frame */
+		    cvl_copy_rect(combined_frame, 0, y_offset, 
+			    frames[i], 0, 0, cvl_frame_width(frames[i]), cvl_frame_height(frames[i]));
+		    /* The right rectangle */
+		    if (combined_width - cvl_frame_width(frames[i]) > 0)
 		    {
-			cvl_frame_fill_rect(combined_frame, cvl_frame_width(frame[i]), y_offset,
-				combined_width - cvl_frame_width(frame[i]), cvl_frame_height(frame[i]),
-				fillpixel);
+			cvl_fill_rect(combined_frame, cvl_frame_width(frames[i]), y_offset,
+				combined_width - cvl_frame_width(frames[i]), cvl_frame_height(frames[i]),
+				fillval);
 		    }
 		}
 		else if (justify.value == 2)	// center
 		{
-		    int columns_to_fill = combined_width - cvl_frame_width(frame[i]);
-		    /* the left rectangle */
+		    int columns_to_fill = combined_width - cvl_frame_width(frames[i]);
+		    /* The left rectangle */
 		    if (columns_to_fill / 2 > 0)
 		    {
-			cvl_frame_fill_rect(combined_frame, 0, y_offset,
-				columns_to_fill / 2, cvl_frame_height(frame[i]),
-				fillpixel);
+			cvl_fill_rect(combined_frame, 0, y_offset,
+				columns_to_fill / 2, cvl_frame_height(frames[i]),
+				fillval);
 		    }
-		    /* the frame */
-		    cvl_frame_copy_rect(combined_frame, columns_to_fill / 2, y_offset,
-			    frame[i], 0, 0, cvl_frame_width(frame[i]), cvl_frame_height(frame[i]));
-		    /* the right rectangle */
-		    if (combined_width - cvl_frame_width(frame[i]) - (columns_to_fill / 2) > 0)
+		    /* The frame */
+		    cvl_copy_rect(combined_frame, columns_to_fill / 2, y_offset,
+			    frames[i], 0, 0, cvl_frame_width(frames[i]), cvl_frame_height(frames[i]));
+		    /* The right rectangle */
+		    if (combined_width - cvl_frame_width(frames[i]) - (columns_to_fill / 2) > 0)
 		    {
-			cvl_frame_fill_rect(combined_frame, 
-				cvl_frame_width(frame[i]) + (columns_to_fill / 2), y_offset,
-				combined_width - cvl_frame_width(frame[i]) - (columns_to_fill / 2), 
-				cvl_frame_height(frame[i]),
-				fillpixel);
+			cvl_fill_rect(combined_frame, 
+				cvl_frame_width(frames[i]) + (columns_to_fill / 2), y_offset,
+				combined_width - cvl_frame_width(frames[i]) - (columns_to_fill / 2), 
+				cvl_frame_height(frames[i]),
+				fillval);
 		    }
 		}
 		else				// right
 		{
-		    /* the left rectangle */
-		    if (combined_width - cvl_frame_width(frame[i]) > 0)
+		    /* The left rectangle */
+		    if (combined_width - cvl_frame_width(frames[i]) > 0)
 		    {
-			cvl_frame_fill_rect(combined_frame, 0, y_offset,
-				combined_width - cvl_frame_width(frame[i]), cvl_frame_height(frame[i]),
-				fillpixel);
+			cvl_fill_rect(combined_frame, 0, y_offset,
+				combined_width - cvl_frame_width(frames[i]), cvl_frame_height(frames[i]),
+				fillval);
 		    }
-		    /* the frame */
-		    cvl_frame_copy_rect(combined_frame, combined_width - cvl_frame_width(frame[i]), y_offset, 
-			    frame[i], 0, 0, cvl_frame_width(frame[i]), cvl_frame_height(frame[i]));
+		    /* The frame */
+		    cvl_copy_rect(combined_frame, combined_width - cvl_frame_width(frames[i]), y_offset, 
+			    frames[i], 0, 0, cvl_frame_width(frames[i]), cvl_frame_height(frames[i]));
 		}
-		y_offset += cvl_frame_height(frame[i]);
+		y_offset += cvl_frame_height(frames[i]);
 	    }
 	}
 	for (int i = 0; i < number_of_files; i++)
 	{
-	    cvl_frame_free(frame[i]);
+	    cvl_frame_free(frames[i]);
 	}
 	if (error)
 	{
 	    break;
 	}
 
-	/* output */
-	cvl_io_info_set_width(combined_info, cvl_frame_width(combined_frame));
-	cvl_io_info_set_height(combined_info, cvl_frame_height(combined_frame));
-	if (!cvl_io_write(stdout, combined_info, combined_frame))
+	/* Output */
+	cvl_write(stdout, stream_type, combined_frame);
+	cvl_frame_free(combined_frame);
+	error = cvl_error();
+	if (error)
 	{
-	    cvl_frame_free(combined_frame);
-	    error = true;
 	    break;
 	}
-	cvl_frame_free(combined_frame);
     }
 
-    free(frame);
+    free(frames);
     for (int i = 0; i < number_of_files; i++)
-    {
 	fclose(f[i]);
-	cvl_io_info_free(input_info[i]);
-    }
     free(f);
-    free(input_info);
-    cvl_io_info_free(combined_info);
     return error ? 1 : 0;
 }

@@ -3,7 +3,7 @@
  * 
  * This file is part of cvtool, a computer vision tool.
  *
- * Copyright (C) 2005, 2006  Martin Lambers <marlam@marlam.de>
+ * Copyright (C) 2005, 2006, 2007  Martin Lambers <marlam@marlam.de>
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -16,8 +16,7 @@
  *   GNU General Public License for more details.
  *
  *   You should have received a copy of the GNU General Public License
- *   along with this program; if not, write to the Free Software Foundation,
- *   Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "config.h"
@@ -29,17 +28,17 @@
 #include <ctype.h>
 #include <limits.h>
 #include <errno.h>
-extern int errno;
 
 #include "inttostr.h"
-#include "xalloc.h"
 
 #include <cvl/cvl.h>
+
+#include "mh.h"
 
 
 void cmd_split_print_help(void)
 {
-    cvl_msg_fmt_req(
+    mh_msg_fmt_req(
 	    "split [-n|--n=<n>] [-t|--template=<template>] [-b|--backwards] [-s|--start=<i>]\n"
 	    "\n"
 	    "Split the input stream into multiple files, each containing n frames (default "
@@ -56,7 +55,7 @@ void cmd_split_print_help(void)
 }
 
 
-bool template_is_ok(const char *t)
+static bool template_is_ok(const char *t)
 {
     char *p;
     
@@ -70,51 +69,49 @@ bool template_is_ok(const char *t)
 
 int cmd_split(int argc, char *argv[])
 {
-    cvl_option_int_t n = { 1, 1, INT_MAX };
-    cvl_option_string_t t = { (char *)"frame-%6N", template_is_ok };
-    cvl_option_bool_t b = { false, true };
-    cvl_option_int_t s = { 0, 0, INT_MAX };
-    cvl_option_t options[] = 
+    mh_option_int_t n = { 1, 1, INT_MAX };
+    mh_option_string_t t = { (char *)"frame-%6N", template_is_ok };
+    mh_option_bool_t b = { false, true };
+    mh_option_int_t s = { 0, 0, INT_MAX };
+    mh_option_t options[] = 
     { 
-	{ "n",         'n', CVL_OPTION_INT,    &n, false },
-	{ "template",  't', CVL_OPTION_STRING, &t, false },
-	{ "backwards", 'b', CVL_OPTION_BOOL,   &b, false },
-	{ "start",     's', CVL_OPTION_INT,    &s, false },
-	cvl_option_null 
+	{ "n",         'n', MH_OPTION_INT,    &n, false },
+	{ "template",  't', MH_OPTION_STRING, &t, false },
+	{ "backwards", 'b', MH_OPTION_BOOL,   &b, false },
+	{ "start",     's', MH_OPTION_INT,    &s, false },
+	mh_option_null 
     };
-    cvl_io_info_t *input_info;    
+    cvl_stream_type_t stream_type;
     int frame_number_index;
+    int frame_counter;
     bool error;
 
-    cvl_msg_set_command_name("%s", argv[0]);    
-    if (!cvl_getopt(argc, argv, options, 0, 0, NULL))
+    mh_msg_set_command_name("%s", argv[0]);    
+    if (!mh_getopt(argc, argv, options, 0, 0, NULL))
     {
 	return 1;
     }
 
     frame_number_index = strchr(t.value, '%') - t.value;
-    input_info = cvl_io_info_new();
-
+    frame_counter = 0;
     error = false;
-    while (!cvl_io_eof(stdin))
+    for (;;)
     {
 	FILE *outfile = NULL;
 	cvl_frame_t *frame;
-	cvl_io_info_t *output_info = NULL;
 
-	for (int i = 0; i < n.value && !cvl_io_eof(stdin); i++)
+	for (int i = 0; i < n.value; i++)
 	{
-	    if (!cvl_io_read(stdin, input_info, &frame))
-	    {
-		error = true;
+	    cvl_read(stdin, &stream_type, &frame);
+	    if (!frame)
 		break;
-	    }
+	    frame_counter++;
 	    if (!outfile)
 	    {
 		int frame_number;
 		char frame_number_str[INT_BUFSIZE_BOUND(intmax_t)];
 		size_t frame_number_len;
-		char padded_frame_number_str[cvl_maxi(INT_BUFSIZE_BOUND(intmax_t), 10)];
+		char padded_frame_number_str[mh_maxi(INT_BUFSIZE_BOUND(intmax_t), 10)];
 		char *outfile_name = NULL;
 		size_t outfile_name_len;
 		int i;
@@ -122,17 +119,13 @@ int cmd_split(int argc, char *argv[])
 		
 		frame_number = s.value;
 		if (b.value)
-		{
-		    frame_number -= cvl_io_info_frame_counter(input_info) - 1;
-		}
+		    frame_number -= frame_counter - 1;
 		else
-		{
-		    frame_number += cvl_io_info_frame_counter(input_info) - 1;
-		}
+		    frame_number += frame_counter - 1;
 		if (frame_number < 0)
 		{
-		    cvl_msg_err("input frame %d: output frame number %d is negative", 
-			    cvl_io_info_frame_counter(input_info) - 1, frame_number);
+		    mh_msg_err("Input frame %d: output frame number %d is negative", 
+			    frame_counter - 1, frame_number);
 		    cvl_frame_free(frame);
 		    error = true;
 		    break;
@@ -145,44 +138,44 @@ int cmd_split(int argc, char *argv[])
 		}
 		strcpy(padded_frame_number_str + i, p);
 		outfile_name_len = strlen(t.value) - 3 + strlen(padded_frame_number_str);
-		outfile_name = xmalloc((outfile_name_len + 1) * sizeof(char));
+		outfile_name = mh_alloc((outfile_name_len + 1) * sizeof(char));
 		strncpy(outfile_name, t.value, frame_number_index);
 		strcpy(outfile_name + frame_number_index, padded_frame_number_str);
 		strcpy(outfile_name + frame_number_index + strlen(padded_frame_number_str),
 			t.value + frame_number_index + 3);
 		if (!(outfile = fopen(outfile_name, "w")))
 		{
-		    cvl_msg_err("cannot open %s: %s", outfile_name, strerror(errno));
+		    mh_msg_err("Cannot open %s: %s", outfile_name, strerror(errno));
 		    free(outfile_name);
 		    cvl_frame_free(frame);
 		    error = true;
 		    break;
 		}
 		free(outfile_name);
-		output_info = cvl_io_info_new();
-		cvl_io_info_link_output_to_input(output_info, input_info);
 	    }
-	    if (!cvl_io_write(outfile, output_info, frame))
+	    cvl_write(outfile, stream_type, frame);
+    	    cvl_frame_free(frame);
+	    error = cvl_error();
+	    if (error)
 	    {
-		cvl_frame_free(frame);
-		error = true;
 		break;
 	    }
-	    cvl_frame_free(frame);
 	}
-	if (error)
+	if (ferror(stdin))
+	{
+	    error = true;
+	}
+	if (error || feof(stdin))
 	{
 	    break;
 	}
 	if (fclose(outfile) != 0)
 	{
-	    cvl_msg_err("output error: %s", strerror(errno));
+	    mh_msg_err("Output error: %s", strerror(errno));
 	    error = true;
 	    break;
 	}
-	cvl_io_info_free(output_info);
     }
 
-    cvl_io_info_free(input_info);
     return error ? 1 : 0;
 }

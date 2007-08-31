@@ -1,9 +1,9 @@
 /*
- * cmd_invert.c
+ * cmd_laplace.c
  * 
  * This file is part of cvtool, a computer vision tool.
  *
- * Copyright (C) 2005, 2006, 2007  Martin Lambers <marlam@marlam.de>
+ * Copyright (C) 2007  Martin Lambers <marlam@marlam.de>
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -24,28 +24,35 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
+#include <limits.h>
+#include <float.h>
 
 #include <cvl/cvl.h>
 
 #include "mh.h"
 
 
-void cmd_invert_print_help(void)
+void cmd_laplace_print_help(void)
 {
     mh_msg_fmt_req(
-	    "invert\n"
+	    "laplace [-c|--c=<c>]\n"
 	    "\n"
-	    "Invert input frames.");
+	    "Sharpens the input frames using the Laplace operator. The sharpness factor c must be greater than "
+	    "or equal to zero. Larger values increase the effect. The default is 0.5.");
 }
 
-
-int cmd_invert(int argc, char *argv[])
+int cmd_laplace(int argc, char *argv[])
 {
-    mh_option_t options[] = { mh_option_null };
-    cvl_frame_t *frame;
+    mh_option_float_t c = { 0.5f, 0.0f, true, FLT_MAX, true };
+    mh_option_t options[] = 
+    {
+	{ "c", 'c', MH_OPTION_FLOAT, &c, false },
+	mh_option_null
+    };
+    cvl_frame_t *frame_in, *frame_out;
     cvl_stream_type_t stream_type;
 
-    mh_msg_set_command_name("%s", argv[0]);    
+    mh_msg_set_command_name("%s", argv[0]);
     if (!mh_getopt(argc, argv, options, 0, 0, NULL))
     {
 	return 1;
@@ -53,20 +60,16 @@ int cmd_invert(int argc, char *argv[])
 
     while (!cvl_error())
     {
-	cvl_read(stdin, &stream_type, &frame);
-	if (!frame)
+	cvl_read(stdin, &stream_type, &frame_in);
+	if (!frame_in)
 	    break;
-	cvl_format_t format = cvl_frame_format(frame);
-	if (format != CVL_LUM)
-	    cvl_convert_format_inplace(frame, CVL_RGB);
-	cvl_frame_t *inverse = cvl_frame_new_tpl(frame);
-	cvl_frame_set_taglist(inverse, cvl_taglist_copy(cvl_frame_taglist(frame)));
-	cvl_invert(inverse, frame);
-	cvl_frame_free(frame);
-	if (format != CVL_LUM)
-	    cvl_convert_format_inplace(inverse, format);
-	cvl_write(stdout, stream_type, inverse);
-    	cvl_frame_free(inverse);
+
+	frame_out = cvl_frame_new_tpl(frame_in);
+	cvl_frame_set_taglist(frame_out, cvl_taglist_copy(cvl_frame_taglist(frame_in)));
+	cvl_laplace(frame_out, frame_in, c.value);
+	cvl_frame_free(frame_in);
+	cvl_write(stdout, stream_type, frame_out);
+	cvl_frame_free(frame_out);
     }
 
     return cvl_error() ? 1 : 0;

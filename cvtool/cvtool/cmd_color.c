@@ -3,7 +3,7 @@
  * 
  * This file is part of cvtool, a computer vision tool.
  *
- * Copyright (C) 2005, 2006  Martin Lambers <marlam@marlam.de>
+ * Copyright (C) 2005, 2006, 2007  Martin Lambers <marlam@marlam.de>
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -16,148 +16,79 @@
  *   GNU General Public License for more details.
  *
  *   You should have received a copy of the GNU General Public License
- *   along with this program; if not, write to the Free Software Foundation,
- *   Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "config.h"
 
 #include <stdbool.h>
-#include <stdio.h>
-#include <string.h>
-#include <math.h>
 #include <float.h>
 
 #include <cvl/cvl.h>
 
+#include "mh.h"
+
 
 void cmd_color_print_help(void)
 {
-    cvl_msg_fmt_req(
-	    "color [-h|--hue=<h>] [-s|--saturation=<s>] [-l|--lightness=<l>] "
-	    "[-c|--contrast=<c>] [-g|--gamma=(<g>|<gr>,<gg>,<gb>)]\n"
+    mh_msg_fmt_req(
+	    "color [-h|--hue=<h>] [-s|--saturation=<s>] [-l|--lightness=<l>] [-c|--contrast=<c>]\n"
 	    "\n"
 	    "Color adjustment.\n"
-	    "Hue, saturation, lightness, and constrast are manipulated in the HSL "
+	    "Hue, saturation, lightness, and contrast are manipulated in the HSL "
 	    "(Hue, Saturation, Lightness) color space. h is an additive constant to "
 	    "the hue angle, in degrees. s, l, c measure the relative change in "
-	    "saturation, lightness, contrast: -1 means the result will be zero, 0 means "
+	    "saturation, lightness, and contrast: -1 means the result will be zero, 0 means "
 	    "the result will be the same as the original, and +1 means that the result "
 	    "will be two times as high as the original. Values greater than +1 are possible. "
-	    "For example, s = -1 will convert the input images to graylevels.\n"
-	    "Gamma correction (--gamma) is applied to the gray channel for gray frames, "
-	    "to the Y channel for YUV frames, and to the R,G,B channels for RGB frames. "
-	    "If three gamma values are given, the frames are always converted to RGB, "
-	    "then gamma corrected for each channel separately, and then converted back "
-	    "to their original type. All gamma values must be greater than zero.");
+	    "For example, s = -1 will convert the input frames to graylevels.");
 }
 
 
 int cmd_color(int argc, char *argv[])
 {
-    cvl_option_double_t h = { 0.0, -DBL_MAX, true, DBL_MAX, true };
-    cvl_option_double_t s = { 0.0, -1.0, true, DBL_MAX, true };
-    cvl_option_double_t l = { 0.0, -1.0, true, DBL_MAX, true };
-    cvl_option_double_t c = { 0.0, -1.0, true, DBL_MAX, true };
-    cvl_option_double_array_t g = { NULL, 0, NULL, 1, NULL };
-    cvl_option_t options[] = 
+    mh_option_float_t h = { 0.0f, -FLT_MAX, true, FLT_MAX, true };
+    mh_option_float_t s = { 0.0f, -1.0f, true, FLT_MAX, true };
+    mh_option_float_t l = { 0.0f, -1.0f, true, FLT_MAX, true };
+    mh_option_float_t c = { 0.0f, -1.0f, true, FLT_MAX, true };
+    mh_option_t options[] = 
     { 
-	{ "hue",        'h', CVL_OPTION_DOUBLE,        &h, false },
-	{ "saturation", 's', CVL_OPTION_DOUBLE,        &s, false },
-	{ "lightness",  'l', CVL_OPTION_DOUBLE,        &l, false },
-	{ "contrast",   'c', CVL_OPTION_DOUBLE,        &c, false },
-	{ "gamma",      'g', CVL_OPTION_DOUBLE_ARRAY,  &g, false },
-	cvl_option_null 
+	{ "hue",        'h', MH_OPTION_FLOAT, &h, false },
+	{ "saturation", 's', MH_OPTION_FLOAT, &s, false },
+	{ "lightness",  'l', MH_OPTION_FLOAT, &l, false },
+	{ "contrast",   'c', MH_OPTION_FLOAT, &c, false },
+	mh_option_null 
     };
-    bool do_color, do_gamma;
-    cvl_io_info_t *input_info;    
-    cvl_io_info_t *output_info;
+    cvl_stream_type_t stream_type;
+    cvl_format_t format;
     cvl_frame_t *frame;
-    bool error;
 
-    cvl_msg_set_command_name("%s", argv[0]);    
-    error = !cvl_getopt(argc, argv, options, 0, 0, NULL);
-    if (!error)
-    {
-	if (g.value)
-	{
-	    if (g.value_sizes[0] != 1 && g.value_sizes[0] != 3)
-	    {
-		cvl_msg_err("need either 1 or 3 values for gamma correction");
-		error = true;
-	    }
-	    else
-	    {
-		do_gamma = false;
-		for (int i = 0; i < g.value_sizes[0]; i++)
-		{
-		    if (g.value[i] <= 0.0)
-		    {
-			cvl_msg_err("gamma values must be > 0.0");
-			error = true;
-			break;
-		    }
-		    if (fabs(g.value[i] - 1.0) > 0.0001)
-		    {
-			do_gamma = true;
-		    }
-		}
-	    }
-	}
-	else
-	{
-	    do_gamma = false;
-	}
-    }
-    if (error)
+    mh_msg_set_command_name("%s", argv[0]);    
+    if (!mh_getopt(argc, argv, options, 0, 0, NULL))
     {
 	return 1;
     }
-    h.value = cvl_angle_normalize_2(cvl_deg_to_rad(h.value));
-    do_color = (fabs(h.value) > 0.0001 
-	    || fabs(s.value) > 0.0001 
-	    || fabs(l.value) > 0.0001 
-	    || fabs(c.value) > 0.0001);
+    h.value = mh_angle_0_to_2pi(mh_deg_to_rad(h.value));
 
-    input_info = cvl_io_info_new();
-    output_info = cvl_io_info_new();
-    cvl_io_info_link_output_to_input(output_info, input_info);
-
-    error = false;
-    while (!cvl_io_eof(stdin))
+    while (!cvl_error())
     {
-	if (!cvl_io_read(stdin, input_info, &frame))
-	{
-	    error = true;
+	cvl_read(stdin, &stream_type, &frame);
+	if (!frame)
 	    break;
-	}
-	if (do_gamma)
-	{
-	    if (g.value_sizes[0] == 1)
-	    {
-		cvl_gamma_correct(frame, g.value[0]);
-	    }
-	    else // g.value_sizes[0] == 3
-	    {
-		cvl_gamma_correct_rgb(frame, g.value[0], g.value[1], g.value[2]);
-	    }
-	}
-	if (do_color)
-	{
-	    cvl_color_adjust(frame, h.value, s.value, l.value, c.value);
-	}
-	if (!cvl_io_write(stdout, output_info, frame))
-	{
-	    cvl_frame_free(frame);
-	    error = true;
-	    break;
-	}
+	if (stream_type == CVL_PNM)
+	    cvl_frame_set_type(frame, CVL_FLOAT);
+	format = cvl_frame_format(frame);
+	cvl_convert_format_inplace(frame, CVL_HSL);
+	cvl_frame_t *tmpframe = cvl_frame_new_tpl(frame);
+	cvl_frame_set_taglist(tmpframe, cvl_taglist_copy(cvl_frame_taglist(frame)));
+	cvl_color_adjust(tmpframe, frame, h.value, s.value, l.value, c.value);
 	cvl_frame_free(frame);
+	cvl_convert_format_inplace(tmpframe, format);
+	if (stream_type == CVL_PNM)
+	    cvl_frame_set_type(tmpframe, CVL_UINT8);
+	cvl_write(stdout, stream_type, tmpframe);
+	cvl_frame_free(tmpframe);
     }
 
-    cvl_io_info_free(input_info);
-    cvl_io_info_free(output_info);
-    free(g.value);
-    free(g.value_sizes);
-    return error ? 1 : 0;
+    return cvl_error() ? 1 : 0;
 }

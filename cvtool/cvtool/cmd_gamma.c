@@ -1,5 +1,5 @@
 /*
- * cmd_invert.c
+ * cmd_gamma.c
  * 
  * This file is part of cvtool, a computer vision tool.
  *
@@ -22,28 +22,33 @@
 #include "config.h"
 
 #include <stdbool.h>
-#include <stdio.h>
-#include <string.h>
+#include <float.h>
 
 #include <cvl/cvl.h>
 
 #include "mh.h"
 
 
-void cmd_invert_print_help(void)
+void cmd_gamma_print_help(void)
 {
     mh_msg_fmt_req(
-	    "invert\n"
+	    "gamma -g|--gamma=<g>\n"
 	    "\n"
-	    "Invert input frames.");
+	    "Gamma correction.");
 }
 
 
-int cmd_invert(int argc, char *argv[])
+int cmd_gamma(int argc, char *argv[])
 {
-    mh_option_t options[] = { mh_option_null };
-    cvl_frame_t *frame;
+    mh_option_float_t g = { -1.0f, 0.0f, false, FLT_MAX, true };
+    mh_option_t options[] = 
+    { 
+	{ "gamma", 'g', MH_OPTION_FLOAT, &g, true },
+	mh_option_null 
+    };
     cvl_stream_type_t stream_type;
+    cvl_format_t format;
+    cvl_frame_t *frame, *new_frame;
 
     mh_msg_set_command_name("%s", argv[0]);    
     if (!mh_getopt(argc, argv, options, 0, 0, NULL))
@@ -56,17 +61,21 @@ int cmd_invert(int argc, char *argv[])
 	cvl_read(stdin, &stream_type, &frame);
 	if (!frame)
 	    break;
-	cvl_format_t format = cvl_frame_format(frame);
+	if (stream_type == CVL_PNM)
+	    cvl_frame_set_type(frame, CVL_FLOAT);
+	format = cvl_frame_format(frame);
 	if (format != CVL_LUM)
 	    cvl_convert_format_inplace(frame, CVL_RGB);
-	cvl_frame_t *inverse = cvl_frame_new_tpl(frame);
-	cvl_frame_set_taglist(inverse, cvl_taglist_copy(cvl_frame_taglist(frame)));
-	cvl_invert(inverse, frame);
+	new_frame = cvl_frame_new_tpl(frame);
+	cvl_frame_set_taglist(new_frame, cvl_taglist_copy(cvl_frame_taglist(frame)));
+	cvl_gamma_correct(new_frame, frame, g.value);
 	cvl_frame_free(frame);
 	if (format != CVL_LUM)
-	    cvl_convert_format_inplace(inverse, format);
-	cvl_write(stdout, stream_type, inverse);
-    	cvl_frame_free(inverse);
+	    cvl_convert_format_inplace(new_frame, format);
+	if (stream_type == CVL_PNM)
+	    cvl_frame_set_type(new_frame, CVL_UINT8);
+	cvl_write(stdout, stream_type, new_frame);
+	cvl_frame_free(new_frame);
     }
 
     return cvl_error() ? 1 : 0;

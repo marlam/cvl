@@ -1,8 +1,7 @@
 bin_PROGRAMS = cvtool
 
-cvtool_SOURCES = cvtool.c crash.c crash.h \
+cvtool_SOURCES = cvtool.c 	\
 	cmd_affine.c		\
-	cmd_binarize.c		\
 	cmd_blend.c		\
 	cmd_channel.c		\
 	cmd_color.c		\
@@ -11,38 +10,38 @@ cvtool_SOURCES = cvtool.c crash.c crash.h \
 	cmd_convolve.c		\
 	cmd_create.c		\
 	cmd_cut.c		\
-	cmd_dibr.c		\
 	cmd_diff.c		\
 	cmd_draw.c		\
 	cmd_edge.c		\
-	cmd_equalize.c		\
-	cmd_fieldconv.c		\
-	cmd_filter.c		\
 	cmd_flip.c		\
 	cmd_flop.c		\
 	cmd_foreach.c		\
+	cmd_gamma.c		\
+	cmd_gauss.c		\
 	cmd_info.c		\
 	cmd_invert.c		\
+	cmd_laplace.c		\
 	cmd_layer.c		\
-	cmd_mat.c		\
+	cmd_max.c		\
+	cmd_mean.c		\
+	cmd_median.c		\
 	cmd_merge.c		\
-	cmd_opticalflow.c	\
+	cmd_min.c		\
 	cmd_resize.c		\
 	cmd_reverse.c		\
 	cmd_rotate.c		\
 	cmd_scale.c		\
-	cmd_sedt.c		\
 	cmd_select.c		\
 	cmd_shear.c		\
-	cmd_skeleton.c		\
 	cmd_split.c		\
-	cmd_stereoview.c	\
-	cmd_trackdepth.c	\
-	cmd_vectors.c
+	cmd_test.c		\
+	cmd_tonemap.c		\
+	cmd_unsharpmask.c	\
+	cmd_visualize.c
 
-cvtool_LDADD = \
-	$(top_builddir)/cvl/libcvl.la \
-	$(top_builddir)/notgnulib/libnotgnu.la \
+cvtool_LDADD = $(CAIRO_LIBS) $(LTLIBICONV)	\
+	$(top_builddir)/cvl/libcvl.la		\
+	$(top_builddir)/mhlib/libmh.la		\
 	$(top_builddir)/gnulib/libgnu.la
 
-AM_CPPFLAGS = -I$(top_srcdir)/gnulib -I$(top_srcdir)/notgnulib -I$(top_srcdir)/cvl -DPROGRAM_NAME=\"cvtool\"
+AM_CPPFLAGS = -I$(top_srcdir)/gnulib -I$(top_srcdir)/mhlib -I$(top_srcdir)/cvl $(CAIRO_CPPFLAGS)

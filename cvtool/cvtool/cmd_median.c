@@ -1,9 +1,9 @@
 /*
- * cmd_convolve.c
+ * cmd_median.c
  * 
  * This file is part of cvtool, a computer vision tool.
  *
- * Copyright (C) 2005, 2006  Martin Lambers <marlam@marlam.de>
+ * Copyright (C) 2005, 2006m 2007  Martin Lambers <marlam@marlam.de>
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -21,28 +21,26 @@
 
 #include "config.h"
 
-#include <stdlib.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
 #include <limits.h>
+#include <float.h>
 
 #include <cvl/cvl.h>
 
 #include "mh.h"
 
 
-void cmd_convolve_print_help(void)
+void cmd_median_print_help(void)
 {
     mh_msg_fmt_req(
-	    "convolve -K|--kernel=<K>\n"
-	    "convolve -X|--vector-x=<X> -Y|--vector-y=<Y> [-T|--vector-t=<T>]\n"
+	    "median [-a|--approximated] [-3|--3d] -k|--k=<k>\n"
+	    "median [-a|--approximated] [-3|--3d] -x|--k-x=<kx> -y|--k-y=<ky> [-t|--k-t=<kt>]\n"
 	    "\n"
-	    "Convolve frames with the given convolution kernel. Both 2D and 3D kernels are accepted "
-	    "(the third dimension is the time). If the kernel is separable, the vectors "
-	    "that generate it can be given instead. "
-	    "The size of the kernel must be an odd number in each "
-	    "dimension.");
+	    "Filter frames, in 2D or 3D (with the third dimension being the time). The kernel size "
+	    "can be given for each dimension, or once for all. It will be (2kx+1)x(2ky+1)[x(2kt+1)]. "
+	    "Different values for each direction lead to asymmetric filtering.");
 }
 
 static bool has_more_data(FILE *f)
@@ -51,81 +49,82 @@ static bool has_more_data(FILE *f)
     return ((c = fgetc(f)) != EOF && ungetc(c, f) != EOF);
 }
 
-int cmd_convolve(int argc, char *argv[])
+int cmd_median(int argc, char *argv[])
 {
-    mh_option_float_array_t K = { NULL, 0, NULL, 0, NULL };
-    mh_option_float_array_t X = { NULL, 0, NULL, 1, NULL };
-    mh_option_float_array_t Y = { NULL, 0, NULL, 1, NULL };
-    mh_option_float_array_t T = { NULL, 0, NULL, 1, NULL };
+    mh_option_bool_t approximated = { false, true };
+    mh_option_bool_t three_dimensional = { false, true };
+    mh_option_int_t k = { -1, 0, MH_MASKSIZE_K_MAX };
+    mh_option_int_t kx = { -1, 0, MH_MASKSIZE_K_MAX };
+    mh_option_int_t ky = { -1, 0, MH_MASKSIZE_K_MAX };
+    mh_option_int_t kt = { -1, 0, MH_MASKSIZE_K_MAX };
     mh_option_t options[] = 
     {
-	{ "kernel",   'K', MH_OPTION_FLOAT_ARRAY, &K, false },
-	{ "vector-x", 'X', MH_OPTION_FLOAT_ARRAY, &X, false },
-	{ "vector-y", 'Y', MH_OPTION_FLOAT_ARRAY, &Y, false },
-	{ "vector-t", 'T', MH_OPTION_FLOAT_ARRAY, &T, false },
+	{ "approximated", 'a', MH_OPTION_BOOL, &approximated,      false },
+	{ "3d",           '3', MH_OPTION_BOOL, &three_dimensional, false },
+	{ "k",            'k', MH_OPTION_INT,  &k,                 false },
+	{ "k-x",          'x', MH_OPTION_INT,  &kx,                false },
+	{ "k-y",          'y', MH_OPTION_INT,  &ky,                false },
+	{ "k-t",          't', MH_OPTION_INT,  &kt,                false },
 	mh_option_null
     };
-    bool three_dimensional;
     cvl_stream_type_t stream_type;
     bool error;
 
     mh_msg_set_command_name("%s", argv[0]);
     error = !mh_getopt(argc, argv, options, 0, 0, NULL);
-    if (!error && (K.value && (X.value || Y.value || T.value)))
+    if (!error)
     {
-	mh_msg_err("Cannot use kernel and vectors at the same time");
-	error = true;
-    }
-    if (!error && K.value)
-    {
-	if ((K.value_dimensions != 2 && K.value_dimensions != 3) 
-		|| K.value_sizes[0] % 2 != 1 || K.value_sizes[1] % 2 != 1
-		|| (K.value_dimensions == 3 && K.value_sizes[2] % 2 != 1))
+	if (kt.value >= 0)
 	{
-	    mh_msg_err("Invalid convolution kernel");
+	    three_dimensional.value = true;
+	}
+	if (k.value >= 0 && (kx.value >= 0 || ky.value >= 0 || kt.value >= 0))
+	{
+	    mh_msg_err("Kernel size is overdetermined");
 	    error = true;
 	}
-    }
-    if (!error && !K.value)
-    {
-	if (!X.value || !Y.value)
+	else if (k.value < 0)
 	{
-	    mh_msg_err("Incomplete kernel information");
-	    error = true;
-	}
-	else if (X.value_sizes[0] % 2 != 1 
-		|| Y.value_sizes[0] % 2 != 1 
-		|| (T.value && T.value_sizes[0] % 2 != 1))
-	{
-	    mh_msg_err("Invalid convolution kernel");
-	    error = true;
+	    if (kx.value < 0 || ky.value < 0 || (three_dimensional.value && kt.value < 0))
+	    {
+		mh_msg_err("Kernel size is underdetermined");
+		error = true;
+	    }
 	}
     }
     if (error)
     {
 	return 1;
     }
-
-    three_dimensional = ((K.value && K.value_dimensions == 3) || T.value);
     
-    if (three_dimensional)
+    if (k.value >= 0)
+    {
+	kx.value = k.value;
+	ky.value = k.value;
+	kt.value = k.value;
+    }
+
+    if (three_dimensional.value)
     {
 	cvl_frame_t *new_frame;
-	int framebuflen = (K.value ? K.value_sizes[0] : T.value_sizes[0]);
+	int framebuflen = 2 * kt.value + 1;
 	cvl_frame_t *framebuf[framebuflen];
 	int future_frames = 0;
 	
 	for (int i = 0; i < framebuflen; i++)
 	    framebuf[i] = NULL;
 
-	while (!cvl_error())
+	for (;;)
 	{
 	    // Read the next frame, or take it from the future.
 	    if (future_frames == 0 && has_more_data(stdin))
 	    {
 		cvl_read(stdin, &stream_type, &(framebuf[framebuflen / 2]));
 		if (!framebuf[framebuflen / 2])
+		{
+		    error = true;
 		    break;
+		}
 	    }
 	    else
 	    {
@@ -149,25 +148,31 @@ int cmd_convolve(int argc, char *argv[])
 	    {
 		cvl_read(stdin, &stream_type, &(framebuf[framebuflen / 2 + future_frames + 1]));
 		if (!framebuf[framebuflen / 2 + future_frames + 1])
+		{
+		    error = true;
 		    break;
+		}
 		future_frames++;
 	    }
-
+	    if (error)
+	    {
+		break;
+	    }
+		
 	    // Process the present frame
 	    new_frame = cvl_frame_new_tpl(framebuf[framebuflen / 2]);
 	    cvl_frame_set_taglist(new_frame, cvl_taglist_copy(cvl_frame_taglist(framebuf[framebuflen / 2])));
-	    if (K.value)
-	    {
-		cvl_convolve3d(new_frame, framebuf, 
-			K.value, K.value_sizes[0], K.value_sizes[1], K.value_sizes[2]);
-	    }
+	    if (approximated.value)
+		cvl_median3d_separated(new_frame, framebuf, kx.value, ky.value, kt.value);
 	    else
-	    {
-		cvl_convolve3d_separable(new_frame, framebuf, 
-			X.value, X.value_sizes[0], Y.value, Y.value_sizes[0], T.value, T.value_sizes[0]);
-	    }
+		cvl_median3d(new_frame, framebuf, kx.value, ky.value, kt.value);
 	    cvl_write(stdout, stream_type, new_frame);
 	    cvl_frame_free(new_frame);
+	    error = cvl_error();
+	    if (error)
+	    {
+		break;
+	    }
 
 	    // Move present into past
     	    cvl_frame_free(framebuf[0]);
@@ -192,28 +197,16 @@ int cmd_convolve(int argc, char *argv[])
 		break;
 	    new_frame = cvl_frame_new_tpl(frame);
 	    cvl_frame_set_taglist(new_frame, cvl_taglist_copy(cvl_frame_taglist(frame)));
-    	    if (K.value)
-	    {
-		cvl_convolve(new_frame, frame, K.value, K.value_sizes[0], K.value_sizes[1]);
-	    }
+	    if (approximated.value)
+		cvl_median_separated(new_frame, frame, kx.value, ky.value);
 	    else
-	    {
-		cvl_convolve_separable(new_frame, frame, X.value, X.value_sizes[0], 
-			Y.value, Y.value_sizes[0]);
-	    }
+		cvl_median(new_frame, frame, kx.value, ky.value);
 	    cvl_frame_free(frame);
 	    cvl_write(stdout, stream_type, new_frame);
 	    cvl_frame_free(new_frame);
 	}
+	error = cvl_error();
     }
-	
-    free(K.value);
-    free(K.value_sizes);
-    free(X.value);
-    free(X.value_sizes);
-    free(Y.value);
-    free(Y.value_sizes);
-    free(T.value);
-    free(T.value_sizes);
-    return cvl_error() ? 1 : 0;
+
+    return error ? 1 : 0;
 }

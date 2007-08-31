@@ -3,7 +3,7 @@
  * 
  * This file is part of cvtool, a computer vision tool.
  *
- * Copyright (C) 2005, 2006  Martin Lambers <marlam@marlam.de>
+ * Copyright (C) 2005, 2006, 2007  Martin Lambers <marlam@marlam.de>
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -16,8 +16,7 @@
  *   GNU General Public License for more details.
  *
  *   You should have received a copy of the GNU General Public License
- *   along with this program; if not, write to the Free Software Foundation,
- *   Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "config.h"
@@ -28,10 +27,11 @@
 
 #include <cvl/cvl.h>
 
+#include "mh.h"
 
 void cmd_cut_print_help(void)
 {
-    cvl_msg_fmt_req(
+    mh_msg_fmt_req(
 	    "cut -l|--left=<l> -t|--top=<t> -w|--width=<w> -h|--height=<h>\n"
 	    "\n"
 	    "Only let the given rectangle through; cut the rest of each frame.");
@@ -40,63 +40,49 @@ void cmd_cut_print_help(void)
 
 int cmd_cut(int argc, char *argv[])
 {
-    cvl_option_int_t l = { 0, 0, INT_MAX };
-    cvl_option_int_t t = { 0, 0, INT_MAX };
-    cvl_option_int_t w = { 0, 1, INT_MAX };
-    cvl_option_int_t h = { 0, 1, INT_MAX };
-    cvl_option_t options[] =
+    mh_option_int_t l = { 0, 0, INT_MAX };
+    mh_option_int_t t = { 0, 0, INT_MAX };
+    mh_option_int_t w = { 0, 1, INT_MAX };
+    mh_option_int_t h = { 0, 1, INT_MAX };
+    mh_option_t options[] =
     {
-	{ "left",   'l', CVL_OPTION_INT, &l, true },
-	{ "top",    't', CVL_OPTION_INT, &t, true },
-	{ "width",  'w', CVL_OPTION_INT, &w, true },
-	{ "height", 'h', CVL_OPTION_INT, &h, true },
-	cvl_option_null
+	{ "left",   'l', MH_OPTION_INT, &l, true },
+	{ "top",    't', MH_OPTION_INT, &t, true },
+	{ "width",  'w', MH_OPTION_INT, &w, true },
+	{ "height", 'h', MH_OPTION_INT, &h, true },
+	mh_option_null
     };
-    cvl_io_info_t *input_info;
-    cvl_io_info_t *output_info;
+    cvl_stream_type_t stream_type;
     cvl_frame_t *frame;
     cvl_frame_t *newframe;
-    bool error;
+    bool error = false;
 
     
-    cvl_msg_set_command_name("%s", argv[0]);
-    if (!cvl_getopt(argc, argv, options, 0, 0, NULL))
+    mh_msg_set_command_name("%s", argv[0]);
+    if (!mh_getopt(argc, argv, options, 0, 0, NULL))
     {
 	return 1;
     }
 
-    input_info = cvl_io_info_new();
-    output_info = cvl_io_info_new();
-    cvl_io_info_link_output_to_input(output_info, input_info);
-
-    error = false;
-    while (!cvl_io_eof(stdin))
+    while (!error && !cvl_error())
     {
-	if (!cvl_io_read(stdin, input_info, &frame))
-	{
-	    error = true;
+	cvl_read(stdin, &stream_type, &frame);
+	if (!frame)
 	    break;
-	}
 	if (l.value + w.value > cvl_frame_width(frame) || t.value + h.value > cvl_frame_height(frame))
 	{
-	    cvl_msg_err("rectangle does not fit into frame");
+	    mh_msg_err("Rectangle does not fit into frame");
 	    error = true;
 	    break;
 	}
-	newframe = cvl_cut(frame, l.value, t.value, w.value, h.value);
+	newframe = cvl_frame_new(w.value, h.value, 
+		cvl_frame_channels(frame), cvl_frame_format(frame), cvl_frame_type(frame), CVL_TEXTURE);
+	cvl_frame_set_taglist(newframe, cvl_taglist_copy(cvl_frame_taglist(frame)));
+	cvl_cut_rect(newframe, frame, l.value, t.value);
 	cvl_frame_free(frame);
-	cvl_io_info_set_width(output_info, cvl_frame_width(newframe));
-	cvl_io_info_set_height(output_info, cvl_frame_height(newframe));
-	if (!cvl_io_write(stdout, output_info, newframe))
-	{
-	    cvl_frame_free(newframe);
-	    error = true;
-	    break;
-	}
+	cvl_write(stdout, stream_type, newframe);
 	cvl_frame_free(newframe);
     }
 
-    cvl_io_info_free(input_info);
-    cvl_io_info_free(output_info);
-    return error ? 1 : 0;
+    return error || cvl_error() ? 1 : 0;
 }

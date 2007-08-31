@@ -3,7 +3,7 @@
  * 
  * This file is part of cvtool, a computer vision tool.
  *
- * Copyright (C) 2005, 2006  Martin Lambers <marlam@marlam.de>
+ * Copyright (C) 2005, 2006, 2007  Martin Lambers <marlam@marlam.de>
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -16,8 +16,7 @@
  *   GNU General Public License for more details.
  *
  *   You should have received a copy of the GNU General Public License
- *   along with this program; if not, write to the Free Software Foundation,
- *   Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "config.h"
@@ -27,7 +26,6 @@
 #include <stdlib.h>
 #include <limits.h>
 #include <errno.h>
-extern int errno;
 #ifdef W32_NATIVE
 #include <fcntl.h>
 #include <io.h>
@@ -35,10 +33,10 @@ extern int errno;
 
 #include <cvl/cvl.h>
 
-#include "crash.h"
+#include "mh.h"
+
 
 char *program_name;
-
 
 /*
  * The command functions. All live in their own .c file (except for the trivial
@@ -62,7 +60,6 @@ typedef struct
 #define COMMAND(NAME)  { #NAME, cmd_ ## NAME, cmd_ ## NAME ## _print_help }
 
 COMMAND_DECL(affine)
-COMMAND_DECL(binarize)
 COMMAND_DECL(blend)
 COMMAND_DECL(channel)
 COMMAND_DECL(color)
@@ -71,41 +68,40 @@ COMMAND_DECL(convert)
 COMMAND_DECL(convolve)
 COMMAND_DECL(create)
 COMMAND_DECL(cut)
-COMMAND_DECL(dibr)
 COMMAND_DECL(diff)
 COMMAND_DECL(draw)
 COMMAND_DECL(edge)
-COMMAND_DECL(equalize)
-COMMAND_DECL(fieldconv)
-COMMAND_DECL(filter)
 COMMAND_DECL(flip)
 COMMAND_DECL(flop)
 COMMAND_DECL(foreach)
+COMMAND_DECL(gamma)
+COMMAND_DECL(gauss)
 COMMAND_DECL(help)
 COMMAND_DECL(info)
 COMMAND_DECL(invert)
+COMMAND_DECL(laplace)
 COMMAND_DECL(layer)
-COMMAND_DECL(mat)
+COMMAND_DECL(max)
+COMMAND_DECL(mean)
+COMMAND_DECL(median)
 COMMAND_DECL(merge)
-COMMAND_DECL(opticalflow)
+COMMAND_DECL(min)
 COMMAND_DECL(resize)
 COMMAND_DECL(reverse)
 COMMAND_DECL(rotate)
 COMMAND_DECL(scale)
-COMMAND_DECL(sedt)
 COMMAND_DECL(select)
 COMMAND_DECL(shear)
-COMMAND_DECL(skeleton)
 COMMAND_DECL(split)
-COMMAND_DECL(stereoview)
-COMMAND_DECL(trackdepth)
-COMMAND_DECL(vectors)
+COMMAND_DECL(test)
+COMMAND_DECL(tonemap)
+COMMAND_DECL(unsharpmask)
 COMMAND_DECL(version)
+COMMAND_DECL(visualize)
 
 cvtool_command_t commands[] = 
 {
     COMMAND(affine),
-    COMMAND(binarize),
     COMMAND(blend),
     COMMAND(channel),
     COMMAND(color),
@@ -114,36 +110,36 @@ cvtool_command_t commands[] =
     COMMAND(convolve),
     COMMAND(create),
     COMMAND(cut),
-    COMMAND(dibr),
     COMMAND(diff),
     COMMAND(draw),
     COMMAND(edge),
-    COMMAND(equalize),
-    COMMAND(fieldconv),
-    COMMAND(filter),
     COMMAND(flip),
     COMMAND(flop),
     COMMAND(foreach),
+    COMMAND(gamma),
+    COMMAND(gauss),
     COMMAND(help),
     COMMAND(info),
     COMMAND(invert),
+    COMMAND(laplace),
     COMMAND(layer),
-    COMMAND(mat),
+    COMMAND(max),
+    COMMAND(mean),
+    COMMAND(median),
     COMMAND(merge),
-    COMMAND(opticalflow),
+    COMMAND(min),
     COMMAND(resize),
     COMMAND(reverse),
     COMMAND(rotate),
     COMMAND(scale),
-    COMMAND(sedt),
     COMMAND(select),
     COMMAND(shear),
-    COMMAND(skeleton),
     COMMAND(split),
-    COMMAND(stereoview),
-    COMMAND(trackdepth),
-    COMMAND(vectors),
+    COMMAND(test),
+    COMMAND(tonemap),
+    COMMAND(unsharpmask),
     COMMAND(version),
+    COMMAND(visualize),
     { NULL, NULL, NULL }
 };
     
@@ -172,7 +168,7 @@ int cmd_find(const char *cmd)
 
 void cmd_version_print_help(void)
 {
-    cvl_msg_fmt_req(
+    mh_msg_fmt_req(
 	    "version\n"
 	    "\n"
 	    "Print version information.");
@@ -180,27 +176,27 @@ void cmd_version_print_help(void)
 
 int cmd_version(int argc, char *argv[])
 {
-    cvl_msg_set_command_name("%s", argv[0]);
+    mh_msg_set_command_name("%s", argv[0]);
     if (argc == 1)
     {
-	cvl_msg_fmt_req("%s version %s\n"
-		"Copyright (C) 2006  Martin Lambers and others.\n"
+	mh_msg_fmt_req("%s version %s\n"
+		"Copyright (C) 2007  Martin Lambers and others.\n"
 		"This is free software. You may redistribute copies of it under the terms of "
-		"the GNU General Public License <http://www.gnu.org/licenses/gpl.html>.\n"
+		"the GNU General Public License.\n"
 		"There is NO WARRANTY, to the extent permitted by law.",
-		PROGRAM_NAME, VERSION);
+		PACKAGE_NAME, VERSION);
 	return 0;
     }
     else
     {
-	cvl_msg_err("too many arguments");
+	mh_msg_err("too many arguments");
 	return 1;
     }
 }
 
 void cmd_help_print_help(void)
 {
-    cvl_msg_fmt_req(
+    mh_msg_fmt_req(
 	    "help [<command>]\n"
 	    "\n"
 	    "Print general or command specific help.");
@@ -208,19 +204,19 @@ void cmd_help_print_help(void)
 
 int cmd_help(int argc, char *argv[])
 {
-    cvl_msg_set_command_name("%s", argv[0]);
+    mh_msg_set_command_name("%s", argv[0]);
     if (argc == 1)
     {
-	cvl_msg_fmt_req(
+	mh_msg_fmt_req(
 		"Usage: %s [-q|--quiet] [-v|--verbose] <command> [argument...]\n"
 		"\n"
 		"Available commands:\n",
 		program_name);
 	for (int i = 0; commands[i].name; i++)
 	{
-	    cvl_msg_req("%s", commands[i].name);
+	    mh_msg_req("%s", commands[i].name);
 	}
-	cvl_msg_fmt_req(
+	mh_msg_fmt_req(
 		"\n"
 		"Use \"%s help <command>\" for command specific help.\n"
 		"Report bugs to <%s>.", program_name, PACKAGE_BUGREPORT);
@@ -231,7 +227,7 @@ int cmd_help(int argc, char *argv[])
 	int cmd_index = cmd_find(argv[1]);
     	if (cmd_index < 0)
 	{
-	    cvl_msg_err("command unknown: %s", argv[1]);
+	    mh_msg_err("command unknown: %s", argv[1]);
 	    return 1;
 	}
 	else
@@ -242,53 +238,39 @@ int cmd_help(int argc, char *argv[])
     }
     else
     {
-	cvl_msg_err("too many arguments");
+	mh_msg_err("too many arguments");
 	return 1;
     }
 }
 
 int main(int argc, char *argv[])
 {
-    char *column_string;
-    int exitcode;
+    int exitcode = 0;
     
 #ifdef W32_NATIVE
-    /* This must be done before anything is read or written */
     _setmode(_fileno(stdin), _O_BINARY);	    
     _setmode(_fileno(stdout), _O_BINARY);	    
-    /* Open all files in binary mode by default */
     _fmode = _O_BINARY;
+    setbuf(stderr, NULL);
 #endif
 
-#ifdef W32_NATIVE
-    program_name = strrchr(argv[0], '\\');
-#else
-    program_name = strrchr(argv[0], '/');
-#endif
+    program_name = strrchr(argv[0], DIRSEP);
     program_name = program_name ? program_name + 1 : argv[0];
-    
-    init_crashhandler();
-    cvl_msg_set_program_name("%s", program_name);
-    cvl_msg_set_output_level(CVL_MSG_INF);
-    if ((column_string = getenv("COLUMNS")))
-    {
-	char *p;
-	long columns;
-	
-	errno = 0;
-	columns = strtol(column_string, &p, 0);
-	if (p != column_string && *p == '\0' && errno != ERANGE && columns > 0 && columns <= INT_MAX)
-	{
-	    cvl_msg_fmt_set_columns(columns);
-	}
-    }
+    mh_msg_set_program_name("%s", program_name);
+#if DEBUG
+    mh_msg_set_output_level(MH_MSG_DBG);
+#else
+    mh_msg_set_output_level(MH_MSG_INF);
+#endif
+    mh_msg_fmt_set_columns_from_env();
+    mh_crashhandler_init();
 
     if (argc < 2)
     {
 	char help[] = "help";
 	char *my_argv[] = { help, NULL };
 	cmd_help(1, my_argv);
-	return 1;
+	exitcode = 1;
     }
     else if (argc == 2 && strcmp(argv[1], "--help") == 0)
     {
@@ -307,30 +289,66 @@ int main(int argc, char *argv[])
 		    || strcmp(argv[argv_cmd_index], "--quiet") == 0))
 	{
 	    argv_cmd_index++;
-	    cvl_msg_set_output_level(CVL_MSG_WRN);
+	    mh_msg_set_output_level(MH_MSG_WRN);
 	}
 	if (argc > argv_cmd_index + 1 && (strcmp(argv[argv_cmd_index], "-v") == 0 
 		    || strcmp(argv[argv_cmd_index], "--verbose") == 0))
 	{
     	    argv_cmd_index++;
-	    cvl_msg_set_output_level(CVL_MSG_DBG);
+	    mh_msg_set_output_level(MH_MSG_DBG);
 	}
 	int cmd_index = cmd_find(argv[argv_cmd_index]);
 	if (cmd_index < 0)
 	{
-	    cvl_msg_err("command unknown: %s", argv[argv_cmd_index]);
+	    mh_msg_err("command unknown: %s", argv[argv_cmd_index]);
 	    exitcode = 1;
 	}
     	else
 	{
-	    exitcode = commands[cmd_index].cmd(argc - argv_cmd_index, &(argv[argv_cmd_index]));
+	    const char *display_name;
+#ifdef W32_NATIVE
+	    display_name = NULL;
+#else
+	    if (!(display_name = getenv("DISPLAY")))
+	    {
+		mh_msg_err("Cannot create OpenGL context: No environment variable DISPLAY.");
+		exitcode = 1;
+	    }
+	    else
+#endif
+	    {
+		cvl_gl_context_t *ctx = cvl_gl_context_new(display_name);
+		if (!ctx)
+		{
+#ifdef W32_NATIVE
+		    mh_msg_err("Cannot create OpenGL context");
+#else
+		    mh_msg_err("Cannot create OpenGL context on display %s", display_name);
+#endif
+		    exitcode = 1;
+		}
+		else
+		{
+		    bool cvl_initialized = false;
+		    cvl_init();
+		    if (!cvl_error())
+		    {
+			cvl_initialized = true;
+			exitcode = commands[cmd_index].cmd(argc - argv_cmd_index, &(argv[argv_cmd_index]));
+		    }
+		    if (cvl_error())
+		    {
+			mh_msg_err("%s", cvl_error_msg());
+			exitcode = 1;
+		    }
+		    if (cvl_initialized)
+		    {
+			cvl_deinit();
+		    }
+		    cvl_gl_context_free(ctx);
+		}
+	    }
 	}
     }
     return exitcode;
-}
-
-void xalloc_die(void)
-{
-    cvl_msg_err("%s", strerror(ENOMEM));
-    exit(1);
 }

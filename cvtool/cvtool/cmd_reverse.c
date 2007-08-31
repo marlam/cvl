@@ -3,7 +3,7 @@
  * 
  * This file is part of cvtool, a computer vision tool.
  *
- * Copyright (C) 2005, 2006  Martin Lambers <marlam@marlam.de>
+ * Copyright (C) 2005, 2006, 2007  Martin Lambers <marlam@marlam.de>
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -16,8 +16,7 @@
  *   GNU General Public License for more details.
  *
  *   You should have received a copy of the GNU General Public License
- *   along with this program; if not, write to the Free Software Foundation,
- *   Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "config.h"
@@ -28,32 +27,25 @@
 #include <string.h>
 #include <limits.h>
 #include <errno.h>
-extern int errno;
-
-#include "xalloc.h"
-
-#include "tempfile.h"
 
 #include <cvl/cvl.h>
+
+#include "mh.h"
 
 
 void cmd_reverse_print_help(void)
 {
-    cvl_msg_fmt_req(
+    mh_msg_fmt_req(
 	    "reverse\n"
 	    "\n"
-	    "Reverses the order of the frames in the video stream.");
+	    "Reverses the order of the frames in the stream.");
 }
-
 
 
 int cmd_reverse(int argc, char *argv[])
 {
-    cvl_option_t options[] = { cvl_option_null };
-    cvl_io_info_t *input_info;
-    cvl_io_info_t *output_info;
-    cvl_io_info_t *tmp_input_info;
-    cvl_io_info_t *tmp_output_info;
+    mh_option_t options[] = { mh_option_null };
+    cvl_stream_type_t stream_type;
     FILE *tmpf;
     char *tmpf_name;
     cvl_frame_t *frame;
@@ -64,68 +56,53 @@ int cmd_reverse(int argc, char *argv[])
     bool error;
 
     
-    cvl_msg_set_command_name("%s", argv[0]);
-    if (!cvl_getopt(argc, argv, options, 0, 0, NULL))
+    mh_msg_set_command_name("%s", argv[0]);
+    if (!mh_getopt(argc, argv, options, 0, 0, NULL))
     {
 	return 1;
     }
 
-    positions = xmalloc(positions_growby * sizeof(fpos_t));
+    positions = mh_alloc(positions_growby * sizeof(fpos_t));
     positions_size = positions_growby;
     positions_index = 0;
     
-    input_info = cvl_io_info_new();
-    output_info = cvl_io_info_new();
-    cvl_io_info_link_output_to_input(output_info, input_info);
-    
     error = false;
-    if (!(tmpf = tempfile(PROGRAM_NAME "-reverse-", &tmpf_name)))
+    if (!(tmpf = mh_mktempfile(PACKAGE_NAME "-reverse-", &tmpf_name)))
     {
-	cvl_msg_err("cannot create temporary file: %s", strerror(errno));
+	mh_msg_err("Cannot create temporary file: %s", strerror(errno));
 	error = true;
     }
 
-    while (!error && !cvl_io_eof(stdin))
+    while (!error)
     {
-	/* Read one frame */
-	if (!cvl_io_read(stdin, input_info, &frame))
-    	{
-	    error = true;
+	cvl_read(stdin, &stream_type, &frame);
+	if (!frame)
 	    break;
-	}
 	/* Store the position for the frame */
 	if (positions_index == positions_size)
 	{
-	    positions = xrealloc(positions, (positions_size + positions_growby) * sizeof(fpos_t));
+	    positions = mh_realloc(positions, mh_alloc_mul((positions_size + positions_growby), sizeof(fpos_t)));
 	    positions_size += positions_growby;
 	}
 	if (fgetpos(tmpf, &(positions[positions_index])) != 0)
 	{
-	    cvl_msg_err("cannot get file position indicator for %s: %s", tmpf_name, strerror(errno));
+	    mh_msg_err("Cannot get file position indicator for %s: %s", tmpf_name, strerror(errno));
 	    cvl_frame_free(frame);
 	    error = true;
 	    break;
 	}
 	positions_index++;
 	/* Write the frame to the temporary file */
-	tmp_output_info = cvl_io_info_new();
-	cvl_io_info_link_output_to_input(tmp_output_info, input_info);
-	if (!cvl_io_write(tmpf, tmp_output_info, frame))
-    	{
-	    cvl_io_info_free(tmp_output_info);
-	    cvl_frame_free(frame);
-	    error = true;
-	    break;
-	}
-	cvl_io_info_free(tmp_output_info);
+	cvl_write(tmpf, stream_type, frame);
 	cvl_frame_free(frame);
+	error = cvl_error();
     }
 
     if (!error)
     {
 	if (fflush(tmpf) != 0)
 	{
-	    cvl_msg_err("cannot flush %s: %s", tmpf_name, strerror(errno));
+	    mh_msg_err("Cannot flush %s: %s", tmpf_name, strerror(errno));
 	    error = true;
 	}
     }
@@ -137,27 +114,18 @@ int cmd_reverse(int argc, char *argv[])
 	    /* Set the file position */
 	    if (fsetpos(tmpf, &(positions[i])) != 0)
 	    {
-		cvl_msg_err("cannot set file position indicator for %s: %s", tmpf_name, strerror(errno));
+		mh_msg_err("Cannot set file position indicator for %s: %s", tmpf_name, strerror(errno));
 		error = true;
 		break;
 	    }
 	    /* Read one frame */
-	    tmp_input_info = cvl_io_info_new();
-	    if (!cvl_io_read(tmpf, tmp_input_info, &frame))
-	    {
-		cvl_io_info_free(tmp_input_info);
-		error = true;
-		break;
-	    }
-	    cvl_io_info_free(tmp_input_info);
+	    cvl_read(tmpf, &stream_type, &frame);
 	    /* Write the frame to stdout */
-	    if (!cvl_io_write(stdout, output_info, frame))
-	    {
-		cvl_frame_free(frame);
-		error = true;
+	    cvl_write(stdout, stream_type, frame);
+    	    cvl_frame_free(frame);
+	    error = cvl_error();
+	    if (error)
 		break;
-	    }
-	    cvl_frame_free(frame);	    
 	}
     }
     
@@ -165,7 +133,5 @@ int cmd_reverse(int argc, char *argv[])
     remove(tmpf_name);
     free(tmpf_name);
     free(positions);
-    cvl_io_info_free(input_info);
-    cvl_io_info_free(output_info);
     return error ? 1 : 0;
 }

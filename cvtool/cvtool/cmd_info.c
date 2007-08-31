@@ -3,7 +3,7 @@
  * 
  * This file is part of cvtool, a computer vision tool.
  *
- * Copyright (C) 2006  Martin Lambers <marlam@marlam.de>
+ * Copyright (C) 2006, 2007  Martin Lambers <marlam@marlam.de>
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -16,8 +16,7 @@
  *   GNU General Public License for more details.
  *
  *   You should have received a copy of the GNU General Public License
- *   along with this program; if not, write to the Free Software Foundation,
- *   Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "config.h"
@@ -25,109 +24,82 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
+#include <math.h>
 
 #include <cvl/cvl.h>
+
+#include "mh.h"
 
 
 void cmd_info_print_help(void)
 {
-    cvl_msg_fmt_req(
-	    "info [-o|--output=<file>]\n"
+    mh_msg_fmt_req(
+	    "info [-s|--statistics] [-S|--single] [-o|--output=<file>]\n"
 	    "\n"
-	    "Print information about the first frame in a stream to stderr or to the given file "
-	    "('-' means stdout). "
-	    "The following information will be printed: STREAMTYPE (y4m or pnm), "
-	    "PIXELTYPE (yuv for y4m streams, rgb or gray for pnm streams), WIDTH, HEIGHT, "
-	    "and, if STREAMTYPE is y4m, CHROMA, INTERLACING, FRAMERATE, ASPECTRATIO.");
+	    "Print information about frames in the input stream.\n"
+	    "If --single is used, the command exits after the first frame has been processed.\n"
+	    "If --statistics is used, additional statistics about the frame contents are printed.\n"
+	    "The output can be redirected to a file or to standard output (-) using the --output option.\n"
+	    "The following information will be printed: STREAM (pfs or pnm), CHANNELS (0-4), "
+	    "FORMAT (luminance or color), TYPE (uint8 or float), WIDTH, HEIGHT.\n"
+	    "Statistics are computed for each available channel c: "
+	    "CHc_MIN, CHc_MAX, CHc_MEAN, CHc_MEDIAN, CHc_STDDEVIATION.");
 }
 
 
 int cmd_info(int argc, char *argv[])
 {
-    cvl_option_file_t output = { NULL, "w", true };
-    cvl_option_t options[] = 
+    mh_option_bool_t statistics = { false, true };
+    mh_option_bool_t single = { false, true };
+    mh_option_file_t output = { NULL, "w", true };
+    mh_option_t options[] = 
     {
-	{ "output", 'o', CVL_OPTION_FILE, &output, false },
-	cvl_option_null
+	{ "statistics", 's', MH_OPTION_BOOL, &statistics, false },
+	{ "single",     'S', MH_OPTION_BOOL, &single,     false },
+	{ "output",     'o', MH_OPTION_FILE, &output,     false },
+	mh_option_null
     };
-    cvl_io_info_t *input_info;    
-    cvl_frame_t *frame;
-    bool error;
+    cvl_frame_t *frame = NULL;
+    cvl_stream_type_t stream_type;
 
-    cvl_msg_set_command_name("%s", argv[0]);    
-    if (!cvl_getopt(argc, argv, options, 0, 0, NULL))
-    {
+    mh_msg_set_command_name("%s", argv[0]);    
+    if (!mh_getopt(argc, argv, options, 0, 0, NULL))
 	return 1;
+
+    while (!cvl_error())
+    {
+	cvl_read(stdin, &stream_type, &frame);
+	if (!frame)
+	    return 0;
+
+	mh_msg(output.value ? output.value : stderr, MH_MSG_REQ,
+		"STREAM=%s CHANNELS=%d FORMAT=%s TYPE=%s WIDTH=%d HEIGHT=%d",
+		stream_type == CVL_PNM ? "pnm" : "pfs",
+		cvl_frame_channels(frame),
+		cvl_frame_format(frame) == CVL_LUM ? "luminance" : "color",
+		cvl_frame_type(frame) == CVL_UINT8 ? "uint8" : "float",
+		cvl_frame_width(frame), cvl_frame_height(frame));
+
+	if (statistics.value)
+	{
+	    float min[4], max[4], median[4], mean[4], stddev[4], dynrange[4];
+	    cvl_statistics(frame, min, max, median, mean, stddev, dynrange);
+	    for (int c = 0; c < cvl_frame_channels(frame); c++)
+	    {
+		mh_msg(output.value ? output.value : stderr, MH_MSG_REQ,
+			"CH%d_MIN=%.4f CH%d_MAX=%.4f CH%d_MEAN=%+.4f CH%d_MEDIAN=%+.4f CH%d_STDDEVIATION=%+.4f CH%d_DYNRANGE=%+.4f",
+			c, min[c], c, max[c], c, mean[c], c, median[c], c, stddev[c], c, dynrange[c]);
+	    }
+	}
+
+	cvl_frame_free(frame);
+
+	if (single.value)
+	    break;
     }
 
-    input_info = cvl_io_info_new();
-
-    if (cvl_io_eof(stdin))
-    {
-	cvl_msg_err("empty stream");
-	error = true;
-    }
-    else
-    {
-	if (!cvl_io_read(stdin, input_info, &frame))
-	{
-	    error = true;
-	}
-	else
-	{
-	    if (cvl_io_info_stream_type(input_info) == CVL_IO_STREAM_Y4M)
-	    {
-		const char *interlacing;
-		const char *chroma;
-		int framerate1, framerate2;
-		int aspectratio1, aspectratio2;
-		
-		if (cvl_io_info_interlacing(input_info) == CVL_Y4M_INTERLACING_PROGRESSIVE)
-		{
-		    interlacing = "p";
-		}
-		else
-		{
-		    interlacing = "unknown";
-		}
-		if (cvl_io_info_chroma(input_info) ==  CVL_Y4M_CHROMA_420JPEG)
-		{
-		    chroma = "420jpeg";
-		}
-		else if (cvl_io_info_chroma(input_info) ==  CVL_Y4M_CHROMA_444)
-		{
-		    chroma = "444";
-		}
-		else
-		{
-		    chroma = "unknown";
-		}
-		cvl_io_info_framerate(input_info, &framerate1, &framerate2);
-		cvl_io_info_aspectratio(input_info, &aspectratio1, &aspectratio2);
-		cvl_msg(output.value ? output.value : stderr, CVL_MSG_REQ,
-		     	"STREAMTYPE=y4m PIXELTYPE=yuv WIDTH=%d HEIGHT=%d "
-			"INTERLACING=%s CHROMA=%s "
-			"FRAMERATE=%d:%d ASPECTRATIO=%d:%d",
-			cvl_io_info_width(input_info), cvl_io_info_height(input_info),
-			interlacing, chroma, 
-			framerate1, framerate2, aspectratio1, aspectratio2);
-	    }
-	    else // CVL_IO_STREAM_PNM
-	    {
-		cvl_msg(output.value ? output.value : stderr, CVL_MSG_REQ,
-			"STREAMTYPE=pnm PIXELTYPE=%s WIDTH=%d HEIGHT=%d",
-			cvl_frame_pixel_type(frame) == CVL_PIXEL_GRAY ? "gray" : "rgb",
-			cvl_io_info_width(input_info), cvl_io_info_height(input_info));
-	    }
-	    cvl_frame_free(frame);
-	    error = false;
-	}
-    }
-    
-    cvl_io_info_free(input_info);
     if (output.value && output.value != stdout)
-    {
 	fclose(output.value);
-    }
-    return error ? 1 : 0;
+    
+    return cvl_error() ? 1 : 0;
 }

@@ -3,7 +3,7 @@
  * 
  * This file is part of cvtool, a computer vision tool.
  *
- * Copyright (C) 2005, 2006  Martin Lambers <marlam@marlam.de>
+ * Copyright (C) 2005, 2006, 2007  Martin Lambers <marlam@marlam.de>
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -16,8 +16,7 @@
  *   GNU General Public License for more details.
  *
  *   You should have received a copy of the GNU General Public License
- *   along with this program; if not, write to the Free Software Foundation,
- *   Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "config.h"
@@ -28,21 +27,19 @@
 #include <string.h>
 #include <limits.h>
 #include <errno.h>
-extern int errno;
+
+#include <cvl/cvl.h>
 
 #include "inttostr.h"
 #include "pipe.h"
 #include "wait-process.h"
-#include "xalloc.h"
 
-#include "tempfile.h"
-
-#include <cvl/cvl.h>
+#include "mh.h"
 
 
 void cmd_foreach_print_help(void)
 {
-    cvl_msg_fmt_req(
+    mh_msg_fmt_req(
 	    "foreach [-s|--shell=<shell>] [-n|--n=<n>] cmd\n"
 	    "\n"
 	    "Execute the given command for every frame. The command is expected to read "
@@ -65,52 +62,18 @@ void cmd_foreach_print_help(void)
 }
 
 
-/*
- * string_replace()
- *
- * Replace all occurences of 's' in the string 'str' with 'r'.
- * 'str' must be allocated; it will be realloc'ed when necessary.
- */
-
-char *string_replace(char *str, const char *s, const char *r)
-{
-    char *p, *new_str;
-    size_t next_pos = 0;
-    size_t rlen = strlen(r);
-
-    while ((p = strstr(str + next_pos, s)))
-    {
-	new_str = xmalloc((strlen(str) + rlen - 1) * sizeof(char));
-	strncpy(new_str, str, (size_t)(p - str));
-	strcpy(new_str + (size_t)(p - str), r);
-	strcpy(new_str + (size_t)(p - str) + rlen, 
-		str + (size_t)(p - str) + 2);
-	next_pos = (size_t)(p - str) + rlen;
-	free(str);
-	str = new_str;
-    }
-    return str;
-}
-
-
-/*
- * Now the real command
- */
-
 int cmd_foreach(int argc, char *argv[])
 {
-    cvl_option_string_t shell = { NULL, NULL };
-    cvl_option_int_t n = { 1, 1, INT_MAX };
-    cvl_option_t options[] =
+    mh_option_string_t shell = { NULL, NULL };
+    mh_option_int_t n = { 1, 1, INT_MAX };
+    mh_option_t options[] =
     {
-	{ "shell",   's', CVL_OPTION_STRING, &shell, false },
-	{ "n",       'n', CVL_OPTION_INT,    &n,     false },
-	cvl_option_null
+	{ "shell",   's', MH_OPTION_STRING, &shell, false },
+	{ "n",       'n', MH_OPTION_INT,    &n,     false },
+	mh_option_null
     };
     int argument_index;
     char *cmd;
-    cvl_io_info_t *input_info;
-    cvl_io_info_t *output_info;
     char Nbuf[INT_BUFSIZE_BOUND(intmax_t)];
     char Wbuf[INT_BUFSIZE_BOUND(intmax_t)];
     char Hbuf[INT_BUFSIZE_BOUND(intmax_t)];
@@ -124,15 +87,16 @@ int cmd_foreach(int argc, char *argv[])
     int pipe_output_fd = -1;
     FILE *pipe_output = NULL;
     int pipe_status;
-    cvl_io_info_t *pipe_input_info = NULL;
-    cvl_io_info_t *pipe_output_info = NULL;
+    cvl_stream_type_t stream_type;
     cvl_frame_t *frame;
+    int frame_counter;
     int i;
     bool error;
+    bool eof;
 
     
-    cvl_msg_set_command_name("%s", argv[0]);
-    if (!cvl_getopt(argc, argv, options, 1, 1, &argument_index))
+    mh_msg_set_command_name("%s", argv[0]);
+    if (!mh_getopt(argc, argv, options, 1, 1, &argument_index))
     {
 	return 1;
     }
@@ -175,60 +139,53 @@ int cmd_foreach(int argc, char *argv[])
     pipe_argv[2] = NULL;
     pipe_argv[3] = NULL;    
     
-    input_info = cvl_io_info_new();
-    output_info = cvl_io_info_new();
-    cvl_io_info_link_output_to_input(output_info, input_info);
-
     error = false;
-    while (!cvl_io_eof(stdin))
+    eof = false;
+    frame_counter = 0;
+    for (;;)
     {
 	/* Create temporary file which will serve as stdin for the command */
-	if (!(pipe_input = tempfile(PROGRAM_NAME "-foreach-", &pipe_input_name)))
+	if (!(pipe_input = mh_mktempfile(PACKAGE_NAME "-foreach-", &pipe_input_name)))
 	{
-	    cvl_msg_err("cannot create temporary file: %s", strerror(errno));
+	    mh_msg_err("Cannot create temporary file: %s", strerror(errno));
 	    error = true;
 	    break;
 	}	
 	
 	/* Copy n frames into temporary file */
-	pipe_input_info = cvl_io_info_new();
-	cvl_io_info_link_output_to_input(pipe_input_info, input_info);
 	i = 0;
-	while (!cvl_io_eof(stdin) && i < n.value)
+	while (i < n.value)
 	{
 	    if (i == 0)
 	    {
-		N = imaxtostr(cvl_io_info_frame_counter(input_info), Nbuf);
+		N = imaxtostr(frame_counter, Nbuf);
 	    }
-	    if (!cvl_io_read(stdin, input_info, &frame))
-	    {
-		error = true;
+	    cvl_read(stdin, &stream_type, &frame);
+	    error = cvl_error();
+	    eof = !error && !frame;
+	    if (!frame)
 		break;
-	    }
+	    frame_counter++;
 	    if (i == 0)
 	    {
 		W = imaxtostr(cvl_frame_width(frame), Wbuf);
 		H = imaxtostr(cvl_frame_height(frame), Hbuf);
 	    }
-	    if (!cvl_io_write(pipe_input, pipe_input_info, frame))
-	    {
-		cvl_frame_free(frame);
-		error = true;
-		break;
-	    }
-	    cvl_frame_free(frame);
+	    cvl_write(pipe_input, stream_type, frame);
+    	    cvl_frame_free(frame);
 	    i++;
+	    error = error || cvl_error();
+	    if (error)
+		break;
 	}
-	cvl_io_info_free(pipe_input_info);
-	pipe_input_info = NULL;
-	if (error)
+	if (error || (eof && i == 0))
 	{
 	    break;
 	}
 	if (fclose(pipe_input) != 0)
 	{
 	    pipe_input = NULL;
-	    cvl_msg_err("cannot close temporary file: %s", strerror(errno));
+	    mh_msg_err("Cannot close temporary file: %s", strerror(errno));
 	    error = true;
 	    break;
 	}
@@ -236,51 +193,40 @@ int cmd_foreach(int argc, char *argv[])
 
 	/* Open pipe to read from command. The command's stdin will be the
 	 * temporary file. */
-	command = xstrdup(cmd);
-	command = string_replace(command, "%N", N);
-	command = string_replace(command, "%W", W);
-	command = string_replace(command, "%H", H);
+	command = mh_strdup(cmd);
+	command = mh_str_replace(command, "%N", N);
+	command = mh_str_replace(command, "%W", W);
+	command = mh_str_replace(command, "%H", H);
 	pipe_argv[pipe_argv_cmd_index] = command;
 	if ((pipe_pid = create_pipe_in(pipe_argv[0], pipe_argv[0], pipe_argv, 
 			pipe_input_name, false, true, false, &pipe_output_fd)) < 0)
 	{
-	    cvl_msg_err("cannot execute command '%s'", command);
+	    mh_msg_err("Cannot execute command '%s'", command);
 	    error = true;
 	    break;
 	}
 	if (!(pipe_output = fdopen(pipe_output_fd, "r")))
 	{
-	    cvl_msg_err("cannot read from command '%s': %s", command, strerror(errno));
+	    mh_msg_err("Cannot read from command '%s': %s", command, strerror(errno));
 	    error = true;
 	    break;
 	}
 
 	/* Copy the output of the command to our stdout */	
-	pipe_output_info = cvl_io_info_new();
-	cvl_io_info_link_output_to_input(output_info, input_info);
-    	while (!cvl_io_eof(pipe_output))
+	for (;;)
 	{
-	    if (!cvl_io_read(pipe_output, pipe_output_info, &frame))
-	    {
-		error = true;
+	    cvl_read(pipe_output, &stream_type, &frame);
+	    error = error || cvl_error();
+	    if (!frame)
 		break;
-	    }
-	    cvl_io_info_set_width(output_info, cvl_frame_width(frame));
-	    cvl_io_info_set_height(output_info, cvl_frame_height(frame));
-	    if (!cvl_io_write(stdout, output_info, frame))
-	    {
-		cvl_frame_free(frame);
-		error = true;
-		break;
-	    }
+	    cvl_write(stdout, stream_type, frame);
 	    cvl_frame_free(frame);
+	    error = error || cvl_error();
 	}
 	if (error)
 	{
 	    break;
 	}
-	cvl_io_info_free(pipe_output_info);
-	pipe_output_info = NULL;
 	(void)remove(pipe_input_name);
 	free(pipe_input_name);
 	pipe_input_name = NULL;
@@ -289,46 +235,32 @@ int cmd_foreach(int argc, char *argv[])
 	pipe_status = wait_subprocess(pipe_pid, command, false, true, true, false);
 	if (pipe_status == 127)
 	{
-	    cvl_msg_err("command '%s' failed to execute", command);
+	    mh_msg_err("Command '%s' failed to execute", command);
 	    error = true;
 	    break;
 	}
 	if (pipe_status != 0)
 	{
-	    cvl_msg_err("'%s' failed with exit status %d", command, pipe_status);
+	    mh_msg_err("Command '%s' failed with exit status %d", command, pipe_status);
 	    error = true;
 	    break;
 	}
 	free(command);
 	command = NULL;
+	if (eof)
+	    break;
     }
     
     if (command)
-    {
 	free(command);
-    }
     if (pipe_input_name)
     {
 	(void)remove(pipe_input_name);
 	free(pipe_input_name);
     }
     if (pipe_input)
-    {
 	fclose(pipe_input);
-    }
     if (pipe_output)
-    {
 	fclose(pipe_output);
-    }
-    if (pipe_input_info)
-    {
-	cvl_io_info_free(pipe_input_info);
-    }
-    if (pipe_output_info)
-    {
-	cvl_io_info_free(pipe_output_info);
-    }
-    cvl_io_info_free(input_info);
-    cvl_io_info_free(output_info);
     return error ? 1 : 0;
 }
