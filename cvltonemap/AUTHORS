@@ -1,0 +1,6 @@
+CVLTonemap was written by Martin Lambers <marlam@marlam.de>.
+
+This software might use some gnulib modules, depending on your platform.
+These gnulib modules were written by other authors and may have their own 
+licenses. Please check the source files in the subdirectory gnulib for more 
+information.

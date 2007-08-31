@@ -1,0 +1,84 @@
+\input texinfo   @c -*-texinfo-*-
+@afourpaper
+@setfilename CVLTonemap.info
+@set UPDATED August 31, 2007
+@set UPDATED-MONTH July 2007
+@set EDITION 0.1.0
+@set VERSION 0.1.0
+@settitle CVLTonemap @value{VERSION}
+
+@c Define new index for commands
+@defcodeindex cm
+
+@finalout
+@copying
+This manual was last updated @value{UPDATED} for version
+@value{VERSION} of CVLTonemap.
+
+Copyright @copyright{} 2007 Martin Lambers
+
+@quotation
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License, Version 1.2 or
+any later version published by the Free Software Foundation; with no
+Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts.  A
+copy of the license is included in the section entitled ``GNU Free
+Documentation License''.
+@end quotation
+@end copying
+
+@dircategory Individual utilities
+@direntry
+* CVLTonemap: (CVLTonemap).	A HDR image viewer and tone mapping tool based on the CVL library.
+@end direntry
+
+@titlepage
+@title CVLTonemap
+@subtitle A HDR image viewer and tone mapping tool based on the CVL library.
+@subtitle version @value{VERSION}, @value{UPDATED}
+@author Martin Lambers (@email{marlam@@marlam.de})
+@page
+@vskip 0pt plus 1filll
+@insertcopying
+@end titlepage
+
+@contents
+
+@ifnottex
+@node Top
+@top CVLTonemap
+@insertcopying
+@end ifnottex
+
+@menu
+* About CVLTonemap::
+* Copying Information::
+@end menu
+
+
+@node About CVLTonemap
+@chapter About CVLTonemap
+
+CVLTonemap is an viewer and tone mapping tool for high dynamic range images.
+It is based on the CVL library.
+
+The program’s homepage is @url{http://cvtool.sourceforge.net}.
+
+
+@node Copying Information
+@appendix Copying Information
+
+@menu
+* GNU Free Documentation License::   License for copying this manual.
+* GNU GPL::                          License for copying the program.
+@end menu
+
+@node GNU Free Documentation License
+@unnumberedsec GNU Free Documentation License
+@include fdl.texi
+@node GNU GPL
+@unnumberedsec GNU GPL
+@include gpl.texi
+
+
+@bye
