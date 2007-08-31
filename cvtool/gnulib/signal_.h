@@ -1,6 +1,6 @@
-/* POSIX compatible signal blocking.
-   Copyright (C) 2006 Free Software Foundation, Inc.
-   Written by Bruno Haible <bruno@clisp.org>, 2006.
+/* A GNU-like <signal.h>.
+
+   Copyright (C) 2006-2007 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -16,14 +16,34 @@
    along with this program; if not, write to the Free Software Foundation,
    Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.  */
 
-#include <signal.h>
+#if defined __need_sig_atomic_t || defined __need_sigset_t
+/* Special invocation convention inside glibc header files.  */
 
-#if ! HAVE_POSIX_SIGNALBLOCKING
+# @INCLUDE_NEXT@ @NEXT_SIGNAL_H@
+
+#else
+/* Normal invocation convention.  */
+
+#ifndef _GL_SIGNAL_H
+
+/* The include_next requires a split double-inclusion guard.  */
+#@INCLUDE_NEXT@ @NEXT_SIGNAL_H@
+
+#ifndef _GL_SIGNAL_H
+#define _GL_SIGNAL_H
+
+/* The definition of GL_LINK_WARNING is copied here.  */
+
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+
+#if !@HAVE_POSIX_SIGNALBLOCKING@
 
 /* Mingw defines sigset_t not in <signal.h>, but in <sys/types.h>.  */
 # include <sys/types.h>
-
-# include "verify.h"
 
 /* Maximum signal number + 1.  */
 # ifndef NSIG
@@ -31,10 +51,10 @@
 # endif
 
 /* This code supports only 32 signals.  */
-verify (NSIG <= 32);
+typedef int verify_NSIG_constraint[2 * (NSIG <= 32) - 1];
 
 /* A set or mask of signals.  */
-# if !HAVE_SIGSET_T
+# if !@HAVE_SIGSET_T@
 typedef unsigned int sigset_t;
 # endif
 
@@ -66,4 +86,13 @@ extern int sigpending (sigset_t *set);
 # define SIG_UNBLOCK 2  /* blocked_set = blocked_set & ~*set; */
 extern int sigprocmask (int operation, const sigset_t *set, sigset_t *old_set);
 
+#endif
+
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* _GL_SIGNAL_H */
+#endif /* _GL_SIGNAL_H */
 #endif

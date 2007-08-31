@@ -1,6 +1,6 @@
-/* Recode strings between character sets, using iconv.
-   Copyright (C) 2004 Free Software Foundation, Inc.
-   Written by Simon Josefsson.
+/* A GNU-like <iconv.h>.
+
+   Copyright (C) 2007 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -16,15 +16,30 @@
    along with this program; if not, write to the Free Software Foundation,
    Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.  */
 
-#ifndef ICONVME_H
-# define ICONVME_H
+#ifndef _GL_ICONV_H
 
-extern char *iconv_string (const char *string, const char *from_code,
-			   const char *to_code);
+/* The include_next requires a split double-inclusion guard.  */
+#@INCLUDE_NEXT@ @NEXT_ICONV_H@
 
-#if HAVE_ICONV
-# include <iconv.h>
-extern char *iconv_alloc (iconv_t cd, const char *string);
+#ifndef _GL_ICONV_H
+#define _GL_ICONV_H
+
+#ifdef __cplusplus
+extern "C" {
 #endif
 
-#endif /* ICONVME_H */
+
+#if @REPLACE_ICONV_OPEN@
+/* An iconv_open wrapper that supports the IANA standardized encoding names
+   ("ISO-8859-1" etc.) as far as possible.  */
+# define iconv_open rpl_iconv_open
+extern iconv_t iconv_open (const char *tocode, const char *fromcode);
+#endif
+
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* _GL_ICONV_H */
+#endif /* _GL_ICONV_H */

@@ -1,5 +1,5 @@
 # DO NOT EDIT! GENERATED AUTOMATICALLY!
-# Copyright (C) 2004-2006 Free Software Foundation, Inc.
+# Copyright (C) 2004-2007 Free Software Foundation, Inc.
 #
 # This file is free software, distributed under the terms of the GNU
 # General Public License.  As a special exception to the GNU General
@@ -35,42 +35,55 @@ AC_DEFUN([gl_INIT],
 [
   m4_pushdef([AC_LIBOBJ], m4_defn([gl_LIBOBJ]))
   m4_pushdef([AC_REPLACE_FUNCS], m4_defn([gl_REPLACE_FUNCS]))
+  m4_pushdef([AC_LIBSOURCES], m4_defn([gl_LIBSOURCES]))
   AM_CONDITIONAL([GL_COND_LIBTOOL], [true])
   gl_cond_libtool=true
   gl_source_base='gnulib'
   gl_FUNC_ALLOCA
   gl_ERROR
   gl_EXITFAIL
-  dnl gl_USE_SYSTEM_EXTENSIONS must be added quite early to configure.ac.
   gl_FATAL_SIGNAL
+  gl_FLOAT_H
   gl_GETOPT
+  AC_SUBST([LIBINTL])
+  AC_SUBST([LTLIBINTL])
   AM_ICONV
-  gl_ICONVME
+  gl_ICONV_H
+  gl_FUNC_ICONV_OPEN
+  gl_INLINE
+  gl_INTTOSTR
+  gl_LOCALCHARSET
+  gl_PIPE
+  gl_SIGNAL_H
+  gl_SIGNALBLOCKING
+  gl_SIGNAL_MODULE_INDICATOR([sigprocmask])
+  gl_SIZE_MAX
+  AM_STDBOOL_H
+  gl_STDINT_H
+  gl_STDIO_H
+  gl_STDLIB_H
+  gl_FUNC_STRDUP
+  gl_STRING_MODULE_INDICATOR([strdup])
   if test $gl_cond_libtool = false; then
     gl_ltlibdeps="$gl_ltlibdeps $LTLIBICONV"
     gl_libdeps="$gl_libdeps $LIBICONV"
   fi
-  gl_INTTOSTR
-  gl_LOCALCHARSET
-  gl_PIPE
-  gl_SIGNALBLOCKING
-  gl_SIZE_MAX
-  gl_STDARG_H
-  AM_STDBOOL_H
-  gl_STDINT_H
-  gl_FUNC_STRDUP
+  gl_HEADER_STRING_H
   gl_FUNC_STRNDUP
+  gl_STRING_MODULE_INDICATOR([strndup])
   gl_FUNC_STRNLEN
+  gl_STRING_MODULE_INDICATOR([strnlen])
   gl_FUNC_STRPBRK
-  gl_FUNC_STRVERSCMP
-  gl_HEADER_UNISTD
+  gl_STRING_MODULE_INDICATOR([strpbrk])
+  gl_UNISTD_H
   gl_FUNC_VASNPRINTF
   gl_FUNC_VASPRINTF
+  gl_STDIO_MODULE_INDICATOR([vasprintf])
   gl_WAIT_PROCESS
+  gl_WCHAR_H
   gl_XALLOC
   gl_XSIZE
-  gl_XSTRNDUP
-  gl_XVASPRINTF
+  m4_popdef([AC_LIBSOURCES])
   m4_popdef([AC_REPLACE_FUNCS])
   m4_popdef([AC_LIBOBJ])
   AC_CONFIG_COMMANDS_PRE([
@@ -99,28 +112,44 @@ AC_DEFUN([gl_LIBOBJ],
 AC_DEFUN([gl_REPLACE_FUNCS],
   [AC_CHECK_FUNCS([$1], , [gl_LIBOBJ($ac_func)])])
 
+# Like AC_LIBSOURCES, except that it does nothing.
+# We rely on EXTRA_lib..._SOURCES instead.
+AC_DEFUN([gl_LIBSOURCES],
+  [])
+
 # This macro records the list of files which have been installed by
 # gnulib-tool and may be removed by future gnulib-tool invocations.
 AC_DEFUN([gl_FILE_LIST], [
   build-aux/config.rpath
+  build-aux/link-warning.h
   lib/alloca_.h
   lib/asnprintf.c
   lib/asprintf.c
+  lib/c-ctype.c
+  lib/c-ctype.h
+  lib/c-strcase.h
+  lib/c-strcasecmp.c
+  lib/c-strncasecmp.c
   lib/config.charset
   lib/error.c
   lib/error.h
-  lib/exit.h
   lib/exitfail.c
   lib/exitfail.h
   lib/fatal-signal.c
   lib/fatal-signal.h
+  lib/float+.h
+  lib/float_.h
   lib/getopt.c
   lib/getopt1.c
   lib/getopt_.h
   lib/getopt_int.h
   lib/gettext.h
-  lib/iconvme.c
-  lib/iconvme.h
+  lib/iconv_.h
+  lib/iconv_open-aix.gperf
+  lib/iconv_open-hpux.gperf
+  lib/iconv_open-irix.gperf
+  lib/iconv_open-osf.gperf
+  lib/iconv_open.c
   lib/imaxtostr.c
   lib/intprops.h
   lib/inttostr.c
@@ -136,40 +165,34 @@ AC_DEFUN([gl_FILE_LIST], [
   lib/printf-parse.h
   lib/ref-add.sin
   lib/ref-del.sin
+  lib/signal_.h
   lib/sigprocmask.c
-  lib/sigprocmask.h
   lib/size_max.h
   lib/stdbool_.h
   lib/stdint_.h
+  lib/stdio_.h
+  lib/stdlib_.h
   lib/strdup.c
-  lib/strdup.h
+  lib/striconv.c
+  lib/striconv.h
+  lib/string_.h
   lib/strndup.c
-  lib/strndup.h
   lib/strnlen.c
-  lib/strnlen.h
   lib/strpbrk.c
-  lib/strpbrk.h
-  lib/strverscmp.c
-  lib/strverscmp.h
   lib/uinttostr.c
   lib/umaxtostr.c
+  lib/unistd_.h
   lib/vasnprintf.c
   lib/vasnprintf.h
   lib/vasprintf.c
-  lib/vasprintf.h
-  lib/verify.h
   lib/w32spawn.h
   lib/wait-process.c
   lib/wait-process.h
+  lib/wchar_.h
   lib/xalloc-die.c
   lib/xalloc.h
-  lib/xasprintf.c
   lib/xmalloc.c
   lib/xsize.h
-  lib/xstrndup.c
-  lib/xstrndup.h
-  lib/xvasprintf.c
-  lib/xvasprintf.h
   m4/absolute-header.m4
   m4/alloca.m4
   m4/codeset.m4
@@ -178,10 +201,15 @@ AC_DEFUN([gl_FILE_LIST], [
   m4/exitfail.m4
   m4/extensions.m4
   m4/fatal-signal.m4
+  m4/float_h.m4
   m4/getopt.m4
   m4/glibc21.m4
+  m4/gnulib-common.m4
   m4/iconv.m4
-  m4/iconvme.m4
+  m4/iconv_h.m4
+  m4/iconv_open.m4
+  m4/include_next.m4
+  m4/inline.m4
   m4/intmax_t.m4
   m4/inttostr.m4
   m4/inttypes_h.m4
@@ -189,31 +217,31 @@ AC_DEFUN([gl_FILE_LIST], [
   m4/lib-link.m4
   m4/lib-prefix.m4
   m4/localcharset.m4
-  m4/longdouble.m4
   m4/longlong.m4
   m4/onceonly_2_57.m4
   m4/pipe.m4
   m4/sig_atomic_t.m4
+  m4/signal_h.m4
   m4/signalblocking.m4
   m4/size_max.m4
-  m4/stdarg.m4
   m4/stdbool.m4
   m4/stdint.m4
   m4/stdint_h.m4
+  m4/stdio_h.m4
+  m4/stdlib_h.m4
   m4/strdup.m4
+  m4/string_h.m4
   m4/strndup.m4
   m4/strnlen.m4
   m4/strpbrk.m4
-  m4/strverscmp.m4
   m4/ulonglong.m4
   m4/unistd_h.m4
   m4/vasnprintf.m4
   m4/vasprintf.m4
   m4/wait-process.m4
+  m4/wchar.m4
   m4/wchar_t.m4
   m4/wint_t.m4
   m4/xalloc.m4
   m4/xsize.m4
-  m4/xstrndup.m4
-  m4/xvasprintf.m4
 ])

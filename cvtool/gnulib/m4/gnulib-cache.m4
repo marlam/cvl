@@ -1,4 +1,4 @@
-# Copyright (C) 2004-2006 Free Software Foundation, Inc.
+# Copyright (C) 2004-2007 Free Software Foundation, Inc.
 #
 # This file is free software, distributed under the terms of the GNU
 # General Public License.  As a special exception to the GNU General
@@ -15,11 +15,11 @@
 
 
 # Specification in the form of a command-line invocation:
-#   gnulib-tool --import --dir=. --lib=libgnu --source-base=gnulib --m4-base=gnulib/m4 --doc-base=doc --aux-dir=build-aux --libtool --macro-prefix=gl getopt iconvme inttostr localcharset pipe size_max stdint strverscmp wait-process xalloc xstrndup xvasprintf
+#   gnulib-tool --import --dir=. --lib=libgnu --source-base=gnulib --m4-base=gnulib/m4 --doc-base=doc --aux-dir=build-aux --libtool --macro-prefix=gl getopt inttostr localcharset pipe striconv strndup vasprintf
 
 # Specification in the form of a few gnulib-tool.m4 macro invocations:
 gl_LOCAL_DIR([])
-gl_MODULES([getopt iconvme inttostr localcharset pipe size_max stdint strverscmp wait-process xalloc xstrndup xvasprintf])
+gl_MODULES([getopt inttostr localcharset pipe striconv strndup vasprintf])
 gl_AVOID([])
 gl_SOURCE_BASE([gnulib])
 gl_M4_BASE([gnulib/m4])
