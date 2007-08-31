@@ -43,7 +43,7 @@ a:hover
       position: absolute;
       left: 10px;
       width: 150px;
-      padding-top: 20px;
+      padding-top: 10px;
 }
 
 #menu ul 
@@ -96,7 +96,7 @@ a:hover
          margin-left: 180px;
          margin-right: 0px;
          /* border: 1px solid #808080; */
-         padding: 10px;
+         padding: 0px;
 }
 
 h1 

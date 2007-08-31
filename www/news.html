@@ -2,8 +2,9 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<link rel="stylesheet" type="text/css" href="cvtool.css">
-<title>cvtool</title>
+<link rel="shortcut icon" href="favicon.ico">
+<link rel="stylesheet" type="text/css" href="cvl.css">
+<title>CVL, cvtool, CVLView, CVLTonemap</title>
 </head>
 
 <!-- The layout and style sheet were adapted from the QEMU homepage -->
@@ -13,7 +14,7 @@
 
 <div id="header"> 
   <div id="logo"> 
-    <img src="cvtool-logo.png" width="338" height="60" border="0" alt="Cvtool logo"> 
+    <img src="cvl-logo.png" width="132" height="60" border="0" alt="CVL logo"> 
   </div>
   <div id="sf-logo"> 
     <a href="http://sourceforge.net"><img src="http://sourceforge.net/sflogo.php?group_id=157871&amp;type=5" 
@@ -26,13 +27,13 @@
 <ul id="menu-ul">
 <li><a href="index.html">About</a></li>
 <li><b><a href="news.html">News</a></b></li>
-<li><a href="requirements.html">Requirements</a></li>
-<li><a href="download.html">Download</a></li>
+<li><a href="cvtool.html">cvtool</a></li>
+<li><a href="cvlview.html">CVLView</a></li>
+<li><a href="cvltonemap.html">CVLTonemap</a></li>
 <li><a href="documentation.html">Documentation</a></li>
-<li><a href="tools.html">Additional tools</a></li>
-<li><a href="development.html">Development</a></li>
-<li><a href="contact.html">Contact</a></li>
+<li><a href="download.html">Download</a></li>
 <li><a href="links.html">Links</a></li>
+<li><a href="contact.html">Contact</a></li>
 </ul>
 <div id="menu-end"></div>
 </div>
@@ -41,11 +42,20 @@
 <!-- content BEGIN -->
 <div id="content">
 
+<div class="content-section">August 31, 2007</div>
+<p>
+Cvtool 0.2.0 is released, together with CVLView 0.1.0 and CVLTonemap 0.1.0!<br>
+This is a complete rewrite. All computations are now done on the graphics processing unit (GPU).
+Additionally, all programs can now handle floating point data, e.g. for high dynamic range
+imaging.
+</p>
+<br>
+
 <div class="content-section">November 6, 2006</div>
 <p>
 Cvtool 0.1.0 is released!<br>
 Some bug fixes, performance improvements, and functionality enhancements were made.<br>
-Please see the file <a href="reldoc/0.1.0/NEWS.txt">NEWS</a> for a more complete overview of the
+Please see the file NEWS for a more complete overview of the
 changes.
 </p>
 <br>
@@ -55,7 +65,7 @@ changes.
 Cvtool 0.0.3 is released!<br>
 Among the new features are 2D and 3D skeletonization and medial axis transforms.<br>
 Many cleanups were made and many bugs were fixed.<br>
-Please see the file <a href="reldoc/0.0.3/NEWS.txt">NEWS</a> for a more complete overview of the
+Please see the file NEWS for a more complete overview of the
 changes.
 </p>
 <br>
@@ -83,7 +93,7 @@ changes.
 <p>
 Cvtool 0.0.1 is released!<br>
 This is the first public release. Cvtool is still in an early alpha phase, but a lot of useful commands
-are already implemented and fully documented. See the <a href="documentation.html">documentation</a>
+are already implemented and fully documented. See the documentation
 for details and examples.
 </p>
 <br>

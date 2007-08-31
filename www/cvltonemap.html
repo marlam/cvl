@@ -25,11 +25,11 @@
 <!-- menu BEGIN -->
 <div id="menu">
 <ul id="menu-ul">
-<li><b><a href="index.html">About</a></b></li>
+<li><a href="index.html">About</a></li>
 <li><a href="news.html">News</a></li>
 <li><a href="cvtool.html">cvtool</a></li>
 <li><a href="cvlview.html">CVLView</a></li>
-<li><a href="cvltonemap.html">CVLTonemap</a></li>
+<li><b><a href="cvltonemap.html">CVLTonemap</a></b></li>
 <li><a href="documentation.html">Documentation</a></li>
 <li><a href="download.html">Download</a></li>
 <li><a href="links.html">Links</a></li>
@@ -42,47 +42,35 @@
 <!-- content BEGIN -->
 <div id="content">
 
+<div class="content-section"><img src="cvltonemap-logo-small.png" alt="CVLTonemap logo"></div>
+<br>
+
 <p>
-CVL is a library for image and data processing using graphics processing units (GPUs).
+CVLTonemap is an interactive viewer and tone mapping tool for high dynamic range images.
 </p>
 
 <p>
-CVL supports both <a href="http://netpbm.sourceforge.net/">netpbm</a> images
-and <a href="http://www.mpi-inf.mpg.de/resources/pfstools/">pfs</a> images and data, e.g. high dynamic range images. 
-It uses <a href="http://www.opengl.org/">OpenGL</a> to process data on the GPU. CVL requires the
-<a href="http://glew.sourceforge.net/">GLEW</a> library and a graphics driver that supports 
-OpenGL 2.1. It currently works on GNU/Linux and Windows systems.
+It supports the <a href="http://www.mpi-inf.mpg.de/resources/pfstools/">pfs</a> file format.  The <a
+href="http://www.mpi-inf.mpg.de/resources/pfstools/">pfstools</a> can be used to import other file
+formats. 
 </p>
-<br>
 
-<div class="content-section">
-<a href="cvtool.html"><img src="cvtool-logo-small.png" alt="cvtool logo"></a>
-</div>
 <p>
-Currently, CVL is bundled with cvtool, a
-command line tool that aims to make all of CVL's functionality available as filters. It integrates
-well with other tools like <a href="http://netpbm.sourceforge.net/">netpbm</a> and <a
-href="http://www.mpi-inf.mpg.de/resources/pfstools/">pfstools</a>.
+Currently, only two tone mapping methods are implemented: the global <a
+href="http://www.mpi-inf.mpg.de/resources/tmo/logmap/">Drago 03</a> method
+and the local <a href="http://people.csail.mit.edu/fredo/PUBLI/Siggraph2002/">Durand 02</a> 
+method. Tone mapping is computationally expensive; you'll need a fast graphcis card to use this
+program interactively.
 </p>
-<br>
 
-<div class="content-section">
-<a href="cvlview.html"><img src="cvlview-logo-small.png" alt="CVLView logo"></a>
-</div>
 <p>
-CVLView is a viewer for arbitrary data stored in PFS files.<br>
-<a href="cvlview.png">Screenshot</a>
+CVLTonemap requires the <a href="http://trolltech.com/products/qt/">Qt</a> toolkit, version 4.2 or
+newer.
 </p>
-<br>
 
-<div class="content-section">
-<a href="cvltonemap.html"><img src="cvltonemap-logo-small.png" alt="CVLTonemap logo"></a>
-</div>
 <p>
-CVLTonemap is an interactive tone mapping tool for high dynamic range images.<br>
-<a href="cvltonemap.png">Screenshot</a>
+<a href="cvltonemap.png"><img src="cvltonemap-small.png" alt="CVLTonemap screenshot"></a>
 </p>
-<br>
 
 <p>
 This is <a href="http://www.gnu.org/philosophy/free-sw.html">free software</a>;
