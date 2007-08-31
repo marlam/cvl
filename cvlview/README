@@ -1,0 +1,4 @@
+CVLView is a viewer for arbritrary data that is stored in pfs files.
+It is based on the CVL library.
+
+See http://cvtool.sourceforge.net for more information on this software.
