@@ -444,7 +444,7 @@ void CVLTonemap::load_parameters()
     file_dialog->setAcceptMode(QFileDialog::AcceptOpen);
     file_dialog->setDirectory(_last_open_dir);
     QStringList filters;
-    filters << tr("%1 parameters files (*.cvltonemap)").arg(PACKAGE_NAME) << tr("All files (*)");
+    filters << tr("%1 parameter files (*.%2)").arg(PACKAGE_NAME).arg(PACKAGE) << tr("All files (*)");
     file_dialog->setFilters(filters);
     file_dialog->setFileMode(QFileDialog::ExistingFile);
     if (!file_dialog->exec())
@@ -472,11 +472,11 @@ void CVLTonemap::save_parameters_as()
 {
     QFileDialog *file_dialog = new QFileDialog(this);
     file_dialog->setWindowTitle(tr("Save parameters"));
-    file_dialog->setDefaultSuffix("cvltonemap");
+    file_dialog->setDefaultSuffix(tr("%1").arg(PACKAGE));
     file_dialog->setAcceptMode(QFileDialog::AcceptSave);
     file_dialog->setDirectory(_last_save_dir);
     QStringList filters;
-    filters << tr("%1 parameters files (*.cvltonemap)").arg(PACKAGE_NAME) << tr("All files (*)");
+    filters << tr("%1 parameter files (*.%2)").arg(PACKAGE_NAME).arg(PACKAGE) << tr("All files (*)");
     file_dialog->setFilters(filters);
     file_dialog->setFileMode(QFileDialog::AnyFile);
     if (!file_dialog->exec())
