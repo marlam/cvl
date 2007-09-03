@@ -5,6 +5,9 @@
 	* Use different sets of postprocessing parameters for each tone
 	mapping method.
 	* Fix Gamma Slider.
+	* Split controls for maximum absolute luminance into its own file,
+	because all future tone mapping operators will need it. Improve the
+	slider.
 
 2007-08-31  Martin Lambers <marlam@marlam.de>
 

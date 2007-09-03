@@ -38,6 +38,7 @@
 
 #include "conf.h"
 #include "postproc_selector.h"
+#include "maxabslum_selector.h"
 
 
 class TonemapParameterSelector : public QWidget
@@ -209,10 +210,7 @@ class TonemapDrago03ParameterSelector : public TonemapParameterSelector
     private:
 	TonemapSelector *_tonemap_selector;
 	cvl_frame_t **_frame;
-	float _max_abs_lum;
-	QCheckBox *_max_abs_lum_checkbox;
-	QDoubleSpinBox *_max_abs_lum_spinbox;
-	QSlider *_max_abs_lum_slider;
+	MaxAbsLumSelector *_max_abs_lum_selector;
 	QDoubleSpinBox *_max_disp_lum_spinbox;
 	QSlider *_max_disp_lum_slider;
 	QDoubleSpinBox *_bias_spinbox;
@@ -220,9 +218,7 @@ class TonemapDrago03ParameterSelector : public TonemapParameterSelector
 	bool _lock;
 
     private slots:
-	void set_max_abs_lum_state(int x UNUSED);
-	void set_max_abs_lum(double x);
-        void max_abs_lum_slider_changed(int x);
+	void max_abs_lum_changed();
 	void set_max_disp_lum(double x);
         void max_disp_lum_slider_changed(int x);
 	void set_bias(double x);
@@ -251,7 +247,7 @@ class TonemapDrago03ParameterSelector : public TonemapParameterSelector
 
 	float get_max_abs_lum() const
 	{
-	    return static_cast<float>(_max_abs_lum_spinbox->value());
+	    return _max_abs_lum_selector->value();
 	}
 
 	float get_max_disp_lum() const
@@ -277,10 +273,7 @@ class TonemapDurand02ParameterSelector : public TonemapParameterSelector
     private:
 	TonemapSelector *_tonemap_selector;
 	cvl_frame_t **_frame;
-	float _max_abs_lum;
-	QCheckBox *_max_abs_lum_checkbox;
-	QDoubleSpinBox *_max_abs_lum_spinbox;
-	QSlider *_max_abs_lum_slider;
+	MaxAbsLumSelector *_max_abs_lum_selector;
 	QDoubleSpinBox *_sigma_spatial_spinbox;
 	QSlider *_sigma_spatial_slider;
 	QDoubleSpinBox *_sigma_luminance_spinbox;
@@ -290,9 +283,7 @@ class TonemapDurand02ParameterSelector : public TonemapParameterSelector
 	bool _lock;
 
     private slots:
-	void set_max_abs_lum_state(int x);
-	void set_max_abs_lum(double x);
-        void max_abs_lum_slider_changed(int x);
+	void max_abs_lum_changed();
 	void set_sigma_spatial(double x);
         void sigma_spatial_slider_changed(int x);
 	void set_sigma_luminance(double x);
@@ -323,7 +314,7 @@ class TonemapDurand02ParameterSelector : public TonemapParameterSelector
 
 	float get_max_abs_lum() const
 	{
-	    return static_cast<float>(_max_abs_lum_spinbox->value());
+	    return _max_abs_lum_selector->value();
 	}
 
 	float get_sigma_spatial() const

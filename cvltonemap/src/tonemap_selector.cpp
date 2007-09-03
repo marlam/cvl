@@ -41,13 +41,8 @@
 
 #include "conf.h"
 #include "postproc_selector.h"
+#include "maxabslum_selector.h"
 #include "tonemap_selector.h"
-
-
-/* Common values for the common "Maximum absolute luminance" setting */
-#define MAXABSLUM_MIN 0.01
-#define MAXABSLUM_MAX 99999.99
-#define MAXABSLUM_DEFAULT 150.0
 
 
 TonemapSelector::TonemapSelector(cvl_frame_t **frame, QWidget *parent)
@@ -514,19 +509,9 @@ TonemapDrago03ParameterSelector::TonemapDrago03ParameterSelector(
 
     QGridLayout *layout = new QGridLayout();
 
-    _max_abs_lum_checkbox = new QCheckBox("Max. Luminance:");
-    connect(_max_abs_lum_checkbox, SIGNAL(stateChanged(int)), this, SLOT(set_max_abs_lum_state(int)));
-    layout->addWidget(_max_abs_lum_checkbox, 0, 0);
-    _max_abs_lum_spinbox = new QDoubleSpinBox();
-    _max_abs_lum_spinbox->setRange(MAXABSLUM_MIN, MAXABSLUM_MAX);
-    _max_abs_lum_spinbox->setDecimals(2);
-    _max_abs_lum_spinbox->setSingleStep(1.0);
-    connect(_max_abs_lum_spinbox, SIGNAL(valueChanged(double)), this, SLOT(set_max_abs_lum(double)));
-    layout->addWidget(_max_abs_lum_spinbox, 0, 1);
-    _max_abs_lum_slider = new QSlider(Qt::Horizontal, this);
-    _max_abs_lum_slider->setRange(mh_iround(MAXABSLUM_MIN * 100.0), mh_iround(MAXABSLUM_MAX * 100.0));
-    connect(_max_abs_lum_slider, SIGNAL(valueChanged(int)), this, SLOT(max_abs_lum_slider_changed(int)));
-    layout->addWidget(_max_abs_lum_slider, 1, 0, 1, 2);
+    _max_abs_lum_selector = new MaxAbsLumSelector(id(), _frame, this);
+    layout->addWidget(_max_abs_lum_selector, 0, 0, 1, 2);
+    connect(_max_abs_lum_selector, SIGNAL(maxabslum_changed()), this, SLOT(max_abs_lum_changed()));
 
     QLabel *ld = new QLabel("Max. Display Lum.: ");
     layout->addWidget(ld, 2, 0);
@@ -564,64 +549,21 @@ TonemapDrago03ParameterSelector::~TonemapDrago03ParameterSelector()
 {
 }
 
+void TonemapDrago03ParameterSelector::max_abs_lum_changed()
+{
+    emit _tonemap_selector->tonemap_changed();
+}
+
 void TonemapDrago03ParameterSelector::update()
 {
-    _max_abs_lum = -1.0f;
     _lock = true;
-    const char *max_luminance_tag = NULL;
-    if (*_frame)
-    {
-	max_luminance_tag = cvl_taglist_get(cvl_frame_taglist(*_frame), "X-MAX-LUMINANCE");
-    }
-    if (!max_luminance_tag || strcmp(max_luminance_tag, "UNKNOWN") == 0)
-    {
-	_max_abs_lum_spinbox->setValue(MAXABSLUM_DEFAULT);
-	_max_abs_lum_slider->setValue(mh_iround(MAXABSLUM_DEFAULT * 100));
-	_max_abs_lum_checkbox->setCheckState(Qt::Checked);
-    }
-    else
-    {
-	_max_abs_lum = atof(max_luminance_tag);
-	_max_abs_lum_spinbox->setValue(_max_abs_lum);
-	_max_abs_lum_slider->setValue(mh_iround(_max_abs_lum * 100.0));
-	_max_abs_lum_checkbox->setCheckState(Qt::Unchecked);
-    }
+    _max_abs_lum_selector->update();
     _max_disp_lum_spinbox->setValue(200.0);
     _max_disp_lum_slider->setValue(20000);
     _bias_spinbox->setValue(0.85);
     _bias_slider->setValue(85);
     _lock = false;
     emit _tonemap_selector->tonemap_changed();
-}
-
-void TonemapDrago03ParameterSelector::set_max_abs_lum_state(int x UNUSED)
-{
-    if (_max_abs_lum_checkbox->isChecked())
-    {
-	_max_abs_lum_spinbox->setEnabled(true);
-	_max_abs_lum_slider->setEnabled(true);
-    }
-    else
-    {
-	if (_max_abs_lum > 0.0f)
-	    _max_abs_lum_spinbox->setValue(_max_abs_lum);
-	_max_abs_lum_spinbox->setEnabled(false);
-	_max_abs_lum_slider->setEnabled(false);
-    }
-}
-
-void TonemapDrago03ParameterSelector::set_max_abs_lum(double x)
-{
-    _lock = true;
-    _max_abs_lum_slider->setValue(mh_iround(100.0 * x));
-    _lock = false;
-    emit _tonemap_selector->tonemap_changed();
-}
-
-void TonemapDrago03ParameterSelector::max_abs_lum_slider_changed(int x)
-{
-    if (!_lock)
-	_max_abs_lum_spinbox->setValue(static_cast<double>(x) / 100.0);
 }
 
 void TonemapDrago03ParameterSelector::set_max_disp_lum(double x)
@@ -654,17 +596,14 @@ void TonemapDrago03ParameterSelector::bias_slider_changed(int x)
 
 void TonemapDrago03ParameterSelector::get_parameters(Conf *conf) const
 {
-    conf->put(mh_string("%s-usemaxabslum", id()).c_str(), _max_abs_lum_checkbox->isChecked());
-    conf->put(mh_string("%s-maxabslum", id()).c_str(), _max_abs_lum_spinbox->value());
+    _max_abs_lum_selector->get_parameters(conf);
     conf->put(mh_string("%s-maxdisplum", id()).c_str(), _max_disp_lum_spinbox->value());
     conf->put(mh_string("%s-bias", id()).c_str(), _bias_spinbox->value());
 }
 
 void TonemapDrago03ParameterSelector::set_parameters(Conf *conf)
 {
-    _max_abs_lum_spinbox->setValue(conf->get(mh_string("%s-maxabslum", id()).c_str(),
-		MAXABSLUM_MIN, MAXABSLUM_MAX, MAXABSLUM_DEFAULT));
-    _max_abs_lum_checkbox->setChecked(conf->get(mh_string("%s-usemaxabslum", id()).c_str(), true));
+    _max_abs_lum_selector->set_parameters(conf);
     _max_disp_lum_spinbox->setValue(conf->get(mh_string("%s-maxdisplum", id()).c_str(), 0.01, 999.99, 200.0));
     _bias_spinbox->setValue(conf->get(mh_string("%s-bias", id()).c_str(), 0.01, 1.00, 0.85));
 }
@@ -681,19 +620,9 @@ TonemapDurand02ParameterSelector::TonemapDurand02ParameterSelector(
 
     QGridLayout *layout = new QGridLayout();
 
-    _max_abs_lum_checkbox = new QCheckBox("Max. Luminance:");
-    connect(_max_abs_lum_checkbox, SIGNAL(stateChanged(int)), this, SLOT(set_max_abs_lum_state(int)));
-    layout->addWidget(_max_abs_lum_checkbox, 0, 0);
-    _max_abs_lum_spinbox = new QDoubleSpinBox();
-    _max_abs_lum_spinbox->setRange(MAXABSLUM_MIN, MAXABSLUM_MAX);
-    _max_abs_lum_spinbox->setDecimals(2);
-    _max_abs_lum_spinbox->setSingleStep(1.0);
-    connect(_max_abs_lum_spinbox, SIGNAL(valueChanged(double)), this, SLOT(set_max_abs_lum(double)));
-    layout->addWidget(_max_abs_lum_spinbox, 0, 1);
-    _max_abs_lum_slider = new QSlider(Qt::Horizontal, this);
-    _max_abs_lum_slider->setRange(mh_iround(MAXABSLUM_MIN * 100.0), mh_iround(MAXABSLUM_MAX * 100.0));
-    connect(_max_abs_lum_slider, SIGNAL(valueChanged(int)), this, SLOT(max_abs_lum_slider_changed(int)));
-    layout->addWidget(_max_abs_lum_slider, 1, 0, 1, 2);
+    _max_abs_lum_selector = new MaxAbsLumSelector(id(), _frame, this);
+    layout->addWidget(_max_abs_lum_selector, 0, 0, 1, 2);
+    connect(_max_abs_lum_selector, SIGNAL(maxabslum_changed()), this, SLOT(max_abs_lum_changed()));
 
     QLabel *lss = new QLabel("Sigma spatial:");
     layout->addWidget(lss, 2, 0);
@@ -744,28 +673,15 @@ TonemapDurand02ParameterSelector::~TonemapDurand02ParameterSelector()
 {
 }
 
+void TonemapDurand02ParameterSelector::max_abs_lum_changed()
+{
+    emit _tonemap_selector->tonemap_changed();
+}
+
 void TonemapDurand02ParameterSelector::update()
 {
-    _max_abs_lum = -1.0f;
     _lock = true;
-    const char *max_luminance_tag = NULL;
-    if (*_frame)
-    {
-	max_luminance_tag = cvl_taglist_get(cvl_frame_taglist(*_frame), "X-MAX-LUMINANCE");
-    }
-    if (!max_luminance_tag || strcmp(max_luminance_tag, "UNKNOWN") == 0)
-    {
-	_max_abs_lum_spinbox->setValue(MAXABSLUM_DEFAULT);
-	_max_abs_lum_slider->setValue(mh_iround(MAXABSLUM_DEFAULT * 100.0));
-	_max_abs_lum_checkbox->setCheckState(Qt::Checked);
-    }
-    else
-    {
-	_max_abs_lum = atof(max_luminance_tag);
-	_max_abs_lum_spinbox->setValue(_max_abs_lum);
-	_max_abs_lum_slider->setValue(mh_iround(_max_abs_lum * 100.0));
-	_max_abs_lum_checkbox->setCheckState(Qt::Unchecked);
-    }
+    _max_abs_lum_selector->update();
     _sigma_spatial_spinbox->setValue(0.4);
     _sigma_spatial_slider->setValue(40);
     _sigma_luminance_spinbox->setValue(1.0);
@@ -774,36 +690,6 @@ void TonemapDurand02ParameterSelector::update()
     _base_contrast_slider->setValue(500);
     _lock = false;
     emit _tonemap_selector->tonemap_changed();
-}
-
-void TonemapDurand02ParameterSelector::set_max_abs_lum_state(int x UNUSED)
-{
-    if (_max_abs_lum_checkbox->isChecked())
-    {
-	_max_abs_lum_spinbox->setEnabled(true);
-	_max_abs_lum_slider->setEnabled(true);
-    }
-    else
-    {
-	if (_max_abs_lum > 0.0f)
-	    _max_abs_lum_spinbox->setValue(_max_abs_lum);
-	_max_abs_lum_spinbox->setEnabled(false);
-	_max_abs_lum_slider->setEnabled(false);
-    }
-}
-
-void TonemapDurand02ParameterSelector::set_max_abs_lum(double x)
-{
-    _lock = true;
-    _max_abs_lum_slider->setValue(mh_iround(100.0 * x));
-    _lock = false;
-    emit _tonemap_selector->tonemap_changed();
-}
-
-void TonemapDurand02ParameterSelector::max_abs_lum_slider_changed(int x)
-{
-    if (!_lock)
-	_max_abs_lum_spinbox->setValue(static_cast<double>(x) / 100.0);
 }
 
 void TonemapDurand02ParameterSelector::set_sigma_spatial(double x)
@@ -850,8 +736,7 @@ void TonemapDurand02ParameterSelector::base_contrast_slider_changed(int x)
 
 void TonemapDurand02ParameterSelector::get_parameters(Conf *conf) const
 {
-    conf->put(mh_string("%s-usemaxabslum", id()).c_str(), _max_abs_lum_checkbox->isChecked());
-    conf->put(mh_string("%s-maxabslum", id()).c_str(), _max_abs_lum_spinbox->value());
+    _max_abs_lum_selector->get_parameters(conf);
     conf->put(mh_string("%s-sigmaspatial", id()).c_str(), _sigma_spatial_spinbox->value());
     conf->put(mh_string("%s-sigmaluminance", id()).c_str(), _sigma_luminance_spinbox->value());
     conf->put(mh_string("%s-basecontrast", id()).c_str(), _base_contrast_spinbox->value());
@@ -859,9 +744,7 @@ void TonemapDurand02ParameterSelector::get_parameters(Conf *conf) const
 
 void TonemapDurand02ParameterSelector::set_parameters(Conf *conf)
 {
-    _max_abs_lum_spinbox->setValue(conf->get(mh_string("%s-maxabslum", id()).c_str(), 
-		MAXABSLUM_MIN, MAXABSLUM_MAX, MAXABSLUM_DEFAULT));
-    _max_abs_lum_checkbox->setChecked(conf->get(mh_string("%s-usemaxabslum", id()).c_str(), true));
+    _max_abs_lum_selector->set_parameters(conf);
     _sigma_spatial_spinbox->setValue(conf->get(mh_string("%s-sigmaspatial", id()).c_str(), 0.01, 9.99, 0.4));
     _sigma_luminance_spinbox->setValue(conf->get(mh_string("%s-sigmaluminance", id()).c_str(), 0.01, 9.99, 1.0));
     _base_contrast_spinbox->setValue(conf->get(mh_string("%s-basecontrast", id()).c_str(), 1.01, 9.99, 5.0));

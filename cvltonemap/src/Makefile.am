@@ -6,6 +6,7 @@ cvltonemap_SOURCES = main.cpp				\
 	cvltonemap.h cvltonemap.cpp			\
 	tonemap_selector.h tonemap_selector.cpp		\
 	postproc_selector.h postproc_selector.cpp	\
+	maxabslum_selector.h maxabslum_selector.cpp	\
 	viewpoint_selector.h viewpoint_selector.cpp	\
 	view_area.h view_area.cpp
 
@@ -17,6 +18,7 @@ nodist_cvltonemap_SOURCES = \
 	moc_cvltonemap.cpp		\
 	moc_tonemap_selector.cpp	\
 	moc_postproc_selector.cpp	\
+	moc_maxabslum_selector.cpp	\
 	moc_viewpoint_selector.cpp	\
 	moc_view_area.cpp		\
 	rcc_cvltonemap.cpp
