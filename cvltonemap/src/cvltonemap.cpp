@@ -53,7 +53,7 @@
 #include "cvltonemap.h"
 
 
-CVLToneMap::CVLToneMap()
+CVLTonemap::CVLTonemap()
 {
     setWindowTitle(PACKAGE_NAME);
     setWindowIcon(QIcon(":appicon.png"));
@@ -184,7 +184,7 @@ CVLToneMap::CVLToneMap()
     help_menu->addAction(show_aboutbox_act);
 }
 
-CVLToneMap::~CVLToneMap()
+CVLTonemap::~CVLTonemap()
 {
     emit make_gl_context_current();
     
@@ -199,7 +199,7 @@ CVLToneMap::~CVLToneMap()
     delete _parameters;
 }
 
-void CVLToneMap::load_image(const char *filename)
+void CVLTonemap::load_image(const char *filename)
 {
     emit make_gl_context_current();
 
@@ -301,7 +301,7 @@ void CVLToneMap::load_image(const char *filename)
     }
 }
 
-void CVLToneMap::closeEvent(QCloseEvent *event)
+void CVLTonemap::closeEvent(QCloseEvent *event)
 {
     _conf->put("session-mainwindow-x", pos().x());
     _conf->put("session-mainwindow-y", pos().y());
@@ -319,7 +319,7 @@ void CVLToneMap::closeEvent(QCloseEvent *event)
     event->accept();
 }
 
-void CVLToneMap::save(bool whole_image)
+void CVLTonemap::save(bool whole_image)
 {
     if (!_frame)
     {
@@ -351,7 +351,7 @@ void CVLToneMap::save(bool whole_image)
     _last_save_dir = file_dialog->directory();
 }
 
-void CVLToneMap::copy(bool whole_image)
+void CVLTonemap::copy(bool whole_image)
 {
     if (!_frame)
     {
@@ -362,7 +362,7 @@ void CVLToneMap::copy(bool whole_image)
     QApplication::clipboard()->setImage(whole_image ? _view_area->get_image() : _view_area->get_view());
 }
 
-void CVLToneMap::save_parameters(const char *file_name)
+void CVLTonemap::save_parameters(const char *file_name)
 {
     _tonemap_selector->get_parameters(_parameters);
     _postproc_selector->get_parameters(_parameters);
@@ -380,7 +380,7 @@ void CVLToneMap::save_parameters(const char *file_name)
     _parameters_file_name = new string(file_name);
 }
 
-void CVLToneMap::load_parameters(const char *file_name)
+void CVLTonemap::load_parameters(const char *file_name)
 {
     Conf *tmp_parameters = new Conf();
     try
@@ -406,7 +406,7 @@ void CVLToneMap::load_parameters(const char *file_name)
     return;
 }
 
-void CVLToneMap::open_image()
+void CVLTonemap::open_image()
 {
     QFileDialog *file_dialog = new QFileDialog(this);
     file_dialog->setWindowTitle(tr("Open image"));
@@ -426,17 +426,17 @@ void CVLToneMap::open_image()
     load_image(qPrintable(file_name));
 }
 
-void CVLToneMap::save_image()
+void CVLTonemap::save_image()
 {
     save(true);
 }
 
-void CVLToneMap::save_view()
+void CVLTonemap::save_view()
 {
     save(false);
 }
 
-void CVLToneMap::load_parameters()
+void CVLTonemap::load_parameters()
 {
     QFileDialog *file_dialog = new QFileDialog(this);
 
@@ -456,7 +456,7 @@ void CVLToneMap::load_parameters()
     load_parameters(qPrintable(file_name));
 }
 
-void CVLToneMap::save_parameters()
+void CVLTonemap::save_parameters()
 {
     if (!_parameters_file_name)
     {
@@ -468,7 +468,7 @@ void CVLToneMap::save_parameters()
     }
 }
 
-void CVLToneMap::save_parameters_as()
+void CVLTonemap::save_parameters_as()
 {
     QFileDialog *file_dialog = new QFileDialog(this);
     file_dialog->setWindowTitle(tr("Save parameters"));
@@ -488,17 +488,17 @@ void CVLToneMap::save_parameters_as()
     save_parameters(qPrintable(file_name));
 }
 
-void CVLToneMap::copy_image()
+void CVLTonemap::copy_image()
 {
     copy(true);
 }
 
-void CVLToneMap::copy_view()
+void CVLTonemap::copy_view()
 {
     copy(false);
 }
 
-void CVLToneMap::show_aboutbox()
+void CVLTonemap::show_aboutbox()
 {
     QMessageBox::about(this, tr("About " PACKAGE_NAME), tr(
 		"<p>%1 version %2</p>"

@@ -44,7 +44,7 @@
 #include "viewpoint_selector.h"
 #include "view_area.h"
 
-class CVLToneMap : public QMainWindow
+class CVLTonemap : public QMainWindow
 {
     Q_OBJECT
 
@@ -76,8 +76,8 @@ class CVLToneMap : public QMainWindow
    	void closeEvent(QCloseEvent *event);	
 	
     public:
-	CVLToneMap();
-	~CVLToneMap();
+	CVLTonemap();
+	~CVLTonemap();
 	void load_image(const char *filename);
 
     signals:

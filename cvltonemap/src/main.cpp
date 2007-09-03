@@ -107,7 +107,7 @@ int main(int argc, char *argv[])
     }
     arg_count = argc - arg_index;
 
-    CVLToneMap *cvltonemap = new CVLToneMap();
+    CVLTonemap *cvltonemap = new CVLTonemap();
     cvltonemap->show();
     if (arg_count > 0)
     {
