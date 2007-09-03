@@ -66,6 +66,8 @@ CVLToneMap::CVLToneMap()
     catch (err e) {}
     _last_open_dir = QDir(_conf->get("session-last-open-dir", qPrintable(QDir::homePath())));
     _last_save_dir = QDir(_conf->get("session-last-save-dir", qPrintable(QDir::homePath())));
+    _parameters = new Conf();
+    _parameters_file_name = NULL;
     _frame = NULL;
 
     /* Restore window geometry */
@@ -151,6 +153,16 @@ CVLToneMap::CVLToneMap()
     connect(save_view_act, SIGNAL(triggered()), this, SLOT(save_view()));
     file_menu->addAction(save_view_act);
     file_menu->addSeparator();
+    QAction *load_parameters_act = new QAction(tr("&Load parameters..."), this);
+    connect(load_parameters_act, SIGNAL(triggered()), this, SLOT(load_parameters()));
+    file_menu->addAction(load_parameters_act);
+    QAction *save_parameters_act = new QAction(tr("&Save parameters"), this);
+    connect(save_parameters_act, SIGNAL(triggered()), this, SLOT(save_parameters()));
+    file_menu->addAction(save_parameters_act);
+    QAction *save_parameters_as_act = new QAction(tr("Save parameters &as..."), this);
+    connect(save_parameters_as_act, SIGNAL(triggered()), this, SLOT(save_parameters_as()));
+    file_menu->addAction(save_parameters_as_act);
+    file_menu->addSeparator();
     QAction *quit_act = new QAction(tr("&Quit"), this);
     quit_act->setShortcut(tr("Ctrl+Q"));
     connect(quit_act, SIGNAL(triggered()), this, SLOT(close()));
@@ -182,6 +194,9 @@ CVLToneMap::~CVLToneMap()
 
     free(const_cast<char *>(_conf_file_name));
     delete _conf;
+    if (_parameters_file_name)
+	delete _parameters_file_name;
+    delete _parameters;
 }
 
 void CVLToneMap::load_image(const char *filename)
@@ -304,26 +319,6 @@ void CVLToneMap::closeEvent(QCloseEvent *event)
     event->accept();
 }
 
-void CVLToneMap::open_image()
-{
-    QFileDialog *file_dialog = new QFileDialog(this);
-    file_dialog->setWindowTitle(tr("Open image"));
-    file_dialog->setAcceptMode(QFileDialog::AcceptOpen);
-    file_dialog->setDirectory(_last_open_dir);
-    QStringList filters;
-    filters << tr("Portable Floating-point Streams (*.pfs)") 
-	<< tr("All files (*)");
-    file_dialog->setFilters(filters);
-    file_dialog->setFileMode(QFileDialog::ExistingFile);
-    if (!file_dialog->exec())
-	return;
-    QString file_name = file_dialog->selectedFiles().at(0);
-    if (file_name.isEmpty())
-	return;
-    _last_open_dir = file_dialog->directory();
-    load_image(qPrintable(file_name));
-}
-
 void CVLToneMap::save(bool whole_image)
 {
     if (!_frame)
@@ -356,6 +351,81 @@ void CVLToneMap::save(bool whole_image)
     _last_save_dir = file_dialog->directory();
 }
 
+void CVLToneMap::copy(bool whole_image)
+{
+    if (!_frame)
+    {
+	QMessageBox::critical(this, tr("Error"), tr("No image loaded yet."));
+	return;
+    }
+
+    QApplication::clipboard()->setImage(whole_image ? _view_area->get_image() : _view_area->get_view());
+}
+
+void CVLToneMap::save_parameters(const char *file_name)
+{
+    _tonemap_selector->get_parameters(_parameters);
+    _postproc_selector->get_parameters(_parameters);
+    _parameters->remove_cruft();
+    try
+    {
+	_parameters->save(file_name);
+    }
+    catch (err e)
+    {
+	QMessageBox::critical(this, tr("Error"), e.msg().c_str());
+	return;
+    }
+    delete _parameters_file_name;
+    _parameters_file_name = new string(file_name);
+}
+
+void CVLToneMap::load_parameters(const char *file_name)
+{
+    Conf *tmp_parameters = new Conf();
+    try
+    {
+	tmp_parameters->load(file_name);
+    }
+    catch (err e)
+    {
+	QMessageBox::critical(this, tr("Error"), e.msg().c_str());
+	return;
+    }
+    if (_parameters)
+	delete _parameters;
+    _parameters = tmp_parameters;
+    if (_parameters_file_name)
+	delete _parameters_file_name;
+    _parameters_file_name = new string(file_name);
+    _view_area->lock();
+    _tonemap_selector->set_parameters(_parameters);
+    _postproc_selector->set_parameters(_parameters);
+    _view_area->unlock();
+    _view_area->update();
+    return;
+}
+
+void CVLToneMap::open_image()
+{
+    QFileDialog *file_dialog = new QFileDialog(this);
+    file_dialog->setWindowTitle(tr("Open image"));
+    file_dialog->setAcceptMode(QFileDialog::AcceptOpen);
+    file_dialog->setDirectory(_last_open_dir);
+    QStringList filters;
+    filters << tr("Portable Floating-point Streams (*.pfs)") 
+	<< tr("All files (*)");
+    file_dialog->setFilters(filters);
+    file_dialog->setFileMode(QFileDialog::ExistingFile);
+    if (!file_dialog->exec())
+	return;
+    QString file_name = file_dialog->selectedFiles().at(0);
+    if (file_name.isEmpty())
+	return;
+    _last_open_dir = file_dialog->directory();
+    load_image(qPrintable(file_name));
+}
+
 void CVLToneMap::save_image()
 {
     save(true);
@@ -366,15 +436,56 @@ void CVLToneMap::save_view()
     save(false);
 }
 
-void CVLToneMap::copy(bool whole_image)
+void CVLToneMap::load_parameters()
 {
-    if (!_frame)
-    {
-	QMessageBox::critical(this, tr("Error"), tr("No image loaded yet."));
-	return;
-    }
+    QFileDialog *file_dialog = new QFileDialog(this);
 
-    QApplication::clipboard()->setImage(whole_image ? _view_area->get_image() : _view_area->get_view());
+    file_dialog->setWindowTitle(tr("Open parameters file"));
+    file_dialog->setAcceptMode(QFileDialog::AcceptOpen);
+    file_dialog->setDirectory(_last_open_dir);
+    QStringList filters;
+    filters << tr("%1 parameters files (*.cvltonemap)").arg(PACKAGE_NAME) << tr("All files (*)");
+    file_dialog->setFilters(filters);
+    file_dialog->setFileMode(QFileDialog::ExistingFile);
+    if (!file_dialog->exec())
+	return;
+    QString file_name = file_dialog->selectedFiles().at(0);
+    if (file_name.isEmpty())
+	return;
+    _last_open_dir = file_dialog->directory();
+    load_parameters(qPrintable(file_name));
+}
+
+void CVLToneMap::save_parameters()
+{
+    if (!_parameters_file_name)
+    {
+	save_parameters_as();
+    }
+    else
+    {
+	save_parameters(_parameters_file_name->c_str());
+    }
+}
+
+void CVLToneMap::save_parameters_as()
+{
+    QFileDialog *file_dialog = new QFileDialog(this);
+    file_dialog->setWindowTitle(tr("Save parameters"));
+    file_dialog->setDefaultSuffix("cvltonemap");
+    file_dialog->setAcceptMode(QFileDialog::AcceptSave);
+    file_dialog->setDirectory(_last_save_dir);
+    QStringList filters;
+    filters << tr("%1 parameters files (*.cvltonemap)").arg(PACKAGE_NAME) << tr("All files (*)");
+    file_dialog->setFilters(filters);
+    file_dialog->setFileMode(QFileDialog::AnyFile);
+    if (!file_dialog->exec())
+	return;
+    QString file_name = file_dialog->selectedFiles().at(0);
+    if (file_name.isEmpty())
+	return;
+    _last_save_dir = file_dialog->directory();
+    save_parameters(qPrintable(file_name));
 }
 
 void CVLToneMap::copy_image()

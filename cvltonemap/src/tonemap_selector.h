@@ -36,6 +36,8 @@
 
 #include <cvl/cvl.h>
 
+#include "conf.h"
+
 
 class TonemapParameterSelector : public QWidget
 {
@@ -47,6 +49,8 @@ class TonemapParameterSelector : public QWidget
 	virtual void update() = 0;
 	virtual const char *name() const = 0;
 	virtual bool is_global() const = 0;
+	virtual void get_parameters(Conf *conf) const = 0;
+	virtual void set_parameters(Conf *conf) = 0;
 };
 
 class TonemapSelector : public QWidget
@@ -89,6 +93,9 @@ class TonemapSelector : public QWidget
 	{
 	    return _tonemap_parameter_selector[_active_tonemap_method];
 	}
+
+	void get_parameters(Conf *conf) const;
+	void set_parameters(Conf *conf);
 
     friend class TonemapRangeSelectionParameterSelector;
     friend class TonemapDrago03ParameterSelector;
@@ -172,6 +179,9 @@ class TonemapRangeSelectionParameterSelector : public TonemapParameterSelector
 	    return _range_max;
 	}
 
+	void get_parameters(Conf *conf) const;
+	void set_parameters(Conf *conf);
+
     friend class RangeSelector;
 };
 
@@ -233,6 +243,9 @@ class TonemapDrago03ParameterSelector : public TonemapParameterSelector
 	{
 	    return static_cast<float>(_bias_spinbox->value());
 	}
+
+	void get_parameters(Conf *conf) const;
+	void set_parameters(Conf *conf);
 };
 
 /* Durand02 */
@@ -302,6 +315,9 @@ class TonemapDurand02ParameterSelector : public TonemapParameterSelector
 	{
 	    return static_cast<float>(_base_contrast_spinbox->value());
 	}
+
+	void get_parameters(Conf *conf) const;
+	void set_parameters(Conf *conf);
 };
 
 #endif

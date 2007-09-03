@@ -53,6 +53,8 @@ class CVLToneMap : public QMainWindow
 	Conf *_conf;
 	QDir _last_open_dir;
 	QDir _last_save_dir;
+	Conf *_parameters;
+	string *_parameters_file_name;
 
 	cvl_frame_t *_frame;
 
@@ -67,6 +69,8 @@ class CVLToneMap : public QMainWindow
 
 	void save(bool whole_image);
 	void copy(bool whole_image);
+	void save_parameters(const char *file_name);
+	void load_parameters(const char *file_name);
 
     protected:
    	void closeEvent(QCloseEvent *event);	
@@ -84,6 +88,9 @@ class CVLToneMap : public QMainWindow
 	void open_image();
         void save_image();
         void save_view();
+	void load_parameters();
+	void save_parameters();
+	void save_parameters_as();
 	void copy_image();
 	void copy_view();
 	void show_aboutbox();

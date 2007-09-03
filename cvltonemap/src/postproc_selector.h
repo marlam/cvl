@@ -28,6 +28,8 @@
 #include <QDoubleSpinBox>
 #include <QSlider>
 
+#include "conf.h"
+
 
 class PostprocSelector : public QWidget
 {
@@ -89,6 +91,9 @@ class PostprocSelector : public QWidget
 	{
 	    return static_cast<float>(_sharpness_spinbox->value());
 	}
+
+	void get_parameters(Conf *conf) const;
+	void set_parameters(Conf *conf);
 
     signals:
 	void postproc_changed();
