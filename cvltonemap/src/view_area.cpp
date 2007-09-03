@@ -46,7 +46,6 @@
 ViewArea::ViewArea(cvl_frame_t **frame, 
 	ViewpointSelector *viewpoint_selector,
 	TonemapSelector *tonemap_selector,
-	PostprocSelector *postproc_selector,
 	int min_size,
 	QWidget *parent)
     : QGLWidget(QGLFormat(QGL::SampleBuffers), parent)
@@ -54,7 +53,6 @@ ViewArea::ViewArea(cvl_frame_t **frame,
     _frame = frame;
     _viewpoint_selector = viewpoint_selector;
     _tonemap_selector = tonemap_selector;
-    _postproc_selector = postproc_selector;
     _lock = false;
     _mouse_pos = QPoint(0, 0);
     _dragging = false;
@@ -146,7 +144,7 @@ void ViewArea::paintGL()
 	{
 	    TonemapRangeSelectionParameterSelector *parameter_selector
 		= reinterpret_cast<TonemapRangeSelectionParameterSelector *>(
-			_tonemap_selector->tonemap_parameter_selector());
+			_tonemap_selector->parameter_selector());
 	    float lum_min = parameter_selector->get_min_luminance();
 	    float lum_max = parameter_selector->get_max_luminance();
 	    cvl_luminance_range(_frame1, *_frame, lum_min, lum_max);
@@ -155,7 +153,7 @@ void ViewArea::paintGL()
 	{
 	    TonemapDrago03ParameterSelector *parameter_selector
 		= reinterpret_cast<TonemapDrago03ParameterSelector *>(
-			_tonemap_selector->tonemap_parameter_selector());
+			_tonemap_selector->parameter_selector());
 	    float max_abs_lum = parameter_selector->get_max_abs_lum();
 	    float bias = parameter_selector->get_bias();
 	    float max_disp_lum = parameter_selector->get_max_disp_lum();
@@ -165,7 +163,7 @@ void ViewArea::paintGL()
 	{
 	    TonemapDurand02ParameterSelector *parameter_selector
 		= reinterpret_cast<TonemapDurand02ParameterSelector *>(
-			_tonemap_selector->tonemap_parameter_selector());
+			_tonemap_selector->parameter_selector());
 	    float max_abs_lum = parameter_selector->get_max_abs_lum();
 	    float sigma_spatial = parameter_selector->get_sigma_spatial();
 	    float sigma_luminance = parameter_selector->get_sigma_luminance();
@@ -177,11 +175,12 @@ void ViewArea::paintGL()
 
 	/* Postprocessing */
 	
-	float gamma = _postproc_selector->get_gamma();
-	float lightness = _postproc_selector->get_lightness();
-	float contrast = _postproc_selector->get_contrast();
-	float saturation = _postproc_selector->get_saturation();
-	float sharpness = _postproc_selector->get_sharpness();
+	PostprocSelector *postproc_selector = _tonemap_selector->postproc_selector();
+	float gamma = postproc_selector->get_gamma();
+	float lightness = postproc_selector->get_lightness();
+	float contrast = postproc_selector->get_contrast();
+	float saturation = postproc_selector->get_saturation();
+	float sharpness = postproc_selector->get_sharpness();
 
 	cvl_gamma_correct(_frame2, _frame1, gamma);
 	cvl_frame_set_format(_frame1, CVL_HSL);

@@ -37,6 +37,7 @@
 #include <cvl/cvl.h>
 
 #include "conf.h"
+#include "postproc_selector.h"
 
 
 class TonemapParameterSelector : public QWidget
@@ -47,7 +48,8 @@ class TonemapParameterSelector : public QWidget
 	TonemapParameterSelector() {}
 	virtual ~TonemapParameterSelector() {}
 	virtual void update() = 0;
-	virtual const char *name() const = 0;
+	virtual const char *name() const = 0;			// User visible
+	virtual const char *id() const = 0;			// Intern; used for parameter save/restore
 	virtual bool is_global() const = 0;
 	virtual void get_parameters(Conf *conf) const = 0;
 	virtual void set_parameters(Conf *conf) = 0;
@@ -59,13 +61,16 @@ class TonemapSelector : public QWidget
 	
     private:
 	cvl_frame_t **_frame;
-	int _tonemap_method_count;
-	TonemapParameterSelector **_tonemap_parameter_selector;
-	int _active_tonemap_method;
+	int _method_count;
+	int _active_method;
+	TonemapParameterSelector **_parameter_selector;
+	PostprocSelector **_postproc_selector;
 	QComboBox *_combo_box;
-	QStackedWidget *_stacked_widget;
+	QStackedWidget *_tonemap_stack;
+	QStackedWidget *_postproc_stack;
 
     private slots:
+	void postproc_changed();
 	void tonemap_activator(int index);
 
     public slots:
@@ -86,12 +91,17 @@ class TonemapSelector : public QWidget
 
 	int active_tonemap_method() const 
 	{ 
-	    return _active_tonemap_method; 
+	    return _active_method; 
 	}
 	
-	TonemapParameterSelector *tonemap_parameter_selector() const
+	TonemapParameterSelector *parameter_selector() const
 	{
-	    return _tonemap_parameter_selector[_active_tonemap_method];
+	    return _parameter_selector[_active_method];
+	}
+
+	PostprocSelector *postproc_selector() const
+	{
+	    return _postproc_selector[_active_method];
 	}
 
 	void get_parameters(Conf *conf) const;
@@ -163,6 +173,11 @@ class TonemapRangeSelectionParameterSelector : public TonemapParameterSelector
 	{
 	    return "Manual Range Selection";
 	}
+	
+	const char *id() const
+	{
+	    return "manualrangeselection";
+	}
 
 	bool is_global() const
 	{
@@ -222,6 +237,11 @@ class TonemapDrago03ParameterSelector : public TonemapParameterSelector
 	const char *name() const
 	{
 	    return "Drago 03";
+	}
+	
+	const char *id() const
+	{
+	    return "drago03";
 	}
 
 	bool is_global() const
@@ -289,6 +309,11 @@ class TonemapDurand02ParameterSelector : public TonemapParameterSelector
 	const char *name() const
 	{
 	    return "Durand 02";
+	}
+	
+	const char *id() const
+	{
+	    return "durand02";
 	}
 
 	bool is_global() const

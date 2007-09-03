@@ -40,7 +40,9 @@
 #include "mh.h"
 
 #include "conf.h"
+#include "postproc_selector.h"
 #include "tonemap_selector.h"
+
 
 /* Common values for the common "Maximum absolute luminance" setting */
 #define MAXABSLUM_MIN 0.01
@@ -54,33 +56,48 @@ TonemapSelector::TonemapSelector(cvl_frame_t **frame, QWidget *parent)
     _frame = frame;
 
     /* When adding a new method, adjust only this block: ---> */
-    _tonemap_method_count = 3;
+    _method_count = 3;
 
-    _tonemap_parameter_selector = new TonemapParameterSelector *[_tonemap_method_count];
+    _parameter_selector = new TonemapParameterSelector *[_method_count];
 
-    _tonemap_parameter_selector[0] = new TonemapRangeSelectionParameterSelector(this, _frame);
-    _tonemap_parameter_selector[1] = new TonemapDrago03ParameterSelector(this, _frame);
-    _tonemap_parameter_selector[2] = new TonemapDurand02ParameterSelector(this, _frame);
+    _parameter_selector[0] = new TonemapRangeSelectionParameterSelector(this, _frame);
+    _parameter_selector[1] = new TonemapDrago03ParameterSelector(this, _frame);
+    _parameter_selector[2] = new TonemapDurand02ParameterSelector(this, _frame);
     /* <--- End. */
 
-    QGridLayout *layout = new QGridLayout();
+    _postproc_selector = new PostprocSelector *[_method_count];
+    for (int i = 0; i < _method_count; i++)
+    {
+	_postproc_selector[i] = new PostprocSelector(_parameter_selector[i]->id());
+	connect(_postproc_selector[i], SIGNAL(postproc_changed()), this, SLOT(postproc_changed()));
+    }
+
     _combo_box = new QComboBox();
     _combo_box->setEditable(false);
-    for (int i = 0; i < _tonemap_method_count; i++)
+    for (int i = 0; i < _method_count; i++)
     {
 	_combo_box->addItem(mh_string("%c %s", 
-		    _tonemap_parameter_selector[i]->is_global() ? 'G' : 'L',
-		    _tonemap_parameter_selector[i]->name()).c_str());
+		    _parameter_selector[i]->is_global() ? 'G' : 'L',
+		    _parameter_selector[i]->name()).c_str());
     }
     connect(_combo_box, SIGNAL(activated(int)), this, SLOT(tonemap_activator(int)));
-    layout->addWidget(_combo_box, 0, 0);
-    _stacked_widget = new QStackedWidget();
-    for (int i = 0; i < _tonemap_method_count; i++)
+
+    _tonemap_stack = new QStackedWidget();
+    for (int i = 0; i < _method_count; i++)
     {
-	_stacked_widget->addWidget(_tonemap_parameter_selector[i]);
+	_tonemap_stack->addWidget(_parameter_selector[i]);
     }
-    layout->addWidget(_stacked_widget, 1, 0);
-    layout->setRowStretch(2, 1);
+    _postproc_stack = new QStackedWidget();
+    for (int i = 0; i < _method_count; i++)
+    {
+	_postproc_stack->addWidget(_postproc_selector[i]);
+    }
+
+    QGridLayout *layout = new QGridLayout();
+    layout->addWidget(_combo_box, 0, 0);
+    layout->addWidget(_tonemap_stack, 1, 0);
+    layout->addWidget(_postproc_stack, 2, 0);
+    layout->setRowStretch(3, 1);
     setLayout(layout);
 
     tonemap_activator(0);
@@ -88,45 +105,54 @@ TonemapSelector::TonemapSelector(cvl_frame_t **frame, QWidget *parent)
 
 TonemapSelector::~TonemapSelector()
 {
-    delete[] _tonemap_parameter_selector;
+    delete[] _parameter_selector;
+    delete[] _postproc_selector;
+}
+
+void TonemapSelector::postproc_changed()
+{
+    emit tonemap_changed();
 }
 
 void TonemapSelector::tonemap_activator(int index)
 {
     _combo_box->setCurrentIndex(index);
-    _stacked_widget->setCurrentIndex(index);
-    _active_tonemap_method = index;
+    _tonemap_stack->setCurrentIndex(index);
+    _postproc_stack->setCurrentIndex(index);
+    _active_method = index;
     emit tonemap_changed();
 }
 
 void TonemapSelector::update()
 {
-    for (int i = 0; i < _tonemap_method_count; i++)
+    for (int i = 0; i < _method_count; i++)
     {
-	_tonemap_parameter_selector[i]->update();
+	_parameter_selector[i]->update();
     }
 }
 
 void TonemapSelector::get_parameters(Conf *conf) const
 {
-    for (int i = 0; i < _tonemap_method_count; i++)
+    for (int i = 0; i < _method_count; i++)
     {
-	_tonemap_parameter_selector[i]->get_parameters(conf);
+	_parameter_selector[i]->get_parameters(conf);
+	_postproc_selector[i]->get_parameters(conf);
     }
-    conf->put("method", _tonemap_parameter_selector[_active_tonemap_method]->name());
+    conf->put("method", _parameter_selector[_active_method]->id());
 }
 
 void TonemapSelector::set_parameters(Conf *conf)
 {
-    for (int i = 0; i < _tonemap_method_count; i++)
+    for (int i = 0; i < _method_count; i++)
     {
-	_tonemap_parameter_selector[i]->set_parameters(conf);
+	_parameter_selector[i]->set_parameters(conf);
+	_postproc_selector[i]->set_parameters(conf);
     }
     int method_index = 0;
     const char *method = conf->get("method");
-    for (int i = 0; i < _tonemap_method_count; i++)
+    for (int i = 0; i < _method_count; i++)
     {
-	if (strcmp(method, _tonemap_parameter_selector[i]->name()) == 0)
+	if (strcmp(method, _parameter_selector[i]->id()) == 0)
 	{
 	    method_index = i;
 	    break;
@@ -462,18 +488,18 @@ void TonemapRangeSelectionParameterSelector::emit_tonemap_changed()
 
 void TonemapRangeSelectionParameterSelector::get_parameters(Conf *conf) const
 {
-    conf->put("rangeselection-min", _range_min);
-    conf->put("rangeselection-max", _range_max);
-    conf->put("rangeselection-loghorz", _log_x_box->isChecked());
-    conf->put("rangeselection-logvert", _log_y_box->isChecked());
+    conf->put(mh_string("%s-min", id()).c_str(), _range_min);
+    conf->put(mh_string("%s-max", id()).c_str(), _range_max);
+    conf->put(mh_string("%s-loghorz", id()).c_str(), _log_x_box->isChecked());
+    conf->put(mh_string("%s-logvert", id()).c_str(), _log_y_box->isChecked());
 }
 
 void TonemapRangeSelectionParameterSelector::set_parameters(Conf *conf)
 {
-    _range_min = conf->get("rangeselection-min", 0.0f, 1.0f, 0.0f);
-    _range_max = conf->get("rangeselection-max", 0.0f, 1.0f, 1.0f);
-    _log_x_box->setChecked(conf->get("rangeselection-loghorz", true));
-    _log_y_box->setChecked(conf->get("rangeselection-logvert", true));
+    _range_min = conf->get(mh_string("%s-min", id()).c_str(), 0.0f, 1.0f, 0.0f);
+    _range_max = conf->get(mh_string("%s-max", id()).c_str(), 0.0f, 1.0f, 1.0f);
+    _log_x_box->setChecked(conf->get(mh_string("%s-loghorz", id()).c_str(), true));
+    _log_y_box->setChecked(conf->get(mh_string("%s-logvert", id()).c_str(), true));
 }
 
 
@@ -628,19 +654,19 @@ void TonemapDrago03ParameterSelector::bias_slider_changed(int x)
 
 void TonemapDrago03ParameterSelector::get_parameters(Conf *conf) const
 {
-    conf->put("drago03-usemaxabslum", _max_abs_lum_checkbox->isChecked());
-    conf->put("drago03-maxabslum", _max_abs_lum_spinbox->value());
-    conf->put("drago03-maxdisplum", _max_disp_lum_spinbox->value());
-    conf->put("drago03-bias", _bias_spinbox->value());
+    conf->put(mh_string("%s-usemaxabslum", id()).c_str(), _max_abs_lum_checkbox->isChecked());
+    conf->put(mh_string("%s-maxabslum", id()).c_str(), _max_abs_lum_spinbox->value());
+    conf->put(mh_string("%s-maxdisplum", id()).c_str(), _max_disp_lum_spinbox->value());
+    conf->put(mh_string("%s-bias", id()).c_str(), _bias_spinbox->value());
 }
 
 void TonemapDrago03ParameterSelector::set_parameters(Conf *conf)
 {
-    _max_abs_lum_spinbox->setValue(conf->get("drago03-maxabslum", 
+    _max_abs_lum_spinbox->setValue(conf->get(mh_string("%s-maxabslum", id()).c_str(),
 		MAXABSLUM_MIN, MAXABSLUM_MAX, MAXABSLUM_DEFAULT));
-    _max_abs_lum_checkbox->setChecked(conf->get("drago03-usemaxabslum", true));
-    _max_disp_lum_spinbox->setValue(conf->get("drago03-maxdisplum", 0.01, 999.99, 200.0));
-    _bias_spinbox->setValue(conf->get("drago03-bias", 0.01, 1.00, 0.85));
+    _max_abs_lum_checkbox->setChecked(conf->get(mh_string("%s-usemaxabslum", id()).c_str(), true));
+    _max_disp_lum_spinbox->setValue(conf->get(mh_string("%s-maxdisplum", id()).c_str(), 0.01, 999.99, 200.0));
+    _bias_spinbox->setValue(conf->get(mh_string("%s-bias", id()).c_str(), 0.01, 1.00, 0.85));
 }
 
 
@@ -824,19 +850,19 @@ void TonemapDurand02ParameterSelector::base_contrast_slider_changed(int x)
 
 void TonemapDurand02ParameterSelector::get_parameters(Conf *conf) const
 {
-    conf->put("durand02-usemaxabslum", _max_abs_lum_checkbox->isChecked());
-    conf->put("durand02-maxabslum", _max_abs_lum_spinbox->value());
-    conf->put("durand02-sigmaspatial", _sigma_spatial_spinbox->value());
-    conf->put("durand02-sigmaluminance", _sigma_luminance_spinbox->value());
-    conf->put("durand02-basecontrast", _base_contrast_spinbox->value());
+    conf->put(mh_string("%s-usemaxabslum", id()).c_str(), _max_abs_lum_checkbox->isChecked());
+    conf->put(mh_string("%s-maxabslum", id()).c_str(), _max_abs_lum_spinbox->value());
+    conf->put(mh_string("%s-sigmaspatial", id()).c_str(), _sigma_spatial_spinbox->value());
+    conf->put(mh_string("%s-sigmaluminance", id()).c_str(), _sigma_luminance_spinbox->value());
+    conf->put(mh_string("%s-basecontrast", id()).c_str(), _base_contrast_spinbox->value());
 }
 
 void TonemapDurand02ParameterSelector::set_parameters(Conf *conf)
 {
-    _max_abs_lum_spinbox->setValue(conf->get("durand02-maxabslum", 
+    _max_abs_lum_spinbox->setValue(conf->get(mh_string("%s-maxabslum", id()).c_str(), 
 		MAXABSLUM_MIN, MAXABSLUM_MAX, MAXABSLUM_DEFAULT));
-    _max_abs_lum_checkbox->setChecked(conf->get("durand02-usemaxabslum", true));
-    _sigma_spatial_spinbox->setValue(conf->get("durand02-sigmaspatial", 0.01, 9.99, 0.4));
-    _sigma_luminance_spinbox->setValue(conf->get("durand02-sigmaluminance", 0.01, 9.99, 1.0));
-    _base_contrast_spinbox->setValue(conf->get("durand02-basecontrast", 1.01, 9.99, 5.0));
+    _max_abs_lum_checkbox->setChecked(conf->get(mh_string("%s-usemaxabslum", id()).c_str(), true));
+    _sigma_spatial_spinbox->setValue(conf->get(mh_string("%s-sigmaspatial", id()).c_str(), 0.01, 9.99, 0.4));
+    _sigma_luminance_spinbox->setValue(conf->get(mh_string("%s-sigmaluminance", id()).c_str(), 0.01, 9.99, 1.0));
+    _base_contrast_spinbox->setValue(conf->get(mh_string("%s-basecontrast", id()).c_str(), 1.01, 9.99, 5.0));
 }

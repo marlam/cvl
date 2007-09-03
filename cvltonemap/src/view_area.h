@@ -33,7 +33,6 @@
 
 #include "viewpoint_selector.h"
 #include "tonemap_selector.h"
-#include "postproc_selector.h"
 
 
 class ViewArea : public QGLWidget
@@ -50,7 +49,6 @@ class ViewArea : public QGLWidget
 	// Parameter selectors
 	ViewpointSelector *_viewpoint_selector;
 	TonemapSelector *_tonemap_selector;
-	PostprocSelector *_postproc_selector;
 	// Processed frame
 	cvl_frame_t *_processed_frame;
 	// Image to be rendered
@@ -82,7 +80,6 @@ class ViewArea : public QGLWidget
 	ViewArea(cvl_frame_t **frame, 
 		ViewpointSelector *viewpoint_selector,
 		TonemapSelector *tonemap_selector,
-		PostprocSelector *postproc_selector,
 		int min_size,
 		QWidget *parent = NULL);
 	~ViewArea();

@@ -33,7 +33,6 @@
 #include <QMainWindow>
 #include <QWidget>
 #include <QToolBar>
-#include <QGroupBox>
 #include <QIcon>
 #include <QGridLayout>
 #include <QMenuBar>
@@ -47,7 +46,6 @@
 #include "conf.h"
 
 #include "tonemap_selector.h"
-#include "postproc_selector.h"
 #include "viewpoint_selector.h"
 #include "view_area.h"
 #include "cvltonemap.h"
@@ -92,33 +90,19 @@ CVLTonemap::CVLTonemap()
     _viewpoint_selector = new ViewpointSelector(&_frame, _widget);
     _viewpoint_selector->setFixedWidth(tools_width + tools_width / 2 + tools_width / 4);
 
-    _tonemap_box = new QGroupBox("Tone Mapping");
-    _tonemap_box->setFixedWidth(tools_width);
-    _tonemap_box->setEnabled(false);
     _tonemap_selector = new TonemapSelector(&_frame, this);
-    QGridLayout *tonemap_layout = new QGridLayout;
-    tonemap_layout->addWidget(_tonemap_selector, 0, 0);
-    _tonemap_box->setLayout(tonemap_layout);
+    _tonemap_selector->setFixedWidth(tools_width);
+    _tonemap_selector->setEnabled(false);
     connect(this, SIGNAL(new_image()), _tonemap_selector, SLOT(update()));
     
-    _postproc_box = new QGroupBox("Postprocessing");
-    _postproc_box->setFixedWidth(tools_width);
-    _postproc_box->setEnabled(false);
-    _postproc_selector = new PostprocSelector(this);
-    QGridLayout *postproc_layout = new QGridLayout;
-    postproc_layout->addWidget(_postproc_selector, 0, 0);
-    _postproc_box->setLayout(postproc_layout);
-
     _view_area = new ViewArea(&_frame,
 	    _viewpoint_selector,
 	    _tonemap_selector,
-	    _postproc_selector,
-	    2 * tools_width + tools_width / 4, _widget);
+	    2 * tools_width, _widget);
     connect(this, SIGNAL(new_image()), _view_area, SLOT(recompute()));
     connect(this, SIGNAL(make_gl_context_current()), _view_area, SLOT(make_gl_context_current()));
     connect(_tonemap_selector, SIGNAL(tonemap_changed()), _view_area, SLOT(recompute()));
     connect(_tonemap_selector, SIGNAL(make_gl_context_current()), _view_area, SLOT(make_gl_context_current()));
-    connect(_postproc_selector, SIGNAL(postproc_changed()), _view_area, SLOT(recompute()));
     connect(_viewpoint_selector, SIGNAL(viewpoint_changed()), _view_area, SLOT(update()));
     connect(_viewpoint_selector, SIGNAL(make_gl_context_current()), _view_area, SLOT(make_gl_context_current()));
     connect(_view_area, SIGNAL(update_size(int, int)), _viewpoint_selector, SLOT(update_view_area_size(int, int)));
@@ -130,10 +114,9 @@ CVLTonemap::CVLTonemap()
     _toolbar->addWidget(_viewpoint_selector);
     
     QGridLayout *layout = new QGridLayout;
-    layout->addWidget(_tonemap_box, 0, 0);
-    layout->addWidget(_postproc_box, 1, 0);
-    layout->addWidget(_view_area, 0, 1, 3, 1);
-    layout->setRowStretch(2, 10000);
+    layout->addWidget(_tonemap_selector, 0, 0);
+    layout->addWidget(_view_area, 0, 1, 2, 1);
+    layout->setRowStretch(1, 10000);
     layout->setColumnStretch(1, 10000);
     _widget->setLayout(layout);
 
@@ -293,8 +276,7 @@ void CVLTonemap::load_image(const char *filename)
 	cvl_frame_free(_frame);
 	_frame = frame;
 	_toolbar->setEnabled(true);
-	_tonemap_box->setEnabled(true);
-	_postproc_box->setEnabled(true);
+	_tonemap_selector->setEnabled(true);
 	emit new_image();
 	_view_area->unlock();
 	_view_area->update();
@@ -365,7 +347,6 @@ void CVLTonemap::copy(bool whole_image)
 void CVLTonemap::save_parameters(const char *file_name)
 {
     _tonemap_selector->get_parameters(_parameters);
-    _postproc_selector->get_parameters(_parameters);
     _parameters->remove_cruft();
     try
     {
@@ -400,7 +381,6 @@ void CVLTonemap::load_parameters(const char *file_name)
     _parameters_file_name = new string(file_name);
     _view_area->lock();
     _tonemap_selector->set_parameters(_parameters);
-    _postproc_selector->set_parameters(_parameters);
     _view_area->unlock();
     _view_area->update();
     return;

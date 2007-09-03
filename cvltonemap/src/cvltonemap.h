@@ -30,9 +30,7 @@
 #include <QMainWindow>
 #include <QWidget>
 #include <QToolBar>
-#include <QGroupBox>
 #include <QDir>
-#include <QLabel>
 
 #include <cvl/cvl.h>
 
@@ -40,7 +38,6 @@
 #include "conf.h"
 
 #include "tonemap_selector.h"
-#include "postproc_selector.h"
 #include "viewpoint_selector.h"
 #include "view_area.h"
 
@@ -60,10 +57,7 @@ class CVLTonemap : public QMainWindow
 
 	QWidget *_widget;
 	QToolBar *_toolbar;
-	QGroupBox *_tonemap_box;
-	QGroupBox *_postproc_box;
 	TonemapSelector *_tonemap_selector;
-	PostprocSelector *_postproc_selector;
 	ViewpointSelector *_viewpoint_selector;
 	ViewArea *_view_area;
 

@@ -36,6 +36,8 @@ class PostprocSelector : public QWidget
     Q_OBJECT
 	
     private:
+	const char *_id;
+	bool _lock;
 	QDoubleSpinBox *_gamma_spinbox;
 	QSlider *_gamma_slider;
 	QDoubleSpinBox *_lightness_spinbox;
@@ -46,7 +48,6 @@ class PostprocSelector : public QWidget
 	QSlider *_saturation_slider;
 	QDoubleSpinBox *_sharpness_spinbox;
 	QSlider *_sharpness_slider;
-	bool _lock;
 
     private slots:
 	void set_gamma(double x);
@@ -61,7 +62,7 @@ class PostprocSelector : public QWidget
         void sharpness_slider_changed(int x);
 
     public:
-	PostprocSelector(QWidget *parent = NULL);	
+	PostprocSelector(const char *id, QWidget *parent = NULL);	
 	~PostprocSelector();
 
 	float get_gamma()

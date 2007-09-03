@@ -33,9 +33,11 @@
 #include "postproc_selector.h"
 
 
-PostprocSelector::PostprocSelector(QWidget *parent) : QWidget(parent)
+PostprocSelector::PostprocSelector(const char *id, QWidget *parent) : QWidget(parent)
 {
+    _id = id;
     _lock = false;
+
     QGridLayout *layout = new QGridLayout;
 
     QLabel *gamma_label = new QLabel("Gamma:");
@@ -122,7 +124,7 @@ void PostprocSelector::set_gamma(double x)
     if (x < 1.0)
 	_gamma_slider->setValue(mh_iround(-300.0 * (1.0 - (x - 0.25) / 0.75)));
     else
-	_gamma_slider->setValue(mh_iround(300.0 * ((x - 1.00) / 4.00)));
+	_gamma_slider->setValue(mh_iround(300.0 * ((x - 1.00) / 3.00)));
     _lock = false;
     emit postproc_changed();
 }
@@ -196,18 +198,18 @@ void PostprocSelector::sharpness_slider_changed(int x)
 
 void PostprocSelector::get_parameters(Conf *conf) const
 {
-    conf->put("gamma", _gamma_spinbox->value());
-    conf->put("lightness", _lightness_spinbox->value());
-    conf->put("contrast", _contrast_spinbox->value());
-    conf->put("saturation", _saturation_spinbox->value());
-    conf->put("sharpness", _sharpness_spinbox->value());
+    conf->put(mh_string("%s-gamma", _id).c_str(), _gamma_spinbox->value());
+    conf->put(mh_string("%s-lightness", _id).c_str(), _lightness_spinbox->value());
+    conf->put(mh_string("%s-contrast", _id).c_str(), _contrast_spinbox->value());
+    conf->put(mh_string("%s-saturation", _id).c_str(), _saturation_spinbox->value());
+    conf->put(mh_string("%s-sharpness", _id).c_str(), _sharpness_spinbox->value());
 }
 
 void PostprocSelector::set_parameters(Conf *conf)
 {
-    _gamma_spinbox->setValue(conf->get("gamma", 0.25, 4.0, 1.0));
-    _lightness_spinbox->setValue(conf->get("lightness", -1.0, +1.0, 0.0));
-    _contrast_spinbox->setValue(conf->get("contrast", -1.0, +1.0, 0.0));
-    _saturation_spinbox->setValue(conf->get("saturation", -1.0, +1.0, 0.0));
-    _sharpness_spinbox->setValue(conf->get("sharpness", -1.0, +1.0, 0.0));
+    _gamma_spinbox->setValue(conf->get(mh_string("%s-gamma", _id).c_str(), 0.25, 4.0, 1.0));
+    _lightness_spinbox->setValue(conf->get(mh_string("%s-lightness", _id).c_str(), -1.0, +1.0, 0.0));
+    _contrast_spinbox->setValue(conf->get(mh_string("%s-contrast", _id).c_str(), -1.0, +1.0, 0.0));
+    _saturation_spinbox->setValue(conf->get(mh_string("%s-saturation", _id).c_str(), -1.0, +1.0, 0.0));
+    _sharpness_spinbox->setValue(conf->get(mh_string("%s-sharpness", _id).c_str(), -1.0, +1.0, 0.0));
 }

@@ -2,6 +2,9 @@
 
 	* Allow to save/load parameter sets.
 	* Use CVLTonemap instead of CVLToneMap internally.
+	* Use different sets of postprocessing parameters for each tone
+	mapping method.
+	* Fix Gamma Slider.
 
 2007-08-31  Martin Lambers <marlam@marlam.de>
 
