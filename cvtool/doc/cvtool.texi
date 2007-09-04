@@ -119,7 +119,7 @@ floating point images.
 @subsection PFS format: @samp{pfs}
 
 Cvtool supports the PFS format used by
-@url{pfstools,http://www.mpi-inf.mpg.de/resources/pfstools/}.
+@url{http://www.mpi-inf.mpg.de/resources/pfstools/,pfstools}.
 
 Currently, cvtool ignore channel tags. This will be fixed in a future version.
 
