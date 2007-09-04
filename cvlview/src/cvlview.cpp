@@ -371,8 +371,10 @@ void CVLView::show_aboutbox()
 		"<p>%1 version %2</p>"
 		"<p>Copyright (C) 2007  Martin Lambers and others.<br>"
 		"This is free software. You may redistribute copies of it under the terms of "
-		"the <a href=\"http://www.gnu.org/licenses/old-licenses/gpl-2.0.html\">GNU General Public License</a>.<br>"
-		"There is NO WARRANTY, to the extent permitted by law.<br>"
-		"See the <a href=\"http://cvtool.sourceforge.net/\">cvtool homepage</a> "
+		"the <a href=\"http://www.gnu.org/licenses/old-licenses/gpl-2.0.html\">"
+		"GNU General Public License</a>.<br>"
+		"There is NO WARRANTY, to the extent permitted by law.</p>"
+		"See <a href=\"http://cvtool.sourceforge.net/cvlview.html\">"
+		"http://cvtool.sourceforge.net/cvlview.html</a> "
 		"for more information on this software.</p>").arg(PACKAGE_NAME).arg(VERSION));
 }
