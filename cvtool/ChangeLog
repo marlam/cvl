@@ -1,6 +1,7 @@
 2007-09-04  Martin Lambers <marlam@marlam.de>
 
 	* Fix minor documentation flaw.
+	* Export cvl_math functions.
 
 2007-08-31  Martin Lambers <marlam@marlam.de>
 
