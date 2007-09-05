@@ -34,6 +34,7 @@
 uniform sampler2D tex;
 uniform float step_h;
 uniform float step_v;
+uniform int reduce_case;
 
 
 vec4 reduce_2(vec4 c1, vec4 c2)
@@ -107,35 +108,40 @@ vec4 reduce_4(vec4 c1, vec4 c2, vec4 c3, vec4 c4)
 
 void main()
 {
-    float x0 = gl_TexCoord[0].x - step_h / 2.0;
-    float y0 = gl_TexCoord[0].y - step_v / 2.0;
-    float x1 = x0 + step_h;
-    float y1 = y0 + step_v;
-
+    float x = gl_TexCoord[0].x;
+    float y = gl_TexCoord[0].y;
     vec4 c;
-    if (x1 < 1.0 && y1 < 1.0)
+
+    if (reduce_case == 0)
     {
+	// Reduce both horizontally and vertically
+	float x0 = x - step_h / 2.0;
+	float y0 = y - step_v / 2.0;
+	float x1 = x0 + step_h;
+	float y1 = y0 + step_v;
 	c = reduce_4(
 		texture2D(tex, vec2(x0, y0)),
 		texture2D(tex, vec2(x0, y1)),
 		texture2D(tex, vec2(x1, y0)),
 		texture2D(tex, vec2(x1, y1)));
     }
-    else if (x1 < 1.0 && y1 >= 1.0)
+    else if (reduce_case == 1)
     {
+	// Reduce horizontally
+	float x0 = x - step_h / 2.0;
+	float x1 = x0 + step_h;
 	c = reduce_2(
-		texture2D(tex, vec2(x0, y0)),
-		texture2D(tex, vec2(x1, y0)));
+		texture2D(tex, vec2(x0, y)),
+		texture2D(tex, vec2(x1, y)));
     }
-    else if (x1 >= 1.0 && y1 < 1.0)
+    else 
     {
+	// Reduce vertically
+	float y0 = y - step_v / 2.0;
+	float y1 = y0 + step_v;
 	c = reduce_2(
-		texture2D(tex, vec2(x0, y0)),
-		texture2D(tex, vec2(x0, y1)));
-    }
-    else
-    {
-	c = texture2D(tex, vec2(x0, y0));
+		texture2D(tex, vec2(x, y0)),
+		texture2D(tex, vec2(x, y1)));
     }
 
     gl_FragColor = c;

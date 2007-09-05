@@ -226,6 +226,8 @@ void cvl_reduce(cvl_frame_t *frame, cvl_reduce_mode_t mode, int channel, float *
 	cvl_gl_set_texture_state();
 	glUniform1f(glGetUniformLocation(prg, "step_h"), 1.0f / (float)src_w);
 	glUniform1f(glGetUniformLocation(prg, "step_v"), 1.0f / (float)src_h);
+	glUniform1i(glGetUniformLocation(prg, "reduce_case"), 
+		(dst_w < src_w && dst_h < src_h) ? 0 : (dst_w < src_w) ? 1 : 2);
 	glDrawArrays(GL_QUADS, 0, 4);
 	if (src_tex != cvl_frame_texture(input_frame))
 	    glDeleteTextures(1, &src_tex);

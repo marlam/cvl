@@ -1,6 +1,7 @@
 2007-09-05  Martin Lambers <marlam@marlam.de>
 
 	* Fix a bad bug in cvl_reduce() that produced wrong results.
+	* Improve the shader program for cvl_reduce().
 
 2007-09-04  Martin Lambers <marlam@marlam.de>
 
