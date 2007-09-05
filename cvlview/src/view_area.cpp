@@ -77,6 +77,11 @@ ViewArea::ViewArea(cvl_frame_t **frame,
     _gamma_selector = gamma_selector;
     _pseudocolor_selector = pseudocolor_selector;
     _fb_x = -1;
+    
+    // The following is necessary to force a call to initializeGL(), so that the
+    // application can be sure that both OpenGL and CVL are initialized when
+    // this Constructor finished.
+    update();
 }
 
 ViewArea::~ViewArea()

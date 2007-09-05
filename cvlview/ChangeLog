@@ -1,3 +1,9 @@
+2007-09-05  Martin Lambers <marlam@marlam.de>
+
+	* Force initializeGL() in constructor. This prevents potential
+	segfaults when other parts of the application use our GL context for
+	CVL calls.
+
 2007-09-04  Martin Lambers <marlam@marlam.de>
 
 	* Update information in the AboutBox.
