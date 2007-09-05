@@ -64,8 +64,11 @@ ViewArea::ViewArea(cvl_frame_t **frame,
     _frame2 = NULL;
     setMinimumSize(min_size, min_size);
     setMouseTracking(true);
-
     _fb_x = -1;
+    // The following is necessary to force a call to initializeGL(), so that the
+    // application can be sure that both OpenGL and CVL are initialized when
+    // this Constructor finished.
+    update();
 }
 
 ViewArea::~ViewArea()
