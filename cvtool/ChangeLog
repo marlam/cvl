@@ -1,3 +1,7 @@
+2007-09-05  Martin Lambers <marlam@marlam.de>
+
+	* Fix a bad bug in cvl_reduce() that produced wrong results.
+
 2007-09-04  Martin Lambers <marlam@marlam.de>
 
 	* Fix minor documentation flaw.

@@ -108,7 +108,7 @@ vec4 reduce_4(vec4 c1, vec4 c2, vec4 c3, vec4 c4)
 void main()
 {
     float x0 = gl_TexCoord[0].x - step_h / 2.0;
-    float y0 = gl_TexCoord[0].x - step_v / 2.0;
+    float y0 = gl_TexCoord[0].y - step_v / 2.0;
     float x1 = x0 + step_h;
     float y1 = y0 + step_v;
 
