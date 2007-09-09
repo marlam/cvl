@@ -1,6 +1,9 @@
 2007-09-09  Martin Lambers <marlam@marlam.de>
 
 	* configure.ac: Remove unused --debug option for configure script.
+	* configure.ac, doc/cvlview.texi, doc/cvlview.1: Bump version numbers
+	and dates for 0.1.1.
+	* NEWS: Update for 0.1.1.
 
 2007-09-05  Martin Lambers <marlam@marlam.de>
 
