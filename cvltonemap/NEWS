@@ -1,6 +1,7 @@
 Version 0.1.1:
 - Parameter sets can be saved and loaded.
 - Postprocessing parameters are stored for each tone mapping method separately.
+- Bug fixes.
 
 Version 0.1.0:
 - Initial public release.

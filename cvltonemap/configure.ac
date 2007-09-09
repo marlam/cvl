@@ -20,7 +20,7 @@ dnl Process this file with autoconf to produce a configure script.
 #
 
 AC_PREREQ([2.61])
-AC_INIT([CVLTonemap], [0.1.0], [marlam@marlam.de])
+AC_INIT([CVLTonemap], [0.1.1], [marlam@marlam.de])
 AC_CONFIG_SRCDIR([src/cvltonemap.cpp])
 AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_MACRO_DIR([build-aux])
