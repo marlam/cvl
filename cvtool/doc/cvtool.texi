@@ -1,8 +1,8 @@
 \input texinfo   @c -*-texinfo-*-
 @afourpaper
 @setfilename cvtool.info
-@set UPDATED August 31, 2007
-@set UPDATED-MONTH August 2007
+@set UPDATED September 9, 2007
+@set UPDATED-MONTH September 2007
 @set EDITION 0.2.0
 @set VERSION 0.2.0
 @settitle cvtool @value{VERSION}

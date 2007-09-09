@@ -1,3 +1,9 @@
+2007-09-09  Martin Lambers <marlam@marlam.de>
+
+	* configure.ac, doc/cvtool.texi, doc/cvl.texi, doc/cvtool.1,
+	doc/doxy/doxyfile: Bump version numbers and dates for 0.2.1.
+	* NEWS: Update for 0.2.1.
+
 2007-09-05  Martin Lambers <marlam@marlam.de>
 
 	* Fix a bad bug in cvl_reduce() that produced wrong results.
