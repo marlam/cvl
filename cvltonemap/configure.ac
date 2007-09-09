@@ -47,12 +47,6 @@ if test "$w32" = "yes"; then
 	fi
 fi
 
-dnl configure switches
-AC_ARG_ENABLE([debug], 
-	[AC_HELP_STRING([--enable-debug], [Enable (costly) debugging checks.])],
-	[debug=1], [debug=0])
-AC_DEFINE_UNQUOTED([DEBUG], [$debug], [Define to 1 to enable (costly) debugging checks.])
-
 dnl gnulib 
 gl_INIT
 
