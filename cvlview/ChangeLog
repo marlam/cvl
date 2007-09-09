@@ -1,3 +1,7 @@
+2007-09-09  Martin Lambers <marlam@marlam.de>
+
+	* configure.ac: Remove unused --debug option for configure script.
+
 2007-09-05  Martin Lambers <marlam@marlam.de>
 
 	* Force initializeGL() in constructor. This prevents potential
