@@ -191,6 +191,7 @@ The API reference is provided in HTML format in the separate directory
 @menu
 * GNU Free Documentation License::   License for copying this manual.
 * GNU GPL::                          License for copying the program.
+* Additional information::           Information about additional licenses.
 @end menu
 
 @node GNU Free Documentation License
@@ -200,5 +201,45 @@ The API reference is provided in HTML format in the separate directory
 @unnumberedsec GNU GPL
 @include gpl.texi
 
+@node Additional information
+@unnumberedsec Additional information
+
+The W32 specific code in @code{cvl_gl_context_new()} was adapted from
+@url{http://glew.sourceforge.net/,GLEW} version 1.4.0, file
+@code{glew/src/glewinfo.c}, function @code{glewCreateContext()} (W32 version).
+
+The original copyright and license information is as follows:
+
+@example
+/*
+** Copyright (C) 2002-2007, Milan Ikits <milan ikits[]ieee org>
+** Copyright (C) 2002-2007, Marcelo E. Magallon <mmagallo[]debian org>
+** Copyright (C) 2002, Lev Povalahev
+** All rights reserved.
+** 
+** Redistribution and use in source and binary forms, with or without 
+** modification, are permitted provided that the following conditions are met:
+** 
+** * Redistributions of source code must retain the above copyright notice, 
+**   this list of conditions and the following disclaimer.
+** * Redistributions in binary form must reproduce the above copyright notice, 
+**   this list of conditions and the following disclaimer in the documentation 
+**   and/or other materials provided with the distribution.
+** * The name of the author may be used to endorse or promote products 
+**   derived from this software without specific prior written permission.
+**
+** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
+** AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE 
+** IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+** ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE 
+** LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
+** CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
+** SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+** INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+** CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+** ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
+** THE POSSIBILITY OF SUCH DAMAGE.
+*/
+@end example
 
 @bye

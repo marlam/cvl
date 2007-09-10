@@ -1,3 +1,8 @@
+2007-09-10  Martin Lambers <marlam@marlam.de>
+
+	* doc/cvl.texi: Add copyright and license info for GLEW code, required
+	by the GLEW license.
+
 2007-09-09  Martin Lambers <marlam@marlam.de>
 
 	* configure.ac, doc/cvtool.texi, doc/cvl.texi, doc/cvtool.1,
