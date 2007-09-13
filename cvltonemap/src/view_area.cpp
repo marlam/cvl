@@ -184,31 +184,52 @@ void ViewArea::paintGL()
 	float contrast = postproc_selector->get_contrast();
 	float saturation = postproc_selector->get_saturation();
 	float sharpness = postproc_selector->get_sharpness();
+	cvl_frame_t *src = _frame1;
+	cvl_frame_t *dst = _frame2;
+	const float epsilon = 0.0001f;
 
-	cvl_gamma_correct(_frame2, _frame1, gamma);
-	cvl_frame_set_format(_frame1, CVL_HSL);
-    	cvl_convert_format(_frame1, _frame2);
-	cvl_frame_set_format(_frame2, CVL_HSL);
-	cvl_color_adjust(_frame2, _frame1, 0.0f, saturation, lightness, contrast);
-	cvl_frame_set_format(_frame1, CVL_XYZ);
-    	cvl_convert_format(_frame1, _frame2);
-	cvl_frame_set_format(_frame2, CVL_XYZ);
-	if (sharpness < 0.0)
+	if (fabsf(gamma - 1.0f) > epsilon)
+	{
+	    cvl_gamma_correct(dst, src, gamma);
+	    src = dst;
+	    dst = (src == _frame1 ? _frame2 : _frame1);
+	}
+	if (fabsf(saturation) > epsilon || fabsf(lightness) > epsilon || fabsf(contrast) > epsilon)
+	{
+	    cvl_frame_set_format(dst, CVL_HSL);
+	    cvl_convert_format(dst, src);
+	    src = dst;
+	    dst = (src == _frame1 ? _frame2 : _frame1);
+	    cvl_frame_set_format(dst, CVL_HSL);
+	    cvl_color_adjust(dst, src, 0.0f, saturation, lightness, contrast);
+	    src = dst;
+	    dst = (src == _frame1 ? _frame2 : _frame1);
+	    cvl_frame_set_format(dst, CVL_XYZ);
+	    cvl_convert_format(dst, src);
+	    src = dst;
+	    dst = (src == _frame1 ? _frame2 : _frame1);
+	    cvl_frame_set_format(dst, CVL_XYZ);
+	}
+	if (sharpness < - epsilon)
 	{
 	    float sigma = - sharpness * 2.0f;
 	    int k = cvl_gauss_sigma_to_k(sigma);
-	    cvl_gauss(_frame2, _frame1, k, k, sigma, sigma);
+	    cvl_gauss(dst, src, k, k, sigma, sigma);
+	    src = dst;
+	    dst = (src == _frame1 ? _frame2 : _frame1);
 	}
-	else
+	else if (sharpness > epsilon)
 	{
 	    float c = sharpness * 0.75f;
-	    cvl_laplace(_frame2, _frame1, c);
+	    cvl_laplace(dst, src, c);
+	    src = dst;
+	    dst = (src == _frame1 ? _frame2 : _frame1);
 	}
 
 	/* Prepare for rendering: Convert to RGB and use 8bit texture to allow
 	 * interpolation even on older hardware. At this point, all values are in
 	 * [0,1] anyway. */
-	cvl_convert_format(_render_frame, _frame2);
+	cvl_convert_format(_render_frame, src);
 
 	_processed_frame = *_frame;
     	_recompute = false;
