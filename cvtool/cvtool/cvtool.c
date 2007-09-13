@@ -303,7 +303,12 @@ int main(int argc, char *argv[])
 	    mh_msg_err("command unknown: %s", argv[argv_cmd_index]);
 	    exitcode = 1;
 	}
-    	else
+    	else if (commands[cmd_index].cmd == cmd_help || commands[cmd_index].cmd == cmd_version)
+	{
+	    /* Do not cretae a GL context for these simple commands */
+	    exitcode = commands[cmd_index].cmd(argc - 1, &(argv[1]));
+	}
+	else
 	{
 	    const char *display_name;
 #ifdef W32_NATIVE

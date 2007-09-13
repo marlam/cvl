@@ -1,3 +1,8 @@
+2007-09-13  Martin Lambers <marlam@marlam.de>
+
+	* cvtool/cvtool.c: Don't create a GL context for the simple commands
+	"help" and "version".
+
 2007-09-10  Martin Lambers <marlam@marlam.de>
 
 	* doc/cvl.texi: Add copyright and license info for GLEW code, required
