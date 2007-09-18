@@ -2,6 +2,8 @@
 
 	* src/view_area.cpp: Do not fail on images where a channel contains 
 	only a single value, and therefore min == max.
+	* src/interpolation_selector.cpp: Disable interpolation by default,
+	since this is a data viewer and not an image viewer.
 
 2007-09-09  Martin Lambers <marlam@marlam.de>
 

@@ -36,7 +36,7 @@ InterpolationSelector::InterpolationSelector(QWidget *parent)
     layout->addWidget(_interpolation_button, 0, 0);
     _interpolation_button->setAutoDefault(false);
     _interpolation_button->setCheckable(true);
-    _interpolation_button->setChecked(true);
+    _interpolation_button->setChecked(false);
     connect(_interpolation_button, SIGNAL(clicked()), this, SLOT(interpolation_button_clicked()));
     layout->setRowStretch(1, 1);
     setLayout(layout);
