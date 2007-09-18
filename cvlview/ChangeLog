@@ -1,3 +1,8 @@
+2007-09-18  Martin Lambers <marlam@marlam.de>
+
+	* src/view_area.cpp: Do not fail on images where a channel contains 
+	only a single value, and therefore min == max.
+
 2007-09-09  Martin Lambers <marlam@marlam.de>
 
 	* configure.ac: Remove unused --debug option for configure script.

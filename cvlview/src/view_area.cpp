@@ -153,11 +153,6 @@ void ViewArea::paintGL()
 	float pseudocolor_lightness = _pseudocolor_selector->get_lightness(channel);
 	cvl_frame_t *dst, *src;
 
-	// FIXME: This should not be necessary, becaus the Range Selector should
-	// be updated when this is called.
-	if (range_min >= range_max)
-	    return;
-
 	if (_processed_frame != *_frame)
 	{
 	    cvl_frame_free(_frame1);
