@@ -13,10 +13,16 @@ body
 a
 {
 	color: #5a3aca;
+	text-decoration: none;
 }
 
 a:hover
 {
+}
+
+img
+{
+	border: 0px;
 }
 
 #header 
