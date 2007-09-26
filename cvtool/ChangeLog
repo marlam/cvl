@@ -1,3 +1,8 @@
+2007-09-26  Martin Lambers <marlam@marlam.de>
+
+	* cvl/cvl_misc.c: Handle rounding errors when computing the standard
+	deviation in cvl_statistics().
+
 2007-09-13  Martin Lambers <marlam@marlam.de>
 
 	* cvtool/cvtool.c: Don't create a GL context for the simple commands

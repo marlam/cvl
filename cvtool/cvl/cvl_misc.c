@@ -412,7 +412,7 @@ void cvl_statistics(cvl_frame_t *frame, float *min, float *max, float *median,
 	cvl_quantil(sorted, -1, 0.5, median);
 	cvl_frame_free(sorted);
     }
-    if (mean || sum)
+    if (mean || sum || stddev)
     {
 	cvl_reduce(frame, CVL_REDUCE_SUM, -1, sum);
     }
@@ -425,14 +425,6 @@ void cvl_statistics(cvl_frame_t *frame, float *min, float *max, float *median,
     }
     if (stddev)
     {
-	float sumsq[4];
-	
-	cvl_frame_t *layers[2] = { frame, frame };
-	cvl_frame_t *squared = cvl_frame_new_tpl(frame);
-	cvl_layer(squared, layers, 2, CVL_LAYER_MUL);
-    	cvl_reduce(squared, CVL_REDUCE_SUM, -1, sumsq);
-	cvl_frame_free(squared);
-
 	if (cvl_frame_size(frame) == 1)
 	{
 	    for (int c = 0; c < 4; c++)
@@ -442,10 +434,17 @@ void cvl_statistics(cvl_frame_t *frame, float *min, float *max, float *median,
 	}
 	else
 	{
+	    float sumsq[4];
+	    cvl_frame_t *layers[2] = { frame, frame };
+	    cvl_frame_t *squared = cvl_frame_new_tpl(frame);
+	    cvl_layer(squared, layers, 2, CVL_LAYER_MUL);
+	    cvl_reduce(squared, CVL_REDUCE_SUM, -1, sumsq);
+	    cvl_frame_free(squared);
+
 	    for (int c = 0; c < 4; c++)
 	    {
-		stddev[c] = sqrtf((sumsq[c] - sum[c] * sum[c] / (float)cvl_frame_size(frame)) 
-			/ (float)(cvl_frame_size(frame) - 1));
+		float radicand = (sumsq[c] - sum[c] * sum[c] / (float)cvl_frame_size(frame)) / (float)(cvl_frame_size(frame) - 1);
+		stddev[c] = (radicand > 0.0f) ? sqrtf(radicand) : 0.0f;
 	    }
 	}
     }
