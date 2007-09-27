@@ -1,3 +1,7 @@
+2007-09-27  Martin Lambers <marlam@marlam.de>
+
+	* cvtool/cmd_info.c: Improve output of the info command.
+
 2007-09-26  Martin Lambers <marlam@marlam.de>
 
 	* cvl/cvl_misc.c: Handle rounding errors when computing the standard

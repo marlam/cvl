@@ -82,13 +82,13 @@ int cmd_info(int argc, char *argv[])
 
 	if (statistics.value)
 	{
-	    float min[4], max[4], median[4], mean[4], stddev[4], dynrange[4];
-	    cvl_statistics(frame, min, max, median, mean, stddev, dynrange);
+	    float min[4], max[4], median[4], mean[4], stddev[4];
+	    cvl_statistics(frame, min, max, median, mean, stddev, NULL);
 	    for (int c = 0; c < cvl_frame_channels(frame); c++)
 	    {
 		mh_msg(output.value ? output.value : stderr, MH_MSG_REQ,
-			"CH%d_MIN=%.4f CH%d_MAX=%.4f CH%d_MEAN=%+.4f CH%d_MEDIAN=%+.4f CH%d_STDDEVIATION=%+.4f CH%d_DYNRANGE=%+.4f",
-			c, min[c], c, max[c], c, mean[c], c, median[c], c, stddev[c], c, dynrange[c]);
+			"CH%d_MIN=%.4g CH%d_MAX=%.4g CH%d_MEAN=%.4g CH%d_MEDIAN=%.4g CH%d_STDDEVIATION=%.4g",
+			c, min[c], c, max[c], c, mean[c], c, median[c], c, stddev[c]);
 	    }
 	}
 
