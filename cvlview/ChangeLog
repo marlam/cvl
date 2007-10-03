@@ -1,3 +1,8 @@
+2007-10-03  Martin Lambers <marlam@marlam.de>
+
+	* configure.ac, doc/cvlview.texi, doc/cvlview.1, NEWS: Update for
+	version 0.1.2.
+
 2007-09-18  Martin Lambers <marlam@marlam.de>
 
 	* src/view_area.cpp: Do not fail on images where a channel contains 
