@@ -1,3 +1,8 @@
+2007-10-09  Martin Lambers <marlam@marlam.de>
+
+	* mhlib/mh_os.h, mhlib/mh_os.c, cvtool/cvtool.c: Rename DIRSEP to
+	MH_DIRSEP. Update the users accordingly.
+
 2007-09-27  Martin Lambers <marlam@marlam.de>
 
 	* cvtool/cmd_info.c: Improve output of the info command.

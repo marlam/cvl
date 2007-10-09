@@ -159,9 +159,9 @@ static FILE *real_mktempfile(const char *base, char **filename)
 	goto error_exit;
     }
     strncpy(template, dir, dirlen);
-    if (dirlen == 0 || template[dirlen - 1] != DIRSEP)
+    if (dirlen == 0 || template[dirlen - 1] != MH_DIRSEP)
     {
-	template[dirlen++] = DIRSEP;
+	template[dirlen++] = MH_DIRSEP;
     }
     /* template is long enough */
     strncpy(template + dirlen, base, baselen);
@@ -367,7 +367,7 @@ char *mh_get_apprcpath(const char *program_name)
 
     /* Combine filename and directory. */
 
-    char *apprcpath = mh_asprintf("%s%c%s", apprcdir, DIRSEP, rcfilename);
+    char *apprcpath = mh_asprintf("%s%c%s", apprcdir, MH_DIRSEP, rcfilename);
     free(apprcdir);
     free(rcfilename);
 

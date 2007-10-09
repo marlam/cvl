@@ -254,7 +254,7 @@ int main(int argc, char *argv[])
     setbuf(stderr, NULL);
 #endif
 
-    program_name = strrchr(argv[0], DIRSEP);
+    program_name = strrchr(argv[0], MH_DIRSEP);
     program_name = program_name ? program_name + 1 : argv[0];
     mh_msg_set_program_name("%s", program_name);
 #if DEBUG
