@@ -25,9 +25,9 @@
 #include <stdio.h>
 
 #ifdef W32_NATIVE
-# define DIRSEP '\\'
+# define MH_DIRSEP '\\'
 #else
-# define DIRSEP '/'
+# define MH_DIRSEP '/'
 #endif
 
 #ifdef __cplusplus
