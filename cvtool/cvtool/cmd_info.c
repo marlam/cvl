@@ -87,7 +87,7 @@ int cmd_info(int argc, char *argv[])
 	    for (int c = 0; c < cvl_frame_channels(frame); c++)
 	    {
 		mh_msg(output.value ? output.value : stderr, MH_MSG_REQ,
-			"CH%d_MIN=%.4g CH%d_MAX=%.4g CH%d_MEAN=%.4g CH%d_MEDIAN=%.4g CH%d_STDDEVIATION=%.4g",
+			"CH%d_MIN=%.6g CH%d_MAX=%.6g CH%d_MEAN=%.6g CH%d_MEDIAN=%.6g CH%d_STDDEVIATION=%.6g",
 			c, min[c], c, max[c], c, mean[c], c, median[c], c, stddev[c]);
 	    }
 	}

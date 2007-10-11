@@ -10,6 +10,7 @@
 	tests/cmd_channelcombine.sh, tests/cmd_channelextract.sh,
 	tests/Makefile.am: Split the channel command into the two new commands
 	channelextract and channelcombine for greater flexibility.
+	* cvtool/cmd_info.c: Print statistics with higher precision.
 
 2007-10-09  Martin Lambers <marlam@marlam.de>
 
