@@ -1,7 +1,8 @@
 testscripts = \
 	cmd_affine.sh		\
 	cmd_blend.sh		\
-	cmd_channel.sh		\
+	cmd_channelcombine.sh	\
+	cmd_channelextract.sh	\
 	cmd_color.sh		\
 	cmd_combine.sh		\
 	cmd_convert.sh		\

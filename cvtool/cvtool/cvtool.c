@@ -61,7 +61,8 @@ typedef struct
 
 COMMAND_DECL(affine)
 COMMAND_DECL(blend)
-COMMAND_DECL(channel)
+COMMAND_DECL(channelcombine)
+COMMAND_DECL(channelextract)
 COMMAND_DECL(color)
 COMMAND_DECL(combine)
 COMMAND_DECL(convert)
@@ -103,7 +104,8 @@ cvtool_command_t commands[] =
 {
     COMMAND(affine),
     COMMAND(blend),
-    COMMAND(channel),
+    COMMAND(channelcombine),
+    COMMAND(channelextract),
     COMMAND(color),
     COMMAND(combine),
     COMMAND(convert),

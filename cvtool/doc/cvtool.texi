@@ -1,8 +1,8 @@
 \input texinfo   @c -*-texinfo-*-
 @afourpaper
 @setfilename cvtool.info
-@set UPDATED September 9, 2007
-@set UPDATED-MONTH September 2007
+@set UPDATED October 11, 2007
+@set UPDATED-MONTH October 2007
 @set EDITION 0.2.0
 @set VERSION 0.2.0
 @settitle cvtool @value{VERSION}
@@ -739,26 +739,38 @@ $ cvtool layer --mode=or red.pnm green.pnm blue.pnm \
 @section Color Manipulation
 
 @menu
-* channel::
+* channelextract::
+* channelcombine::
 * color::
 * gamma::
 * invert::
 @end menu
 
-@node channel
-@subsection channel
-@cmindex channel
-@code{channel [-r|--reverse] -c|--channel=0|1|2|r|g|b}
+@node channelextract
+@subsection channelextract
+@cmindex channelextract
+@code{channelextract -c|--channel=0|1|2|3|r|g|b|lum}
 
 @noindent
-Extract the given channel from the input, and write it into luminance output.
-When channel is r, g, or b, then the input is converted to RGB format first.
-When @samp{--reverse} is used, the luminance of the input is written into the
-given channel of an RGB frame, and the other channels are set to zero.
+Extract the given channel from the input. If @samp{channel} is 0, 1, 2, or 3,
+then the data is copied unmodified. If the @samp{channel} is r, g, b, or lum,
+then the input is first converted to the red, gree, blue, or luminance form.
 
 @example
-$ cvtool channel -c r < color.ppm > red.pgm
-$ cvtool channel -r -c r < red.pgm > color-red-only.ppm
+$ cvtool channelextract -c r < color.ppm > red.pgm
+@end example
+
+@node channelcombine
+@subsection channelcombine
+@cmindex channelcombine
+@code{channelcombine file0 [file1 [file2 [file3]]]}
+
+@noindent
+Extract the first channel from the given files and combine them into
+multichannel output data.
+
+@example
+$ cvtool channelcombine red.pgm green.pgm blue.pgm > rgb.ppm
 @end example
 
 @node color

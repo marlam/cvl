@@ -3,7 +3,8 @@ bin_PROGRAMS = cvtool
 cvtool_SOURCES = cvtool.c 	\
 	cmd_affine.c		\
 	cmd_blend.c		\
-	cmd_channel.c		\
+	cmd_channelextract.c	\
+	cmd_channelcombine.c	\
 	cmd_color.c		\
 	cmd_combine.c		\
 	cmd_convert.c		\
