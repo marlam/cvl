@@ -3,6 +3,8 @@
 	* cvl/cvl_color.c: cvl_convert_format_inplace(): Remove extra change
 	of format.
 	* cvl/cvl_color.c: Fix description of cvl_channel_combine().
+	* cvl/cvl_io.c: cvl_write_pnm(): Fix writing of PNM frames with
+	unknown format.
 
 2007-10-09  Martin Lambers <marlam@marlam.de>
 
