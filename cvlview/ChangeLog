@@ -1,3 +1,8 @@
+2007-10-11  Martin Lambers <marlam@marlam.de>
+
+	* src/pixel_info.cpp, src/channel_info.cpp: Print numbers with higher
+	precision.
+
 2007-10-09  Martin Lambers <marlam@marlam.de>
 
 	* mhlib/mh_os.h, mhlib/mh_os.c, src/main.cpp: Rename DIRSEP to

@@ -89,12 +89,12 @@ void PixelInfo::update(int x, int y, int channels, const float *val, const float
 	snprintf(buf, 64, "Pos: %d, %d", x, y);
 	_pos_label->setText(buf);
 	_pos_label->setEnabled(true);
-	snprintf(buf, 64, "Ch.0: %.4g", val[0]);
+	snprintf(buf, 64, "Ch.0: %.6g", val[0]);
 	_ch0_label->setText(buf);
 	_ch0_label->setEnabled(true);
 	if (channels > 1)
 	{
-	    snprintf(buf, 64, "Ch.1: %.4g", val[1]);
+	    snprintf(buf, 64, "Ch.1: %.6g", val[1]);
 	    _ch1_label->setText(buf);
 	    _ch1_label->setEnabled(true);
 	}
@@ -105,7 +105,7 @@ void PixelInfo::update(int x, int y, int channels, const float *val, const float
 	}
 	if (channels > 2)
 	{
-	    snprintf(buf, 64, "Ch.2: %.4g", val[2]);
+	    snprintf(buf, 64, "Ch.2: %.6g", val[2]);
 	    _ch2_label->setText(buf);
 	    _ch2_label->setEnabled(true);
 	}
@@ -116,7 +116,7 @@ void PixelInfo::update(int x, int y, int channels, const float *val, const float
 	}
 	if (channels > 3)
 	{
-	    snprintf(buf, 64, "Ch.3: %.4g", val[3]);
+	    snprintf(buf, 64, "Ch.3: %.6g", val[3]);
 	    _ch3_label->setText(buf);
 	    _ch3_label->setEnabled(true);
 	}
@@ -127,7 +127,7 @@ void PixelInfo::update(int x, int y, int channels, const float *val, const float
 	}
 	if (lum)
 	{
-	    snprintf(buf, 64, "Lum.: %.4g", *lum);
+	    snprintf(buf, 64, "Lum.: %.6g", *lum);
 	    _lum_label->setText(buf);
 	    _lum_label->setEnabled(true);
 	}

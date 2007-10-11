@@ -139,16 +139,16 @@ void ChannelInfo::update()
 	    _processed_frame_extended = *_frame;
 	}
 	int c = _channel_selector->get_channel();
-	_min_label->setText(mh_string("%.4g", _min[c + 1]).c_str());
-	_max_label->setText(mh_string("%.4g", _max[c + 1]).c_str());
+	_min_label->setText(mh_string("%.6g", _min[c + 1]).c_str());
+	_max_label->setText(mh_string("%.6g", _max[c + 1]).c_str());
 	_meanstr_label->setEnabled(true);
-	_mean_label->setText(mh_string("%.4g", _mean[c + 1]).c_str());
+	_mean_label->setText(mh_string("%.6g", _mean[c + 1]).c_str());
 	_medianstr_label->setEnabled(true);
-	_median_label->setText(mh_string("%.4g", _median[c + 1]).c_str());
+	_median_label->setText(mh_string("%.6g", _median[c + 1]).c_str());
 	_stddevstr_label->setEnabled(true);
-	_stddev_label->setText(mh_string("%.4g", _stddev[c + 1]).c_str());
+	_stddev_label->setText(mh_string("%.6g", _stddev[c + 1]).c_str());
 	_dynrangestr_label->setEnabled(true);
-	_dynrange_label->setText(mh_string("%.4g dB", to_decibel(_dynrange[c + 1])).c_str());
+	_dynrange_label->setText(mh_string("%.6g dB", to_decibel(_dynrange[c + 1])).c_str());
     }
     else
     {
@@ -169,8 +169,8 @@ void ChannelInfo::update()
 	    _processed_frame = *_frame;
 	}
 	int c = _channel_selector->get_channel();
-	_min_label->setText(mh_string("%.4g", _min[c + 1]).c_str());
-	_max_label->setText(mh_string("%.4g", _max[c + 1]).c_str());
+	_min_label->setText(mh_string("%.6g", _min[c + 1]).c_str());
+	_max_label->setText(mh_string("%.6g", _max[c + 1]).c_str());
 	_meanstr_label->setEnabled(false);
 	_mean_label->setText("");
 	_medianstr_label->setEnabled(false);
