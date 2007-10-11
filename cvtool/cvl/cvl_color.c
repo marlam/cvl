@@ -979,7 +979,7 @@ static void cvl_hsl_to_rgb(cvl_frame_t *dst, cvl_frame_t *src)
  * \param c3		The fourth channel.
  *
  * Combines the channels \a c0, \a c1, \a c2, and \a c3 into the frame \a dst.
- * Channels that are NULL will not be set to zero in the result. At least 
+ * Channels that are NULL will be set to zero in the result. At least 
  * one channel must be given. The number of channels in the resulting frame must
  * match.
  */
