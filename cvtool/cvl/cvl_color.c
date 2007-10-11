@@ -1178,7 +1178,6 @@ void cvl_convert_format_inplace(cvl_frame_t *frame, cvl_format_t format)
     }
     if (cvl_frame_format(frame) == CVL_UNKNOWN)
     {
-	cvl_frame_set_format(frame, CVL_UNKNOWN);
 	cvl_frame_set_format(frame, format);
 	return;
     }
