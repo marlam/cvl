@@ -393,7 +393,9 @@ void cvl_read_pnm(FILE *f, cvl_frame_t **frame)
  * \param frame		The frame.
  *
  * Writes the frame \a frame to the stream \a f in PNM format. The PNM subformat
- * is PGM for frames with format #CVL_LUM and PPM for all other frames.
+ * is PGM for frames with a single channel and PPM for all other frames.
+ * Information loss will occur when saving #CVL_FLOAT frames or frames with more than
+ * 3 channels.
  */
 void cvl_write_pnm(FILE *f, cvl_frame_t *frame)
 {
@@ -422,32 +424,149 @@ void cvl_write_pnm(FILE *f, cvl_frame_t *frame)
     
     if (cvl_frame_type(out) == CVL_UINT8)
     {
-	error = (fprintf(f, "P%d\n%d %d\n255\n", 
-		    cvl_frame_format(out) == CVL_LUM ? 5 : 6,
-		    cvl_frame_width(out), cvl_frame_height(out)) < 0
-		|| fwrite(cvl_frame_pointer(out), components * size * sizeof(uint8_t), 1, f) != 1);
+	uint8_t *p = cvl_frame_pointer(out);
+	if (cvl_frame_format(out) == CVL_UNKNOWN)
+	{
+	    if (cvl_frame_channels(out) == 1)
+	    {
+		uint8_t *np;
+		if (!(np = malloc(1 * size * sizeof(uint8_t))))
+		{
+		    cvl_error_set(CVL_ERROR_MEM, "%s", strerror(errno));
+		    if (out != frame)
+		    {
+			cvl_frame_free(out);
+		    }
+		    return;
+		}
+		for (size_t i = 0; i < size; i++)
+		{
+	    	    np[i] = p[4 * i];
+		}
+		error = (fprintf(f, "P5\n%d %d\n255\n", cvl_frame_width(out), cvl_frame_height(out)) < 0
+			|| fwrite(np, 1 * size * sizeof(uint8_t), 1, f) != 1);
+		free(np);
+	    }
+	    else
+	    {
+		uint8_t *np;
+		if (!(np = malloc(3 * size * sizeof(uint8_t))))
+		{
+		    cvl_error_set(CVL_ERROR_MEM, "%s", strerror(errno));
+		    if (out != frame)
+		    {
+			cvl_frame_free(out);
+		    }
+		    return;
+		}
+		for (size_t i = 0; i < size; i++)
+		{
+	    	    np[3 * i + 0] = p[4 * i + 0];
+    		    np[3 * i + 1] = p[4 * i + 1];
+		    np[3 * i + 2] = (cvl_frame_channels(out) >= 3 ? p[4 * i + 2] : 0);
+		}
+		error = (fprintf(f, "P6\n%d %d\n255\n", cvl_frame_width(out), cvl_frame_height(out)) < 0
+			|| fwrite(np, 3 * size * sizeof(uint8_t), 1, f) != 1);
+		free(np);
+	    }
+	}
+	else
+	{
+	    error = (fprintf(f, "P%d\n%d %d\n255\n", 
+	    		cvl_frame_format(out) == CVL_LUM ? 5 : 6,
+	    		cvl_frame_width(out), cvl_frame_height(out)) < 0
+	    	    || fwrite(p, components * size * sizeof(uint8_t), 1, f) != 1);
+	}
     }
     else
     {
 	float *fp = cvl_frame_pointer(out);
-	uint8_t *p;
-	
-	if (!(p = malloc(size * components * 2 * sizeof(uint8_t))))
+	if (cvl_frame_format(out) == CVL_UNKNOWN)
 	{
-	    cvl_error_set(CVL_ERROR_MEM, "%s", strerror(errno));
-	    return;
+	    if (cvl_frame_channels(out) == 1)
+	    {
+		uint8_t *np;
+		if (!(np = malloc(1 * size * 2 * sizeof(uint8_t))))
+		{
+		    cvl_error_set(CVL_ERROR_MEM, "%s", strerror(errno));
+		    if (out != frame)
+		    {
+			cvl_frame_free(out);
+		    }
+		    return;
+		}
+		for (size_t i = 0; i < size; i++)
+		{
+		    unsigned int v = fp[4 * i];
+		    np[2 * i + 0] = (v >> 8);
+		    np[2 * i + 1] = (v & 0xff);
+		}
+		error = (fprintf(f, "P5\n%d %d\n65535\n", cvl_frame_width(out), cvl_frame_height(out)) < 0
+			|| fwrite(np, 1 * size * 2 * sizeof(uint8_t), 1, f) != 1);
+		free(np);
+	    }
+	    else
+	    {
+		uint8_t *np;
+		if (!(np = malloc(3 * size * 2 * sizeof(uint8_t))))
+		{
+		    cvl_error_set(CVL_ERROR_MEM, "%s", strerror(errno));
+		    if (out != frame)
+		    {
+			cvl_frame_free(out);
+		    }
+		    return;
+		}
+		for (size_t i = 0; i < size; i++)
+		{
+		    unsigned int v;
+		    v = fp[4 * i + 0];
+		    np[6 * i + 0] = (v >> 8);
+		    np[6 * i + 1] = (v & 0xff);
+		    v = fp[4 * i + 0];
+		    np[6 * i + 2] = (v >> 8);
+		    np[6 * i + 3] = (v & 0xff);
+		    if (cvl_frame_channels(out) >= 3)
+		    {
+			v = fp[4 * i + 0];
+			np[6 * i + 4] = (v >> 8);
+			np[6 * i + 5] = (v & 0xff);
+		    }
+		    else
+		    {
+			np[6 * i + 4] = 0;
+			np[6 * i + 5] = 0;
+		    }
+		}
+		error = (fprintf(f, "P6\n%d %d\n65535\n", cvl_frame_width(out), cvl_frame_height(out)) < 0
+			|| fwrite(np, 3 * size * 2 * sizeof(uint8_t), 1, f) != 1);
+		free(np);
+	    }
 	}
-	for (size_t i = 0; i < components * size; i++)
-    	{
-	    unsigned int v = fp[i] * 65535.0f;
-	    p[2 * i + 0] = (v >> 8);
-	    p[2 * i + 1] = (v & 0xff);
+	else
+	{
+	    uint8_t *np;
+	    if (!(np = malloc(size * components * 2 * sizeof(uint8_t))))
+	    {
+		cvl_error_set(CVL_ERROR_MEM, "%s", strerror(errno));
+		if (out != frame)
+	    	{
+    		    cvl_frame_free(out);
+		}
+		return;
+	    }
+	    for (size_t i = 0; i < components * size; i++)
+	    {
+	    	unsigned int v = fp[i] * 65535.0f;
+		np[2 * i + 0] = (v >> 8);
+		np[2 * i + 1] = (v & 0xff);
+	    }
+	    error = (fprintf(f, "P%d\n%d %d\n65535\n", 
+			cvl_frame_format(out) == CVL_LUM ? 5 : 6,
+			cvl_frame_width(out), cvl_frame_height(out)) < 0
+		    || fwrite(np, components * size * 2 * sizeof(uint8_t), 1, f) != 1);
+	    free(np);
 	}
-	error = (fprintf(f, "P%d\n%d %d\n65535\n", 
-		    cvl_frame_format(out) == CVL_LUM ? 5 : 6,
-		    cvl_frame_width(out), cvl_frame_height(out)) < 0
-		|| fwrite(p, components * size * 2 * sizeof(uint8_t), 1, f) != 1);
-	free(p);
     }
 
     if (out != frame)
