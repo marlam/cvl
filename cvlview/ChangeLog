@@ -1,6 +1,6 @@
 2007-10-09  Martin Lambers <marlam@marlam.de>
 
-	* * mhlib/mh_os.h, mhlib/mh_os.c, src/main.cpp: Rename DIRSEP to
+	* mhlib/mh_os.h, mhlib/mh_os.c, src/main.cpp: Rename DIRSEP to
 	MH_DIRSEP. Update the users accordingly.
 
 2007-10-03  Martin Lambers <marlam@marlam.de>
