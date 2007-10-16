@@ -465,7 +465,7 @@ void CVLView::copy_view()
 void CVLView::show_aboutbox()
 {
     QMessageBox::about(this, tr("About " PACKAGE_NAME), tr(
-		"<p>%1 version %2</p>"
+		"<p>This is %1 version %2, using CVL version %3.</p>"
 		"<p>Copyright (C) 2007  Martin Lambers and others.<br>"
 		"This is free software. You may redistribute copies of it under the terms of "
 		"the <a href=\"http://www.gnu.org/licenses/old-licenses/gpl-2.0.html\">"
@@ -473,5 +473,6 @@ void CVLView::show_aboutbox()
 		"There is NO WARRANTY, to the extent permitted by law.</p>"
 		"See <a href=\"http://cvtool.sourceforge.net/cvlview.html\">"
 		"http://cvtool.sourceforge.net/cvlview.html</a> "
-		"for more information on this software.</p>").arg(PACKAGE_NAME).arg(VERSION));
+		"for more information on this software.</p>")
+	    .arg(PACKAGE_NAME).arg(VERSION).arg(cvl_check_version(NULL)));
 }

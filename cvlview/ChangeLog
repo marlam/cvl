@@ -20,6 +20,7 @@
 	gnulib/m4/gnulib-comp.m4, gnulib/m4/gnulib-cache.m4, gnulib/fseeko.c,
 	gnulib/lseek.c, gnulib/ftello.c, gnulib/Makefile.am: Add gnulib fseeko
 	and ftello modules for W32 portability.
+	* src/cvlview.cpp: Print CVL version in AboutBox.
 
 2007-10-11  Martin Lambers <marlam@marlam.de>
 
