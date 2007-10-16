@@ -27,6 +27,8 @@ AC_DEFUN([gl_EARLY],
   AC_REQUIRE([AC_PROG_RANLIB])
   AC_REQUIRE([AC_GNU_SOURCE])
   AC_REQUIRE([gl_USE_SYSTEM_EXTENSIONS])
+  AC_REQUIRE([AC_FUNC_FSEEKO])
+  AC_REQUIRE([AC_FUNC_FSEEKO])
 ])
 
 # This macro should be invoked from ./configure.ac, in the section
@@ -43,9 +45,15 @@ AC_DEFUN([gl_INIT],
   gl_source_base='gnulib'
   gl_FUNC_ALLOCA
   gl_FLOAT_H
+  gl_FUNC_FSEEKO
+  gl_STDIO_MODULE_INDICATOR([fseeko])
+  gl_FUNC_FTELLO
+  gl_STDIO_MODULE_INDICATOR([ftello])
   gl_GETOPT
   AC_SUBST([LIBINTL])
   AC_SUBST([LTLIBINTL])
+  gl_FUNC_LSEEK
+  gl_UNISTD_MODULE_INDICATOR([lseek])
   gl_SIZE_MAX
   gl_STDINT_H
   gl_STDIO_H
@@ -108,11 +116,14 @@ AC_DEFUN([gl_FILE_LIST], [
   lib/dummy.c
   lib/float+.h
   lib/float_.h
+  lib/fseeko.c
+  lib/ftello.c
   lib/getopt.c
   lib/getopt1.c
   lib/getopt_.h
   lib/getopt_int.h
   lib/gettext.h
+  lib/lseek.c
   lib/printf-args.c
   lib/printf-args.h
   lib/printf-parse.c
@@ -133,12 +144,15 @@ AC_DEFUN([gl_FILE_LIST], [
   m4/eoverflow.m4
   m4/extensions.m4
   m4/float_h.m4
+  m4/fseeko.m4
+  m4/ftello.m4
   m4/getopt.m4
   m4/gnulib-common.m4
   m4/include_next.m4
   m4/intmax_t.m4
   m4/inttypes_h.m4
   m4/longlong.m4
+  m4/lseek.m4
   m4/size_max.m4
   m4/stdint.m4
   m4/stdint_h.m4
