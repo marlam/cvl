@@ -1,3 +1,8 @@
+2007-10-16  Martin Lambers <marlam@marlam.de>
+
+	* src/interpolation_selector.cpp, src/viewpoint_selector.cpp: Add
+	keyboard shortcuts to buttons.
+
 2007-10-11  Martin Lambers <marlam@marlam.de>
 
 	* src/pixel_info.cpp, src/channel_info.cpp: Print numbers with higher

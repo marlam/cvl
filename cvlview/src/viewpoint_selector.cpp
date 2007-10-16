@@ -54,11 +54,13 @@ ViewpointSelector::ViewpointSelector(cvl_frame_t **frame, QWidget *parent)
     connect(_zoomfactor_spinbox, SIGNAL(valueChanged(double)), this, SLOT(_set_zoomfactor(double)));
     layout->addWidget(_zoomfactor_spinbox, 0, 2, 1, 2);
     
-    _zoom_fit_button = new QPushButton("Fit");
+    _zoom_fit_button = new QPushButton(tr("&Fit"));
+    _zoom_fit_button->setShortcut(tr("f"));
     connect(_zoom_fit_button, SIGNAL(clicked()), this, SLOT(zoom_fit_button_clicked()));
     layout->addWidget(_zoom_fit_button, 0, 4, 1, 1);
     
-    _zoom_reset_button = new QPushButton("1:1");
+    _zoom_reset_button = new QPushButton(tr("&1:1"));
+    _zoom_reset_button->setShortcut(tr("1"));
     connect(_zoom_reset_button, SIGNAL(clicked()), this, SLOT(zoom_reset_button_clicked()));
     layout->addWidget(_zoom_reset_button, 0, 5, 1, 1);
 
@@ -83,7 +85,8 @@ ViewpointSelector::ViewpointSelector(cvl_frame_t **frame, QWidget *parent)
     connect(_y_offset_spinbox, SIGNAL(valueChanged(int)), this, SLOT(_set_y_offset(int)));
     layout->addWidget(_y_offset_spinbox, 0, 11, 1, 2);
     
-    _offset_reset_button = new QPushButton("Center");
+    _offset_reset_button = new QPushButton(tr("&Center"));
+    _offset_reset_button->setShortcut(tr("c"));
     connect(_offset_reset_button, SIGNAL(clicked()), this, SLOT(offset_reset_button_clicked()));
     layout->addWidget(_offset_reset_button, 0, 13, 1, 2);
 

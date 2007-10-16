@@ -32,7 +32,8 @@ InterpolationSelector::InterpolationSelector(QWidget *parent)
 	: QWidget(parent)
 {
     QGridLayout *layout = new QGridLayout;
-    _interpolation_button = new QPushButton("Interpolate");
+    _interpolation_button = new QPushButton(tr("&Interpolate"));
+    _interpolation_button->setShortcut(tr("i"));
     layout->addWidget(_interpolation_button, 0, 0);
     _interpolation_button->setAutoDefault(false);
     _interpolation_button->setCheckable(true);
