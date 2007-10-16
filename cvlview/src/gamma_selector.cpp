@@ -74,6 +74,12 @@ GammaSelector::~GammaSelector()
 {
 }
 
+void GammaSelector::reset()
+{
+    _enable_box->setCheckState(Qt::Checked);
+    _gamma_slider->setValue(900);
+}
+
 void GammaSelector::_set_enable(int e UNUSED)
 {
     int c = _channel_selector->get_channel() + 1;

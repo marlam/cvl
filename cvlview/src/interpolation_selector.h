@@ -47,6 +47,9 @@ class InterpolationSelector : public QWidget
 	    return _interpolation_button->isChecked();
 	}
 
+    public slots:
+	void reset();
+
     signals:
 	void interpolation_changed();
 };

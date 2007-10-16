@@ -94,6 +94,14 @@ PseudocolorSelector::~PseudocolorSelector()
 {
 }
 
+void PseudocolorSelector::reset()
+{
+    _startcolor_slider->setValue(0);
+    _lightness_slider->setValue(0);
+    _enable_box->setCheckState(Qt::Unchecked);
+    _cyclic_box->setCheckState(Qt::Unchecked);
+}
+
 void PseudocolorSelector::_set_enable(int e UNUSED)
 {
     int c = _channel_selector->get_channel() + 1;

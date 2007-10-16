@@ -46,8 +46,9 @@
 
 #include "err.h"
 #include "conf.h"
+#include "datafile.h"
 
-#include "image_info.h"
+#include "frame_info.h"
 #include "channel_selector.h"
 #include "channel_info.h"
 #include "viewpoint_selector.h"
@@ -72,6 +73,7 @@ CVLView::CVLView()
     catch (err e) {}
     _last_open_dir = QDir(_conf->get("session-last-open-dir", qPrintable(QDir::homePath())));
     _last_save_dir = QDir(_conf->get("session-last-save-dir", qPrintable(QDir::homePath())));
+    _datafile = NULL;
     _frame = NULL;
 
     /* Restore window geometry */
@@ -93,38 +95,45 @@ CVLView::CVLView()
     setCentralWidget(_widget);
     const int tools_width = 256;
 
-    _image_info = new ImageInfo(&_frame, _widget);
-    connect(this, SIGNAL(new_frame()), _image_info, SLOT(update()));
-    _image_info->setFixedWidth(tools_width);
-    _image_info->setEnabled(false);
+    _frame_info = new FrameInfo(&_datafile, &_frame, _widget);
+    connect(this, SIGNAL(new_frame()), _frame_info, SLOT(update()));
+    _frame_info->setFixedWidth(tools_width);
+    _frame_info->setEnabled(false);
     
     _channel_selector = new ChannelSelector(&_frame, _widget);
     connect(this, SIGNAL(new_frame()), _channel_selector, SLOT(update()));
+    connect(this, SIGNAL(new_datafile()), _channel_selector, SLOT(reset()));
     _channel_selector->setFixedWidth(tools_width);
 
     _viewpoint_selector = new ViewpointSelector(&_frame, _widget);
+    connect(this, SIGNAL(new_datafile()), _viewpoint_selector, SLOT(reset()));
     _viewpoint_selector->setFixedWidth(tools_width + tools_width / 2 + tools_width / 4);
 
     _interpolation_selector = new InterpolationSelector(_widget);
+    connect(this, SIGNAL(new_datafile()), _interpolation_selector, SLOT(reset()));
     _interpolation_selector->setFixedWidth(tools_width / 2);
 
     _channel_info = new ChannelInfo(&_frame, _channel_selector, _widget);
-    _channel_info->setFixedWidth(tools_width);
     connect(this, SIGNAL(new_frame()), _channel_info, SLOT(update()));
+    connect(this, SIGNAL(new_datafile()), _channel_info, SLOT(reset()));
     connect(_channel_selector, SIGNAL(channel_changed()), _channel_info, SLOT(update()));
+    _channel_info->setFixedWidth(tools_width);
 
     _range_selector = new RangeSelector(&_frame, _channel_selector, _channel_info, _widget);
-    _range_selector->setFixedWidth(tools_width);
     connect(this, SIGNAL(new_frame()), _range_selector, SLOT(update()));
+    connect(this, SIGNAL(new_datafile()), _range_selector, SLOT(reset()));
     connect(_channel_selector, SIGNAL(channel_changed()), _range_selector, SLOT(update_channel()));
+    _range_selector->setFixedWidth(tools_width);
 
     _gamma_selector = new GammaSelector(_channel_selector, _widget);
-    _gamma_selector->setFixedWidth(tools_width);
     connect(_channel_selector, SIGNAL(channel_changed()), _gamma_selector, SLOT(update_channel()));
+    connect(this, SIGNAL(new_datafile()), _gamma_selector, SLOT(reset()));
+    _gamma_selector->setFixedWidth(tools_width);
 
     _pseudocolor_selector = new PseudocolorSelector(_channel_selector, _widget);
-    _pseudocolor_selector->setFixedWidth(tools_width);
     connect(_channel_selector, SIGNAL(channel_changed()), _pseudocolor_selector, SLOT(update_channel()));
+    connect(this, SIGNAL(new_datafile()), _pseudocolor_selector, SLOT(reset()));
+    _pseudocolor_selector->setFixedWidth(tools_width);
 
     _view_area = new ViewArea(&_frame, 2 * tools_width + tools_width / 4,
 	    _channel_selector,
@@ -136,7 +145,7 @@ CVLView::CVLView()
 	    _widget);
     connect(this, SIGNAL(new_frame()), _view_area, SLOT(recompute()));
     connect(this, SIGNAL(make_gl_context_current()), _view_area, SLOT(make_gl_context_current()));
-    connect(_image_info, SIGNAL(make_gl_context_current()), _view_area, SLOT(make_gl_context_current()));
+    connect(_frame_info, SIGNAL(make_gl_context_current()), _view_area, SLOT(make_gl_context_current()));
     connect(_channel_selector, SIGNAL(channel_changed()), _view_area, SLOT(recompute()));
     connect(_channel_selector, SIGNAL(make_gl_context_current()), _view_area, SLOT(make_gl_context_current()));
     connect(_viewpoint_selector, SIGNAL(viewpoint_changed()), _view_area, SLOT(update()));
@@ -173,7 +182,7 @@ CVLView::CVLView()
     _toolbox->addItem(_pseudocolor_selector, "Pseudo Color");
 
     QGridLayout *layout = new QGridLayout;
-    layout->addWidget(_image_info, 0, 0);
+    layout->addWidget(_frame_info, 0, 0);
     layout->addWidget(_toolbox, 1, 0);
     layout->addWidget(_view_area, 0, 1, 3, 1);
     layout->addWidget(_pixel_info, 3, 0, 1, 2);
@@ -185,11 +194,20 @@ CVLView::CVLView()
 
     // File menu
     QMenu *file_menu = menuBar()->addMenu(tr("&File"));
-    QAction *open_image_act = new QAction(tr("&Open image..."), this);
-    open_image_act->setShortcut(tr("Ctrl+O"));
-    connect(open_image_act, SIGNAL(triggered()), this, SLOT(open_image()));
-    file_menu->addAction(open_image_act);
-    QAction *save_image_act = new QAction(tr("&Save whole image..."), this);
+    QAction *open_datafile_act = new QAction(tr("&Open data file..."), this);
+    open_datafile_act->setShortcut(tr("Ctrl+O"));
+    connect(open_datafile_act, SIGNAL(triggered()), this, SLOT(open_datafile()));
+    file_menu->addAction(open_datafile_act);
+    QAction *prev_dataset_act = new QAction(tr("Previous data set"), this);
+    prev_dataset_act->setShortcut(tr("Left"));
+    connect(prev_dataset_act, SIGNAL(triggered()), this, SLOT(prev_dataset()));
+    file_menu->addAction(prev_dataset_act);
+    QAction *next_dataset_act = new QAction(tr("Next data set"), this);
+    next_dataset_act->setShortcut(tr("Right"));
+    connect(next_dataset_act, SIGNAL(triggered()), this, SLOT(next_dataset()));
+    file_menu->addAction(next_dataset_act);
+    file_menu->addSeparator();
+    QAction *save_image_act = new QAction(tr("&Save..."), this);
     save_image_act->setShortcut(tr("Ctrl+S"));
     connect(save_image_act, SIGNAL(triggered()), this, SLOT(save_image()));
     file_menu->addAction(save_image_act);
@@ -203,7 +221,7 @@ CVLView::CVLView()
     file_menu->addAction(quit_act);
     // Edit menu
     QMenu *edit_menu = menuBar()->addMenu(tr("&Edit"));
-    QAction *copy_image_act = new QAction(tr("&Copy whole image"), this);
+    QAction *copy_image_act = new QAction(tr("&Copy"), this);
     copy_image_act->setShortcut(tr("Ctrl+C"));
     connect(copy_image_act, SIGNAL(triggered()), this, SLOT(copy_image()));
     edit_menu->addAction(copy_image_act);
@@ -230,37 +248,49 @@ CVLView::~CVLView()
     delete _conf;
 }
 
-void CVLView::load_image(const char *filename)
+void CVLView::activate_frame(cvl_frame_t *frame)
 {
     emit make_gl_context_current();
-
     _view_area->lock();
+    cvl_frame_free(_frame);
+    _frame = frame;
+    // Use floating point textures for all calculations
+    cvl_frame_set_type(_frame, CVL_FLOAT);
+    emit new_frame();
+    _view_area->unlock();
+    _view_area->update();
+}
+
+void CVLView::load_datafile(const char *filename)
+{
+    emit make_gl_context_current();
+    
+    DataFile *datafile;
     cvl_frame_t *frame;
-    cvl_load(filename, NULL, &frame);
-    if (!frame)
+    try
     {
-	cvl_error_set(CVL_ERROR_IO, "%s: No data.", filename);
+	datafile = new DataFile(filename);
+	frame = datafile->read();
     }
-    if (cvl_error())
+    catch (err e) 
     {
-	QMessageBox::critical(this, tr("Error"), 
-		tr("<p>Cannot load image:<pre>%1</pre></p>").arg(cvl_error_msg()));
-	cvl_error_reset();
-	_view_area->unlock();
+	QMessageBox::critical(this, tr("Error"), e.msg().c_str());
+	return;    
     }
-    else
+    cvl_error_reset();
+    if (_datafile)
     {
-	cvl_frame_free(_frame);
-	_frame = frame;
-	// Use floating point textures for all calculations
-	cvl_frame_set_type(_frame, CVL_FLOAT);
-	_image_info->setEnabled(true);
-	_toolbar->setEnabled(true);
-	_toolbox->setEnabled(true);
-	emit new_frame();
-	_view_area->unlock();
-	_view_area->update();
+	delete _datafile;
     }
+    _datafile = datafile;
+    _frame_info->setEnabled(true);
+    _toolbar->setEnabled(true);
+    _toolbox->setEnabled(true);
+    _view_area->lock();
+    emit new_datafile();
+    _view_area->unlock();
+    _view_area->update();
+    activate_frame(frame);
 }
 
 void CVLView::closeEvent(QCloseEvent *event)
@@ -281,7 +311,7 @@ void CVLView::closeEvent(QCloseEvent *event)
     event->accept();
 }
 
-void CVLView::open_image()
+void CVLView::open_datafile()
 {
     QFileDialog *file_dialog = new QFileDialog(this);
     file_dialog->setWindowTitle(tr("Open image"));
@@ -299,7 +329,74 @@ void CVLView::open_image()
     if (file_name.isEmpty())
 	return;
     _last_open_dir = file_dialog->directory();
-    load_image(qPrintable(file_name));
+    load_datafile(qPrintable(file_name));
+}
+
+void CVLView::prev_dataset()
+{
+    if (!_datafile)
+    {
+	QMessageBox::critical(this, tr("Error"), tr("No data loaded yet."));
+	return;
+    }
+    if (_datafile->index() == 1)
+    {
+	// no previous data set
+	return;
+    }
+    emit make_gl_context_current();
+    cvl_frame_t *frame;
+    try
+    {
+	_datafile->prev();	// moves file pointer to current data set
+	_datafile->prev();	// moves file pointer to previous data set
+	frame = _datafile->read();
+    }
+    catch (err e)
+    {
+	QMessageBox::critical(this, tr("Error"), e.msg().c_str());
+	_view_area->unlock();
+	return;    
+    }
+    cvl_error_reset();
+    activate_frame(frame);
+}
+
+void CVLView::next_dataset()
+{
+    if (!_datafile)
+    {
+	QMessageBox::critical(this, tr("Error"), tr("No data loaded yet."));
+	return;
+    }
+    if (_datafile->index() == _datafile->total() - 1)
+    {
+	// no next data set
+	return;
+    }
+    emit make_gl_context_current();
+    cvl_frame_t *frame;
+    try
+    {
+	// filepointer already points to next data set
+	frame = _datafile->read();
+    }
+    catch (err e)
+    {
+	QMessageBox::critical(this, tr("Error"), e.msg().c_str());
+	_view_area->unlock();
+	return;    
+    }
+    cvl_error_reset();
+    if (frame)
+    {
+	activate_frame(frame);
+    }
+    else
+    {
+	// update the data set counter
+	_frame_info->update();
+    }
 }
 
 void CVLView::save(bool whole_image)

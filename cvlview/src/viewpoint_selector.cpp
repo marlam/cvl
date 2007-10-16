@@ -98,6 +98,13 @@ ViewpointSelector::~ViewpointSelector()
 {
 }
 
+void ViewpointSelector::reset()
+{
+    _zoomfactor_spinbox->setValue(1.0);
+    _x_offset_spinbox->setValue(0);
+    _y_offset_spinbox->setValue(0);
+}
+
 void ViewpointSelector::zoom_fit_button_clicked()
 {
     if (!_frame || !*_frame)

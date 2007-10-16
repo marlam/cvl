@@ -111,7 +111,7 @@ int main(int argc, char *argv[])
     cvlview->show();
     if (arg_count > 0)
     {
-	cvlview->load_image(argv[arg_index]);
+	cvlview->load_datafile(argv[arg_index]);
     }
     int retval = app->exec();
     delete cvlview;

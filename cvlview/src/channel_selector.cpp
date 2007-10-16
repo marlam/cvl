@@ -71,6 +71,11 @@ ChannelSelector::~ChannelSelector()
 {
 }
 
+void ChannelSelector::reset()
+{
+    ch0_button_clicked();
+}
+
 void ChannelSelector::ch0_button_clicked()
 {
     if (_channel_button[0]->isChecked())

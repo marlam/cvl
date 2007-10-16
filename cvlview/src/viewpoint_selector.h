@@ -86,6 +86,8 @@ class ViewpointSelector : public QWidget
 	    _view_area_height = h;
 	}
 
+        void reset();
+
     signals:
         void make_gl_context_current();
 	void viewpoint_changed();

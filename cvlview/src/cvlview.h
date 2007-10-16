@@ -38,8 +38,9 @@
 
 #include "err.h"
 #include "conf.h"
+#include "datafile.h"
 
-#include "image_info.h"
+#include "frame_info.h"
 #include "channel_selector.h"
 #include "viewpoint_selector.h"
 #include "interpolation_selector.h"
@@ -60,12 +61,13 @@ class CVLView : public QMainWindow
 	QDir _last_open_dir;
 	QDir _last_save_dir;
 
+	DataFile *_datafile;
 	cvl_frame_t *_frame;
 
 	QWidget *_widget;
 	QToolBar *_toolbar;
 	QToolBox *_toolbox;
-	ImageInfo *_image_info;
+	FrameInfo *_frame_info;
 	ChannelSelector *_channel_selector;
 	ViewpointSelector *_viewpoint_selector;
 	InterpolationSelector *_interpolation_selector;
@@ -85,14 +87,18 @@ class CVLView : public QMainWindow
     public:
 	CVLView();
 	~CVLView();
-	void load_image(const char *filename);
+	void activate_frame(cvl_frame_t *frame);
+	void load_datafile(const char *filename);
 
     signals:
 	void make_gl_context_current();
+        void new_datafile();
         void new_frame();
 
     private slots:
-	void open_image();
+	void open_datafile();
+	void prev_dataset();
+	void next_dataset();
         void save_image();
         void save_view();
 	void copy_image();

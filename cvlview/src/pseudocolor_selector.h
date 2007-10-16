@@ -83,6 +83,7 @@ class PseudocolorSelector : public QWidget
 
     public slots:
 	void update_channel();
+        void reset();
 
     signals:
 	void pseudocolor_changed();

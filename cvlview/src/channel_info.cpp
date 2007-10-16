@@ -95,6 +95,11 @@ ChannelInfo::~ChannelInfo()
 {
 }
 
+void ChannelInfo::reset()
+{
+    _extended_box->setCheckState(Qt::Unchecked);
+}
+
 float ChannelInfo::to_decibel(float dr)
 {
     return 10.0f * logf(dr) / logf(10.0f);

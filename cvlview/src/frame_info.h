@@ -1,5 +1,5 @@
 /*
- * gamma_selector.h
+ * frame_info.h
  *
  * This file is part of cvlview, an image viewer using the CVL library.
  *
@@ -19,52 +19,40 @@
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef GAMMA_SELECTOR_H
-#define GAMMA_SELECTOR_H
+#ifndef FRAME_INFO_H
+#define FRAME_INFO_H
 
 #include "config.h"
 
 #include <QWidget>
-#include <QCheckBox>
-#include <QDoubleSpinBox>
-#include <QSlider>
+#include <QLabel>
 
-#include "channel_selector.h"
+#include <cvl/cvl.h>
+
+#include "datafile.h"
 
 
-class GammaSelector : public QWidget
+class FrameInfo : public QWidget
 {
     Q_OBJECT
 	
     private:
-	ChannelSelector *_channel_selector;
-	QCheckBox *_enable_box;
-	QDoubleSpinBox *_gamma_spinbox;
-	QSlider *_gamma_slider;
-	bool _enabled[5];
-	float _gamma[5];
-	bool _lock;
-
-    private slots:
-	void _set_enable(int e UNUSED);
-	void _set_gamma(double g);
-	void _gamma_slider_changed(int g);
-
-    public:
-	GammaSelector(ChannelSelector *channel_selector, QWidget *parent = NULL);	
-	~GammaSelector();
-
-	float get_gamma(int channel)
-	{
-	    return _enabled[channel + 1] ? _gamma[channel + 1] : 1.0f;
-	}
+	DataFile **_datafile;
+	cvl_frame_t **_frame;
+	QLabel *_line0;
+	QLabel *_line1;
+	QLabel *_line2;
+	QLabel *_ch_line[4];
 
     public slots:
-        void update_channel();
-        void reset();
+	void update();
+
+    public:
+	FrameInfo(DataFile **datafile, cvl_frame_t **frame, QWidget *parent = NULL);	
+	~FrameInfo();
 
     signals:
-	void gamma_changed();
+	void make_gl_context_current();
 };
 
 #endif

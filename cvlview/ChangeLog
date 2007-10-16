@@ -2,6 +2,17 @@
 
 	* src/interpolation_selector.cpp, src/viewpoint_selector.cpp: Add
 	keyboard shortcuts to buttons.
+	* src/pseudocolor_selector.cpp, src/frame_info.h,
+	src/channel_selector.h, src/datafile.h, src/cvlview.cpp, src/main.cpp,
+	src/interpolation_selector.cpp, src/gamma_selector.h,
+	src/channel_info.h, src/viewpoint_selector.h, src/range_selector.h,
+	src/pseudocolor_selector.h, src/frame_info.cpp,
+	src/channel_selector.cpp, src/datafile.cpp, src/gamma_selector.cpp,
+	src/channel_info.cpp, src/cvlview.h, src/viewpoint_selector.cpp,
+	src/Makefile.am, src/interpolation_selector.h, src/range_selector.cpp:
+	Support multiple data sets in single data files. Reset settings if and
+	only if a new data file is opened; preserve them when switching data
+	sets.
 
 2007-10-11  Martin Lambers <marlam@marlam.de>
 

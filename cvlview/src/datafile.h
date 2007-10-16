@@ -1,5 +1,5 @@
 /*
- * image_info.h
+ * datafile.h
  *
  * This file is part of cvlview, an image viewer using the CVL library.
  *
@@ -19,35 +19,46 @@
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef IMAGE_INFO_H
-#define IMAGE_INFO_H
+/**
+ * \file datafile.h
+ * \brief Data file handling.
+ *
+ * Data file handling.
+ */
 
-#include "config.h"
-
-#include <QWidget>
-#include <QLabel>
+#include <cstdio>
 
 #include <cvl/cvl.h>
 
-class ImageInfo : public QWidget
-{
-    Q_OBJECT
-	
-    private:
-	cvl_frame_t **_frame;
-	QLabel *_line1;
-	QLabel *_line2;
-	QLabel *_ch_line[4];
+#include "err.h"
 
-    public slots:
-	void update();
+
+#ifndef DATAFILE_H
+#define DATAFILE_H
+
+class DataFile
+{
+    private:
+	char *_filename;
+	FILE *_f;
+	bool _eof_seen;
+	int _known_datasets;
+	int _offsets_buflen;
+	off_t *_offsets;
+	int _index;
 
     public:
-	ImageInfo(cvl_frame_t **frame, QWidget *parent = NULL);	
-	~ImageInfo();
+	DataFile(const char *filename) throw (err);
+	~DataFile();
 
-    signals:
-	void make_gl_context_current();
+	void set_index(int i) throw (err);
+	void prev() throw (err);
+	void next() throw (err);
+
+	cvl_frame_t *read() throw (err);
+
+	int index();
+	int total();
 };
 
 #endif

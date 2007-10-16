@@ -3,8 +3,9 @@ bin_PROGRAMS = cvlview
 cvlview_SOURCES = main.cpp					\
 	err.h err.cpp						\
 	conf.h conf.cpp						\
+	datafile.h datafile.cpp					\
 	cvlview.h cvlview.cpp					\
-	image_info.h image_info.cpp				\
+	frame_info.h frame_info.cpp				\
 	channel_selector.h channel_selector.cpp			\
 	viewpoint_selector.h viewpoint_selector.cpp		\
 	interpolation_selector.h interpolation_selector.cpp	\
@@ -21,7 +22,7 @@ endif
 
 nodist_cvlview_SOURCES = \
 	moc_cvlview.cpp			\
-	moc_image_info.cpp		\
+	moc_frame_info.cpp		\
 	moc_channel_selector.cpp	\
 	moc_viewpoint_selector.cpp	\
 	moc_interpolation_selector.cpp	\

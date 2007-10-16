@@ -47,6 +47,12 @@ InterpolationSelector::~InterpolationSelector()
 {
 }
 
+void InterpolationSelector::reset()
+{
+    _interpolation_button->setChecked(false);
+    emit interpolation_changed();
+}
+
 void InterpolationSelector::interpolation_button_clicked()
 {
     emit interpolation_changed();

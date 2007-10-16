@@ -62,6 +62,7 @@ class ChannelInfo : public QWidget
 
     public slots:
 	void update();
+        void reset();
 
     public:
 	ChannelInfo(cvl_frame_t **frame, 

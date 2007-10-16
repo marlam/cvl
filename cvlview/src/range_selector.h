@@ -96,6 +96,8 @@ class RangeSelector : public QWidget
 	bool _log_y[5];
 	// Current channel
 	int _channel;
+	// Reset?
+	bool _reset_on_next_update;
 
     private slots:
 	void set_range_min(float range_min);
@@ -103,10 +105,6 @@ class RangeSelector : public QWidget
 	void set_range(float range_min, float range_max);
 	void set_log_x();
 	void set_log_y();
-
-    public slots:
-        void update_channel();
-	void update();
 
     public:
 	RangeSelector(cvl_frame_t **frame,
@@ -128,6 +126,11 @@ class RangeSelector : public QWidget
     signals:
 	void make_gl_context_current();
 	void range_changed();
+
+    public slots:
+        void update_channel();
+	void update();
+	void reset();
 
     friend class Selector;
 };

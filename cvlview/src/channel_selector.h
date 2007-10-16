@@ -46,9 +46,6 @@ class ChannelSelector : public QWidget
 	void ch3_button_clicked();
 	void color_button_clicked();
 
-    public slots:
-	void update();
-
     public:
 	ChannelSelector(cvl_frame_t **frame, QWidget *parent = NULL);	
 	~ChannelSelector();
@@ -61,6 +58,10 @@ class ChannelSelector : public QWidget
     signals:
 	void make_gl_context_current();
 	void channel_changed();
+
+    public slots:
+	void update();
+        void reset();
 };
 
 #endif

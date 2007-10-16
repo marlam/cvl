@@ -1,5 +1,5 @@
 /*
- * image_info.cpp
+ * frame_info.cpp
  *
  * This file is part of cvlview, an image viewer using the CVL library.
  *
@@ -31,40 +31,52 @@
 
 #include "mh.h"
 
-#include "image_info.h"
+#include "datafile.h"
+#include "frame_info.h"
 
 
-ImageInfo::ImageInfo(cvl_frame_t **frame, QWidget *parent) 
+FrameInfo::FrameInfo(DataFile **datafile, cvl_frame_t **frame, QWidget *parent) 
 	: QWidget(parent)
 {
+    _datafile = datafile;
     _frame = frame;
 
     QGridLayout *layout = new QGridLayout;
     
+    _line0 = new QLabel("Data set: ");
+    layout->addWidget(_line0, 0, 0);
     _line1 = new QLabel("Size: ");
-    layout->addWidget(_line1, 0, 0);
+    layout->addWidget(_line1, 1, 0);
     _line2 = new QLabel("Data: ");
-    layout->addWidget(_line2, 1, 0);
+    layout->addWidget(_line2, 2, 0);
     for (int c = 0; c < 4; c++)
     {
 	_ch_line[c] = new QLabel(mh_string("Channel %d:", c).c_str());
-	layout->addWidget(_ch_line[c], 2 + c, 0);
+	layout->addWidget(_ch_line[c], 3 + c, 0);
     }
 
-    layout->setRowStretch(6, 1);
+    layout->setRowStretch(7, 1);
     setLayout(layout);
 }
 
-ImageInfo::~ImageInfo()
+FrameInfo::~FrameInfo()
 {
 }
 
-void ImageInfo::update()
+void FrameInfo::update()
 {
     if (_frame && *_frame)
     {
 	emit make_gl_context_current();
 
+	if ((*_datafile)->total() > 0)
+	{
+	    _line0->setText(mh_string("Data set: %d / %d", (*_datafile)->index(), (*_datafile)->total() - 1).c_str());
+	}
+	else
+	{
+	    _line0->setText(mh_string("Data set: %d", (*_datafile)->index()).c_str());
+	}
 	_line1->setText(mh_string("Size: %d x %d", cvl_frame_width(*_frame), cvl_frame_height(*_frame)).c_str());
 	_line2->setText(mh_string("Data: %s, %s", 
 		cvl_frame_format(*_frame) == CVL_LUM ? "Luminance" : 

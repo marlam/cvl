@@ -327,6 +327,7 @@ RangeSelector::RangeSelector(cvl_frame_t **frame,
     _frame = frame;
     _channel_selector = channel_selector;
     _channel_info = channel_info;
+    _reset_on_next_update = true;
 
     _histogram_size = 1024;
     _histogram = new int[5 * _histogram_size];
@@ -359,6 +360,11 @@ RangeSelector::RangeSelector(cvl_frame_t **frame,
 RangeSelector::~RangeSelector()
 {
     delete[] _histogram;
+}
+
+void RangeSelector::reset()
+{
+    _reset_on_next_update = true;
 }
 
 void RangeSelector::set_range_min(float range_min)
@@ -463,6 +469,11 @@ void RangeSelector::update()
 	}
 	_channel_min[0] = 0.0f;
 	_channel_max[0] = 1.0f;
+	if (_reset_on_next_update)
+	{
+	    _log_x[0] = false;
+	    _log_y[0] = false;
+	}
     }
 
     // Build histogram
@@ -478,7 +489,7 @@ void RangeSelector::update()
     }
     for (int c = 0; c < 4; c++)
     {
-	if (_range_min[c + 1] > _range_max[c + 1] 
+	if (_reset_on_next_update || _range_min[c + 1] > _range_max[c + 1] 
 		|| _range_min[c + 1] < _channel_min[c + 1] || _range_max[c + 1] > _channel_max[c + 1])
 	{
 	    _range_min[c + 1] = _channel_min[c + 1];
@@ -498,7 +509,7 @@ void RangeSelector::update()
     	    if (_histogram[i] > _histmax[0])
 		_histmax[0] = _histogram[i];
 	}
-	if (_range_min[0] > _range_max[0]
+	if (_reset_on_next_update || _range_min[0] > _range_max[0]
 		|| _range_min[0] < _channel_min[0] || _range_max[0] > _channel_max[0]);
 	{
 	    _range_min[0] = _channel_min[0];
@@ -506,5 +517,6 @@ void RangeSelector::update()
 	}
     }
     
+    _reset_on_next_update = false;
     update_channel();	// this will update everything
 }
