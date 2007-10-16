@@ -1,3 +1,8 @@
+Version 0.2.2:
+- Bug fixes.
+- Cvtool: The 'channel' command was split into the two new commands
+  'channelextract' and 'channelcombine'.
+
 Version 0.2.1:
 - Bug fixes.
 
