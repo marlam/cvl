@@ -35,6 +35,7 @@ ChannelSelector::ChannelSelector(cvl_frame_t **frame, QWidget *parent)
 {
     _frame = frame;
     _channel = 0;
+    _reset_on_next_update = true;
 
     QGridLayout *layout = new QGridLayout;
     
@@ -73,7 +74,7 @@ ChannelSelector::~ChannelSelector()
 
 void ChannelSelector::reset()
 {
-    ch0_button_clicked();
+    _reset_on_next_update = true;
 }
 
 void ChannelSelector::ch0_button_clicked()
@@ -169,25 +170,33 @@ void ChannelSelector::update()
 
 	for (int c = 0; c < cvl_frame_channels(*_frame); c++)
 	{
-	    _channel_button[c]->setChecked(false);
 	    _channel_button[c]->setEnabled(true);
 	}
 	for (int c = cvl_frame_channels(*_frame); c < 4; c++)
 	{
-	    _channel_button[c]->setChecked(false);
 	    _channel_button[c]->setEnabled(false);
 	}
-	_color_button->setChecked(false);
 	_color_button->setEnabled(cvl_frame_format(*_frame) != CVL_LUM && cvl_frame_format(*_frame) != CVL_UNKNOWN);
-	if (_color_button->isEnabled())
+	if (_reset_on_next_update 
+		|| (_channel == -1 && !_color_button->isEnabled())
+		|| (_channel >= 0 && !_channel_button[_channel]->isEnabled()))
 	{
-	    _color_button->setChecked(true);
-	    color_button_clicked();
+	    for (int c = 0; c < 4; c++)
+	    {
+		_channel_button[c]->setChecked(false);
+	    }
+	    _color_button->setChecked(false);
+	    if (_color_button->isEnabled())
+	    {
+		_color_button->setChecked(true);
+		color_button_clicked();
+	    }
+	    else
+	    {
+		_channel_button[0]->setChecked(true);
+		ch0_button_clicked();
+	    }
 	}
-	else
-	{
-	    _channel_button[0]->setChecked(true);
-	    ch0_button_clicked();
-	}
+	_reset_on_next_update = false;
     }
 }

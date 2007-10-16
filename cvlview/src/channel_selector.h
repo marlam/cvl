@@ -38,6 +38,7 @@ class ChannelSelector : public QWidget
 	QPushButton *_channel_button[4];
 	QPushButton *_color_button;
 	int _channel;
+	bool _reset_on_next_update;
 
     private slots:
 	void ch0_button_clicked();

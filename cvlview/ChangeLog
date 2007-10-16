@@ -14,6 +14,8 @@
 	only if a new data file is opened; preserve them when switching data
 	sets.
 	* configure.ac, NEWS, doc/cvlview.texi: Bump version to 0.2.0.
+	* src/channel_selector.h, src/channel_selector.cpp: Preserve channel
+	setting when switching between data sets in the same data file.
 
 2007-10-11  Martin Lambers <marlam@marlam.de>
 
