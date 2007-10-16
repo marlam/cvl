@@ -1,3 +1,8 @@
+2007-10-16  Martin Lambers <marlam@marlam.de>
+
+	* configure.ac, doc/cvtool.texi, doc/cvl.texi, doc/cvtool.1,
+	doc/doxy/doxyfile: Bump version numbers and dates for 0.2.2.
+
 2007-10-11  Martin Lambers <marlam@marlam.de>
 
 	* cvl/cvl_color.c: cvl_convert_format_inplace(): Remove extra change

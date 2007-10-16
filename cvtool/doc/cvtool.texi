@@ -1,10 +1,10 @@
 \input texinfo   @c -*-texinfo-*-
 @afourpaper
 @setfilename cvtool.info
-@set UPDATED October 11, 2007
+@set UPDATED October 16, 2007
 @set UPDATED-MONTH October 2007
-@set EDITION 0.2.0
-@set VERSION 0.2.0
+@set EDITION 0.2.2
+@set VERSION 0.2.2
 @settitle cvtool @value{VERSION}
 
 @c Define new index for commands
