@@ -6,6 +6,7 @@
 	* gnulib/m4/strverscmp.m4, gnulib/strverscmp.c, gnulib/strverscmp.h,
 	cvl/cvl/cvl_init.h, cvl/cvl_init.c: Add the cvl_check_version()
 	function.
+	* configure.ac: Bump CVL shared library version number.
 
 2007-10-11  Martin Lambers <marlam@marlam.de>
 
