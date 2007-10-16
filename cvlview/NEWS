@@ -1,3 +1,6 @@
+Version 0.2.0:
+- Multiple data sets in a single data file are now supported.
+
 Version 0.1.2:
 - Bug fixes.
 

@@ -20,7 +20,7 @@ dnl Process this file with autoconf to produce a configure script.
 #
 
 AC_PREREQ([2.61])
-AC_INIT([CVLView], [0.1.2], [marlam@marlam.de])
+AC_INIT([CVLView], [0.2.0], [marlam@marlam.de])
 AC_CONFIG_SRCDIR([src/cvlview.cpp])
 AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_MACRO_DIR([build-aux])
