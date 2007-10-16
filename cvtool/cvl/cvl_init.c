@@ -36,6 +36,8 @@
 
 #include <GL/glew.h>
 
+#include "strverscmp.h"
+
 #include "cvl_intern.h"
 #include "cvl/cvl_error.h"
 #include "cvl/cvl_gl.h"
@@ -200,4 +202,22 @@ void cvl_deinit(void)
 	free(ctx->cvl_gl_program_cache_values);
 	free(ctx);
     }
+}
+
+
+/**
+ * \param req_version           The required version.
+ *
+ * Check that the version of the library is at minimum the requested one
+ * and return the version string; return NULL if the condition is not
+ * satisfied. If a NULL is passed to this function, no check is done,
+ * but the version string is simply returned.
+ */
+const char *cvl_check_version(const char *req_version)
+{
+    if (!req_version || strverscmp(req_version, PACKAGE_VERSION) <= 0)
+    {
+	return PACKAGE_VERSION;
+    }
+    return NULL;
 }

@@ -3,6 +3,9 @@
 	* configure.ac, doc/cvtool.texi, doc/cvl.texi, doc/cvtool.1,
 	doc/doxy/doxyfile: Bump version numbers and dates for 0.2.2.
 	* NEWS: Update for 0.2.2.
+	* gnulib/m4/strverscmp.m4, gnulib/strverscmp.c, gnulib/strverscmp.h,
+	cvl/cvl/cvl_init.h, cvl/cvl_init.c: Add the cvl_check_version()
+	function.
 
 2007-10-11  Martin Lambers <marlam@marlam.de>
 

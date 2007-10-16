@@ -75,6 +75,7 @@ AC_DEFUN([gl_INIT],
   gl_STRING_MODULE_INDICATOR([strnlen])
   gl_FUNC_STRPBRK
   gl_STRING_MODULE_INDICATOR([strpbrk])
+  gl_FUNC_STRVERSCMP
   gl_UNISTD_H
   gl_FUNC_VASNPRINTF
   gl_FUNC_VASPRINTF
@@ -179,6 +180,8 @@ AC_DEFUN([gl_FILE_LIST], [
   lib/strndup.c
   lib/strnlen.c
   lib/strpbrk.c
+  lib/strverscmp.c
+  lib/strverscmp.h
   lib/uinttostr.c
   lib/umaxtostr.c
   lib/unistd_.h
@@ -234,6 +237,7 @@ AC_DEFUN([gl_FILE_LIST], [
   m4/strndup.m4
   m4/strnlen.m4
   m4/strpbrk.m4
+  m4/strverscmp.m4
   m4/ulonglong.m4
   m4/unistd_h.m4
   m4/vasnprintf.m4

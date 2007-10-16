@@ -24,5 +24,6 @@
 
 void cvl_init(void);
 void cvl_deinit(void);
+const char *cvl_check_version(const char *req_version);
 
 #endif
