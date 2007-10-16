@@ -1,6 +1,7 @@
 2007-10-16  Martin Lambers <marlam@marlam.de>
 
 	* src/cvltonemap.cpp: Print CVL version in AboutBox.
+	* configure.ac: Require CVL >= 0.2.2.
 
 2007-10-09  Martin Lambers <marlam@marlam.de>
 
