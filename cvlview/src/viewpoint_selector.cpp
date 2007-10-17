@@ -85,8 +85,8 @@ ViewpointSelector::ViewpointSelector(cvl_frame_t **frame, QWidget *parent)
     connect(_y_offset_spinbox, SIGNAL(valueChanged(int)), this, SLOT(_set_y_offset(int)));
     layout->addWidget(_y_offset_spinbox, 0, 11, 1, 2);
     
-    _offset_reset_button = new QPushButton(tr("&Center"));
-    _offset_reset_button->setShortcut(tr("c"));
+    _offset_reset_button = new QPushButton(tr("Ce&nter"));
+    _offset_reset_button->setShortcut(tr("n"));
     connect(_offset_reset_button, SIGNAL(clicked()), this, SLOT(offset_reset_button_clicked()));
     layout->addWidget(_offset_reset_button, 0, 13, 1, 2);
 
