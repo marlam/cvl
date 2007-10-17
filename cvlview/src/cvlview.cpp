@@ -112,7 +112,7 @@ CVLView::CVLView()
 
     _interpolation_selector = new InterpolationSelector(_widget);
     connect(this, SIGNAL(new_datafile()), _interpolation_selector, SLOT(reset()));
-    _interpolation_selector->setFixedWidth(tools_width / 2);
+    _interpolation_selector->setFixedWidth(tools_width / 6);
 
     _frame_info = new FrameInfo(&_datafile, &_frame, _widget);
     connect(this, SIGNAL(new_frame()), _frame_info, SLOT(update()));
