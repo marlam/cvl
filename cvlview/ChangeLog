@@ -8,6 +8,7 @@
 	toolbar buttons.
 	* src/cvlview.cpp: Add new filter "All supported files" to open
 	dialog.
+	* src/interpolation_selector.cpp: Shorten the button to save space.
 
 2007-10-16  Martin Lambers <marlam@marlam.de>
 
