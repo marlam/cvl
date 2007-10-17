@@ -59,8 +59,8 @@ ViewpointSelector::ViewpointSelector(cvl_frame_t **frame, QWidget *parent)
     connect(_zoom_fit_button, SIGNAL(clicked()), this, SLOT(zoom_fit_button_clicked()));
     layout->addWidget(_zoom_fit_button, 0, 4, 1, 1);
     
-    _zoom_reset_button = new QPushButton(tr("&1:1"));
-    _zoom_reset_button->setShortcut(tr("1"));
+    _zoom_reset_button = new QPushButton(tr("1&:1"));
+    _zoom_reset_button->setShortcut(tr(":"));
     connect(_zoom_reset_button, SIGNAL(clicked()), this, SLOT(zoom_reset_button_clicked()));
     layout->addWidget(_zoom_reset_button, 0, 5, 1, 1);
 

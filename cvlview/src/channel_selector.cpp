@@ -39,15 +39,20 @@ ChannelSelector::ChannelSelector(cvl_frame_t **frame, QWidget *parent)
 
     QGridLayout *layout = new QGridLayout;
     
-    _channel_button[0] = new QPushButton("0");
+    _channel_button[0] = new QPushButton(tr("&0"));
+    _channel_button[0]->setShortcut(tr("0"));
     layout->addWidget(_channel_button[0], 0, 0);
-    _channel_button[1] = new QPushButton("1");
+    _channel_button[1] = new QPushButton(tr("&1"));
+    _channel_button[1]->setShortcut(tr("1"));
     layout->addWidget(_channel_button[1], 0, 1);
-    _channel_button[2] = new QPushButton("2");
+    _channel_button[2] = new QPushButton(tr("&2"));
+    _channel_button[2]->setShortcut(tr("2"));
     layout->addWidget(_channel_button[2], 0, 2);
-    _channel_button[3] = new QPushButton("3");
+    _channel_button[3] = new QPushButton(tr("&3"));
+    _channel_button[3]->setShortcut(tr("3"));
     layout->addWidget(_channel_button[3], 0, 3);
-    _color_button = new QPushButton("Color");
+    _color_button = new QPushButton(tr("&Color"));
+    _color_button->setShortcut(tr("C"));
     layout->addWidget(_color_button, 0, 4, 1, 2);
 
     for (int c = 0; c < 4; c++)

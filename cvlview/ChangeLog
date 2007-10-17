@@ -1,3 +1,8 @@
+2007-10-17  Martin Lambers <marlam@marlam.de>
+
+	* src/viewpoint_selector.cpp, src/channel_selector.cpp: Update and add
+	keyboard shortcuts.
+
 2007-10-16  Martin Lambers <marlam@marlam.de>
 
 	* src/interpolation_selector.cpp, src/viewpoint_selector.cpp: Add
