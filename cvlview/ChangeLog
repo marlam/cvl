@@ -10,6 +10,8 @@
 	dialog.
 	* src/cvlview.cpp, src/interpolation_selector.cpp: Shorten the button
 	to save space.
+	* src/viewpoint_selector.cpp: Change keyboard shortcut to avoid
+	collision.
 
 2007-10-16  Martin Lambers <marlam@marlam.de>
 
