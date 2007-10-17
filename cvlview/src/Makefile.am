@@ -5,10 +5,11 @@ cvlview_SOURCES = main.cpp					\
 	conf.h conf.cpp						\
 	datafile.h datafile.cpp					\
 	cvlview.h cvlview.cpp					\
-	frame_info.h frame_info.cpp				\
+	dataset_selector.h dataset_selector.cpp			\
 	channel_selector.h channel_selector.cpp			\
 	viewpoint_selector.h viewpoint_selector.cpp		\
 	interpolation_selector.h interpolation_selector.cpp	\
+	frame_info.h frame_info.cpp				\
 	channel_info.h channel_info.cpp				\
 	range_selector.h range_selector.cpp			\
 	gamma_selector.h gamma_selector.cpp			\
@@ -17,15 +18,20 @@ cvlview_SOURCES = main.cpp					\
 	pixel_info.h pixel_info.cpp
 
 if W32
-cvlview_SOURCES += appicon.ico
+cvlview_SOURCES += icons/appicon.ico
 endif
+
+RESOURCES = icons/appicon.png icons/prev.png icons/next.png
+
+EXTRA_DIST = cvlview.qrc $(RESOURCES)
 
 nodist_cvlview_SOURCES = \
 	moc_cvlview.cpp			\
-	moc_frame_info.cpp		\
+	moc_dataset_selector.cpp	\
 	moc_channel_selector.cpp	\
 	moc_viewpoint_selector.cpp	\
 	moc_interpolation_selector.cpp	\
+	moc_frame_info.cpp		\
 	moc_channel_info.cpp		\
 	moc_range_selector.cpp		\
 	moc_gamma_selector.cpp		\
@@ -35,8 +41,6 @@ nodist_cvlview_SOURCES = \
 	rcc_cvlview.cpp
 
 BUILT_SOURCES = $(nodist_cvlview_SOURCES)
-
-EXTRA_DIST = appicon.ico appicon.png cvlview.qrc
 
 CLEANFILES = $(BUILT_SOURCES)
 
@@ -57,7 +61,7 @@ cvlview_CXXFLAGS = $(QT4_CXXFLAGS)
 moc_%.cpp: %.h
 	$(QT4_MOC) -o $@ $<
 
-rcc_%.cpp: %.qrc
+rcc_%.cpp: %.qrc $(RESOURCES)
 	$(QT4_RCC) -o $@ $<
 
 %.glsl.h: %.glsl

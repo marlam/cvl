@@ -48,10 +48,12 @@
 #include "conf.h"
 #include "datafile.h"
 
-#include "frame_info.h"
+#include "dataset_selector.h"
 #include "channel_selector.h"
-#include "channel_info.h"
 #include "viewpoint_selector.h"
+#include "interpolation_selector.h"
+#include "frame_info.h"
+#include "channel_info.h"
 #include "range_selector.h"
 #include "gamma_selector.h"
 #include "pseudocolor_selector.h"
@@ -63,7 +65,7 @@
 CVLView::CVLView()
 {
     setWindowTitle(PACKAGE_NAME);
-    setWindowIcon(QIcon(":appicon.png"));
+    setWindowIcon(QIcon(":icons/appicon.png"));
     _conf_file_name = mh_get_apprcpath(PACKAGE_NAME);
     _conf = new Conf();
     try
@@ -94,11 +96,10 @@ CVLView::CVLView()
     _widget = new QWidget;
     setCentralWidget(_widget);
     const int tools_width = 256;
-
-    _frame_info = new FrameInfo(&_datafile, &_frame, _widget);
-    connect(this, SIGNAL(new_frame()), _frame_info, SLOT(update()));
-    _frame_info->setFixedWidth(tools_width);
-    _frame_info->setEnabled(false);
+    
+    _dataset_selector = new DatasetSelector(&_datafile, _widget);
+    connect(_dataset_selector, SIGNAL(dataset_changed()), this, SLOT(open_frame()));
+    _dataset_selector->setFixedWidth(tools_width / 3);
     
     _channel_selector = new ChannelSelector(&_frame, _widget);
     connect(this, SIGNAL(new_frame()), _channel_selector, SLOT(update()));
@@ -112,6 +113,11 @@ CVLView::CVLView()
     _interpolation_selector = new InterpolationSelector(_widget);
     connect(this, SIGNAL(new_datafile()), _interpolation_selector, SLOT(reset()));
     _interpolation_selector->setFixedWidth(tools_width / 2);
+
+    _frame_info = new FrameInfo(&_datafile, &_frame, _widget);
+    connect(this, SIGNAL(new_frame()), _frame_info, SLOT(update()));
+    _frame_info->setFixedWidth(tools_width);
+    _frame_info->setEnabled(false);
 
     _channel_info = new ChannelInfo(&_frame, _channel_selector, _widget);
     connect(this, SIGNAL(new_frame()), _channel_info, SLOT(update()));
@@ -166,6 +172,8 @@ CVLView::CVLView()
     _toolbar->setEnabled(false);
     _toolbar->setMovable(false);
     addToolBar(_toolbar);
+    _toolbar->addWidget(_dataset_selector);
+    _toolbar->addSeparator();
     _toolbar->addWidget(_channel_selector);
     _toolbar->addSeparator();
     _toolbar->addWidget(_viewpoint_selector);
@@ -198,14 +206,6 @@ CVLView::CVLView()
     open_datafile_act->setShortcut(tr("Ctrl+O"));
     connect(open_datafile_act, SIGNAL(triggered()), this, SLOT(open_datafile()));
     file_menu->addAction(open_datafile_act);
-    QAction *prev_dataset_act = new QAction(tr("Previous data set"), this);
-    prev_dataset_act->setShortcut(tr("Left"));
-    connect(prev_dataset_act, SIGNAL(triggered()), this, SLOT(prev_dataset()));
-    file_menu->addAction(prev_dataset_act);
-    QAction *next_dataset_act = new QAction(tr("Next data set"), this);
-    next_dataset_act->setShortcut(tr("Right"));
-    connect(next_dataset_act, SIGNAL(triggered()), this, SLOT(next_dataset()));
-    file_menu->addAction(next_dataset_act);
     file_menu->addSeparator();
     QAction *save_image_act = new QAction(tr("&Save..."), this);
     save_image_act->setShortcut(tr("Ctrl+S"));
@@ -332,53 +332,12 @@ void CVLView::open_datafile()
     load_datafile(qPrintable(file_name));
 }
 
-void CVLView::prev_dataset()
+void CVLView::open_frame()
 {
-    if (!_datafile)
-    {
-	QMessageBox::critical(this, tr("Error"), tr("No data loaded yet."));
-	return;
-    }
-    if (_datafile->index() == 1)
-    {
-	// no previous data set
-	return;
-    }
     emit make_gl_context_current();
     cvl_frame_t *frame;
     try
     {
-	_datafile->prev();	// moves file pointer to current data set
-	_datafile->prev();	// moves file pointer to previous data set
-	frame = _datafile->read();
-    }
-    catch (err e)
-    {
-	QMessageBox::critical(this, tr("Error"), e.msg().c_str());
-	_view_area->unlock();
-	return;    
-    }
-    cvl_error_reset();
-    activate_frame(frame);
-}
-
-void CVLView::next_dataset()
-{
-    if (!_datafile)
-    {
-	QMessageBox::critical(this, tr("Error"), tr("No data loaded yet."));
-	return;
-    }
-    if (_datafile->index() == _datafile->total() - 1)
-    {
-	// no next data set
-	return;
-    }
-    emit make_gl_context_current();
-    cvl_frame_t *frame;
-    try
-    {
-	// filepointer already points to next data set
 	frame = _datafile->read();
     }
     catch (err e)

@@ -40,10 +40,11 @@
 #include "conf.h"
 #include "datafile.h"
 
-#include "frame_info.h"
+#include "dataset_selector.h"
 #include "channel_selector.h"
 #include "viewpoint_selector.h"
 #include "interpolation_selector.h"
+#include "frame_info.h"
 #include "channel_info.h"
 #include "range_selector.h"
 #include "gamma_selector.h"
@@ -67,10 +68,11 @@ class CVLView : public QMainWindow
 	QWidget *_widget;
 	QToolBar *_toolbar;
 	QToolBox *_toolbox;
-	FrameInfo *_frame_info;
+	DatasetSelector *_dataset_selector;
 	ChannelSelector *_channel_selector;
 	ViewpointSelector *_viewpoint_selector;
 	InterpolationSelector *_interpolation_selector;
+	FrameInfo *_frame_info;
 	ChannelInfo *_channel_info;
 	RangeSelector *_range_selector;
 	GammaSelector *_gamma_selector;
@@ -97,8 +99,7 @@ class CVLView : public QMainWindow
 
     private slots:
 	void open_datafile();
-	void prev_dataset();
-	void next_dataset();
+	void open_frame();
         void save_image();
         void save_view();
 	void copy_image();
