@@ -318,7 +318,8 @@ void CVLView::open_datafile()
     file_dialog->setAcceptMode(QFileDialog::AcceptOpen);
     file_dialog->setDirectory(_last_open_dir);
     QStringList filters;
-    filters << tr("Portable Floating-point Streams (*.pfs)") 
+    filters << tr("All supported files (*.pfs *.pnm *.pbm *.pgm *.ppm *.pam)")
+	<< tr("Portable Floating-point Streams (*.pfs)") 
 	<< tr("NetPBM files (*.pnm *.pbm *.pgm *.ppm *.pam)")
 	<< tr("All files (*)");
     file_dialog->setFilters(filters);

@@ -6,6 +6,8 @@
 	src/dataset_selector.cpp, src/Makefile.am, src/cvlview.qrc, src/icons,
 	src/icons/prev.png, src/icons/next.png: Move data set switching to
 	toolbar buttons.
+	* src/cvlview.cpp: Add new filter "All supported files" to open
+	dialog.
 
 2007-10-16  Martin Lambers <marlam@marlam.de>
 
