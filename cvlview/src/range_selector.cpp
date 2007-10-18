@@ -441,6 +441,7 @@ void RangeSelector::set_lowerbound(double x)
 	    }
 	    update_histograms();
 	    _selector->update();
+	    emit range_changed();
 	}
     }
 }
@@ -466,6 +467,7 @@ void RangeSelector::set_upperbound(double x)
 	    }
 	    update_histograms();
 	    _selector->update();
+	    emit range_changed();
 	}
     }
 }
@@ -482,6 +484,7 @@ void RangeSelector::reset_bounds()
     _range_max[_channel + 1] = _upperbound[_channel + 1];
     update_histograms();
     _selector->update();
+    emit range_changed();
 }
 
 void RangeSelector::set_range_min(float range_min)
