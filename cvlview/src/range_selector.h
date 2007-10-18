@@ -62,6 +62,7 @@ class Selector : public QLabel
 	Selector(QWidget *parent = NULL);
 	~Selector();
 	QSize sizeHint() const;
+	void update_bounds();
     protected:
 	void paintEvent(QPaintEvent *e UNUSED);
 	void mouseMoveEvent(QMouseEvent *e);

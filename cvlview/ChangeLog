@@ -6,6 +6,8 @@
 	bounds of the histogram.
 	* src/range_selector.cpp: Tweak layout. Fix initial display of lower
 	and upper bound.
+	* src/range_selector.cpp: Fix range properly when updating the
+	histogram bounds.
 
 2007-10-17  Martin Lambers <marlam@marlam.de>
 

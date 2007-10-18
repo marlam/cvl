@@ -301,22 +301,70 @@ void Selector::wheelEvent(QWheelEvent *e)
     float new_range_left_normalized, new_range_right_normalized;
     if (steps < 0.0f)
     {
-	new_range_left_normalized = mh_maxf(0.0f, _range_left_normalized + steps * 0.05);
-	new_range_right_normalized = mh_min(1.0f, _range_right_normalized - steps * 0.05);
+	new_range_left_normalized = mh_maxf(0.0f, _range_left_normalized + steps * 0.05f);
+	new_range_right_normalized = mh_min(1.0f, _range_right_normalized - steps * 0.05f);
     }
     else
     {
-	new_range_left_normalized = _range_left_normalized + steps * 0.05;
-	new_range_right_normalized = _range_right_normalized - steps * 0.05;
+	new_range_left_normalized = _range_left_normalized + steps * 0.05f;
+	new_range_right_normalized = _range_right_normalized - steps * 0.05f;
 	if (new_range_left_normalized + _tolerance_normalized > new_range_right_normalized - _tolerance_normalized)
 	{
-	    float center = (_range_right_normalized - _range_left_normalized) / 2.0 + _range_left_normalized;
+	    float center = (_range_right_normalized - _range_left_normalized) / 2.0f + _range_left_normalized;
 	    new_range_left_normalized = center - _tolerance_normalized;
 	    new_range_right_normalized = center + _tolerance_normalized;
 	}
     }
     float new_range_min = normalized_x_to_rangeval(new_range_left_normalized);
     float new_range_max = normalized_x_to_rangeval(new_range_right_normalized);
+    range_selector->set_range(new_range_min, new_range_max);
+    update();
+    emit range_selector->range_changed();
+}
+
+void Selector::update_bounds()
+{
+    RangeSelector *range_selector = reinterpret_cast<RangeSelector *>(parentWidget());
+    if (!(*(range_selector->_frame)))
+	return;
+
+    int channel = range_selector->_channel + 1;
+    float lowerbound = range_selector->_lowerbound[channel];
+    float upperbound = range_selector->_upperbound[channel];
+    float range_min = range_selector->_range_min[channel];
+    float range_max = range_selector->_range_max[channel];
+
+    if (range_min < lowerbound)
+    {
+	range_min = lowerbound;
+    }
+    if (range_max > upperbound)
+    {
+	range_max = upperbound;
+    }
+    float range_left_normalized = rangeval_to_normalized_x(range_min);
+    float range_right_normalized = rangeval_to_normalized_x(range_max);
+    if (range_left_normalized + _tolerance_normalized > range_right_normalized - _tolerance_normalized)
+    {
+	float center = fabsf(range_right_normalized - range_left_normalized) / 2.0f + range_left_normalized;
+	if (center < _tolerance_normalized)
+	{
+	    range_left_normalized = 0.0f;
+	    range_right_normalized = 2.0f * _tolerance_normalized;
+	}
+	else if (center > 1.0f - _tolerance_normalized)
+	{
+	    range_left_normalized = 1.0f - 2.0f * _tolerance_normalized;
+	    range_right_normalized = 1.0f;
+	}
+	else
+	{
+	    range_left_normalized = center - _tolerance_normalized;
+	    range_right_normalized = center + _tolerance_normalized;
+	}
+    }
+    float new_range_min = normalized_x_to_rangeval(range_left_normalized);
+    float new_range_max = normalized_x_to_rangeval(range_right_normalized);
     range_selector->set_range(new_range_min, new_range_max);
     update();
     emit range_selector->range_changed();
@@ -431,17 +479,8 @@ void RangeSelector::set_lowerbound(double x)
 	else
 	{
 	    _lowerbound[_channel + 1] = x;
-	    if (_range_min[_channel + 1] < _lowerbound[_channel + 1])
-	    {
-		_range_min[_channel + 1] = _lowerbound[_channel + 1];
-		if (_range_min[_channel + 1] > _range_max[_channel + 1])
-		{
-		    _range_max[_channel + 1] = _range_min[_channel + 1] + FLT_MIN;
-		}
-	    }
 	    update_histograms();
-	    _selector->update();
-	    emit range_changed();
+	    _selector->update_bounds();
 	}
     }
 }
@@ -457,17 +496,8 @@ void RangeSelector::set_upperbound(double x)
 	else
 	{
 	    _upperbound[_channel + 1] = x;
-	    if (_range_max[_channel + 1] > _upperbound[_channel + 1])
-	    {
-		_range_max[_channel + 1] = _upperbound[_channel + 1];
-		if (_range_max[_channel + 1] < _range_min[_channel + 1])
-		{
-		    _range_min[_channel + 1] = _range_max[_channel + 1] - FLT_MIN;
-		}
-	    }
 	    update_histograms();
-	    _selector->update();
-	    emit range_changed();
+	    _selector->update_bounds();
 	}
     }
 }
