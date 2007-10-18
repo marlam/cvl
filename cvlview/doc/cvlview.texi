@@ -1,8 +1,8 @@
 \input texinfo   @c -*-texinfo-*-
 @afourpaper
 @setfilename cvlview.info
-@set UPDATED Oktober 16, 2007
-@set UPDATED-MONTH Oktober 2007
+@set UPDATED October 18, 2007
+@set UPDATED-MONTH October 2007
 @set EDITION 0.2.0
 @set VERSION 0.2.0
 @settitle CVLView @value{VERSION}
