@@ -400,12 +400,12 @@ RangeSelector::RangeSelector(cvl_frame_t **frame,
     connect(_log_y_box, SIGNAL(stateChanged(int)), this, SLOT(set_log_y()));
 
     QGridLayout *layout = new QGridLayout;
-    layout->addWidget(_lowerbound_spinbox, 0, 0);
-    layout->addWidget(_boundreset_button, 0, 1);
-    layout->addWidget(_upperbound_spinbox, 0, 2);
-    layout->addWidget(_selector, 1, 0, 1, 3);
-    layout->addWidget(_log_x_box, 2, 0, 1, 3);
-    layout->addWidget(_log_y_box, 3, 0, 1, 3);
+    layout->addWidget(_lowerbound_spinbox, 0, 0, 1, 2);
+    layout->addWidget(_boundreset_button, 0, 2);
+    layout->addWidget(_upperbound_spinbox, 0, 3, 1, 2);
+    layout->addWidget(_selector, 1, 0, 1, 5);
+    layout->addWidget(_log_x_box, 2, 0, 1, 5);
+    layout->addWidget(_log_y_box, 3, 0, 1, 5);
     layout->setRowStretch(4, 1);
     setLayout(layout);
 }
@@ -518,8 +518,10 @@ void RangeSelector::set_log_y()
 void RangeSelector::update_channel()
 {
     _channel = _channel_selector->get_channel();
+    _lock_bounds = true;
     _lowerbound_spinbox->setValue(_lowerbound[_channel + 1]);
     _upperbound_spinbox->setValue(_upperbound[_channel + 1]);
+    _lock_bounds = false;
     _log_x_box->setCheckState(_log_x[_channel + 1] ? Qt::Checked : Qt::Unchecked);
     _log_y_box->setCheckState(_log_y[_channel + 1] ? Qt::Checked : Qt::Unchecked);
     _selector->update();

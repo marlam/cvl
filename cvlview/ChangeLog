@@ -4,6 +4,8 @@
 	fine-grained control over the histogram and the range selection.
 	* src/range_selector.cpp: Update view when changing upper and lower
 	bounds of the histogram.
+	* src/range_selector.cpp: Tweak layout. Fix initial display of lower
+	and upper bound.
 
 2007-10-17  Martin Lambers <marlam@marlam.de>
 
