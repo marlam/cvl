@@ -26,6 +26,8 @@
 
 #include <QWidget>
 #include <QLabel>
+#include <QDoubleSpinBox>
+#include <QPushButton>
 #include <QCheckBox>
 #include <QMouseEvent>
 #include <QWheelEvent>
@@ -68,6 +70,14 @@ class Selector : public QLabel
    	void wheelEvent(QWheelEvent *e);
 };
 
+class FloatSpinBox : public QDoubleSpinBox
+{
+    Q_OBJECT
+    QValidator::State validate(QString &input, int &pos UNUSED) const;
+    QString textFromValue(double value) const;
+    double valueFromText(const QString &text) const;
+};
+
 class RangeSelector : public QWidget
 {
     Q_OBJECT
@@ -77,7 +87,9 @@ class RangeSelector : public QWidget
 	ChannelSelector *_channel_selector;
 	ChannelInfo *_channel_info;
 	// Range Selector contents:
-	QLabel *_range_label;
+	FloatSpinBox *_lowerbound_spinbox;
+	FloatSpinBox *_upperbound_spinbox;
+	QPushButton *_boundreset_button;
 	Selector *_selector;
 	QCheckBox *_log_x_box;
 	QCheckBox *_log_y_box;
@@ -86,8 +98,11 @@ class RangeSelector : public QWidget
 	int *_histogram;
 	int _histmax[5];
 	// Value range
-	float _channel_min[5];
-	float _channel_max[5];
+	float _default_lowerbound[5];
+	float _default_upperbound[5];
+	float _lowerbound[5];
+	float _upperbound[5];
+	bool _lock_bounds;
 	// Selected range information
 	float _range_min[5];
 	float _range_max[5];
@@ -99,7 +114,12 @@ class RangeSelector : public QWidget
 	// Reset?
 	bool _reset_on_next_update;
 
+	void update_histograms();
+
     private slots:
+	void set_lowerbound(double x);
+    	void set_upperbound(double x);
+	void reset_bounds();
 	void set_range_min(float range_min);
 	void set_range_max(float range_max);
 	void set_range(float range_min, float range_max);

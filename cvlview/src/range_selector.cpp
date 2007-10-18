@@ -22,11 +22,15 @@
 #include "config.h"
 
 #include <cmath>
+#include <cstdlib>
+#include <cerrno>
+#include <cfloat>
 
 #include <GL/gl.h>
 
 #include <QWidget>
 #include <QLabel>
+#include <QDoubleSpinBox>
 #include <QCheckBox>
 #include <QGridLayout>
 #include <QFrame>
@@ -88,23 +92,23 @@ float Selector::normalized_x_to_rangeval(float x)
 {
     RangeSelector *range_selector = reinterpret_cast<RangeSelector *>(parentWidget());
     int channel = range_selector->_channel + 1;
-    float channel_min = range_selector->_channel_min[channel];
-    float channel_max = range_selector->_channel_max[channel];
+    float lowerbound = range_selector->_lowerbound[channel];
+    float upperbound = range_selector->_upperbound[channel];
     bool log_x = range_selector->_log_x[channel];
 
     return (1.0f - (log_x ? logtransf(1.0f - x) : 1.0f - x))
-	* (channel_max - channel_min) + channel_min;
+	* (upperbound - lowerbound) + lowerbound;
 }
 
 float Selector::rangeval_to_normalized_x(float x)
 {
     RangeSelector *range_selector = reinterpret_cast<RangeSelector *>(parentWidget());
     int channel = range_selector->_channel + 1;
-    float channel_min = range_selector->_channel_min[channel];
-    float channel_max = range_selector->_channel_max[channel];
+    float lowerbound = range_selector->_lowerbound[channel];
+    float upperbound = range_selector->_upperbound[channel];
     bool log_x = range_selector->_log_x[channel];
 
-    float r = (x - channel_min) / (channel_max - channel_min);
+    float r = (x - lowerbound) / (upperbound - lowerbound);
     return log_x ? (1.0f - invlogtransf(1.0f - r)) : r;
 }
 
@@ -318,6 +322,42 @@ void Selector::wheelEvent(QWheelEvent *e)
     emit range_selector->range_changed();
 }
 
+/* FloatSpinBox */
+
+QValidator::State FloatSpinBox::validate(QString &input, int &pos UNUSED) const
+{
+    char *s;
+    char *e;
+    float x;
+
+    s = mh_strdup(qPrintable(input));
+    errno = 0;
+    x = strtof(s, &e);
+    free(s);
+
+    if (e == s || *e != '\0' || errno != 0 || !finite(x))
+    {
+	return QValidator::Invalid;
+    }
+    else
+    {
+	return QValidator::Acceptable;
+    }
+}
+
+QString FloatSpinBox::textFromValue(double value) const
+{
+    return mh_string("%g", value).c_str();
+
+}
+
+double FloatSpinBox::valueFromText(const QString &text) const
+{
+    return strtof(qPrintable(text), NULL);
+}
+
+/* RangeSelector */
+
 RangeSelector::RangeSelector(cvl_frame_t **frame,
 	ChannelSelector *channel_selector,
 	ChannelInfo *channel_info,
@@ -327,6 +367,7 @@ RangeSelector::RangeSelector(cvl_frame_t **frame,
     _frame = frame;
     _channel_selector = channel_selector;
     _channel_info = channel_info;
+    _lock_bounds = false;
     _reset_on_next_update = true;
 
     _histogram_size = 1024;
@@ -339,7 +380,17 @@ RangeSelector::RangeSelector(cvl_frame_t **frame,
 	_log_y[c] = false;
     }
     _channel = _channel_selector->get_channel();
-    _range_label = new QLabel("Range:");
+
+    _lowerbound_spinbox = new FloatSpinBox();
+    _lowerbound_spinbox->setDecimals(99);
+    _lowerbound_spinbox->setRange(-FLT_MAX, +FLT_MAX);
+    connect(_lowerbound_spinbox, SIGNAL(valueChanged(double)), this, SLOT(set_lowerbound(double)));
+    _upperbound_spinbox = new FloatSpinBox();
+    _upperbound_spinbox->setDecimals(99);
+    _upperbound_spinbox->setRange(-FLT_MAX, +FLT_MAX);
+    connect(_upperbound_spinbox, SIGNAL(valueChanged(double)), this, SLOT(set_upperbound(double)));
+    _boundreset_button = new QPushButton("Reset");
+    connect(_boundreset_button, SIGNAL(clicked()), this, SLOT(reset_bounds()));
     _selector = new Selector(this);
     _log_x_box = new QCheckBox("Logarithmic horizontal scale");
     _log_x_box->setCheckState(Qt::Unchecked);
@@ -349,10 +400,12 @@ RangeSelector::RangeSelector(cvl_frame_t **frame,
     connect(_log_y_box, SIGNAL(stateChanged(int)), this, SLOT(set_log_y()));
 
     QGridLayout *layout = new QGridLayout;
-    layout->addWidget(_range_label, 0, 0);
-    layout->addWidget(_selector, 1, 0);
-    layout->addWidget(_log_x_box, 2, 0);
-    layout->addWidget(_log_y_box, 3, 0);
+    layout->addWidget(_lowerbound_spinbox, 0, 0);
+    layout->addWidget(_boundreset_button, 0, 1);
+    layout->addWidget(_upperbound_spinbox, 0, 2);
+    layout->addWidget(_selector, 1, 0, 1, 3);
+    layout->addWidget(_log_x_box, 2, 0, 1, 3);
+    layout->addWidget(_log_y_box, 3, 0, 1, 3);
     layout->setRowStretch(4, 1);
     setLayout(layout);
 }
@@ -365,6 +418,70 @@ RangeSelector::~RangeSelector()
 void RangeSelector::reset()
 {
     _reset_on_next_update = true;
+}
+
+void RangeSelector::set_lowerbound(double x)
+{
+    if (!_lock_bounds)
+    {
+	if (x >= _upperbound_spinbox->value())
+	{
+	    _lowerbound_spinbox->setValue(_upperbound_spinbox->value() - FLT_MIN);
+	}
+	else
+	{
+	    _lowerbound[_channel + 1] = x;
+	    if (_range_min[_channel + 1] < _lowerbound[_channel + 1])
+	    {
+		_range_min[_channel + 1] = _lowerbound[_channel + 1];
+		if (_range_min[_channel + 1] > _range_max[_channel + 1])
+		{
+		    _range_max[_channel + 1] = _range_min[_channel + 1] + FLT_MIN;
+		}
+	    }
+	    update_histograms();
+	    _selector->update();
+	}
+    }
+}
+
+void RangeSelector::set_upperbound(double x)
+{
+    if (!_lock_bounds)
+    {
+	if (x <= _lowerbound_spinbox->value())
+	{
+	    _upperbound_spinbox->setValue(_lowerbound_spinbox->value() + FLT_MIN);
+	}
+	else
+	{
+	    _upperbound[_channel + 1] = x;
+	    if (_range_max[_channel + 1] > _upperbound[_channel + 1])
+	    {
+		_range_max[_channel + 1] = _upperbound[_channel + 1];
+		if (_range_max[_channel + 1] < _range_min[_channel + 1])
+		{
+		    _range_min[_channel + 1] = _range_max[_channel + 1] - FLT_MIN;
+		}
+	    }
+	    update_histograms();
+	    _selector->update();
+	}
+    }
+}
+
+void RangeSelector::reset_bounds()
+{
+    _lock_bounds = true;
+    _lowerbound_spinbox->setValue(_default_lowerbound[_channel + 1]);
+    _upperbound_spinbox->setValue(_default_upperbound[_channel + 1]);
+    _lock_bounds = false;
+    _lowerbound[_channel + 1] = _default_lowerbound[_channel + 1];
+    _upperbound[_channel + 1] = _default_upperbound[_channel + 1];
+    _range_min[_channel + 1] = _lowerbound[_channel + 1];
+    _range_max[_channel + 1] = _upperbound[_channel + 1];
+    update_histograms();
+    _selector->update();
 }
 
 void RangeSelector::set_range_min(float range_min)
@@ -398,10 +515,42 @@ void RangeSelector::set_log_y()
 void RangeSelector::update_channel()
 {
     _channel = _channel_selector->get_channel();
-    _range_label->setText(mh_string("Range: [%.4g, %.4g]", _channel_min[_channel + 1], _channel_max[_channel + 1]).c_str());
+    _lowerbound_spinbox->setValue(_lowerbound[_channel + 1]);
+    _upperbound_spinbox->setValue(_upperbound[_channel + 1]);
     _log_x_box->setCheckState(_log_x[_channel + 1] ? Qt::Checked : Qt::Unchecked);
     _log_y_box->setCheckState(_log_y[_channel + 1] ? Qt::Checked : Qt::Unchecked);
     _selector->update();
+}
+
+void RangeSelector::update_histograms()
+{
+    emit make_gl_context_current();
+
+    // Build histogram
+    cvl_histogram(*_frame, -1, _histogram_size, _lowerbound + 1, _upperbound + 1, _histogram + _histogram_size);
+    for (int c = 0; c < 4; c++)
+    {
+	_histmax[c + 1] = _histogram[(c + 1) * _histogram_size + 0];
+	for (int i = 1; i < _histogram_size; i++)
+	{
+	    if (_histogram[(c + 1) * _histogram_size + i] > _histmax[c + 1])
+		_histmax[c + 1] = _histogram[(c + 1) * _histogram_size + i];
+	}
+    }
+    if (cvl_frame_format(*_frame) != CVL_LUM && cvl_frame_format(*_frame) != CVL_UNKNOWN)
+    {
+	cvl_frame_t *ctmp = cvl_frame_new(cvl_frame_width(*_frame), cvl_frame_height(*_frame),
+		1, CVL_LUM, CVL_FLOAT, CVL_TEXTURE);
+	cvl_convert_format(ctmp, *_frame);
+	cvl_histogram(ctmp, 0, _histogram_size, _lowerbound, _upperbound, _histogram);
+	cvl_frame_free(ctmp);
+	_histmax[0] = _histogram[0];
+	for (int i = 1; i < _histogram_size; i++)
+	{
+    	    if (_histogram[i] > _histmax[0])
+		_histmax[0] = _histogram[i];
+	}
+    }
 }
 
 void RangeSelector::update()
@@ -410,7 +559,7 @@ void RangeSelector::update()
 
     /* Initialize information */
 
-    // Set minmax range of histogram
+    // Set bounds of histogram
     if (cvl_frame_format(*_frame) == CVL_UNKNOWN 
 	    && cvl_frame_channel_name(*_frame, 0) 
 	    && strcmp(cvl_frame_channel_name(*_frame, 0), "X-SAR-A") == 0
@@ -420,12 +569,12 @@ void RangeSelector::update()
 		    && strcmp(cvl_frame_channel_name(*_frame, 1), "X-SAR-P") == 0)))
     {
 	// SAR Data
-	_channel_min[1] = 0.0f;
-    	_channel_max[1] = 1.0f;
+	_default_lowerbound[1] = 0.0f;
+    	_default_upperbound[1] = 1.0f;
 	_log_x[1] = true;
 	_log_y[1] = true;
-	_channel_min[2] = - M_PI;
-    	_channel_max[2] = + M_PI;
+	_default_lowerbound[2] = - M_PI;
+    	_default_upperbound[2] = + M_PI;
 	_log_x[2] = false;
 	_log_y[2] = false;
     }
@@ -434,8 +583,8 @@ void RangeSelector::update()
 	// Unknown data.
     	for (int c = 0; c < 4; c++)
 	{
-	    _channel_min[c + 1] = _channel_info->get_min(c);
-	    _channel_max[c + 1] = _channel_info->get_max(c);
+	    _default_lowerbound[c + 1] = _channel_info->get_min(c);
+	    _default_upperbound[c + 1] = _channel_info->get_max(c);
 	    _log_x[c + 1] = false;
 	    _log_y[c + 1] = false;
 	}
@@ -446,13 +595,13 @@ void RangeSelector::update()
 	// Guess: HDR frame data, calibrated to SI units.
     	for (int c = 0; c < 4; c++)
 	{
-	    _channel_min[c + 1] = 0.0f;
-	    _channel_max[c + 1] = _channel_info->get_max(c); 
+	    _default_lowerbound[c + 1] = 0.0f;
+	    _default_upperbound[c + 1] = _channel_info->get_max(c); 
 	    _log_x[c + 1] = false;
 	    _log_y[c + 1] = false;
 	}
-	_channel_min[0] = 0.0f;
-	_channel_max[0] = _channel_info->get_max(1);
+	_default_lowerbound[0] = 0.0f;
+	_default_upperbound[0] = _channel_info->get_max(1);
 	_log_x[-1 + 1] = true;	// color channel
 	_log_x[1 + 1] = true;	// Y channel
     }
@@ -462,58 +611,43 @@ void RangeSelector::update()
 	// Could also be HDR frame data normalized to [0,1].
     	for (int c = 0; c < 4; c++)
 	{
-	    _channel_min[c + 1] = 0.0f;
-	    _channel_max[c + 1] = 1.0f;
+	    _default_lowerbound[c + 1] = 0.0f;
+	    _default_upperbound[c + 1] = 1.0f;
 	    _log_x[c + 1] = false;
 	    _log_y[c + 1] = false;
 	}
-	_channel_min[0] = 0.0f;
-	_channel_max[0] = 1.0f;
+	_default_lowerbound[0] = 0.0f;
+	_default_upperbound[0] = 1.0f;
 	if (_reset_on_next_update)
 	{
 	    _log_x[0] = false;
 	    _log_y[0] = false;
 	}
     }
-
-    // Build histogram
-    cvl_histogram(*_frame, -1, _histogram_size, _channel_min + 1, _channel_max + 1, _histogram + _histogram_size);
-    for (int c = 0; c < 4; c++)
+    for (int c = -1; c < 4; c++)
     {
-	_histmax[c + 1] = _histogram[(c + 1) * _histogram_size + 0];
-	for (int i = 1; i < _histogram_size; i++)
-	{
-	    if (_histogram[(c + 1) * _histogram_size + i] > _histmax[c + 1])
-		_histmax[c + 1] = _histogram[(c + 1) * _histogram_size + i];
-	}
+	_lowerbound[c + 1] = _default_lowerbound[c + 1];
+	_upperbound[c + 1] = _default_upperbound[c + 1];
     }
+
+    // Build histograms
+    update_histograms();
     for (int c = 0; c < 4; c++)
     {
 	if (_reset_on_next_update || _range_min[c + 1] > _range_max[c + 1] 
-		|| _range_min[c + 1] < _channel_min[c + 1] || _range_max[c + 1] > _channel_max[c + 1])
+		|| _range_min[c + 1] < _lowerbound[c + 1] || _range_max[c + 1] > _upperbound[c + 1])
 	{
-	    _range_min[c + 1] = _channel_min[c + 1];
-	    _range_max[c + 1] = _channel_max[c + 1];
+	    _range_min[c + 1] = _lowerbound[c + 1];
+	    _range_max[c + 1] = _upperbound[c + 1];
 	}
     }
     if (cvl_frame_format(*_frame) != CVL_LUM && cvl_frame_format(*_frame) != CVL_UNKNOWN)
     {
-	cvl_frame_t *ctmp = cvl_frame_new(cvl_frame_width(*_frame), cvl_frame_height(*_frame),
-		1, CVL_LUM, CVL_FLOAT, CVL_TEXTURE);
-	cvl_convert_format(ctmp, *_frame);
-	cvl_histogram(ctmp, 0, _histogram_size, _channel_min, _channel_max, _histogram);
-	cvl_frame_free(ctmp);
-	_histmax[0] = _histogram[0];
-	for (int i = 1; i < _histogram_size; i++)
-	{
-    	    if (_histogram[i] > _histmax[0])
-		_histmax[0] = _histogram[i];
-	}
 	if (_reset_on_next_update || _range_min[0] > _range_max[0]
-		|| _range_min[0] < _channel_min[0] || _range_max[0] > _channel_max[0]);
+		|| _range_min[0] < _lowerbound[0] || _range_max[0] > _upperbound[0]);
 	{
-	    _range_min[0] = _channel_min[0];
-	    _range_max[0] = _channel_max[0];
+	    _range_min[0] = _lowerbound[0];
+	    _range_max[0] = _upperbound[0];
 	}
     }
     
