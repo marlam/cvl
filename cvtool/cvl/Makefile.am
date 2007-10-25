@@ -75,8 +75,9 @@ nodist_libcvl_la_SOURCES = \
 	glsl/math/mul.glsl.h			\
 	glsl/math/first_derivative.glsl.h	\
 	glsl/math/laplacian.glsl.h		\
-	glsl/mix/blend.glsl.h			\
 	glsl/mix/layer.glsl.h			\
+	glsl/mix/blend.glsl.h			\
+	glsl/mix/mix.glsl.h			\
 	glsl/filter/convolve.glsl.h		\
 	glsl/filter/convolve_separable.glsl.h	\
 	glsl/filter/convolve3d.glsl.h		\

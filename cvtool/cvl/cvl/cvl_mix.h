@@ -43,5 +43,6 @@ typedef enum
 
 void cvl_layer(cvl_frame_t *dst, cvl_frame_t **layers, int number_of_layers, cvl_layer_mode_t mode);
 void cvl_blend(cvl_frame_t *dst, int dst_x, int dst_y, cvl_frame_t *block, cvl_frame_t *block_alpha);
+void cvl_mix(cvl_frame_t *frame, cvl_frame_t **srcs, const float *w, int n);
 
 #endif

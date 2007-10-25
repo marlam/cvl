@@ -1,6 +1,8 @@
 2007-10-25  Martin Lambers <marlam@marlam.de>
 
 	* configure.ac: Bump package and library versions.
+	* cvl/cvl_mix.c, cvl/cvl/cvl_mix.h, cvl/glsl/mix/mix.glsl,
+	cvl/Makefile.am: Add new cvl_mix() function.
 
 2007-10-16  Martin Lambers <marlam@marlam.de>
 

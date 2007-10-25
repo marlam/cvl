@@ -39,8 +39,9 @@
 #include "cvl/cvl_basic.h"
 #include "cvl/cvl_mix.h"
 
-#include "glsl/mix/blend.glsl.h"
 #include "glsl/mix/layer.glsl.h"
+#include "glsl/mix/blend.glsl.h"
+#include "glsl/mix/mix.glsl.h"
 
 
 /**
@@ -78,9 +79,9 @@
 
 /**
  * \param frame		The destination frame.
- * \param mode		The layering mode.
  * \param layers	The source frames.
  * \param number_of_layers	The number of source frames.
+ * \param mode		The layering mode.
  *
  * Layers the given source frames on top of each other, using the given \a mode.
  * Layering is done for each channel separately. 
@@ -201,4 +202,48 @@ void cvl_blend(cvl_frame_t *frame, int dst_x, int dst_y,
     glActiveTexture(GL_TEXTURE0);
     cvl_check_errors();
     cvl_frame_free(orig);
+}
+
+/**
+ * \param frame		The destination frame.
+ * \param srcs		The source frames.
+ * \param w		The weight from [0,1].
+ * \param n		The number of sources.
+ *
+ * Mixes the \a n frames from \a srcs into the frame \a frame. The parameters \a
+ * w give a relative weight greater than or equal to zero for each source frame.
+ */
+void cvl_mix(cvl_frame_t *frame, cvl_frame_t **srcs, const float *w, int n)
+{
+    cvl_assert(frame != NULL);
+    cvl_assert(srcs != NULL);
+    cvl_assert(w != NULL);
+    cvl_assert(n > 0);
+    for (int i = 0; i < n; i++)
+    {
+	cvl_assert(srcs[i] != NULL);
+	cvl_assert(w[i] >= 0.0f);
+    }
+    if (cvl_error())
+	return;
+
+    GLuint prg;
+    char *prg_name = cvl_asprintf("cvl_mix_n%d", n);
+    if ((prg = cvl_gl_program_cache_get(prg_name)) == 0)
+    {
+	char *src = cvl_gl_srcprep(cvl_strdup(CVL_MIX_GLSL_STR), "$n=%d", n);
+	prg = cvl_gl_program_new_src(prg_name, NULL, src);
+	cvl_gl_program_cache_put(prg_name, prg);
+	free(src);
+    }
+    free(prg_name);
+    glUseProgram(prg);
+    float total_weight = 0.0f;
+    for (int i = 0; i < n; i++)
+	total_weight += w[i];
+    glUniform1f(glGetUniformLocation(prg, "total_weight"), total_weight);
+    glUniform1fv(glGetUniformLocation(prg, "w"), n, w);
+
+    cvl_transform_multi(&frame, 1, srcs, n, "srcs");
+    cvl_check_errors();
 }
