@@ -6,6 +6,7 @@
 	* cvtool/cmd_mix.c, cvtool/cvtool.c, cvtool/Makefile.am,
 	tests/cmd_mix.sh, tests/Makefile.am, doc/cvtool.texi: Add new mix
 	command.
+	* NEWS: Update.
 
 2007-10-16  Martin Lambers <marlam@marlam.de>
 

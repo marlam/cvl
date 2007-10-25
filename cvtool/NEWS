@@ -1,3 +1,7 @@
+Version 0.2.3:
+- Cvtool: New command 'mix'.
+- CVL: New function cvl_mix().
+
 Version 0.2.2:
 - Bug fixes.
 - Cvtool: The 'channel' command was split into the two new commands
