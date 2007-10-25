@@ -19,7 +19,7 @@ dnl Process this file with autoconf to produce a configure script.
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-AC_INIT([cvtool], [0.2.2], [marlam@marlam.de])
+AC_INIT([cvtool], [0.2.3], [marlam@marlam.de])
 AC_CONFIG_SRCDIR([cvtool/cvtool.c])
 AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_MACRO_DIR([build-aux])
@@ -51,7 +51,7 @@ dnl Library code modified:		REVISION++
 dnl Interfaces changed/added/removed:   CURRENT++	REVISION=0
 dnl Interfaces added: 			AGE++
 dnl Interfaces removed:			AGE=0
-AC_SUBST([LT_CURRENT], [5])
+AC_SUBST([LT_CURRENT], [6])
 AC_SUBST([LT_REVISION], [0])
 AC_SUBST([LT_AGE], [0])
 

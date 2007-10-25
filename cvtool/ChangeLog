@@ -1,3 +1,7 @@
+2007-10-25  Martin Lambers <marlam@marlam.de>
+
+	* configure.ac: Bump package and library versions.
+
 2007-10-16  Martin Lambers <marlam@marlam.de>
 
 	* configure.ac, doc/cvtool.texi, doc/cvl.texi, doc/cvtool.1,
