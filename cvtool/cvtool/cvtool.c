@@ -87,6 +87,7 @@ COMMAND_DECL(mean)
 COMMAND_DECL(median)
 COMMAND_DECL(merge)
 COMMAND_DECL(min)
+COMMAND_DECL(mix)
 COMMAND_DECL(resize)
 COMMAND_DECL(reverse)
 COMMAND_DECL(rotate)
@@ -130,6 +131,7 @@ cvtool_command_t commands[] =
     COMMAND(median),
     COMMAND(merge),
     COMMAND(min),
+    COMMAND(mix),
     COMMAND(resize),
     COMMAND(reverse),
     COMMAND(rotate),

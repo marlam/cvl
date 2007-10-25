@@ -1,10 +1,10 @@
 \input texinfo   @c -*-texinfo-*-
 @afourpaper
 @setfilename cvtool.info
-@set UPDATED October 16, 2007
+@set UPDATED October 25, 2007
 @set UPDATED-MONTH October 2007
-@set EDITION 0.2.2
-@set VERSION 0.2.2
+@set EDITION 0.2.3
+@set VERSION 0.2.3
 @settitle cvtool @value{VERSION}
 
 @c Define new index for commands
@@ -674,6 +674,7 @@ $ cvtool shear -x 20 -y 10 < in.pnm > out.pnm
 @menu
 * blend::
 * layer::
+* mix::
 @end menu
 
 @node blend
@@ -733,6 +734,24 @@ transformed so that the results fit in [0,1]. Example for two layers: X =
 @example
 $ cvtool layer --mode=or red.pnm green.pnm blue.pnm \
   > allchannels.pnm
+@end example
+
+
+@node mix 
+@subsection mix
+@cmindex mix
+@code{mix -w|--weight=weight... file@dots{}}
+
+@noindent
+Mixes the given sources into a single stream using the given weights. Each
+input file is assigned exactly one weight. The weights mustbe floating point
+numbers greater than or equal to zero.
+
+The input frames may differ in size. In this case, they will be implicitly
+scaled to a common size.
+
+@example
+$ cvtool mix --weight=1,1 black.pgm white.pgm > gray.pgm
 @end example
 
 @node Color Manipulation

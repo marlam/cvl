@@ -27,6 +27,7 @@ testscripts = \
 	cmd_median.sh		\
 	cmd_merge.sh		\
 	cmd_min.sh		\
+	cmd_mix.sh		\
 	cmd_resize.sh		\
 	cmd_reverse.sh		\
 	cmd_rotate.sh		\

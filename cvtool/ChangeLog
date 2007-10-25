@@ -3,6 +3,9 @@
 	* configure.ac: Bump package and library versions.
 	* cvl/cvl_mix.c, cvl/cvl/cvl_mix.h, cvl/glsl/mix/mix.glsl,
 	cvl/Makefile.am: Add new cvl_mix() function.
+	* cvtool/cmd_mix.c, cvtool/cvtool.c, cvtool/Makefile.am,
+	tests/cmd_mix.sh, tests/Makefile.am, doc/cvtool.texi: Add new mix
+	command.
 
 2007-10-16  Martin Lambers <marlam@marlam.de>
 

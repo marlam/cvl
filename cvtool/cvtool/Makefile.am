@@ -28,6 +28,7 @@ cvtool_SOURCES = cvtool.c 	\
 	cmd_median.c		\
 	cmd_merge.c		\
 	cmd_min.c		\
+	cmd_mix.c		\
 	cmd_resize.c		\
 	cmd_reverse.c		\
 	cmd_rotate.c		\
