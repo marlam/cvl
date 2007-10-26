@@ -1,3 +1,7 @@
+2007-10-26  Martin Lambers <marlam@marlam.de>
+
+	* cvtool/cmd_mix.c, doc/cvtool.texi: Improve the mix command.
+
 2007-10-25  Martin Lambers <marlam@marlam.de>
 
 	* configure.ac: Bump package and library versions.

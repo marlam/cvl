@@ -1,7 +1,7 @@
 \input texinfo   @c -*-texinfo-*-
 @afourpaper
 @setfilename cvtool.info
-@set UPDATED October 25, 2007
+@set UPDATED October 26, 2007
 @set UPDATED-MONTH October 2007
 @set EDITION 0.2.3
 @set VERSION 0.2.3
@@ -740,18 +740,26 @@ $ cvtool layer --mode=or red.pnm green.pnm blue.pnm \
 @node mix 
 @subsection mix
 @cmindex mix
-@code{mix -w|--weight=weight... file@dots{}}
+@code{mix -w|--firstweight=@var{fw}@dots{} [-W|--lastweight=@var{lw}@dots{}] 
+[-s|--steps=@var{s}] [-b|--bias=@var{b}] file@dots{}}
 
 @noindent
-Mixes the given sources into a single stream using the given weights. Each
-input file is assigned exactly one weight. The weights mustbe floating point
-numbers greater than or equal to zero.
+Mixes the given sources into a single stream using the given weights. 
+
+The default is to produce a single step, i.e. one output frame for each set of
+input frames. If more steps are requested, the weights are interpolated between
+the set of first weights and the set of last weights. By default, this
+interpolation is done linearly, which corresponds to a bias setting of 0.5.
+Smaller bias values will give more attention to the first weights, larger
+values more to the last weigths. The bias must be from (0,1).
 
 The input frames may differ in size. In this case, they will be implicitly
 scaled to a common size.
 
 @example
 $ cvtool mix --weight=1,1 black.pgm white.pgm > gray.pgm
+$ cvtool mix -w 1,0 -W 0,1 -s 10 black.pgm white.pgm \
+  > from-black-to-white.pgm
 @end example
 
 @node Color Manipulation
