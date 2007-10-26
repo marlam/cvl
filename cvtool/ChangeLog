@@ -1,7 +1,6 @@
 2007-10-26  Martin Lambers <marlam@marlam.de>
 
 	* cvtool/cmd_mix.c, doc/cvtool.texi: Improve the mix command.
-	* mhlib/mh_alloc.h: Rename mh_alloc() to mh_malloc(). Add mh_calloc().
 
 2007-10-25  Martin Lambers <marlam@marlam.de>
 

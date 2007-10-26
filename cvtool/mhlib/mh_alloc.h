@@ -61,18 +61,10 @@ extern inline size_t mh_alloc_mul3(size_t a, size_t b, size_t c)
     return mh_alloc_mul(a * b, c);
 }
 
-extern inline void *mh_malloc(size_t size)
+extern inline void *mh_alloc(size_t size)
 {
     void *ptr;
     if (!(ptr = malloc(size))) 
-	mh_alloc_failure();
-    return ptr;
-}
-
-extern inline void *mh_calloc(size_t size)
-{
-    void *ptr;
-    if (!(ptr = calloc(size))) 
 	mh_alloc_failure();
     return ptr;
 }
