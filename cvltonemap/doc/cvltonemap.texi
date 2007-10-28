@@ -1,6 +1,6 @@
 \input texinfo   @c -*-texinfo-*-
 @afourpaper
-@setfilename CVLTonemap.info
+@setfilename cvltonemap.info
 @set UPDATED September 9, 2007
 @set UPDATED-MONTH September 2007
 @set EDITION 0.1.1
