@@ -1,3 +1,8 @@
+2007-10-28  Martin Lambers <marlam@marlam.de>
+
+	* src/range_selector.cpp: Fix resetting of histogram bounds for color
+	images.
+
 2007-10-18  Martin Lambers <marlam@marlam.de>
 
 	* src/range_selector.h, src/range_selector.cpp: Allow much more

@@ -679,7 +679,7 @@ void RangeSelector::update()
     if (cvl_frame_format(*_frame) != CVL_LUM && cvl_frame_format(*_frame) != CVL_UNKNOWN)
     {
 	if (_reset_on_next_update || _range_min[0] > _range_max[0]
-		|| _range_min[0] < _lowerbound[0] || _range_max[0] > _upperbound[0]);
+		|| _range_min[0] < _lowerbound[0] || _range_max[0] > _upperbound[0])
 	{
 	    _range_min[0] = _lowerbound[0];
 	    _range_max[0] = _upperbound[0];
