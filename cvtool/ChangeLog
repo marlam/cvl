@@ -1,3 +1,8 @@
+2007-10-28  Martin Lambers <marlam@marlam.de>
+
+	* cvl/cvl_misc.c: In cvl_statistics(): do not compute the sum of all
+	elements if not needed.
+
 2007-10-26  Martin Lambers <marlam@marlam.de>
 
 	* cvtool/cmd_mix.c, doc/cvtool.texi: Improve the mix command.

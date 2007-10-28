@@ -412,7 +412,7 @@ void cvl_statistics(cvl_frame_t *frame, float *min, float *max, float *median,
 	cvl_quantil(sorted, -1, 0.5, median);
 	cvl_frame_free(sorted);
     }
-    if (mean || sum || stddev)
+    if (mean || stddev)
     {
 	cvl_reduce(frame, CVL_REDUCE_SUM, -1, sum);
     }
