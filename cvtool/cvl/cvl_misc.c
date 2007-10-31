@@ -385,7 +385,7 @@ void cvl_quantil(cvl_frame_t *frame, int channel, float q, float *result)
  * The minimum, maximum, median, and mean values are stored in \a min, \a max,
  * \a median, \a mean respectively. The standard deviation is stored in \a stddev.\n
  * The dynamic range of each channel is stored in \a dynrange.
- * If any of \a diff, \a min, \a max, \a median, \a mean, \a stddev, \a dynrange 
+ * If any of \a min, \a max, \a median, \a mean, \a stddev, \a dynrange 
  * is NULL, then the corresponding computation will not be executed.
  */
 void cvl_statistics(cvl_frame_t *frame, float *min, float *max, float *median, 

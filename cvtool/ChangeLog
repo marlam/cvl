@@ -1,3 +1,7 @@
+2007-10-31  Martin Lambers <marlam@marlam.de>
+
+	* cvl/cvl_misc.c: Fix documentation of cvl_statistics().
+
 2007-10-28  Martin Lambers <marlam@marlam.de>
 
 	* cvl/cvl_misc.c: In cvl_statistics(): do not compute the sum of all
