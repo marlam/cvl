@@ -35,7 +35,7 @@
 void cmd_mix_print_help(void)
 {
     mh_msg_fmt_req(
-	    "mix -w|--firstweight=fw.. [-W|--lastweight=lw...] [-s|--steps=s] [-b|--bias=b] file...\n"
+	    "mix -w|--firstweight=fw... [-W|--lastweight=lw...] [-s|--steps=s] [-b|--bias=b] file...\n"
 	    "\n"
 	    "Mixes the given sources into a single stream using the given weights.\n"
 	    "The default is to produce a single step, i.e. one output frame for each set of input frames. "

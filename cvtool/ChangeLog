@@ -1,3 +1,7 @@
+2007-11-05  Martin Lambers <marlam@marlam.de>
+
+	* cvtool/cmd_mix.c: Fix typo in help text.
+
 2007-10-31  Martin Lambers <marlam@marlam.de>
 
 	* cvl/cvl_misc.c: Fix documentation of cvl_statistics().
