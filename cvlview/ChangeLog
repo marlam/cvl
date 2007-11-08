@@ -2,6 +2,7 @@
 
 	* src/view_area.cpp: Fix export of whole image if it is stored in a
 	CVL_LUM frame.
+	* src/conf.cpp: Save doubles with enough precision.
 
 2007-10-28  Martin Lambers <marlam@marlam.de>
 
