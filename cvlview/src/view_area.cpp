@@ -323,14 +323,29 @@ QImage ViewArea::get_image()
     int h = cvl_frame_height(_render_frame);
     uint8_t *p = static_cast<uint8_t *>(cvl_frame_pointer(_render_frame));
     QImage img(w, h, QImage::Format_RGB32); 
-    for (int y = 0; y < h; y++)
+    if (cvl_frame_format(_render_frame) == CVL_LUM)
     {
-	for (int x = 0; x < w; x++)
+	for (int y = 0; y < h; y++)
 	{
-	    uint8_t *pixel = p + 3 * (y * w + x);
-	    img.setPixel(x, y, qRgb(pixel[0], pixel[1], pixel[2]));
+	    for (int x = 0; x < w; x++)
+	    {
+		uint8_t pixel = p[y * w + x];
+		img.setPixel(x, y, qRgb(pixel, pixel, pixel));
+	    }
 	}
     }
+    else
+    {
+	for (int y = 0; y < h; y++)
+	{
+	    for (int x = 0; x < w; x++)
+	    {
+		uint8_t *pixel = p + 3 * (y * w + x);
+		img.setPixel(x, y, qRgb(pixel[0], pixel[1], pixel[2]));
+	    }
+	}
+    }
+
     return img;
 }
 
