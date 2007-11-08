@@ -297,7 +297,7 @@ void Conf::put(const char *name, int value)
 
 void Conf::put(const char *name, double value)
 {
-    char *str = mh_asprintf("%.15f", value);
+    char *str = mh_asprintf("%.24g", value);
     put(name, str);
     free(str);
 }

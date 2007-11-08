@@ -1,3 +1,7 @@
+2007-11-08  Martin Lambers <marlam@marlam.de>
+
+	* src/conf.cpp: Save doubles with enough precision.
+
 2007-10-28  Martin Lambers <marlam@marlam.de>
 
 	* doc/cvltonemap.texi: Fix filename of info file.
