@@ -149,7 +149,7 @@ int cmd_mix(int argc, char *argv[])
 	{
 	    float weights[number_of_files];
 	    float x = (float)step / (float)(s.value - 1);
-    	    float y = powf(x, b.value >= 0.5f ? 2.0f * (1.0f - b.value) : 1.0f / (2.0f * b.value));
+    	    float y = mh_clampf(powf(x, b.value >= 0.5f ? 2.0f * (1.0f - b.value) : 1.0f / (2.0f * b.value)), 0.0f, 1.0f);
 	    for (int i = 0; i < number_of_files; i++)
 	    {
 		weights[i] = (1.0f - y) * w.value[i] + y * W.value[i];
