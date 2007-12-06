@@ -42,6 +42,7 @@
 #include <QCloseEvent>
 #include <QMessageBox>
 #include <QFileDialog>
+#include <QFileInfo>
 #include <QStatusBar>
 
 #include "err.h"
@@ -283,6 +284,10 @@ void CVLView::load_datafile(const char *filename)
 	delete _datafile;
     }
     _datafile = datafile;
+    setWindowTitle(mh_string("%s.%s (%s)",
+		qPrintable(QFileInfo(filename).baseName()),
+		qPrintable(QFileInfo(filename).completeSuffix()), 
+		PACKAGE_NAME).c_str());
     _frame_info->setEnabled(true);
     _toolbar->setEnabled(true);
     _toolbox->setEnabled(true);

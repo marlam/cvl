@@ -2,7 +2,9 @@
 
 	* mhlib/mh_os.h: Add MH_STDIN, MH_STDOUT.
 	* src/range_selector.h, src/range_selector.cpp: Improve range
-	spinboxes.
+	spinboxes. Suggested by Maik Keller.
+	* src/cvlview.cpp: Show filename in window title. Suggested by
+	Maik Keller.
 
 2007-11-08  Martin Lambers <marlam@marlam.de>
 
@@ -86,10 +88,10 @@
 
 	* src/view_area.cpp: Do not fail on images where a channel contains 
 	only a single value, and therefore min == max. Bug reported by Maik
-	Keller <keller@fb12.uni-siegen.de>.
+	Keller.
 	* src/interpolation_selector.cpp: Disable interpolation by default,
 	since this is a data viewer and not an image viewer. Bug reported by
-	Maik Keller <keller@fb12.uni-siegen.de>.
+	Maik Keller.
 
 2007-09-09  Martin Lambers <marlam@marlam.de>
 
