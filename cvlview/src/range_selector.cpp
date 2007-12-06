@@ -370,40 +370,6 @@ void Selector::update_bounds()
     emit range_selector->range_changed();
 }
 
-/* FloatSpinBox */
-
-QValidator::State FloatSpinBox::validate(QString &input, int &pos UNUSED) const
-{
-    char *s;
-    char *e;
-    float x;
-
-    s = mh_strdup(qPrintable(input));
-    errno = 0;
-    x = strtof(s, &e);
-    free(s);
-
-    if (e == s || *e != '\0' || errno != 0 || !finite(x))
-    {
-	return QValidator::Invalid;
-    }
-    else
-    {
-	return QValidator::Acceptable;
-    }
-}
-
-QString FloatSpinBox::textFromValue(double value) const
-{
-    return mh_string("%g", value).c_str();
-
-}
-
-double FloatSpinBox::valueFromText(const QString &text) const
-{
-    return strtof(qPrintable(text), NULL);
-}
-
 /* RangeSelector */
 
 RangeSelector::RangeSelector(cvl_frame_t **frame,
@@ -429,11 +395,11 @@ RangeSelector::RangeSelector(cvl_frame_t **frame,
     }
     _channel = _channel_selector->get_channel();
 
-    _lowerbound_spinbox = new FloatSpinBox();
+    _lowerbound_spinbox = new QDoubleSpinBox();
     _lowerbound_spinbox->setDecimals(99);
     _lowerbound_spinbox->setRange(-FLT_MAX, +FLT_MAX);
     connect(_lowerbound_spinbox, SIGNAL(valueChanged(double)), this, SLOT(set_lowerbound(double)));
-    _upperbound_spinbox = new FloatSpinBox();
+    _upperbound_spinbox = new QDoubleSpinBox();
     _upperbound_spinbox->setDecimals(99);
     _upperbound_spinbox->setRange(-FLT_MAX, +FLT_MAX);
     connect(_upperbound_spinbox, SIGNAL(valueChanged(double)), this, SLOT(set_upperbound(double)));
@@ -472,11 +438,7 @@ void RangeSelector::set_lowerbound(double x)
 {
     if (!_lock_bounds)
     {
-	if (x >= _upperbound_spinbox->value())
-	{
-	    _lowerbound_spinbox->setValue(_upperbound_spinbox->value() - FLT_MIN);
-	}
-	else
+	if (x < _upperbound_spinbox->value())
 	{
 	    _lowerbound[_channel + 1] = x;
 	    update_histograms();
@@ -489,11 +451,7 @@ void RangeSelector::set_upperbound(double x)
 {
     if (!_lock_bounds)
     {
-	if (x <= _lowerbound_spinbox->value())
-	{
-	    _upperbound_spinbox->setValue(_lowerbound_spinbox->value() + FLT_MIN);
-	}
-	else
+	if (x > _lowerbound_spinbox->value())
 	{
 	    _upperbound[_channel + 1] = x;
 	    update_histograms();

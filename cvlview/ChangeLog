@@ -1,6 +1,8 @@
 2007-12-06  Martin Lambers <marlam@marlam.de>
 
 	* mhlib/mh_os.h: Add MH_STDIN, MH_STDOUT.
+	* src/range_selector.h, src/range_selector.cpp: Improve range
+	spinboxes.
 
 2007-11-08  Martin Lambers <marlam@marlam.de>
 
