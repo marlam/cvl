@@ -40,6 +40,7 @@
 #include <QCloseEvent>
 #include <QMessageBox>
 #include <QFileDialog>
+#include <QFileInfo>
 #include <QStatusBar>
 
 #include "err.h"
@@ -275,6 +276,10 @@ void CVLTonemap::load_image(const char *filename)
 	// Now replace the old frame, if any.
 	cvl_frame_free(_frame);
 	_frame = frame;
+	setWindowTitle(mh_string("%s.%s (%s)",
+     		    qPrintable(QFileInfo(filename).baseName()),
+	  	    qPrintable(QFileInfo(filename).completeSuffix()),
+	     	    PACKAGE_NAME).c_str());
 	_toolbar->setEnabled(true);
 	_tonemap_selector->setEnabled(true);
 	emit new_image();
