@@ -1,3 +1,8 @@
+2007-12-08  Martin Lambers <marlam@marlam.de>
+
+	* configure.ac, doc/cvlview.1, doc/cvlview.texi: Bump version to
+	0.2.1.
+
 2007-12-06  Martin Lambers <marlam@marlam.de>
 
 	* mhlib/mh_os.h: Add MH_STDIN, MH_STDOUT.
