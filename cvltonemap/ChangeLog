@@ -1,3 +1,8 @@
+2007-12-08  Martin Lambers <marlam@marlam.de>
+
+	* configure.ac, doc/cvltonemap.1, doc/cvltonemap.texi: Bump version to
+	0.1.2.
+
 2007-12-06  Martin Lambers <marlam@marlam.de>
 
 	* mhlib/mh_os.h: Add MH_STDIN, MH_STDOUT.
