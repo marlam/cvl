@@ -1,3 +1,7 @@
+2007-12-09  Martin Lambers <marlam@marlam.de>
+
+	* cvl/Makefile.am: Add glsl/mix/mix.glsl.
+
 2007-12-06  Martin Lambers <marlam@marlam.de>
 
 	* mhlib/mh_os.h: Add MH_STDIN, MH_STDOUT.

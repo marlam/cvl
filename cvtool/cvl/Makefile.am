@@ -132,6 +132,7 @@ EXTRA_DIST = cvl/cvl_version.h.in \
 	glsl/math/laplacian.glsl		\
 	glsl/mix/blend.glsl			\
 	glsl/mix/layer.glsl			\
+	glsl/mix/mix.glsl			\
 	glsl/filter/convolve.glsl		\
 	glsl/filter/convolve_separable.glsl	\
 	glsl/filter/convolve3d.glsl		\
