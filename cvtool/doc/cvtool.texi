@@ -1,8 +1,8 @@
 \input texinfo   @c -*-texinfo-*-
 @afourpaper
 @setfilename cvtool.info
-@set UPDATED October 26, 2007
-@set UPDATED-MONTH October 2007
+@set UPDATED January 8, 2008
+@set UPDATED-MONTH January 2008
 @set EDITION 0.2.3
 @set VERSION 0.2.3
 @settitle cvtool @value{VERSION}
@@ -15,7 +15,7 @@
 This manual was last updated @value{UPDATED} for version
 @value{VERSION} of cvtool.
 
-Copyright @copyright{} 2005, 2006, 2007 Martin Lambers
+Copyright @copyright{} 2005, 2006, 2007, 2008 Martin Lambers
 
 @quotation
 Permission is granted to copy, distribute and/or modify this document
@@ -804,8 +804,7 @@ $ cvtool channelcombine red.pgm green.pgm blue.pgm > rgb.ppm
 @subsection color
 @cmindex color
 @code{color [-h|--hue=@var{h}] [-s|--saturation=@var{s}]
-[-l|--lightness=@var{l}] [-c|--contrast=@var{c}]
-[-g|--gamma=(@var{g}|@var{gr},@var{gg},@var{gb})]}
+[-l|--lightness=@var{l}] [-c|--contrast=@var{c}]}
 
 @noindent
 Color adjustment.

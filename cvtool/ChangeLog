@@ -1,3 +1,7 @@
+2008-01-08  Martin Lambers <marlam@marlam.de>
+
+	* doc/cvtool.texi: Fix description of color command.
+
 2007-12-09  Martin Lambers <marlam@marlam.de>
 
 	* cvl/Makefile.am: Add glsl/mix/mix.glsl.
