@@ -1,6 +1,7 @@
 2008-01-08  Martin Lambers <marlam@marlam.de>
 
 	* doc/cvtool.texi: Fix description of color command.
+	* doc/cvtool.texi: Use standard format in command descriptions.
 
 2007-12-09  Martin Lambers <marlam@marlam.de>
 

@@ -265,7 +265,6 @@ Cvtool returns @code{0} on success and @code{1} on error.
 @cmindex help
 @code{help [@var{command}]}
 
-@noindent
 Print general or command specific help.
 
 @node version
@@ -273,7 +272,6 @@ Print general or command specific help.
 @cmindex version
 @code{version}
 
-@noindent
 Print version information.
 
 @node info
@@ -281,17 +279,20 @@ Print version information.
 @cmindex info
 @code{info [-s|--statistics] [-S|--single] [-o|--output=@var{file}]}
 
-@noindent
 Print information about frames in the input stream.
+
 If @samp{--single} is used, the command exits after the first frame has been
 processed.  If @samp{--statistics} is used, additional statistics about the
 frame contents are printed.  The output can be redirected to a file or to
-standard output (-) using the @samp{--output} option.@*
-The following information will be printed: STREAM (pfs or pnm), CHANNELS (0-4),
-FORMAT (luminance or color), TYPE (uint8 or float), WIDTH, HEIGHT.@*
-Statistics are computed for each available channel c: CHc_MIN, CHc_MAX,
-CHc_MEAN, CHc_MEDIAN, CHc_STDDEVIATION.@*
+standard output (-) using the @samp{--output} option.
 
+The following information will be printed: STREAM (pfs or pnm), CHANNELS (0-4),
+FORMAT (luminance or color), TYPE (uint8 or float), WIDTH, HEIGHT.
+
+Statistics are computed for each available channel c: CHc_MIN, CHc_MAX,
+CHc_MEAN, CHc_MEDIAN, CHc_STDDEVIATION.
+
+Example:
 @example
 $ cvtool info < file.pnm
 cvtool: [REQ] info: STREAM=pnm CHANNELS=3 FORMAT=color TYPE=uint8 WIDTH=394 HEIGHT=454
@@ -322,7 +323,6 @@ $ echo $WIDTH
 [-j|--justify=(left|top)|center|(right|bottom)] [-c|--color=@var{color}]
 @var{file@dots{}}}
 
-@noindent
 Combine the given files by placing the frames side by side (@samp{leftright})
 or one below the other (@samp{topbottom}).
 
@@ -331,6 +331,7 @@ smaller ones have to be aligned with the biggest one. The default is to center
 them. The remaining space will be filled with the given color; the default is
 black.
 
+Example:
 @example
 $ cvtool combine left.pnm right.pnm > lr.pnm
 $ cvtool combine -m tb \
@@ -344,11 +345,11 @@ $ cvtool combine -m tb \
 @cmindex convert
 @code{convert [-t|--type=uint8|float] [-f|--format=lum|color]}
 
-@noindent
 Converts the input frames to another type and format. The default is to keep
 the input type and format. The output will be PNM for type uint8 and PFS
 for type float.
 
+Example:
 @example
 $ cvtool convert -t float < in.pnm > out.pfs
 @end example
@@ -359,12 +360,12 @@ $ cvtool convert -t float < in.pnm > out.pfs
 @code{create [-t|--type=uint8|float] [-f|--format=lum|color] [-n|--n=@var{n}] 
 -w|--width=@var{w} -h|--height=@var{h} [-c|--color=<color>]}
 
-@noindent
 Create n (default 1) frames with the given format (default color) and the given
 type (default uint8). The frames will have the given width and height, and they
 will be filled with the given color (default black). The resulting stream type
 will be PNM if the type is uint8, and PFS otherwise.
 
+Example:
 @example
 $ cvtool create -t uint8 -f lum -w 720 -h 576 > out.pgm
 $ cvtool create -t float -f color -w 10 -h 10 -c green > green.pfs
@@ -375,7 +376,6 @@ $ cvtool create -t float -f color -w 10 -h 10 -c green > green.pfs
 @cmindex foreach
 @code{foreach [-s|--shell=@var{shell}] [-n|--n=@var{n}] @var{cmd}}
 
-@noindent
 Execute the given command for every frame. 
 
 The command is expected to read @var{n} frames from standard input (default is
@@ -393,6 +393,7 @@ is @samp{/bin/sh -c} on most systems. This can be overridden with the
 part of the string is the shell, the second part (if any) is the first option
 to the shell. The next option will then be the command to execute.
 
+Example:
 @example
 # Rotate a video. Resize after rotation to keep the original dimensions.
 $ cvtool foreach 'cvtool rotate -a %N | cvtool resize -w 352 -h 240' \
@@ -404,13 +405,13 @@ $ cvtool foreach 'cvtool rotate -a %N | cvtool resize -w 352 -h 240' \
 @cmindex merge
 @code{merge [-s|--shuffle] [-o|--output=@var{file}] @var{file@dots{}}}
 
-@noindent
 Merges files into one stream, in the given order.
 
 If @code{--shuffle} is used, the order will be randomized. The file names will
 be printed to stderr in the order they are merged. If @code{--output} is used,
 the file names will be written to the given file instead.
 
+Example:
 @example
 $ ls
 frame000.pnm frame001.pnm frame002.pnm
@@ -422,12 +423,12 @@ $ cvtool merge frame*.pnm > video.pnm
 @cmindex reverse
 @code{reverse}
 
-@noindent
 Reverses the order of the frames in the stream.
 
 This requires a temporary file that is big enough to hold the complete input
 stream.
 
+Example:
 @example
 $ cvtool reverse < video.pnm > oediv.pnm
 @end example
@@ -437,7 +438,6 @@ $ cvtool reverse < video.pnm > oediv.pnm
 @cmindex select
 @code{select [-d|--drop] [-f|--fps=@var{fps}] @var{range@dots{}}}
 
-@noindent
 Selects frames from a stream.
 
 By default, frames in the given ranges are kept and all others dropped. With
@@ -454,6 +454,7 @@ IMPORTANT: If you use frame number ranges, the high frame number is inclusive:
 the frame with this number will be dropped/kept. If you use time ranges, the
 high time is exclusive and marks the first frame that will not be dropped/kept.
 
+Example:
 @example
 # Drop the frames 0 to 124 from the stream (with a framerate of 25 fps,
 # these are the first five seconds).
@@ -476,7 +477,6 @@ $ cvtool select --fps 25 --drop -5:00 10:00- < in.pnm > out.pnm
 @code{split [-n|--n=@var{n}] [-t|--template=@var{template}] [-b|--backwards]
 [-s|--start=@var{i}]}
 
-@noindent
 Split the input stream into multiple files.
 
 Each new files contains @var{n} frames (default is @var{n}=1). The filename
@@ -491,6 +491,7 @@ A start number i for the first frame can be given, and the frames can be
 counted backwards. If the frames are counted backwards, a start number is
 required, because negative frame numbers are not accepted.
 
+Example:
 @example
 $ cvtool split -t frame%3N.pnm < ../video.pnm
 $ ls
@@ -515,7 +516,6 @@ img99.pnm img98.pnm img97.pnm
 @code{resize -w|--width=@var{w} -h|--height=@var{h} [-x|--x-offset=@var{x}]
 [-y|--y-offset=@var{y}] [-c|--color=@var{color}]}
 
-@noindent
 Resize the frames to the given new width and height.
 
 Place the original frame contents at the position (@var{x},@var{y}) relative to
@@ -524,6 +524,7 @@ is given, compute the missing part(s) so that the old contents are centered on
 the new frame. Fill holes that might result with the given color (default is
 black).
 
+Example:
 @example
 # Add a green border of 10 pixels to a 352x240 frame
 $ cvtool resize -w 372 -h 260 -c green < img.pnm > img2.pnm
@@ -535,9 +536,9 @@ $ cvtool resize -w 372 -h 260 -c green < img.pnm > img2.pnm
 @code{cut -l|--left=@var{l} -t|--top=@var{t} -w|--width=@var{w}
 -h|--height=@var{h}}
 
-@noindent
 Only let the given rectangle through; cut the rest of each frame.
 
+Example:
 @example
 $ cvtool cut -l 0 -t 0 -w 10 -h 10 < in.pnm > out.pnm
 @end example
@@ -573,12 +574,12 @@ The default interpolation type is @code{bilinear}.
 @code{affine -m|--matrix=@var{2x2-matrix} [-c|--color=@var{color}]
 [-i|--interpolation=@var{i}]}
 
-@noindent
 Apply the affine tranformation defined by the given matrix (4 floating point
 values separated by commas) to the frames.  The frame dimensions will be
 adapted so that the resulting frame will fit. Possible holes will be filled
 with the given color; the default is black.
 
+Example:
 @example
 $ cvtool affine -m 2.0,0.1,0.75,1.0 < in.pnm > out.pnm
 @end example
@@ -588,9 +589,9 @@ $ cvtool affine -m 2.0,0.1,0.75,1.0 < in.pnm > out.pnm
 @cmindex flip
 @code{flip}
 
-@noindent
 Flip frames (left/right).
 
+Example:
 @example
 $ cvtool flip < in.pnm > out.pnm
 @end example
@@ -600,9 +601,9 @@ $ cvtool flip < in.pnm > out.pnm
 @cmindex flop
 @code{flop}
 
-@noindent
 Flop frames (top/bottom).
 
+Example:
 @example
 $ cvtool flop < in.pnm > out.pnm
 @end example
@@ -613,13 +614,13 @@ $ cvtool flop < in.pnm > out.pnm
 @code{rotate -a|--angle=@var{angle} [-c|--color=@var{color}]
 [-i|--interpolation=@var{i}]}
 
-@noindent
 Rotate frames with the given angle (in degrees), counterclockwise.
 
 The dimensions of the rotated frame will be big enough to hold all informations
 from the source.  "Holes" will be filled with the given color; the default is
 black.
 
+Example:
 @example
 $ cvtool rotate -a -45 < in.pnm > out.pnm
 @end example
@@ -633,7 +634,6 @@ $ cvtool rotate -a -45 < in.pnm > out.pnm
 [-i|--interpolation=@var{i}}@*
 @code{scale -f|--factor=@var{factor} [-i|--interpolation=@var{i}]}
 
-@noindent
 Scale frames to new size. 
 
 First form: Give new width and/or height. If one value is missing, it is
@@ -643,6 +643,7 @@ Second form: Give scale factors for width and height.
 
 Third form: Give one scale factor for both width and height.
 
+Example:
 @example
 # The following three commands do the same for a 400x200 frame:
 $ cvtool scale -w 100 -h 50    < in.pnm > out.pnm
@@ -656,13 +657,13 @@ $ cvtool scale -f 0.25         < in.pnm > out.pnm
 @code{shear [-x|--shear-x=@var{angle-x}] [-y|--shear-y=@var{angle-y}]
 [-c|--color=@var{color}] [-i|--interpolation=@var{i}]}
 
-@noindent
 Shear frames in horizontal and/or vertical direction.
 
 The frames are sheared with the given angle(s) from (-90,90).  Negative angles
 shear clockwise. "Holes" will be filled with the given color; the default is
 black.
 
+Example:
 @example
 $ cvtool shear -x 20 -y 10 < in.pnm > out.pnm
 @end example
@@ -683,7 +684,6 @@ $ cvtool shear -x 20 -y 10 < in.pnm > out.pnm
 @code{blend -s|--source=@var{file} [-a|--alpha=@var{file}] [-S|--single]
 [-x|--x=@var{x}] [-y|--y=@var{y}]}
 
-@noindent
 Blends the source into the frame stream, using an alpha map.
 
 With no alpha map, the source is simply copied into the frames. @var{x} and
@@ -693,6 +693,7 @@ that do not fit into the frames will be ignored. When @option{--single} is
 used, only the first frame of the source will be used; this frame will be
 copied into all frames of the stream.
 
+Example:
 @example
 $ cvtool blend --single -s logo.pnm -a logo-alpha.pgm -x 700 -y 0 \
   < video.pnm > video-with-logo.pnm
@@ -703,7 +704,6 @@ $ cvtool blend --single -s logo.pnm -a logo-alpha.pgm -x 700 -y 0 \
 @cmindex layer
 @code{layer -m|--mode=min|max|median|or|and|xor|diff|add|xadd|sub|xsub|mul|div file@dots{}}
 
-@noindent
 Layers the frames from the given files on top of each other, using the given
 mode.  
 
@@ -731,6 +731,7 @@ transformed so that the results fit in [0,1]. Example for two layers: X =
 @item @code{div}: Divide values.
 @end itemize
 
+Example:
 @example
 $ cvtool layer --mode=or red.pnm green.pnm blue.pnm \
   > allchannels.pnm
@@ -743,7 +744,6 @@ $ cvtool layer --mode=or red.pnm green.pnm blue.pnm \
 @code{mix -w|--firstweight=@var{fw}@dots{} [-W|--lastweight=@var{lw}@dots{}] 
 [-s|--steps=@var{s}] [-b|--bias=@var{b}] file@dots{}}
 
-@noindent
 Mixes the given sources into a single stream using the given weights. 
 
 The default is to produce a single step, i.e. one output frame for each set of
@@ -756,6 +756,7 @@ values more to the last weigths. The bias must be from (0,1).
 The input frames may differ in size. In this case, they will be implicitly
 scaled to a common size.
 
+Example:
 @example
 $ cvtool mix --weight=1,1 black.pgm white.pgm > gray.pgm
 $ cvtool mix -w 1,0 -W 0,1 -s 10 black.pgm white.pgm \
@@ -778,11 +779,11 @@ $ cvtool mix -w 1,0 -W 0,1 -s 10 black.pgm white.pgm \
 @cmindex channelextract
 @code{channelextract -c|--channel=0|1|2|3|r|g|b|lum}
 
-@noindent
 Extract the given channel from the input. If @samp{channel} is 0, 1, 2, or 3,
 then the data is copied unmodified. If the @samp{channel} is r, g, b, or lum,
 then the input is first converted to the red, gree, blue, or luminance form.
 
+Example:
 @example
 $ cvtool channelextract -c r < color.ppm > red.pgm
 @end example
@@ -792,10 +793,10 @@ $ cvtool channelextract -c r < color.ppm > red.pgm
 @cmindex channelcombine
 @code{channelcombine file0 [file1 [file2 [file3]]]}
 
-@noindent
 Extract the first channel from the given files and combine them into
 multichannel output data.
 
+Example:
 @example
 $ cvtool channelcombine red.pgm green.pgm blue.pgm > rgb.ppm
 @end example
@@ -806,7 +807,6 @@ $ cvtool channelcombine red.pgm green.pgm blue.pgm > rgb.ppm
 @code{color [-h|--hue=@var{h}] [-s|--saturation=@var{s}]
 [-l|--lightness=@var{l}] [-c|--contrast=@var{c}]}
 
-@noindent
 Color adjustment.
 
 Hue, saturation, lightness, and constrast are manipulated in the HSL (Hue,
@@ -819,6 +819,7 @@ example, s = -1 will convert the input frames to graylevels. See the
 @url{http://en.wikipedia.org/wiki/HLS_color_space,Wikipedia entry for HSL color
 space} for more information.
 
+Example:
 @example
 $ cvtool color -h 120 < red.pnm > green.pnm
 $ cvtool color -h 120 < green.pnm > blue.pnm
@@ -832,9 +833,9 @@ $ cvtool color -l +1 < dark.pnm > light.pnm
 @cmindex gamma
 @code{gamma}
 
-@noindent
 Gamma correction.
 
+Example:
 @example
 $ cvtool gamma -g 2.2 < dark.pnm > bright.pnm
 @end example
@@ -844,9 +845,9 @@ $ cvtool gamma -g 2.2 < dark.pnm > bright.pnm
 @cmindex invert
 @code{invert}
 
-@noindent
 Invert input frames.
 
+Example:
 @example
 $ cvtool invert < in.pnm > out.pnm
 @end example
@@ -885,7 +886,6 @@ $ cvtool invert < in.pnm > out.pnm
 [-u|--unit]
 @var{command@dots{}}}
 
-@noindent
 Draw simple geometric forms, lines and curves, and/or text.
 
 The style for the object lines and the filling can be specified separately; it
@@ -983,6 +983,7 @@ The draw command is only a simple interface to the excellent
 @url{http://www.cairographics.org/documentation,CAIRO documentation} is useful
 for this command, too, especially the @url{http://www.cairographics.org/FAQ,FAQ}.
 
+Example:
 @example
 # Draw two green circles with a line width of 5.
 $ cvtool draw -w 5 -c green circle 50,50,40 50,50,20 \
@@ -1026,7 +1027,6 @@ $ cvtool draw -u -f "Serif" -F 0.1,0.1 -j center -J center \
 [-y|--k-y=@var{ky}] [-t|--k-t=@var{kt}] [-s|--sigma=@var{s}]
 [--sigma-x=@var{sx}] [--sigma-y=@var{sy}] [--sigma-t=@var{st}]}
 
-@noindent
 Filter framess with a Gauss filter, in 2D or 3D (with the third dimension being
 the time). The kernel size can be given for each dimension, or once for all. It
 will be (2@var{kx}+1)x(2@var{ky}+1)[x(2@var{kt}+1)]. Different values for each
@@ -1036,6 +1036,7 @@ the sigma value(s): the mask size will be computed so that roughly 95% of the
 mass lies within the resulting mask. It is also possible to specify both sigma
 and k.
 
+Example:
 @example
 $ cvtool gauss --3d -k 3 < video.pnm > smoothed-video.pnm
 @end example
@@ -1047,12 +1048,12 @@ $ cvtool gauss --3d -k 3 < video.pnm > smoothed-video.pnm
 @code{filter mean [-3|--3d] -x|--k-x=@var{kx} -y|--k-y=@var{ky}
 [-t|--k-t=@var{kt}]}@*
 
-@noindent
 Filter frames with a Mean filter, in 2D or 3D (with the third dimension being
 the time). The kernel size can be given for each dimension, or once for all. It
 will be (2@var{kx}+1)x(2@var{ky}+1)[x(2@var{kt}+1)]. Different values for each
 direction lead to asymmetric filtering.  
 
+Example:
 @example
 $ cvtool mean -k 2 < in.pnm > out.pnm
 @end example
@@ -1064,7 +1065,6 @@ $ cvtool mean -k 2 < in.pnm > out.pnm
 @code{filter median [-a|--approximated] [-3|--3d] -x|--k-x=@var{kx} -y|--k-y=@var{ky}
 [-t|--k-t=@var{kt}]}@*
 
-@noindent
 Filter frames with a Median filter, in 2D or 3D (with the third dimension being
 the time). The kernel size can be given for each dimension, or once for all. It
 will be (2@var{kx}+1)x(2@var{ky}+1)[x(2@var{kt}+1)]. Different values for each
@@ -1073,6 +1073,7 @@ direction lead to asymmetric filtering.
 If the @var{--approxmated} option is given, then the median will be approximated.
 This helps to allow larger mask sizes.
 
+Example:
 @example
 $ cvtool median -a -k 2 < in.pnm > out.pnm
 @end example
@@ -1084,12 +1085,12 @@ $ cvtool median -a -k 2 < in.pnm > out.pnm
 @code{filter min [-3|--3d] -x|--k-x=@var{kx} -y|--k-y=@var{ky}
 [-t|--k-t=@var{kt}]}@*
 
-@noindent
 Filter frames with a Minimum filter, in 2D or 3D (with the third dimension being
 the time). The kernel size can be given for each dimension, or once for all. It
 will be (2@var{kx}+1)x(2@var{ky}+1)[x(2@var{kt}+1)]. Different values for each
 direction lead to asymmetric filtering.  
 
+Example:
 @example
 $ cvtool min -k 2 < in.pnm > out.pnm
 @end example
@@ -1101,12 +1102,12 @@ $ cvtool min -k 2 < in.pnm > out.pnm
 @code{filter max [-3|--3d] -x|--k-x=@var{kx} -y|--k-y=@var{ky}
 [-t|--k-t=@var{kt}]}@*
 
-@noindent
 Filter frames with a Maximum filter, in 2D or 3D (with the third dimension being
 the time). The kernel size can be given for each dimension, or once for all. It
 will be (2@var{kx}+1)x(2@var{ky}+1)[x(2@var{kt}+1)]. Different values for each
 direction lead to asymmetric filtering.  
 
+Example:
 @example
 $ cvtool max -k 2 < in.pnm > out.pnm
 @end example
@@ -1118,7 +1119,6 @@ $ cvtool max -k 2 < in.pnm > out.pnm
 @code{convolve -X|--vector-x=@var{X} -Y|--vector-y=@var{Y}
 [-T|--vector-t=@var{T}]}
 
-@noindent
 Convolve frames with the given convolution kernel.
 
 Both 2D and 3D kernels are accepted (the third dimension is the time). If the
@@ -1126,6 +1126,7 @@ kernel is separable, the vectors that generate it can be given instead, to
 reduce computation costs. All kernel elements must be integers. The size of the
 kernel must be an odd number in each dimension.
 
+Example:
 @example
 # Both commands are equivalent to 2D smoothing with the 
 # mean filter with k=1:
@@ -1138,12 +1139,12 @@ $ cvtool convolve -X 3:1,1,1 -Y 3:1,1,1    < in.pnm > out.pnm
 @cmindex laplace
 @code{laplace [-c|--c=@var{c}]}
 
-@noindent
 Sharpens the input frames using the Laplace operator.
 
 The sharpness factor @var{c} must be greater than or equal to zero. Larger values
 increase the effect. The default is 0.5.
 
+Example:
 @example
 $ cvtool laplace -c 0.7 < smooth.pnm > sharp.pnm
 @end example
@@ -1153,7 +1154,6 @@ $ cvtool laplace -c 0.7 < smooth.pnm > sharp.pnm
 @cmindex unsharpmask
 @code{unsharpmask -u|--unsharp=@var{file} [-c|--c=@var{c}]}
 
-@noindent
 Sharpens the input frames using unsharp masking.
 
 The unsharp version of the input frames must be given using the
@@ -1161,6 +1161,7 @@ The unsharp version of the input frames must be given using the
 It can be produced using e.g. a 3x3 Gauss filter. The sharpness parameter
 @var{c} must be from (0.5, 1.0). The default is 0.7.
 
+Example:
 @example
 $ cvtool unsharpmask -u smoothsmooth.pnm -c 0.7 < smooth.pnm > sharp.pnm
 @end example
@@ -1179,7 +1180,6 @@ $ cvtool unsharpmask -u smoothsmooth.pnm -c 0.7 < smooth.pnm > sharp.pnm
 @code{edge sobel}@*
 @code{edge canny -s|--sigma=@var{sigma} -l|--low=@var{l} -h|--high=@var{h}}
 
-@noindent
 Detect edges.
 
 Sobel will generate graylevel frames: the brighter a point, the stronger the
@@ -1194,6 +1194,7 @@ channel containing the edge strengths and a channel containing the edge
 directions. If the input is PNM, then the output will be graylevel frames
 containing only the strength information.
 
+Example:
 @example
 $ cvtool edge sobel < in.pgm > gray-edges.pgm
 $ cvtool edge canny -s 1.2 -l 4 -h 8 < in.pgm > bw-edges.pgm
@@ -1212,7 +1213,6 @@ $ cvtool edge canny -s 1.2 -l 4 -h 8 < in.pgm > bw-edges.pgm
 @cmindex diff
 @code{diff [-s|--statistics] [-o|--output=@var{file}] @var{file-1} @var{file-2}}
 
-@noindent
 Shows the differences between the two sources. 
 
 The sources must have the same pixel type, width, and height. This command
@@ -1228,6 +1228,7 @@ the Y channel is considered.  The output will be printed to @code{stderr}, unles
 is redirected with the @option{--output} option. If the output is redirected to
 @code{stdout} (-), then only the statistics and no frames will be written to @code{stdout}.
 
+Example:
 @example 
 $ cvtool create -w 10 -h 10 -c r255g0b0 > red.pnm
 $ cvtool create -w 10 -h 10 -c r0g255b0 > green.pnm
@@ -1253,7 +1254,6 @@ frame pair 0: standard deviation = 0.1969 0.1969 0.0000
 @code{tonemap -m|--method=drago03  [-l|--max-absolute-luminance=@var{l}] [--max-display-luminance=@var{d}] [--bias=@var{b}]}
 @code{tonemap -m|--method=durand02 [-l|--max-absolute-luminance=@var{l}] [--sigma-spatial=@var{ss}] [--sigma-color=@var{sc}] [--base-contrast=@var{bc}]}
 
-@noindent
 Tone map frames. 
 
 High dynamic range (HDR) frames are read from standard input, and low dynamic
