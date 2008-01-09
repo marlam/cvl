@@ -5,6 +5,7 @@
 	tumblinrushmeier99 tonemap methods in CVL 0.2.3.
 	* configure.ac, doc/cvltonemap.1, doc/cvltonemap.texi: Bump version to
 	0.2.0.
+	* README: Update.
 
 2007-12-08  Martin Lambers <marlam@marlam.de>
 

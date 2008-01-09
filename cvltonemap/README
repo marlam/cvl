@@ -1,4 +1,6 @@
-CVLTonemap is an viewer and tone mapping tool for high dynamic range images.
-It is based on the CVL library.
+CVLTonemap is an interactive viewer and tone mapping tool for high dynamic
+range images. It is based on the CVL library, and thus uses the GPU for image
+processing.
 
-See http://cvtool.sourceforge.net for more information on this software.
+See http://cvtool.sourceforge.net/cvltonemap.html for more information on this
+software.
