@@ -8,6 +8,9 @@
 	Add cvl_tonemap_tumblinrushmeier99().
 	* cvtool/cmd_tonemap.c, tests/cmd_tonemap.sh, doc/cvtool.texi: Add the
 	tumblinrushmeier99 method to the tonemap command.
+	* cvl/cvl_hdr.c, cvl/cvl/cvl_hdr.h,
+	cvl/glsl/hdr/tonemap_schlick94.glsl, cvl/Makefile.am: Add
+	cvl_tonemap_schlick94().
 
 2008-01-08  Martin Lambers <marlam@marlam.de>
 

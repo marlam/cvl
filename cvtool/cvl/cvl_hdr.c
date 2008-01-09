@@ -52,11 +52,52 @@
 #include "cvl/cvl_misc.h"
 #include "cvl/cvl_hdr.h"
 
-#include "glsl/hdr/tonemap_drago03.glsl.h"
+#include "glsl/hdr/tonemap_schlick94.glsl.h"
 #include "glsl/hdr/tonemap_tumblinrushmeier99_step1.glsl.h"
 #include "glsl/hdr/tonemap_tumblinrushmeier99_step2.glsl.h"
+#include "glsl/hdr/tonemap_drago03.glsl.h"
 #include "glsl/hdr/tonemap_durand02_step1.glsl.h"
 #include "glsl/hdr/tonemap_durand02_step2.glsl.h"
+
+
+/**
+ * \param dst			The destination frame.
+ * \param src			The source frame.
+ * \param max_abs_lum		Maximum absolute luminance.
+ * \param p			Parameter.
+ *
+ * Applies tone mapping to the high dynamic range frame \a src and writes the
+ * result to \a dst. Input and output must be in #CVL_XYZ format.\n
+ * The parameter \a p must be greater than or equal to 1.0.\n
+ * See also section 7.2.9 in 
+ * E. Reinhard and G. Ward and S. Pattanaik and P. Debevec, 
+ * High Dynamic Range Imaging: Acquisition, Display and Image-based Lighting,
+ * Morgan Kaufmann, 2005, ISBN 0-12-585263-0
+ */
+void cvl_tonemap_schlick94(cvl_frame_t *dst, cvl_frame_t *src, float p)
+{
+    cvl_assert(dst != NULL);
+    cvl_assert(src != NULL);
+    cvl_assert(dst != src);
+    cvl_assert(cvl_frame_format(dst) == CVL_XYZ);
+    cvl_assert(cvl_frame_format(src) == CVL_XYZ);
+    cvl_assert(p >= 1.0f);
+    if (cvl_error())
+	return;
+
+    GLuint prg;
+    if ((prg = cvl_gl_program_cache_get("cvl_tonemap_schlick94")) == 0)
+    {
+	prg = cvl_gl_program_new_src("cvl_tonemap_schlick94", NULL, 
+		CVL_TONEMAP_SCHLICK94_GLSL_STR);
+	cvl_gl_program_cache_put("cvl_tonemap_schlick94", prg);
+    }
+    glUseProgram(prg);
+    glUniform1f(glGetUniformLocation(prg, "p"), p);
+    cvl_transform(dst, src);
+
+    cvl_check_errors();
+}
 
 
 // Helper function
