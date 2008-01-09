@@ -3,7 +3,7 @@
  *
  * This file is part of cvltonemap, a tone mapping tool using the CVL library.
  *
- * Copyright (C) 2007  Martin Lambers <marlam@marlam.de>
+ * Copyright (C) 2007, 2008  Martin Lambers <marlam@marlam.de>
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -152,6 +152,24 @@ void ViewArea::paintGL()
 	    float lum_max = parameter_selector->get_max_luminance();
 	    cvl_luminance_range(_frame1, *_frame, lum_min, lum_max);
 	}
+	else if (_tonemap_selector->active_tonemap_method() == TonemapSelector::SCHLICK94)
+	{
+	    TonemapSchlick94ParameterSelector *parameter_selector
+		= reinterpret_cast<TonemapSchlick94ParameterSelector *>(
+			_tonemap_selector->parameter_selector());
+	    float p = parameter_selector->get_p();
+	    cvl_tonemap_schlick94(_frame1, *_frame, p);
+	}
+	else if (_tonemap_selector->active_tonemap_method() == TonemapSelector::TUMBLINRUSHMEIER99)
+	{
+	    TonemapTumblinRushmeier99ParameterSelector *parameter_selector
+		= reinterpret_cast<TonemapTumblinRushmeier99ParameterSelector *>(
+			_tonemap_selector->parameter_selector());
+	    float max_abs_lum = parameter_selector->get_max_abs_lum();
+	    float disp_adapt_level = parameter_selector->get_disp_adapt_level();
+	    float max_contrast = parameter_selector->get_max_contrast();
+	    cvl_tonemap_tumblinrushmeier99(_frame1, *_frame, max_abs_lum, disp_adapt_level, max_contrast);
+	}
 	else if (_tonemap_selector->active_tonemap_method() == TonemapSelector::DRAGO03)
 	{
 	    TonemapDrago03ParameterSelector *parameter_selector
@@ -162,7 +180,7 @@ void ViewArea::paintGL()
 	    float max_disp_lum = parameter_selector->get_max_disp_lum();
 	    cvl_tonemap_drago03(_frame1, *_frame, max_abs_lum, bias, max_disp_lum);
 	}
-	else // DURAND02
+	else if (_tonemap_selector->active_tonemap_method() == TonemapSelector::DURAND02)
 	{
 	    TonemapDurand02ParameterSelector *parameter_selector
 		= reinterpret_cast<TonemapDurand02ParameterSelector *>(

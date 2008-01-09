@@ -1,3 +1,9 @@
+2008-01-09  Martin Lambers <marlam@marlam.de>
+
+	* configure.ac, src/tonemap_selector.h, src/tonemap_selector.cpp,
+	src/view_area.cpp: Add support for the new schlick94 and
+	tumblinrushmeier99 tonemap methods in CVL 0.2.3.
+
 2007-12-08  Martin Lambers <marlam@marlam.de>
 
 	* configure.ac, doc/cvltonemap.1, doc/cvltonemap.texi: Bump version to

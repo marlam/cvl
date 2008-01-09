@@ -3,7 +3,7 @@ dnl Process this file with autoconf to produce a configure script.
 #
 # This file is part of cvltonemap, a tone mapping tool using the CVL library.
 #
-# Copyright (C) 2007  Martin Lambers <marlam@marlam.de>
+# Copyright (C) 2007, 2008  Martin Lambers <marlam@marlam.de>
 #
 #   This program is free software; you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -61,12 +61,12 @@ dnl CVL
 CVL_LIBS=""
 AC_LIB_HAVE_LINKFLAGS([cvl], [], 
 	[#include <cvl/cvl.h>
-	 #if CVL_VERSION_MAJOR < 0 || CVL_VERSION_MINOR < 2 || CVL_VERSION_PATCH < 2
+	 #if CVL_VERSION_MAJOR < 0 || CVL_VERSION_MINOR < 2 || CVL_VERSION_PATCH < 3
 	 CVL version too old
 	 #endif], 
 	[cvl_init();])
 if test "$HAVE_LIBCVL" != "yes"; then
-	AC_MSG_ERROR([could not find CVL >= 0.2.2])
+	AC_MSG_ERROR([could not find CVL >= 0.2.3])
 else
 	CVL_LIBS="$LIBCVL"
 fi

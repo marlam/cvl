@@ -3,7 +3,7 @@
  *
  * This file is part of cvltonemap, a tone mapping tool using the CVL library.
  *
- * Copyright (C) 2007  Martin Lambers <marlam@marlam.de>
+ * Copyright (C) 2007, 2008  Martin Lambers <marlam@marlam.de>
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -51,13 +51,13 @@ TonemapSelector::TonemapSelector(cvl_frame_t **frame, QWidget *parent)
     _frame = frame;
 
     /* When adding a new method, adjust only this block: ---> */
-    _method_count = 3;
-
+    _method_count = 5;
     _parameter_selector = new TonemapParameterSelector *[_method_count];
-
     _parameter_selector[0] = new TonemapRangeSelectionParameterSelector(this, _frame);
-    _parameter_selector[1] = new TonemapDrago03ParameterSelector(this, _frame);
-    _parameter_selector[2] = new TonemapDurand02ParameterSelector(this, _frame);
+    _parameter_selector[1] = new TonemapSchlick94ParameterSelector(this, _frame);
+    _parameter_selector[2] = new TonemapTumblinRushmeier99ParameterSelector(this, _frame);
+    _parameter_selector[3] = new TonemapDrago03ParameterSelector(this, _frame);
+    _parameter_selector[4] = new TonemapDurand02ParameterSelector(this, _frame);
     /* <--- End. */
 
     _postproc_selector = new PostprocSelector *[_method_count];
@@ -495,6 +495,185 @@ void TonemapRangeSelectionParameterSelector::set_parameters(Conf *conf)
     _range_max = conf->get(mh_string("%s-max", id()).c_str(), 0.0f, 1.0f, 1.0f);
     _log_x_box->setChecked(conf->get(mh_string("%s-loghorz", id()).c_str(), true));
     _log_y_box->setChecked(conf->get(mh_string("%s-logvert", id()).c_str(), true));
+}
+
+
+/* Schlick94 */
+
+TonemapSchlick94ParameterSelector::TonemapSchlick94ParameterSelector(
+	TonemapSelector *tonemap_selector, cvl_frame_t **frame)
+{
+    _tonemap_selector = tonemap_selector;
+    _frame = frame;
+    _lock = false;
+
+    QGridLayout *layout = new QGridLayout();
+
+    QLabel *lp = new QLabel("Brightness: ");
+    layout->addWidget(lp, 0, 0);
+    _p_spinbox = new QDoubleSpinBox();
+    _p_spinbox->setRange(1.0, 999.99);
+    _p_spinbox->setDecimals(2);
+    _p_spinbox->setSingleStep(0.1);
+    connect(_p_spinbox, SIGNAL(valueChanged(double)), this, SLOT(set_p(double)));
+    layout->addWidget(_p_spinbox, 0, 1);
+    _p_slider = new QSlider(Qt::Horizontal, this);
+    _p_slider->setRange(1, 99999);
+    connect(_p_slider, SIGNAL(valueChanged(int)), this, SLOT(p_slider_changed(int)));
+    layout->addWidget(_p_slider, 1, 0, 1, 2);
+
+    layout->setRowStretch(2, 1);
+    setLayout(layout);
+
+    update();
+}
+
+TonemapSchlick94ParameterSelector::~TonemapSchlick94ParameterSelector()
+{
+}
+
+void TonemapSchlick94ParameterSelector::update()
+{
+    _lock = true;
+    _p_spinbox->setValue(100.0);
+    _p_slider->setValue(10000);
+    _lock = false;
+    emit _tonemap_selector->tonemap_changed();
+}
+
+void TonemapSchlick94ParameterSelector::set_p(double x)
+{
+    _lock = true;
+    _p_slider->setValue(mh_iround(100.0 * x));
+    _lock = false;
+    emit _tonemap_selector->tonemap_changed();
+}
+
+void TonemapSchlick94ParameterSelector::p_slider_changed(int x)
+{
+    if (!_lock)
+	_p_spinbox->setValue(static_cast<double>(x) / 100.0);
+}
+
+void TonemapSchlick94ParameterSelector::get_parameters(Conf *conf) const
+{
+    conf->put(mh_string("%s-p", id()).c_str(), _p_spinbox->value());
+}
+
+void TonemapSchlick94ParameterSelector::set_parameters(Conf *conf)
+{
+    _p_spinbox->setValue(conf->get(mh_string("%s-p", id()).c_str(), 1.00, 999.99, 200.0));
+}
+
+
+/* TumblinRushmeier99 */
+
+TonemapTumblinRushmeier99ParameterSelector::TonemapTumblinRushmeier99ParameterSelector(
+	TonemapSelector *tonemap_selector, cvl_frame_t **frame)
+{
+    _tonemap_selector = tonemap_selector;
+    _frame = frame;
+    _lock = false;
+
+    QGridLayout *layout = new QGridLayout();
+
+    _max_abs_lum_selector = new MaxAbsLumSelector(id(), _frame, this);
+    layout->addWidget(_max_abs_lum_selector, 0, 0, 1, 2);
+    connect(_max_abs_lum_selector, SIGNAL(maxabslum_changed()), this, SLOT(max_abs_lum_changed()));
+
+    QLabel *ld = new QLabel("Display Adaptation Level: ");
+    layout->addWidget(ld, 2, 0);
+    _disp_adapt_level_spinbox = new QDoubleSpinBox();
+    _disp_adapt_level_spinbox->setRange(0.01, 999.99);
+    _disp_adapt_level_spinbox->setDecimals(2);
+    _disp_adapt_level_spinbox->setSingleStep(0.1);
+    connect(_disp_adapt_level_spinbox, SIGNAL(valueChanged(double)), this, SLOT(set_disp_adapt_level(double)));
+    layout->addWidget(_disp_adapt_level_spinbox, 2, 1);
+    _disp_adapt_level_slider = new QSlider(Qt::Horizontal, this);
+    _disp_adapt_level_slider->setRange(1, 99999);
+    connect(_disp_adapt_level_slider, SIGNAL(valueChanged(int)), this, SLOT(disp_adapt_level_slider_changed(int)));
+    layout->addWidget(_disp_adapt_level_slider, 3, 0, 1, 2);
+
+    QLabel *lb = new QLabel("Max. displayable contrast:");
+    layout->addWidget(lb, 4, 0);
+    _max_contrast_spinbox = new QDoubleSpinBox();
+    _max_contrast_spinbox->setRange(0.01, 99.99);
+    _max_contrast_spinbox->setDecimals(2);
+    _max_contrast_spinbox->setSingleStep(0.1);
+    connect(_max_contrast_spinbox, SIGNAL(valueChanged(double)), this, SLOT(set_max_contrast(double)));
+    layout->addWidget(_max_contrast_spinbox, 4, 1);
+    _max_contrast_slider = new QSlider(Qt::Horizontal, this);
+    _max_contrast_slider->setRange(1, 9999);
+    connect(_max_contrast_slider, SIGNAL(valueChanged(int)), this, SLOT(max_contrast_slider_changed(int)));
+    layout->addWidget(_max_contrast_slider, 5, 0, 1, 2);
+
+    layout->setRowStretch(6, 1);
+    setLayout(layout);
+
+    update();
+}
+
+TonemapTumblinRushmeier99ParameterSelector::~TonemapTumblinRushmeier99ParameterSelector()
+{
+}
+
+void TonemapTumblinRushmeier99ParameterSelector::max_abs_lum_changed()
+{
+    emit _tonemap_selector->tonemap_changed();
+}
+
+void TonemapTumblinRushmeier99ParameterSelector::update()
+{
+    _lock = true;
+    _max_abs_lum_selector->update();
+    _disp_adapt_level_spinbox->setValue(100.0);
+    _disp_adapt_level_slider->setValue(10000);
+    _max_contrast_spinbox->setValue(70.0);
+    _max_contrast_slider->setValue(7000);
+    _lock = false;
+    emit _tonemap_selector->tonemap_changed();
+}
+
+void TonemapTumblinRushmeier99ParameterSelector::set_disp_adapt_level(double x)
+{
+    _lock = true;
+    _disp_adapt_level_slider->setValue(mh_iround(100.0 * x));
+    _lock = false;
+    emit _tonemap_selector->tonemap_changed();
+}
+
+void TonemapTumblinRushmeier99ParameterSelector::disp_adapt_level_slider_changed(int x)
+{
+    if (!_lock)
+	_disp_adapt_level_spinbox->setValue(static_cast<double>(x) / 100.0);
+}
+
+void TonemapTumblinRushmeier99ParameterSelector::set_max_contrast(double x)
+{
+    _lock = true;
+    _max_contrast_slider->setValue(mh_iround(100.0 * x));
+    _lock = false;
+    emit _tonemap_selector->tonemap_changed();
+}
+
+void TonemapTumblinRushmeier99ParameterSelector::max_contrast_slider_changed(int x)
+{
+    if (!_lock)
+	_max_contrast_spinbox->setValue(static_cast<double>(x) / 100.0);
+}
+
+void TonemapTumblinRushmeier99ParameterSelector::get_parameters(Conf *conf) const
+{
+    _max_abs_lum_selector->get_parameters(conf);
+    conf->put(mh_string("%s-disp_adapt_level", id()).c_str(), _disp_adapt_level_spinbox->value());
+    conf->put(mh_string("%s-max_contrast", id()).c_str(), _max_contrast_spinbox->value());
+}
+
+void TonemapTumblinRushmeier99ParameterSelector::set_parameters(Conf *conf)
+{
+    _max_abs_lum_selector->set_parameters(conf);
+    _disp_adapt_level_spinbox->setValue(conf->get(mh_string("%s-disp_adapt_level", id()).c_str(), 0.01, 999.99, 200.0));
+    _max_contrast_spinbox->setValue(conf->get(mh_string("%s-max_contrast", id()).c_str(), 0.01, 999.99, 70.0));
 }
 
 

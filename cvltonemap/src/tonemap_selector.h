@@ -3,7 +3,7 @@
  *
  * This file is part of cvltonemap, a tone mapping tool using the CVL library.
  *
- * Copyright (C) 2007  Martin Lambers <marlam@marlam.de>
+ * Copyright (C) 2007, 2008  Martin Lambers <marlam@marlam.de>
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -87,8 +87,10 @@ class TonemapSelector : public QWidget
 	~TonemapSelector();
 	
 	static const int RANGE_SELECTION	= 0;
-	static const int DRAGO03		= 1;
-	static const int DURAND02		= 2;
+	static const int SCHLICK94		= 1;
+	static const int TUMBLINRUSHMEIER99	= 2;
+	static const int DRAGO03		= 3;
+	static const int DURAND02		= 4;
 
 	int active_tonemap_method() const 
 	{ 
@@ -109,6 +111,8 @@ class TonemapSelector : public QWidget
 	void set_parameters(Conf *conf);
 
     friend class TonemapRangeSelectionParameterSelector;
+    friend class TonemapSchlick94ParameterSelector;
+    friend class TonemapTumblinRushmeier99ParameterSelector;
     friend class TonemapDrago03ParameterSelector;
     friend class TonemapDurand02ParameterSelector;
 };
@@ -199,6 +203,116 @@ class TonemapRangeSelectionParameterSelector : public TonemapParameterSelector
 	void set_parameters(Conf *conf);
 
     friend class RangeSelector;
+};
+
+/* Schlick94 */
+
+class TonemapSchlick94ParameterSelector : public TonemapParameterSelector
+{
+    Q_OBJECT
+
+    private:
+	TonemapSelector *_tonemap_selector;
+	cvl_frame_t **_frame;
+	QDoubleSpinBox *_p_spinbox;
+	QSlider *_p_slider;
+	bool _lock;
+
+    private slots:
+	void set_p(double x);
+        void p_slider_changed(int x);
+
+    public:
+	TonemapSchlick94ParameterSelector(
+		TonemapSelector *tonemap_selector, cvl_frame_t **frame);
+	~TonemapSchlick94ParameterSelector();
+	void update();
+	
+	const char *name() const
+	{
+	    return "Schlick 94";
+	}
+	
+	const char *id() const
+	{
+	    return "schlick94";
+	}
+
+	bool is_global() const
+	{
+	    return true;
+	}
+
+	float get_p() const
+	{
+	    return _p_spinbox->value();
+	}
+
+	void get_parameters(Conf *conf) const;
+	void set_parameters(Conf *conf);
+};
+
+/* Tumblin/Rushmeier 99 */
+
+class TonemapTumblinRushmeier99ParameterSelector : public TonemapParameterSelector
+{
+    Q_OBJECT
+
+    private:
+	TonemapSelector *_tonemap_selector;
+	cvl_frame_t **_frame;
+	MaxAbsLumSelector *_max_abs_lum_selector;
+	QDoubleSpinBox *_disp_adapt_level_spinbox;
+	QSlider *_disp_adapt_level_slider;
+	QDoubleSpinBox *_max_contrast_spinbox;
+	QSlider *_max_contrast_slider;
+	bool _lock;
+
+    private slots:
+	void max_abs_lum_changed();
+	void set_disp_adapt_level(double x);
+        void disp_adapt_level_slider_changed(int x);
+	void set_max_contrast(double x);
+        void max_contrast_slider_changed(int x);
+
+    public:
+	TonemapTumblinRushmeier99ParameterSelector(
+		TonemapSelector *tonemap_selector, cvl_frame_t **frame);
+	~TonemapTumblinRushmeier99ParameterSelector();
+	void update();
+	
+	const char *name() const
+	{
+	    return "Tumblin/Rushmeier 99";
+	}
+	
+	const char *id() const
+	{
+	    return "tumblinrushmeier99";
+	}
+
+	bool is_global() const
+	{
+	    return true;
+	}
+
+	float get_max_abs_lum() const
+	{
+	    return _max_abs_lum_selector->value();
+	}
+
+	float get_disp_adapt_level() const
+	{
+	    return static_cast<float>(_disp_adapt_level_spinbox->value());
+	}
+
+	float get_max_contrast() const
+	{
+	    return static_cast<float>(_max_contrast_spinbox->value());
+	}
+
+	void get_parameters(Conf *conf) const;
+	void set_parameters(Conf *conf);
 };
 
 /* Drago03 */
