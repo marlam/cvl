@@ -1251,9 +1251,10 @@ frame pair 0: standard deviation = 0.1969 0.1969 0.0000
 @node tonemap
 @subsection tonemap
 @cmindex tonemap
-@code{tonemap -m|--method=tumblinrushmeier99 [-l|--max-absolute-luminance=<l>] [--display-adaptation-level=<d>]
-[--max-displayable-contrast=<c>]}
-@code{tonemap -m|--method=drago03  [-l|--max-absolute-luminance=@var{l}] [--max-display-luminance=@var{d}] [--bias=@var{b}]}
+@code{tonemap -m|--method=schlick94 [--brightness=@var{b}]}
+@code{tonemap -m|--method=tumblinrushmeier99 [-l|--max-absolute-luminance=@var{l}] [--display-adaptation-level=@var{d}]
+[--max-displayable-contrast=@var{c}]}
+@code{tonemap -m|--method=drago03 [-l|--max-absolute-luminance=@var{l}] [--max-display-luminance=@var{d}] [--bias=@var{b}]}
 @code{tonemap -m|--method=durand02 [-l|--max-absolute-luminance=@var{l}] [--sigma-spatial=@var{ss}] [--sigma-color=@var{sc}] [--base-contrast=@var{bc}]}
 
 Tone map frames. 
@@ -1263,6 +1264,8 @@ range (LDR) frames are written to standard output.  See the original papers for
 a description of the parameters.
 
 The default for the maximum absolute luminance is to get it from the file (if specified), or else 150.0.
+
+The default for schlick94 is @var{b}=100.0.
 
 The defaults for tumblinrushmeier99 are @var{d}=100.0, @var{c}=70.0.
 
@@ -1277,6 +1280,8 @@ See also:
 @item For general information:@*
 E. Reinhard, G. Ward, S. Pattanaik, and P. Debevec. High Dynamic
 Range Imaging: Acquisition, Display and Image-based Lighting. @cite{Morgan Kaufmann}, 2005.
+@item For the @code{schlick94} method:@*
+Section 7.2.9 of the HDRI book.
 @item For the @code{tumblinrushmeier99} method:@*
 Section 7.2.2 of the HDRI book.
 @item For the @code{drago03} method:@*
