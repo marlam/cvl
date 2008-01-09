@@ -3,7 +3,7 @@
  * 
  * This file is part of cvtool, a computer vision tool.
  *
- * Copyright (C) 2007  Martin Lambers <marlam@marlam.de>
+ * Copyright (C) 2007, 2008  Martin Lambers <marlam@marlam.de>
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -34,6 +34,8 @@
 void cmd_tonemap_print_help(void)
 {
     mh_msg_fmt_req(
+	    "tonemap -m|--method=tumblinrushmeier99 [-l|--max-absolute-luminance=<l>] "
+	    "[--display-adaptation-level=<d>] [--max-displayable-contrast=<c>]\n"
 	    "tonemap -m|--method=drago03 [-l|--max-absolute-luminance=<l>] [--max-display-luminance=<d>] [--bias=<b>]\n"
 	    "tonemap -m|--method=durand02 [-l|--max-absolute-luminance=<l>] [--sigma-spatial=<ss>] [--sigma-luminance=<sl>] [--base-contrast=<bc>]\n"
 	    "\n"
@@ -41,6 +43,7 @@ void cmd_tonemap_print_help(void)
 	    "are written to standard output.\n"
 	    "See the original papers for a description of the parameters.\n"
 	    "The default for the maximum absolute luminance is to get it from the file (if specified), or else 150.0.\n"
+	    "The defaults for tumblinrushmeier99 are d=100.0, c=70.0.\n"
 	    "The defaults for drago03 are d=200.0, b=0.85.\n"
 	    "The defaults for durand02 are ss=0.3, sl=0.4, bc=2.0. The results of this method need to be gamma corrected!");
 }
@@ -48,10 +51,12 @@ void cmd_tonemap_print_help(void)
 
 int cmd_tonemap(int argc, char *argv[])
 {
-    typedef enum { TM_DRAGO03, TM_DURAND02 = 0 } method_t;
-    const char *method_names[] = { "drago03", "durand02" , NULL };
+    typedef enum { TM_TR99, TM_DRAGO03, TM_DURAND02 = 0 } method_t;
+    const char *method_names[] = { "tumblinrushmeier99", "drago03", "durand02" , NULL };
     mh_option_name_t method = { -1, method_names };
     mh_option_float_t max_abs_lum = { -1.0f, 0.0f, false, FLT_MAX, true };
+    mh_option_float_t tr99_disp_adapt_level = { 100.0f, 0.0f, false, FLT_MAX, true };
+    mh_option_float_t tr99_max_contrast = { 70.0f, 0.0f, false, FLT_MAX, true };
     mh_option_float_t drago03_max_disp_lum = { 200.0f, 0.0f, false, FLT_MAX, true };
     mh_option_float_t drago03_bias = { 0.85f, 0.0f, true, 1.0f, true };
     mh_option_float_t durand02_sigma_spatial = { 0.3f, 0.0f, false, FLT_MAX, true };
@@ -59,13 +64,15 @@ int cmd_tonemap(int argc, char *argv[])
     mh_option_float_t durand02_base_contrast = { 3.0f, 1.0f, false, FLT_MAX, true };
     mh_option_t options[] = 
     {
-	{ "method",                 'm',  MH_OPTION_NAME,  &method,                   true  },
-	{ "max-absolute-luminance", 'l',  MH_OPTION_FLOAT, &max_abs_lum,              false },
-	{ "max-display-luminance",  '\0', MH_OPTION_FLOAT, &drago03_max_disp_lum,     false },
-	{ "bias",                   '\0', MH_OPTION_FLOAT, &drago03_bias,             false },
-	{ "sigma-spatial",          '\0', MH_OPTION_FLOAT, &durand02_sigma_spatial,   false },
-	{ "sigma-luminance" ,       '\0', MH_OPTION_FLOAT, &durand02_sigma_luminance, false },
-	{ "base-contrast",          '\0', MH_OPTION_FLOAT, &durand02_base_contrast,   false },
+	{ "method",                    'm', MH_OPTION_NAME,  &method,                   true  },
+	{ "max-absolute-luminance",    'l', MH_OPTION_FLOAT, &max_abs_lum,              false },
+	{ "display-adaptation-level", '\0', MH_OPTION_FLOAT, &tr99_disp_adapt_level,    false },
+	{ "max-displayable-contrast", '\0', MH_OPTION_FLOAT, &tr99_max_contrast,        false },
+	{ "max-display-luminance",    '\0', MH_OPTION_FLOAT, &drago03_max_disp_lum,     false },
+	{ "bias",                     '\0', MH_OPTION_FLOAT, &drago03_bias,             false },
+	{ "sigma-spatial",            '\0', MH_OPTION_FLOAT, &durand02_sigma_spatial,   false },
+	{ "sigma-luminance" ,         '\0', MH_OPTION_FLOAT, &durand02_sigma_luminance, false },
+	{ "base-contrast",            '\0', MH_OPTION_FLOAT, &durand02_base_contrast,   false },
 	mh_option_null
     };
     cvl_stream_type_t stream_type;
@@ -114,12 +121,17 @@ int cmd_tonemap(int argc, char *argv[])
 	    max_abs_lum.value = 150.0f;
 	}
 	tonemapped_frame = cvl_frame_new_tpl(frame);
-	if (method.value == TM_DRAGO03)
+	if (method.value == TM_TR99)
+	{
+	    cvl_tonemap_tumblinrushmeier99(tonemapped_frame, frame, max_abs_lum.value,
+		    tr99_disp_adapt_level.value, tr99_max_contrast.value);
+	}
+	else if (method.value == TM_DRAGO03)
 	{
 	    cvl_tonemap_drago03(tonemapped_frame, frame, max_abs_lum.value, 
 		    drago03_bias.value, drago03_max_disp_lum.value);
 	}
-	else // (method.value == TM_DURAND02)
+	else if (method.value == TM_DURAND02)
 	{
 	    // Limit kernel size to 9x9 because the graphics card cannot handle more
 	    cvl_tonemap_durand02(tonemapped_frame, frame, max_abs_lum.value,
