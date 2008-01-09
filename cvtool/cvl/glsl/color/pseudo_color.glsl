@@ -34,11 +34,11 @@ void main()
     float x = texture2D(tex, gl_TexCoord[0].xy).CHANNEL;
     x = (clamp(x, xmin, xmax) - xmin) / (xmax - xmin);
 
-    float H = (-1.0 / 3.0) + startcolor + factor * x;
-    if (H < 0.0)
+    float H = (2.0 / 3.0) - startcolor - factor * x;
+    if (H < -1.0)
+	H += 2.0;
+    else if (H < 0.0)
 	H += 1.0;
-    else if (H > 1.0)
-	H -= 1.0;
     float S = 1.0;
     float L = clamp(((1.0 - lightness) * 0.5) + lightness * x * 0.5, 0.0, 0.5);
     gl_FragColor = vec4(H, S, L, 0.0);

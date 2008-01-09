@@ -1,3 +1,8 @@
+2008-01-09  Martin Lambers <marlam@marlam.de>
+
+	* cvl/glsl/color/pseudo_color.glsl: Fix pseudo color computation: Use
+	the hue values in the opposite direction.
+
 2008-01-08  Martin Lambers <marlam@marlam.de>
 
 	* doc/cvtool.texi: Fix description of color command.
