@@ -1,3 +1,8 @@
+2008-01-09  Martin Lambers <marlam@marlam.de>
+
+	* configure.ac: Require CVL >= 0.2.3 to benefit from a fix to the
+	pseudo color function.
+
 2007-12-08  Martin Lambers <marlam@marlam.de>
 
 	* configure.ac, doc/cvlview.1, doc/cvlview.texi: Bump version to
