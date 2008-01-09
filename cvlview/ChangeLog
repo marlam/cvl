@@ -2,6 +2,7 @@
 
 	* configure.ac: Require CVL >= 0.2.3 to benefit from a fix to the
 	pseudo color function.
+	* README: Update.
 
 2007-12-08  Martin Lambers <marlam@marlam.de>
 
