@@ -3,7 +3,7 @@
  * 
  * This file is part of CVL, a computer vision library.
  *
- * Copyright (C) 2007  Martin Lambers <marlam@marlam.de>
+ * Copyright (C) 2007, 2008  Martin Lambers <marlam@marlam.de>
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -53,8 +53,87 @@
 #include "cvl/cvl_hdr.h"
 
 #include "glsl/hdr/tonemap_drago03.glsl.h"
+#include "glsl/hdr/tonemap_tumblinrushmeier99_step1.glsl.h"
+#include "glsl/hdr/tonemap_tumblinrushmeier99_step2.glsl.h"
 #include "glsl/hdr/tonemap_durand02_step1.glsl.h"
 #include "glsl/hdr/tonemap_durand02_step2.glsl.h"
+
+
+// Helper function
+static float cvl_tonemap_tr_gamma(float L)
+{
+    return (L > 100.0f) ? 2.655f : 1.855f + 0.4f * logf(L + 2.3e-5f) / logf(10.0f);
+}
+
+/**
+ * \param dst				The destination frame.
+ * \param src				The source frame.
+ * \param max_abs_lum			Maximum absolute luminance.
+ * \param display_adaptation_level	Display adaptation level.
+ * \param max_displayable_contrast	Maximum displayable contrast.
+ *
+ * Applies tone mapping to the high dynamic range frame \a src and writes the
+ * result to \a dst. Input and output must be in #CVL_XYZ format.\n
+ * The \a display_adaptation_level parameter must be greater than zero.
+ * The \a max_displayable_contrast parameter must be greater than zero.\n
+ * See also section 7.2.2 in 
+ * E. Reinhard and G. Ward and S. Pattanaik and P. Debevec, 
+ * High Dynamic Range Imaging: Acquisition, Display and Image-based Lighting,
+ * Morgan Kaufmann, 2005, ISBN 0-12-585263-0
+ */
+void cvl_tonemap_tumblinrushmeier99(cvl_frame_t *dst, cvl_frame_t *src, float max_abs_lum, 
+	float display_adaptation_level, float max_displayable_contrast)
+{
+    cvl_assert(dst != NULL);
+    cvl_assert(src != NULL);
+    cvl_assert(dst != src);
+    cvl_assert(cvl_frame_format(dst) == CVL_XYZ);
+    cvl_assert(cvl_frame_format(src) == CVL_XYZ);
+    cvl_assert(max_abs_lum > 0.0f);
+    cvl_assert(display_adaptation_level > 0.0f);
+    cvl_assert(max_displayable_contrast > 0.0f);
+    if (cvl_error())
+	return;
+
+    GLuint prg;
+    float world_adaptation_level;
+
+    if ((prg = cvl_gl_program_cache_get("cvl_tonemap_tumblinrushmeier99_step1")) == 0)
+    {
+	prg = cvl_gl_program_new_src("cvl_tonemap_tumblinrushmeier99_step1", NULL, 
+		CVL_TONEMAP_TUMBLINRUSHMEIER99_STEP1_GLSL_STR);
+	cvl_gl_program_cache_put("cvl_tonemap_tumblinrushmeier99_step1", prg);
+    }
+    glUseProgram(prg);
+    glUniform1f(glGetUniformLocation(prg, "max_abs_lum"), max_abs_lum);
+    cvl_frame_t *tmp = cvl_frame_new(cvl_frame_width(src), cvl_frame_height(src), 
+	    1, CVL_UNKNOWN, CVL_FLOAT, CVL_TEXTURE);
+    cvl_transform(tmp, src);
+    cvl_reduce(tmp, CVL_REDUCE_SUM, 0, &world_adaptation_level);
+    world_adaptation_level = expf(world_adaptation_level / (float)cvl_frame_size(src));
+    cvl_frame_free(tmp);
+
+    float gamma_d = cvl_tonemap_tr_gamma(display_adaptation_level);
+    float gamma_w = cvl_tonemap_tr_gamma(world_adaptation_level);
+    float gamma_wd = gamma_w / (1.855f + 0.4f * logf(display_adaptation_level) / logf(10.0f));
+    float m = powf(sqrtf(max_displayable_contrast), gamma_wd - 1.0f);
+    if ((prg = cvl_gl_program_cache_get("cvl_tonemap_tumblinrushmeier99_step2")) == 0)
+    {
+	prg = cvl_gl_program_new_src("cvl_tonemap_tumblinrushmeier99_step2", NULL, 
+		CVL_TONEMAP_TUMBLINRUSHMEIER99_STEP2_GLSL_STR);
+	cvl_gl_program_cache_put("cvl_tonemap_tumblinrushmeier99_step2", prg);
+    }
+    glUseProgram(prg);
+    glUniform1f(glGetUniformLocation(prg, "max_abs_lum"), max_abs_lum);
+    glUniform1f(glGetUniformLocation(prg, "Lwa"), world_adaptation_level);
+    glUniform1f(glGetUniformLocation(prg, "Lda"), display_adaptation_level);
+    glUniform1f(glGetUniformLocation(prg, "m"), m);
+    glUniform1f(glGetUniformLocation(prg, "gamma_w"), gamma_w);
+    glUniform1f(glGetUniformLocation(prg, "gamma_d"), gamma_d);
+    cvl_transform(dst, src);
+
+    cvl_check_errors();
+}
 
 
 /**
@@ -67,7 +146,7 @@
  * Applies tone mapping to the high dynamic range frame \a src and writes the
  * result to \a dst. Input and output must be in #CVL_XYZ format.\n
  * The \a bias parameter must be from [0,1].
- * The \a max_disp_lum parameter must be greater than zero.
+ * The \a max_disp_lum parameter must be greater than zero.\n
  * See also:
  * F. Drago, K. Myszkowski, T. Annen and N. Chiba,
  * Adaptive Logarithmic Mapping For Displaying High Contrast Scenes.
@@ -98,6 +177,8 @@ void cvl_tonemap_drago03(cvl_frame_t *dst, cvl_frame_t *src, float max_abs_lum, 
     glUniform1f(glGetUniformLocation(prg, "factor"), (max_disp_lum / 100.0f) / logf(1.0f + max_abs_lum));
     glUniform1f(glGetUniformLocation(prg, "bias_cooked"), logf(bias) / logf(0.5f));
     cvl_transform(dst, src);
+
+    cvl_check_errors();
 }
 
 
@@ -113,7 +194,7 @@ void cvl_tonemap_drago03(cvl_frame_t *dst, cvl_frame_t *src, float max_abs_lum, 
  * Applies tone mapping to the high dynamic range frame \a src and writes the
  * result to \a dst. Input and output must be in #CVL_XYZ format.\n
  * The sigma values must be greater than zero, and the \a base_contrast
- * parameter must be grater than 1.
+ * parameter must be grater than 1.\n
  * See also:
  * F. Durand and J. Dorsey, Fast Bilateral Filtering for the Display of 
  * High-Dynamic-Range Images, Proc. ACM SIGGRAPH 2002, pp. 257-266.

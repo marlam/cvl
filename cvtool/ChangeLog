@@ -2,6 +2,10 @@
 
 	* cvl/glsl/color/pseudo_color.glsl: Fix pseudo color computation: Use
 	the hue values in the opposite direction.
+	* cvl/cvl_hdr.c, cvl/cvl/cvl_hdr.h,
+	cvl/glsl/hdr/tonemap_tumblinrushmeier99_step1.glsl,
+	cvl/glsl/hdr/tonemap_tumblinrushmeier99_step2.glsl, cvl/Makefile.am: 
+	Add cvl_tonemap_tumblinrushmeier99().
 
 2008-01-08  Martin Lambers <marlam@marlam.de>
 

@@ -1,13 +1,13 @@
 /*
- * cvl_hdr.h
+ * tonemap_tumblinrushmeier_step1.glsl
  * 
  * This file is part of CVL, a computer vision library.
  *
- * Copyright (C) 2007  Martin Lambers <marlam@marlam.de>
+ * Copyright (C) 2008  Martin Lambers <marlam@marlam.de>
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation; either version 2 of the License, or
+ *   the Free Software Foundation; either version 3 of the License, or
  *   (at your option) any later version.
  *
  *   This program is distributed in the hope that it will be useful,
@@ -19,17 +19,12 @@
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CVL_HDR_H
-#define CVL_HDR_H
+#version 110
 
-#include "cvl_frame.h"
+uniform float max_abs_lum;
+uniform sampler2D tex;
 
-void cvl_tonemap_tumblinrushmeier99(cvl_frame_t *dst, cvl_frame_t *src, float max_abs_lum, 
-	float display_adaptation_level, float max_displayable_contrast);
-
-void cvl_tonemap_drago03(cvl_frame_t *dst, cvl_frame_t *src, float max_abs_lum, float bias, float max_disp_lum);
-
-void cvl_tonemap_durand02(cvl_frame_t *dst, cvl_frame_t *src, float max_abs_lum, 
-	int k, float sigma_spatial, float sigma_luminance, float base_contrast);
-
-#endif
+void main()
+{
+    gl_FragColor = vec4(log(max_abs_lum * texture2D(tex, gl_TexCoord[0].xy).g), 0.0, 0.0, 0.0);
+}
