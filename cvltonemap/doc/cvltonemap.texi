@@ -62,7 +62,7 @@ Documentation License''.
 CVLTonemap is an viewer and tone mapping tool for high dynamic range images.
 It is based on the CVL library.
 
-The program’s homepage is @url{http://cvtool.sourceforge.net}.
+The program’s homepage is @url{http://cvtool.sourceforge.net/cvltonemap.html}.
 
 
 @node Copying Information

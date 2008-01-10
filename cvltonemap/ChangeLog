@@ -1,6 +1,7 @@
 2008-01-10  Martin Lambers <marlam@marlam.de>
 
 	* NEWS: Update.
+	* doc/cvltonemap.1, doc/cvltonemap.texi: Update.
 
 2008-01-09  Martin Lambers <marlam@marlam.de>
 
