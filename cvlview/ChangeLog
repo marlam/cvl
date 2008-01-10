@@ -6,6 +6,8 @@
 	spinboxes. This change replaces the erraneous patch from 2007-12-06.
 	* src/range_selector.h, src/range_selector.cpp: Simplify the previous
 	change.
+	* src/main.cpp, src/cvlview.cpp: Update copyright year in --version
+	output and AboutBox.
 
 2008-01-09  Martin Lambers <marlam@marlam.de>
 
