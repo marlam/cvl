@@ -372,20 +372,24 @@ void Selector::update_bounds()
 
 /* FloatSpinBox */
 
-bool FloatSpinBox::is_valid(const char *s) const
+QValidator::State FloatSpinBox::validate(QString &input, int &pos UNUSED) const
 {
+    const char *s;
     char *e;
     float x;
 
+    s = qPrintable(input);
     errno = 0;
     x = strtof(s, &e);
 
-    return (e != s && *e == '\0' && errno == 0 && finite(x));
-}
-
-QValidator::State FloatSpinBox::validate(QString &input, int &pos UNUSED) const
-{
-    return is_valid(qPrintable(input)) ? QValidator::Acceptable : QValidator::Intermediate;
+    if (e == s || *e != '\0' || errno != 0 || !finite(x))
+    {
+	return QValidator::Intermediate;
+    }
+    else
+    {
+	return QValidator::Acceptable;
+    }
 }
 
 QString FloatSpinBox::textFromValue(double value) const

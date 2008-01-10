@@ -75,9 +75,6 @@ class FloatSpinBox : public QDoubleSpinBox
 {
     Q_OBJECT
 
-    private:
-	bool is_valid(const char *s) const;
-
     public:
 	QValidator::State validate(QString &input, int &pos UNUSED) const;
 	QString textFromValue(double value) const;

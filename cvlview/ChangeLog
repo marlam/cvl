@@ -4,6 +4,8 @@
 	* doc/cvlview.1, doc/cvlview.texi: Update.
 	* src/range_selector.h, src/range_selector.cpp: Improve range
 	spinboxes. This change replaces the erraneous patch from 2007-12-06.
+	* src/range_selector.h, src/range_selector.cpp: Simplify the previous
+	change.
 
 2008-01-09  Martin Lambers <marlam@marlam.de>
 
