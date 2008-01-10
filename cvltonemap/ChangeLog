@@ -2,6 +2,8 @@
 
 	* NEWS: Update.
 	* doc/cvltonemap.1, doc/cvltonemap.texi: Update.
+	* src/main.cpp, src/cvltonemap.cpp: Update copyright year in --version
+	output and AboutBox.
 
 2008-01-09  Martin Lambers <marlam@marlam.de>
 
