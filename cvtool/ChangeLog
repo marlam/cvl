@@ -1,6 +1,7 @@
 2008-01-10  Martin Lambers <marlam@marlam.de>
 
 	* NEWS: Update.
+	* cvtool/cvtool.c: Update copyright year in --version output.
 
 2008-01-09  Martin Lambers <marlam@marlam.de>
 
