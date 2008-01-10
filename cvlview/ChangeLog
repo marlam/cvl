@@ -1,3 +1,7 @@
+2008-01-10  Martin Lambers <marlam@marlam.de>
+
+	* NEWS: Update.
+
 2008-01-09  Martin Lambers <marlam@marlam.de>
 
 	* configure.ac: Require CVL >= 0.2.3 to benefit from a fix to the

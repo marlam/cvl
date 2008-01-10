@@ -1,3 +1,6 @@
+Version 0.2.1:
+- Bug fixes.
+
 Version 0.2.0:
 - Multiple data sets in a single data file are now supported. The same viewing
   parameters are used for all data sets in a file. Opening a different file
