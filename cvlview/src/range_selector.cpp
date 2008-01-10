@@ -370,6 +370,35 @@ void Selector::update_bounds()
     emit range_selector->range_changed();
 }
 
+/* FloatSpinBox */
+
+bool FloatSpinBox::is_valid(const char *s) const
+{
+    char *e;
+    float x;
+
+    errno = 0;
+    x = strtof(s, &e);
+
+    return (e != s && *e == '\0' && errno == 0 && finite(x));
+}
+
+QValidator::State FloatSpinBox::validate(QString &input, int &pos UNUSED) const
+{
+    return is_valid(qPrintable(input)) ? QValidator::Acceptable : QValidator::Intermediate;
+}
+
+QString FloatSpinBox::textFromValue(double value) const
+{
+    return mh_string("%g", value).c_str();
+
+}
+
+double FloatSpinBox::valueFromText(const QString &text) const
+{
+    return strtof(qPrintable(text), NULL);
+}
+
 /* RangeSelector */
 
 RangeSelector::RangeSelector(cvl_frame_t **frame,
@@ -395,11 +424,11 @@ RangeSelector::RangeSelector(cvl_frame_t **frame,
     }
     _channel = _channel_selector->get_channel();
 
-    _lowerbound_spinbox = new QDoubleSpinBox();
+    _lowerbound_spinbox = new FloatSpinBox();
     _lowerbound_spinbox->setDecimals(99);
     _lowerbound_spinbox->setRange(-FLT_MAX, +FLT_MAX);
     connect(_lowerbound_spinbox, SIGNAL(valueChanged(double)), this, SLOT(set_lowerbound(double)));
-    _upperbound_spinbox = new QDoubleSpinBox();
+    _upperbound_spinbox = new FloatSpinBox();
     _upperbound_spinbox->setDecimals(99);
     _upperbound_spinbox->setRange(-FLT_MAX, +FLT_MAX);
     connect(_upperbound_spinbox, SIGNAL(valueChanged(double)), this, SLOT(set_upperbound(double)));

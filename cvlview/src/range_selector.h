@@ -71,6 +71,19 @@ class Selector : public QLabel
    	void wheelEvent(QWheelEvent *e);
 };
 
+class FloatSpinBox : public QDoubleSpinBox
+{
+    Q_OBJECT
+
+    private:
+	bool is_valid(const char *s) const;
+
+    public:
+	QValidator::State validate(QString &input, int &pos UNUSED) const;
+	QString textFromValue(double value) const;
+	double valueFromText(const QString &text) const;
+};
+
 class RangeSelector : public QWidget
 {
     Q_OBJECT
@@ -80,8 +93,8 @@ class RangeSelector : public QWidget
 	ChannelSelector *_channel_selector;
 	ChannelInfo *_channel_info;
 	// Range Selector contents:
-	QDoubleSpinBox *_lowerbound_spinbox;
-	QDoubleSpinBox *_upperbound_spinbox;
+	FloatSpinBox *_lowerbound_spinbox;
+	FloatSpinBox *_upperbound_spinbox;
 	QPushButton *_boundreset_button;
 	Selector *_selector;
 	QCheckBox *_log_x_box;
