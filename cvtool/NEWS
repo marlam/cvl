@@ -1,6 +1,11 @@
 Version 0.2.3:
-- Cvtool: New command 'mix'.
-- CVL: New function cvl_mix().
+- Bug fixes.
+- CVL:
+  - New function cvl_mix().
+  - New tonemap functions for the methods schlick94 and tumblinrushmeier99.
+- Cvtool:
+  - New command 'mix'.
+  - New methods schlick94 and tumblinrushmeier99 for the tonemap command.
 
 Version 0.2.2:
 - Bug fixes.
