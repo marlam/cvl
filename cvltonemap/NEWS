@@ -1,3 +1,7 @@
+Version 0.2.0:
+- Added support for the tonemap methods Schlick 94 and Tumblin/Rushmeier 99.
+- Bug fixes.
+
 Version 0.1.1:
 - Parameter sets can be saved and loaded.
 - Postprocessing parameters are stored for each tone mapping method separately.

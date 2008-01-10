@@ -1,3 +1,7 @@
+2008-01-10  Martin Lambers <marlam@marlam.de>
+
+	* NEWS: Update.
+
 2008-01-09  Martin Lambers <marlam@marlam.de>
 
 	* configure.ac, src/tonemap_selector.h, src/tonemap_selector.cpp,
