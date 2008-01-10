@@ -1,8 +1,8 @@
 \input texinfo   @c -*-texinfo-*-
 @afourpaper
 @setfilename cvlview.info
-@set UPDATED December 8, 2007
-@set UPDATED-MONTH December 2007
+@set UPDATED January 10, 2008
+@set UPDATED-MONTH January 2009
 @set EDITION 0.2.1
 @set VERSION 0.2.1
 @settitle CVLView @value{VERSION}
@@ -15,7 +15,7 @@
 This manual was last updated @value{UPDATED} for version
 @value{VERSION} of CVLView.
 
-Copyright @copyright{} 2007 Martin Lambers
+Copyright @copyright{} 2007, 2008 Martin Lambers
 
 @quotation
 Permission is granted to copy, distribute and/or modify this document

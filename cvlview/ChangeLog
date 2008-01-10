@@ -1,6 +1,7 @@
 2008-01-10  Martin Lambers <marlam@marlam.de>
 
 	* NEWS: Update.
+	* doc/cvlview.1, doc/cvlview.texi: Update.
 
 2008-01-09  Martin Lambers <marlam@marlam.de>
 
