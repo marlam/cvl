@@ -63,7 +63,6 @@
 /**
  * \param dst			The destination frame.
  * \param src			The source frame.
- * \param max_abs_lum		Maximum absolute luminance.
  * \param p			Parameter.
  *
  * Applies tone mapping to the high dynamic range frame \a src and writes the
