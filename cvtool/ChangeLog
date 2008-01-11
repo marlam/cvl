@@ -1,6 +1,8 @@
 2008-01-11  Martin Lambers <marlam@marlam.de>
 
 	* cvl/cvl_hdr.c: Fix documentation of cvl_tonemap_schlick94().
+	* doc/cvl.texi, doc/cvtool.1, doc/doxy/doxyfile: Bump version to
+	0.2.3.
 
 2008-01-10  Martin Lambers <marlam@marlam.de>
 

@@ -1,10 +1,10 @@
 \input texinfo   @c -*-texinfo-*-
 @afourpaper
 @setfilename cvl.info
-@set UPDATED October 16, 2007
-@set UPDATED-MONTH October 2007
-@set EDITION 0.2.2
-@set VERSION 0.2.2
+@set UPDATED January 11, 2008
+@set UPDATED-MONTH January 2008
+@set EDITION 0.2.3
+@set VERSION 0.2.3
 @settitle CVL @value{VERSION}
 
 @c Define new indices: for options (op) and commands (cm)
@@ -16,7 +16,7 @@
 This manual was last updated @value{UPDATED} for version
 @value{VERSION} of CVL.
 
-Copyright @copyright{} 2005, 2006, 2007 Martin Lambers
+Copyright @copyright{} 2005, 2006, 2007, 2008 Martin Lambers
 
 @quotation
 Permission is granted to copy, distribute and/or modify this document
