@@ -1,3 +1,8 @@
+2008-01-12  Martin Lambers <marlam@marlam.de>
+
+	* src/tonemap_selector.h, src/tonemap_selector.cpp, src/view_area.cpp,
+	NEWS: Rename tumblinrushmeier99 to tumblin99, as in CVL.
+
 2008-01-10  Martin Lambers <marlam@marlam.de>
 
 	* NEWS: Update.

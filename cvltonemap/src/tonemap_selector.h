@@ -88,7 +88,7 @@ class TonemapSelector : public QWidget
 	
 	static const int RANGE_SELECTION	= 0;
 	static const int SCHLICK94		= 1;
-	static const int TUMBLINRUSHMEIER99	= 2;
+	static const int TUMBLIN99		= 2;
 	static const int DRAGO03		= 3;
 	static const int DURAND02		= 4;
 
@@ -112,7 +112,7 @@ class TonemapSelector : public QWidget
 
     friend class TonemapRangeSelectionParameterSelector;
     friend class TonemapSchlick94ParameterSelector;
-    friend class TonemapTumblinRushmeier99ParameterSelector;
+    friend class TonemapTumblin99ParameterSelector;
     friend class TonemapDrago03ParameterSelector;
     friend class TonemapDurand02ParameterSelector;
 };
@@ -252,9 +252,9 @@ class TonemapSchlick94ParameterSelector : public TonemapParameterSelector
 	void set_parameters(Conf *conf);
 };
 
-/* Tumblin/Rushmeier 99 */
+/* Tumblin/ 99 */
 
-class TonemapTumblinRushmeier99ParameterSelector : public TonemapParameterSelector
+class TonemapTumblin99ParameterSelector : public TonemapParameterSelector
 {
     Q_OBJECT
 
@@ -276,19 +276,19 @@ class TonemapTumblinRushmeier99ParameterSelector : public TonemapParameterSelect
         void max_contrast_slider_changed(int x);
 
     public:
-	TonemapTumblinRushmeier99ParameterSelector(
+	TonemapTumblin99ParameterSelector(
 		TonemapSelector *tonemap_selector, cvl_frame_t **frame);
-	~TonemapTumblinRushmeier99ParameterSelector();
+	~TonemapTumblin99ParameterSelector();
 	void update();
 	
 	const char *name() const
 	{
-	    return "Tumblin/Rushmeier 99";
+	    return "Tumblin 99";
 	}
 	
 	const char *id() const
 	{
-	    return "tumblinrushmeier99";
+	    return "tumblin99";
 	}
 
 	bool is_global() const

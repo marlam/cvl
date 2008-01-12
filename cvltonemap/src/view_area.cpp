@@ -160,15 +160,15 @@ void ViewArea::paintGL()
 	    float p = parameter_selector->get_p();
 	    cvl_tonemap_schlick94(_frame1, *_frame, p);
 	}
-	else if (_tonemap_selector->active_tonemap_method() == TonemapSelector::TUMBLINRUSHMEIER99)
+	else if (_tonemap_selector->active_tonemap_method() == TonemapSelector::TUMBLIN99)
 	{
-	    TonemapTumblinRushmeier99ParameterSelector *parameter_selector
-		= reinterpret_cast<TonemapTumblinRushmeier99ParameterSelector *>(
+	    TonemapTumblin99ParameterSelector *parameter_selector
+		= reinterpret_cast<TonemapTumblin99ParameterSelector *>(
 			_tonemap_selector->parameter_selector());
 	    float max_abs_lum = parameter_selector->get_max_abs_lum();
 	    float disp_adapt_level = parameter_selector->get_disp_adapt_level();
 	    float max_contrast = parameter_selector->get_max_contrast();
-	    cvl_tonemap_tumblinrushmeier99(_frame1, *_frame, max_abs_lum, disp_adapt_level, max_contrast);
+	    cvl_tonemap_tumblin99(_frame1, *_frame, max_abs_lum, disp_adapt_level, max_contrast);
 	}
 	else if (_tonemap_selector->active_tonemap_method() == TonemapSelector::DRAGO03)
 	{

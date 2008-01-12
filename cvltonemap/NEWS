@@ -1,5 +1,5 @@
 Version 0.2.0:
-- Added support for the tonemap methods Schlick 94 and Tumblin/Rushmeier 99.
+- Added support for the tonemap methods Schlick 94 and Tumblin 99.
 - Bug fixes.
 
 Version 0.1.1:

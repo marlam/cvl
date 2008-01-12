@@ -55,7 +55,7 @@ TonemapSelector::TonemapSelector(cvl_frame_t **frame, QWidget *parent)
     _parameter_selector = new TonemapParameterSelector *[_method_count];
     _parameter_selector[0] = new TonemapRangeSelectionParameterSelector(this, _frame);
     _parameter_selector[1] = new TonemapSchlick94ParameterSelector(this, _frame);
-    _parameter_selector[2] = new TonemapTumblinRushmeier99ParameterSelector(this, _frame);
+    _parameter_selector[2] = new TonemapTumblin99ParameterSelector(this, _frame);
     _parameter_selector[3] = new TonemapDrago03ParameterSelector(this, _frame);
     _parameter_selector[4] = new TonemapDurand02ParameterSelector(this, _frame);
     /* <--- End. */
@@ -566,9 +566,9 @@ void TonemapSchlick94ParameterSelector::set_parameters(Conf *conf)
 }
 
 
-/* TumblinRushmeier99 */
+/* Tumblin99 */
 
-TonemapTumblinRushmeier99ParameterSelector::TonemapTumblinRushmeier99ParameterSelector(
+TonemapTumblin99ParameterSelector::TonemapTumblin99ParameterSelector(
 	TonemapSelector *tonemap_selector, cvl_frame_t **frame)
 {
     _tonemap_selector = tonemap_selector;
@@ -613,16 +613,16 @@ TonemapTumblinRushmeier99ParameterSelector::TonemapTumblinRushmeier99ParameterSe
     update();
 }
 
-TonemapTumblinRushmeier99ParameterSelector::~TonemapTumblinRushmeier99ParameterSelector()
+TonemapTumblin99ParameterSelector::~TonemapTumblin99ParameterSelector()
 {
 }
 
-void TonemapTumblinRushmeier99ParameterSelector::max_abs_lum_changed()
+void TonemapTumblin99ParameterSelector::max_abs_lum_changed()
 {
     emit _tonemap_selector->tonemap_changed();
 }
 
-void TonemapTumblinRushmeier99ParameterSelector::update()
+void TonemapTumblin99ParameterSelector::update()
 {
     _lock = true;
     _max_abs_lum_selector->update();
@@ -634,7 +634,7 @@ void TonemapTumblinRushmeier99ParameterSelector::update()
     emit _tonemap_selector->tonemap_changed();
 }
 
-void TonemapTumblinRushmeier99ParameterSelector::set_disp_adapt_level(double x)
+void TonemapTumblin99ParameterSelector::set_disp_adapt_level(double x)
 {
     _lock = true;
     _disp_adapt_level_slider->setValue(mh_iround(100.0 * x));
@@ -642,13 +642,13 @@ void TonemapTumblinRushmeier99ParameterSelector::set_disp_adapt_level(double x)
     emit _tonemap_selector->tonemap_changed();
 }
 
-void TonemapTumblinRushmeier99ParameterSelector::disp_adapt_level_slider_changed(int x)
+void TonemapTumblin99ParameterSelector::disp_adapt_level_slider_changed(int x)
 {
     if (!_lock)
 	_disp_adapt_level_spinbox->setValue(static_cast<double>(x) / 100.0);
 }
 
-void TonemapTumblinRushmeier99ParameterSelector::set_max_contrast(double x)
+void TonemapTumblin99ParameterSelector::set_max_contrast(double x)
 {
     _lock = true;
     _max_contrast_slider->setValue(mh_iround(100.0 * x));
@@ -656,20 +656,20 @@ void TonemapTumblinRushmeier99ParameterSelector::set_max_contrast(double x)
     emit _tonemap_selector->tonemap_changed();
 }
 
-void TonemapTumblinRushmeier99ParameterSelector::max_contrast_slider_changed(int x)
+void TonemapTumblin99ParameterSelector::max_contrast_slider_changed(int x)
 {
     if (!_lock)
 	_max_contrast_spinbox->setValue(static_cast<double>(x) / 100.0);
 }
 
-void TonemapTumblinRushmeier99ParameterSelector::get_parameters(Conf *conf) const
+void TonemapTumblin99ParameterSelector::get_parameters(Conf *conf) const
 {
     _max_abs_lum_selector->get_parameters(conf);
     conf->put(mh_string("%s-disp_adapt_level", id()).c_str(), _disp_adapt_level_spinbox->value());
     conf->put(mh_string("%s-max_contrast", id()).c_str(), _max_contrast_spinbox->value());
 }
 
-void TonemapTumblinRushmeier99ParameterSelector::set_parameters(Conf *conf)
+void TonemapTumblin99ParameterSelector::set_parameters(Conf *conf)
 {
     _max_abs_lum_selector->set_parameters(conf);
     _disp_adapt_level_spinbox->setValue(conf->get(mh_string("%s-disp_adapt_level", id()).c_str(), 0.01, 999.99, 200.0));
