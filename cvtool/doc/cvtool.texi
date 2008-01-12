@@ -1252,7 +1252,7 @@ frame pair 0: standard deviation = 0.1969 0.1969 0.0000
 @subsection tonemap
 @cmindex tonemap
 @code{tonemap -m|--method=schlick94 [--brightness=@var{b}]}
-@code{tonemap -m|--method=tumblinrushmeier99 [-l|--max-absolute-luminance=@var{l}] [--display-adaptation-level=@var{d}]
+@code{tonemap -m|--method=tumblin99 [-l|--max-absolute-luminance=@var{l}] [--display-adaptation-level=@var{d}]
 [--max-displayable-contrast=@var{c}]}
 @code{tonemap -m|--method=drago03 [-l|--max-absolute-luminance=@var{l}] [--max-display-luminance=@var{d}] [--bias=@var{b}]}
 @code{tonemap -m|--method=durand02 [-l|--max-absolute-luminance=@var{l}] [--sigma-spatial=@var{ss}] [--sigma-color=@var{sc}] [--base-contrast=@var{bc}]}
@@ -1267,7 +1267,7 @@ The default for the maximum absolute luminance is to get it from the file (if sp
 
 The default for schlick94 is @var{b}=100.0.
 
-The defaults for tumblinrushmeier99 are @var{d}=100.0, @var{c}=70.0.
+The defaults for tumblin99 are @var{d}=100.0, @var{c}=70.0.
 
 The defaults for drago03 are @var{d}=200.0, @var{b}=0.85.
 
@@ -1282,7 +1282,7 @@ E. Reinhard, G. Ward, S. Pattanaik, and P. Debevec. High Dynamic
 Range Imaging: Acquisition, Display and Image-based Lighting. @cite{Morgan Kaufmann}, 2005.
 @item For the @code{schlick94} method:@*
 Section 7.2.9 of the HDRI book.
-@item For the @code{tumblinrushmeier99} method:@*
+@item For the @code{tumblin99} method:@*
 Section 7.2.2 of the HDRI book.
 @item For the @code{drago03} method:@*
 F. Drago, K. Myszkowski, T. Annen and N. Chiba. Adaptive Logarithmic Mapping For Displaying High Contrast Scenes.

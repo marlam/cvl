@@ -53,8 +53,8 @@
 #include "cvl/cvl_hdr.h"
 
 #include "glsl/hdr/tonemap_schlick94.glsl.h"
-#include "glsl/hdr/tonemap_tumblinrushmeier99_step1.glsl.h"
-#include "glsl/hdr/tonemap_tumblinrushmeier99_step2.glsl.h"
+#include "glsl/hdr/tonemap_tumblin99_step1.glsl.h"
+#include "glsl/hdr/tonemap_tumblin99_step2.glsl.h"
 #include "glsl/hdr/tonemap_drago03.glsl.h"
 #include "glsl/hdr/tonemap_durand02_step1.glsl.h"
 #include "glsl/hdr/tonemap_durand02_step2.glsl.h"
@@ -121,7 +121,7 @@ static float cvl_tonemap_tr_gamma(float L)
  * High Dynamic Range Imaging: Acquisition, Display and Image-based Lighting,
  * Morgan Kaufmann, 2005, ISBN 0-12-585263-0
  */
-void cvl_tonemap_tumblinrushmeier99(cvl_frame_t *dst, cvl_frame_t *src, float max_abs_lum, 
+void cvl_tonemap_tumblin99(cvl_frame_t *dst, cvl_frame_t *src, float max_abs_lum, 
 	float display_adaptation_level, float max_displayable_contrast)
 {
     cvl_assert(dst != NULL);
@@ -138,11 +138,11 @@ void cvl_tonemap_tumblinrushmeier99(cvl_frame_t *dst, cvl_frame_t *src, float ma
     GLuint prg;
     float world_adaptation_level;
 
-    if ((prg = cvl_gl_program_cache_get("cvl_tonemap_tumblinrushmeier99_step1")) == 0)
+    if ((prg = cvl_gl_program_cache_get("cvl_tonemap_tumblin99_step1")) == 0)
     {
-	prg = cvl_gl_program_new_src("cvl_tonemap_tumblinrushmeier99_step1", NULL, 
-		CVL_TONEMAP_TUMBLINRUSHMEIER99_STEP1_GLSL_STR);
-	cvl_gl_program_cache_put("cvl_tonemap_tumblinrushmeier99_step1", prg);
+	prg = cvl_gl_program_new_src("cvl_tonemap_tumblin99_step1", NULL, 
+		CVL_TONEMAP_TUMBLIN99_STEP1_GLSL_STR);
+	cvl_gl_program_cache_put("cvl_tonemap_tumblin99_step1", prg);
     }
     glUseProgram(prg);
     glUniform1f(glGetUniformLocation(prg, "max_abs_lum"), max_abs_lum);
@@ -157,11 +157,11 @@ void cvl_tonemap_tumblinrushmeier99(cvl_frame_t *dst, cvl_frame_t *src, float ma
     float gamma_w = cvl_tonemap_tr_gamma(world_adaptation_level);
     float gamma_wd = gamma_w / (1.855f + 0.4f * logf(display_adaptation_level) / logf(10.0f));
     float m = powf(sqrtf(max_displayable_contrast), gamma_wd - 1.0f);
-    if ((prg = cvl_gl_program_cache_get("cvl_tonemap_tumblinrushmeier99_step2")) == 0)
+    if ((prg = cvl_gl_program_cache_get("cvl_tonemap_tumblin99_step2")) == 0)
     {
-	prg = cvl_gl_program_new_src("cvl_tonemap_tumblinrushmeier99_step2", NULL, 
-		CVL_TONEMAP_TUMBLINRUSHMEIER99_STEP2_GLSL_STR);
-	cvl_gl_program_cache_put("cvl_tonemap_tumblinrushmeier99_step2", prg);
+	prg = cvl_gl_program_new_src("cvl_tonemap_tumblin99_step2", NULL, 
+		CVL_TONEMAP_TUMBLIN99_STEP2_GLSL_STR);
+	cvl_gl_program_cache_put("cvl_tonemap_tumblin99_step2", prg);
     }
     glUseProgram(prg);
     glUniform1f(glGetUniformLocation(prg, "max_abs_lum"), max_abs_lum);

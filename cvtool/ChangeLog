@@ -1,3 +1,9 @@
+2008-01-12  Martin Lambers <marlam@marlam.de>
+
+	* cvl/cvl/cvl_hdr.h, cvl/cvl_hdr.c, cvl/Makefile.am, 
+	tests/cmd_tonemap.sh, doc/cvtool.texi, cvtool/cmd_tonemap.c, NEWS:
+	Rename tumblinrushmeier99 to tumblin99 for consistency.
+
 2008-01-11  Martin Lambers <marlam@marlam.de>
 
 	* cvl/cvl_hdr.c: Fix documentation of cvl_tonemap_schlick94().

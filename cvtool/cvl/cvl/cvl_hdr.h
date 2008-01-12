@@ -26,7 +26,7 @@
 
 void cvl_tonemap_schlick94(cvl_frame_t *dst, cvl_frame_t *src, float p);
 
-void cvl_tonemap_tumblinrushmeier99(cvl_frame_t *dst, cvl_frame_t *src, float max_abs_lum, 
+void cvl_tonemap_tumblin99(cvl_frame_t *dst, cvl_frame_t *src, float max_abs_lum, 
 	float display_adaptation_level, float max_displayable_contrast);
 
 void cvl_tonemap_drago03(cvl_frame_t *dst, cvl_frame_t *src, float max_abs_lum, float bias, float max_disp_lum);

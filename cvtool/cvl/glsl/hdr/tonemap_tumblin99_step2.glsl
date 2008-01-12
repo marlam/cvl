@@ -1,5 +1,5 @@
 /*
- * tonemap_tumblinrushmeier_step2.glsl
+ * tonemap_tumblin_step2.glsl
  * 
  * This file is part of CVL, a computer vision library.
  *

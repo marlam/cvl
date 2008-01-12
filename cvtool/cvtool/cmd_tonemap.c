@@ -35,7 +35,7 @@ void cmd_tonemap_print_help(void)
 {
     mh_msg_fmt_req(
 	    "tonemap -m|--method=schlick94 [--brightness=<b>]\n"
-	    "tonemap -m|--method=tumblinrushmeier99 [-l|--max-absolute-luminance=<l>] "
+	    "tonemap -m|--method=tumblin99 [-l|--max-absolute-luminance=<l>] "
 	    "[--display-adaptation-level=<d>] [--max-displayable-contrast=<c>]\n"
 	    "tonemap -m|--method=drago03 [-l|--max-absolute-luminance=<l>] [--max-display-luminance=<d>] [--bias=<b>]\n"
 	    "tonemap -m|--method=durand02 [-l|--max-absolute-luminance=<l>] [--sigma-spatial=<ss>] [--sigma-luminance=<sl>] [--base-contrast=<bc>]\n"
@@ -45,7 +45,7 @@ void cmd_tonemap_print_help(void)
 	    "See the original papers for a description of the parameters.\n"
 	    "The default for the maximum absolute luminance is to get it from the file (if specified), or else 150.0.\n"
 	    "The default for schlick94 is b=100.0.\n"
-	    "The defaults for tumblinrushmeier99 are d=100.0, c=70.0.\n"
+	    "The defaults for tumblin99 are d=100.0, c=70.0.\n"
 	    "The defaults for drago03 are d=200.0, b=0.85.\n"
 	    "The defaults for durand02 are ss=0.3, sl=0.4, bc=2.0. The results of this method need to be gamma corrected!");
 }
@@ -53,8 +53,8 @@ void cmd_tonemap_print_help(void)
 
 int cmd_tonemap(int argc, char *argv[])
 {
-    typedef enum { TM_SCHLICK94, TM_TR99, TM_DRAGO03, TM_DURAND02 = 0 } method_t;
-    const char *method_names[] = { "schlick94", "tumblinrushmeier99", "drago03", "durand02" , NULL };
+    typedef enum { TM_SCHLICK94, TM_TUMBLIN99, TM_DRAGO03, TM_DURAND02 = 0 } method_t;
+    const char *method_names[] = { "schlick94", "tumblin99", "drago03", "durand02" , NULL };
     mh_option_name_t method = { -1, method_names };
     mh_option_float_t max_abs_lum = { -1.0f, 0.0f, false, FLT_MAX, true };
     mh_option_float_t schlick94_p = { 100.0f, 1.0f, true, FLT_MAX, true };
@@ -129,9 +129,9 @@ int cmd_tonemap(int argc, char *argv[])
 	{
 	    cvl_tonemap_schlick94(tonemapped_frame, frame, schlick94_p.value);
 	}
-	else if (method.value == TM_TR99)
+	else if (method.value == TM_TUMBLIN99)
 	{
-	    cvl_tonemap_tumblinrushmeier99(tonemapped_frame, frame, max_abs_lum.value,
+	    cvl_tonemap_tumblin99(tonemapped_frame, frame, max_abs_lum.value,
 		    tr99_disp_adapt_level.value, tr99_max_contrast.value);
 	}
 	else if (method.value == TM_DRAGO03)
