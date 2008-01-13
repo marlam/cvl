@@ -1,3 +1,8 @@
+2008-01-13  Martin Lambers <marlam@marlam.de>
+
+	* src/tonemap_selector.h, src/tonemap_selector.cpp, src/view_area.cpp:
+	Add support for the reinhard05 method.
+
 2008-01-12  Martin Lambers <marlam@marlam.de>
 
 	* src/tonemap_selector.h, src/tonemap_selector.cpp, src/view_area.cpp,

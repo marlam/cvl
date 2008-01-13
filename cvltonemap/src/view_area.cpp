@@ -180,6 +180,40 @@ void ViewArea::paintGL()
 	    float max_disp_lum = parameter_selector->get_max_disp_lum();
 	    cvl_tonemap_drago03(_frame1, *_frame, max_abs_lum, bias, max_disp_lum);
 	}
+	else if (_tonemap_selector->active_tonemap_method() == TonemapSelector::REINHARD05)
+	{
+	    static cvl_frame_t *frame = NULL;
+	    static float min_lum;
+	    static float avg_lum;
+	    static float log_avg_lum;
+	    static cvl_frame_t *rgb = NULL;
+	    static float channel_avg[4];
+	    if (frame != *_frame)
+	    {
+		cvl_reduce(*_frame, CVL_REDUCE_MIN, 1, &min_lum);
+		cvl_reduce(*_frame, CVL_REDUCE_SUM, 1, &avg_lum);
+		avg_lum /= static_cast<float>(cvl_frame_size(*_frame));
+		log_avg_lum = cvl_log_avg_lum(*_frame, 1.0f);
+		cvl_frame_free(rgb);
+		rgb = cvl_frame_new(cvl_frame_width(*_frame), cvl_frame_height(*_frame), 3, CVL_RGB, CVL_FLOAT, CVL_TEXTURE);
+		cvl_convert_format(rgb, *_frame);
+		cvl_reduce(rgb, CVL_REDUCE_SUM, -1, channel_avg);
+		channel_avg[0] /= static_cast<float>(cvl_frame_size(*_frame));
+		channel_avg[1] /= static_cast<float>(cvl_frame_size(*_frame));
+		channel_avg[2] /= static_cast<float>(cvl_frame_size(*_frame));
+		frame = *_frame;
+	    }
+	    TonemapReinhard05ParameterSelector *parameter_selector
+		= reinterpret_cast<TonemapReinhard05ParameterSelector *>(
+			_tonemap_selector->parameter_selector());
+	    float f = parameter_selector->get_f();
+	    float c = parameter_selector->get_c();
+	    float l = parameter_selector->get_l();
+	    cvl_tonemap_reinhard05(_frame1, *_frame, 
+		    min_lum, avg_lum, log_avg_lum, rgb, channel_avg,
+		    f, c, l);
+	    // FIXME: Free the RGB frame
+	}
 	else if (_tonemap_selector->active_tonemap_method() == TonemapSelector::DURAND02)
 	{
 	    TonemapDurand02ParameterSelector *parameter_selector

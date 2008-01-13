@@ -90,7 +90,8 @@ class TonemapSelector : public QWidget
 	static const int SCHLICK94		= 1;
 	static const int TUMBLIN99		= 2;
 	static const int DRAGO03		= 3;
-	static const int DURAND02		= 4;
+	static const int REINHARD05		= 4;
+	static const int DURAND02		= 5;
 
 	int active_tonemap_method() const 
 	{ 
@@ -114,6 +115,7 @@ class TonemapSelector : public QWidget
     friend class TonemapSchlick94ParameterSelector;
     friend class TonemapTumblin99ParameterSelector;
     friend class TonemapDrago03ParameterSelector;
+    friend class TonemapReinhard05ParameterSelector;
     friend class TonemapDurand02ParameterSelector;
 };
 
@@ -252,7 +254,7 @@ class TonemapSchlick94ParameterSelector : public TonemapParameterSelector
 	void set_parameters(Conf *conf);
 };
 
-/* Tumblin/ 99 */
+/* Tumblin99 */
 
 class TonemapTumblin99ParameterSelector : public TonemapParameterSelector
 {
@@ -372,6 +374,71 @@ class TonemapDrago03ParameterSelector : public TonemapParameterSelector
 	float get_bias() const
 	{
 	    return static_cast<float>(_bias_spinbox->value());
+	}
+
+	void get_parameters(Conf *conf) const;
+	void set_parameters(Conf *conf);
+};
+
+/* Reinhard05 */
+
+class TonemapReinhard05ParameterSelector : public TonemapParameterSelector
+{
+    Q_OBJECT
+
+    private:
+	TonemapSelector *_tonemap_selector;
+	cvl_frame_t **_frame;
+	QDoubleSpinBox *_f_spinbox;
+	QSlider *_f_slider;
+	QDoubleSpinBox *_c_spinbox;
+	QSlider *_c_slider;
+	QDoubleSpinBox *_l_spinbox;
+	QSlider *_l_slider;
+	bool _lock;
+
+    private slots:
+	void set_f(double x);
+        void f_slider_changed(int x);
+	void set_c(double x);
+        void c_slider_changed(int x);
+	void set_l(double x);
+        void l_slider_changed(int x);
+
+    public:
+	TonemapReinhard05ParameterSelector(
+		TonemapSelector *tonemap_selector, cvl_frame_t **frame);
+	~TonemapReinhard05ParameterSelector();
+	void update();
+	
+	const char *name() const
+	{
+	    return "Reinhard 05";
+	}
+	
+	const char *id() const
+	{
+	    return "reinhard05";
+	}
+
+	bool is_global() const
+	{
+	    return true;
+	}
+
+	float get_f() const
+	{
+	    return static_cast<float>(_f_spinbox->value());
+	}
+
+	float get_c() const
+	{
+	    return static_cast<float>(_c_spinbox->value());
+	}
+
+	float get_l() const
+	{
+	    return static_cast<float>(_l_spinbox->value());
 	}
 
 	void get_parameters(Conf *conf) const;

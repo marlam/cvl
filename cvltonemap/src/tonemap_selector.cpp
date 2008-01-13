@@ -51,13 +51,14 @@ TonemapSelector::TonemapSelector(cvl_frame_t **frame, QWidget *parent)
     _frame = frame;
 
     /* When adding a new method, adjust only this block: ---> */
-    _method_count = 5;
+    _method_count = 6;
     _parameter_selector = new TonemapParameterSelector *[_method_count];
     _parameter_selector[0] = new TonemapRangeSelectionParameterSelector(this, _frame);
     _parameter_selector[1] = new TonemapSchlick94ParameterSelector(this, _frame);
     _parameter_selector[2] = new TonemapTumblin99ParameterSelector(this, _frame);
     _parameter_selector[3] = new TonemapDrago03ParameterSelector(this, _frame);
-    _parameter_selector[4] = new TonemapDurand02ParameterSelector(this, _frame);
+    _parameter_selector[4] = new TonemapReinhard05ParameterSelector(this, _frame);
+    _parameter_selector[5] = new TonemapDurand02ParameterSelector(this, _frame);
     /* <--- End. */
 
     _postproc_selector = new PostprocSelector *[_method_count];
@@ -785,6 +786,136 @@ void TonemapDrago03ParameterSelector::set_parameters(Conf *conf)
     _max_abs_lum_selector->set_parameters(conf);
     _max_disp_lum_spinbox->setValue(conf->get(mh_string("%s-maxdisplum", id()).c_str(), 0.01, 999.99, 200.0));
     _bias_spinbox->setValue(conf->get(mh_string("%s-bias", id()).c_str(), 0.01, 1.00, 0.85));
+}
+
+
+/* Reinhard05 */
+
+TonemapReinhard05ParameterSelector::TonemapReinhard05ParameterSelector(
+	TonemapSelector *tonemap_selector, cvl_frame_t **frame)
+{
+    _tonemap_selector = tonemap_selector;
+    _frame = frame;
+    _lock = false;
+
+    QGridLayout *layout = new QGridLayout();
+
+    QLabel *lf = new QLabel("Brightness: ");
+    layout->addWidget(lf, 0, 0);
+    _f_spinbox = new QDoubleSpinBox();
+    _f_spinbox->setRange(-8.0, +8.0);
+    _f_spinbox->setDecimals(1);
+    _f_spinbox->setSingleStep(0.1);
+    connect(_f_spinbox, SIGNAL(valueChanged(double)), this, SLOT(set_f(double)));
+    layout->addWidget(_f_spinbox, 0, 1);
+    _f_slider = new QSlider(Qt::Horizontal, this);
+    _f_slider->setRange(-80, +80);
+    connect(_f_slider, SIGNAL(valueChanged(int)), this, SLOT(f_slider_changed(int)));
+    layout->addWidget(_f_slider, 1, 0, 1, 2);
+
+    QLabel *lc = new QLabel("Chromatic Adaptation:");
+    layout->addWidget(lc, 2, 0);
+    _c_spinbox = new QDoubleSpinBox();
+    _c_spinbox->setRange(0.00, 1.00);
+    _c_spinbox->setDecimals(2);
+    _c_spinbox->setSingleStep(0.01);
+    connect(_c_spinbox, SIGNAL(valueChanged(double)), this, SLOT(set_c(double)));
+    layout->addWidget(_c_spinbox, 2, 1);
+    _c_slider = new QSlider(Qt::Horizontal, this);
+    _c_slider->setRange(0, 100);
+    connect(_c_slider, SIGNAL(valueChanged(int)), this, SLOT(c_slider_changed(int)));
+    layout->addWidget(_c_slider, 3, 0, 1, 2);
+
+    QLabel *ll = new QLabel("Light Adaptation:");
+    layout->addWidget(ll, 4, 0);
+    _l_spinbox = new QDoubleSpinBox();
+    _l_spinbox->setRange(0.00, 1.00);
+    _l_spinbox->setDecimals(2);
+    _l_spinbox->setSingleStep(0.01);
+    connect(_l_spinbox, SIGNAL(valueChanged(double)), this, SLOT(set_l(double)));
+    layout->addWidget(_l_spinbox, 4, 1);
+    _l_slider = new QSlider(Qt::Horizontal, this);
+    _l_slider->setRange(0, 100);
+    connect(_l_slider, SIGNAL(valueChanged(int)), this, SLOT(l_slider_changed(int)));
+    layout->addWidget(_l_slider, 5, 0, 1, 2);
+
+    layout->setRowStretch(6, 1);
+    setLayout(layout);
+
+    update();
+}
+
+TonemapReinhard05ParameterSelector::~TonemapReinhard05ParameterSelector()
+{
+}
+
+void TonemapReinhard05ParameterSelector::update()
+{
+    _lock = true;
+    _f_spinbox->setValue(0.0);
+    _f_slider->setValue(0);
+    _c_spinbox->setValue(0.0);
+    _c_slider->setValue(0);
+    _l_spinbox->setValue(1.0);
+    _l_slider->setValue(100);
+    _lock = false;
+    emit _tonemap_selector->tonemap_changed();
+}
+
+void TonemapReinhard05ParameterSelector::set_f(double x)
+{
+    _lock = true;
+    _f_slider->setValue(mh_iround(10.0 * x));
+    _lock = false;
+    emit _tonemap_selector->tonemap_changed();
+}
+
+void TonemapReinhard05ParameterSelector::f_slider_changed(int x)
+{
+    if (!_lock)
+	_f_spinbox->setValue(static_cast<double>(x) / 10.0);
+}
+
+void TonemapReinhard05ParameterSelector::set_c(double x)
+{
+    _lock = true;
+    _c_slider->setValue(mh_iround(100.0 * x));
+    _lock = false;
+    emit _tonemap_selector->tonemap_changed();
+}
+
+void TonemapReinhard05ParameterSelector::c_slider_changed(int x)
+{
+    if (!_lock)
+	_c_spinbox->setValue(static_cast<double>(x) / 100.0);
+}
+
+void TonemapReinhard05ParameterSelector::set_l(double x)
+{
+    _lock = true;
+    _l_slider->setValue(mh_iround(100.0 * x));
+    _lock = false;
+    emit _tonemap_selector->tonemap_changed();
+}
+
+void TonemapReinhard05ParameterSelector::l_slider_changed(int x)
+{
+    if (!_lock)
+	_l_spinbox->setValue(static_cast<double>(x) / 100.0);
+}
+
+void TonemapReinhard05ParameterSelector::get_parameters(Conf *conf) const
+{
+    conf->put(mh_string("%s-f", id()).c_str(), _f_spinbox->value());
+    conf->put(mh_string("%s-c", id()).c_str(), _c_spinbox->value());
+    conf->put(mh_string("%s-l", id()).c_str(), _l_spinbox->value());
+}
+
+void TonemapReinhard05ParameterSelector::set_parameters(Conf *conf)
+{
+    _f_spinbox->setValue(conf->get(mh_string("%s-f", id()).c_str(), -8.0, 8.0, 0.0));
+    _c_spinbox->setValue(conf->get(mh_string("%s-c", id()).c_str(), 0.0, 1.0, 0.0));
+    _l_spinbox->setValue(conf->get(mh_string("%s-l", id()).c_str(), 0.0, 1.0, 1.0));
 }
 
 
