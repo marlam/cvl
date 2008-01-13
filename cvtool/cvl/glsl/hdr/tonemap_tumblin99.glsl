@@ -1,5 +1,5 @@
 /*
- * tonemap_tumblin_step1.glsl
+ * tonemap_tumblin99.glsl
  * 
  * This file is part of CVL, a computer vision library.
  *
@@ -22,9 +22,24 @@
 #version 110
 
 uniform float max_abs_lum;
+uniform float Lwa;
+uniform float Lda;
+uniform float m;
+uniform float gamma_w;
+uniform float gamma_d;
 uniform sampler2D tex;
 
 void main()
 {
-    gl_FragColor = vec4(log(max_abs_lum * texture2D(tex, gl_TexCoord[0].xy).g), 0.0, 0.0, 0.0);
+    vec3 XYZ = texture2D(tex, gl_TexCoord[0].xy).rgb;
+    float x = XYZ.r / (XYZ.r + XYZ.g + XYZ.b);
+    float y = XYZ.g / (XYZ.r + XYZ.g + XYZ.b);
+
+    float old_Y = max_abs_lum * XYZ.g;
+    float new_Y = m * Lda * pow(old_Y / Lwa, gamma_w / gamma_d) / 1000.0;
+    new_Y = clamp(new_Y, 0.00001, 1.0);
+
+    float new_X = (new_Y / y) * x;
+    float new_Z = (new_Y / y) * (1.0 - x - y);
+    gl_FragColor = vec4(new_X, new_Y, new_Z, 0.0);
 }

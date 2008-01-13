@@ -52,18 +52,55 @@
 #include "cvl/cvl_misc.h"
 #include "cvl/cvl_hdr.h"
 
+#include "glsl/hdr/log_avg_lum.glsl.h"
 #include "glsl/hdr/tonemap_schlick94.glsl.h"
-#include "glsl/hdr/tonemap_tumblin99_step1.glsl.h"
-#include "glsl/hdr/tonemap_tumblin99_step2.glsl.h"
+#include "glsl/hdr/tonemap_tumblin99.glsl.h"
 #include "glsl/hdr/tonemap_drago03.glsl.h"
+#include "glsl/hdr/tonemap_reinhard05.glsl.h"
 #include "glsl/hdr/tonemap_durand02_step1.glsl.h"
 #include "glsl/hdr/tonemap_durand02_step2.glsl.h"
 
 
 /**
- * \param dst			The destination frame.
- * \param src			The source frame.
- * \param p			Parameter.
+ * \param frame		The frame.
+ * \param max_abs_lum	Maximum absolute luminance.
+ * \return	The log average luminance.
+ *
+ * Computes the log average luminance of the given frame, with respect to the
+ * given maximum absolute luminance.
+ */
+float cvl_log_avg_lum(cvl_frame_t *frame, float max_abs_lum)
+{
+    cvl_assert(frame != NULL);
+    cvl_assert(cvl_frame_format(frame) == CVL_XYZ);
+    cvl_assert(max_abs_lum > 0.0f);
+    if (cvl_error())
+	return 0.0f;
+
+    float log_avg_lum;
+    GLuint prg;
+    if ((prg = cvl_gl_program_cache_get("cvl_log_avg_lum")) == 0)
+    {
+	prg = cvl_gl_program_new_src("cvl_log_avg_lum", NULL, 
+		CVL_LOG_AVG_LUM_GLSL_STR);
+	cvl_gl_program_cache_put("cvl_log_avg_lum", prg);
+    }
+    glUseProgram(prg);
+    glUniform1f(glGetUniformLocation(prg, "max_abs_lum"), max_abs_lum);
+    cvl_frame_t *tmp = cvl_frame_new(cvl_frame_width(frame), cvl_frame_height(frame), 
+	    1, CVL_UNKNOWN, CVL_FLOAT, CVL_TEXTURE);
+    cvl_transform(tmp, frame);
+    cvl_reduce(tmp, CVL_REDUCE_SUM, 0, &log_avg_lum);
+    log_avg_lum = expf(log_avg_lum / (float)cvl_frame_size(frame));
+    cvl_frame_free(tmp);
+    return log_avg_lum;
+}
+
+
+/**
+ * \param dst		The destination frame.
+ * \param src		The source frame.
+ * \param p		Parameter.
  *
  * Applies tone mapping to the high dynamic range frame \a src and writes the
  * result to \a dst. Input and output must be in #CVL_XYZ format.\n
@@ -135,33 +172,17 @@ void cvl_tonemap_tumblin99(cvl_frame_t *dst, cvl_frame_t *src, float max_abs_lum
     if (cvl_error())
 	return;
 
-    GLuint prg;
-    float world_adaptation_level;
-
-    if ((prg = cvl_gl_program_cache_get("cvl_tonemap_tumblin99_step1")) == 0)
-    {
-	prg = cvl_gl_program_new_src("cvl_tonemap_tumblin99_step1", NULL, 
-		CVL_TONEMAP_TUMBLIN99_STEP1_GLSL_STR);
-	cvl_gl_program_cache_put("cvl_tonemap_tumblin99_step1", prg);
-    }
-    glUseProgram(prg);
-    glUniform1f(glGetUniformLocation(prg, "max_abs_lum"), max_abs_lum);
-    cvl_frame_t *tmp = cvl_frame_new(cvl_frame_width(src), cvl_frame_height(src), 
-	    1, CVL_UNKNOWN, CVL_FLOAT, CVL_TEXTURE);
-    cvl_transform(tmp, src);
-    cvl_reduce(tmp, CVL_REDUCE_SUM, 0, &world_adaptation_level);
-    world_adaptation_level = expf(world_adaptation_level / (float)cvl_frame_size(src));
-    cvl_frame_free(tmp);
-
+    float world_adaptation_level = cvl_log_avg_lum(src, max_abs_lum);
     float gamma_d = cvl_tonemap_tr_gamma(display_adaptation_level);
     float gamma_w = cvl_tonemap_tr_gamma(world_adaptation_level);
     float gamma_wd = gamma_w / (1.855f + 0.4f * logf(display_adaptation_level) / logf(10.0f));
     float m = powf(sqrtf(max_displayable_contrast), gamma_wd - 1.0f);
-    if ((prg = cvl_gl_program_cache_get("cvl_tonemap_tumblin99_step2")) == 0)
+    GLuint prg;
+    if ((prg = cvl_gl_program_cache_get("cvl_tonemap_tumblin99")) == 0)
     {
-	prg = cvl_gl_program_new_src("cvl_tonemap_tumblin99_step2", NULL, 
-		CVL_TONEMAP_TUMBLIN99_STEP2_GLSL_STR);
-	cvl_gl_program_cache_put("cvl_tonemap_tumblin99_step2", prg);
+	prg = cvl_gl_program_new_src("cvl_tonemap_tumblin99", NULL, 
+		CVL_TONEMAP_TUMBLIN99_GLSL_STR);
+	cvl_gl_program_cache_put("cvl_tonemap_tumblin99", prg);
     }
     glUseProgram(prg);
     glUniform1f(glGetUniformLocation(prg, "max_abs_lum"), max_abs_lum);
@@ -217,6 +238,82 @@ void cvl_tonemap_drago03(cvl_frame_t *dst, cvl_frame_t *src, float max_abs_lum, 
     glUniform1f(glGetUniformLocation(prg, "factor"), (max_disp_lum / 100.0f) / logf(1.0f + max_abs_lum));
     glUniform1f(glGetUniformLocation(prg, "bias_cooked"), logf(bias) / logf(0.5f));
     cvl_transform(dst, src);
+
+    cvl_check_errors();
+}
+
+
+/**
+ * \param dst			The destination frame.
+ * \param src			The source frame.
+ * \param min_lum		Minimum luminance value in \a src.
+ * \param avg_lum		Average luminance value in \a src.
+ * \param log_avg_lum		Log average luminance value in \a src.
+ * \param rgb			A RGB version of \a src.
+ * \param channel_avg		Average channel values in \a rgb.
+ * \param f			Brightness parameter.
+ * \param c			Chromatic adaptation parameter.
+ * \param l			Light adaptation parameter.
+ *
+ * Applies tone mapping to the high dynamic range frame \a src and writes the
+ * result to \a dst. Input and output must be in #CVL_XYZ format.\n
+ * This function needs some information that needs to be computed from the
+ * source frame \a src: \a min_lum, \a avg_lum, \a log_avg_lum, a #CVL_RGB
+ * version of \a src, and the average RGB channel values.\n
+ * The \a f parameter must be from [-8,8] (default: 0).
+ * The \a c parameter must be from [0,1] (default: 0).
+ * The \a l parameter must be from [0,1] (default: 1).
+ * * The \a max_disp_lum parameter must be greater than zero.\n
+ * See also:
+ * E. Reinhard and K. Devlin\n
+ * Dynamic range reduction inspired by photoreceptor physiology\m
+ * Transactions on Visualization and Computer Graphics, Volume 11, Issue 1,
+ * Jan.-Feb. 2005, pp 13-24.
+ */
+void cvl_tonemap_reinhard05(cvl_frame_t *dst, cvl_frame_t *src, 
+	float min_lum, float avg_lum, float log_avg_lum,
+	cvl_frame_t *rgb, const float channel_avg[3],
+	float f, float c, float l)
+{
+    cvl_assert(dst != NULL);
+    cvl_assert(src != NULL);
+    cvl_assert(dst != src);
+    cvl_assert(cvl_frame_format(dst) == CVL_XYZ);
+    cvl_assert(cvl_frame_format(src) == CVL_XYZ);
+    cvl_assert(f >= -8.0f && f <= 8.0f);
+    cvl_assert(c >= 0.0f && c <= 1.0f);
+    cvl_assert(l >= 0.0f && l <= 1.0f);
+    if (cvl_error())
+	return;
+
+    GLuint prg;
+
+    float max_lum = 1.0f;
+    float m;
+    float I_a_global[3];
+
+    m = 0.3f + 0.7f * powf((logf(max_lum) - logf(log_avg_lum)) / (logf(max_lum) - logf(min_lum)), 1.4f);
+    I_a_global[0] = c * channel_avg[0] + (1.0f - c) * avg_lum;
+    I_a_global[1] = c * channel_avg[1] + (1.0f - c) * avg_lum;
+    I_a_global[2] = c * channel_avg[2] + (1.0f - c) * avg_lum;
+
+    if ((prg = cvl_gl_program_cache_get("cvl_tonemap_reinhard05")) == 0)
+    {
+	prg = cvl_gl_program_new_src("cvl_tonemap_reinhard05", NULL, 
+		CVL_TONEMAP_REINHARD05_GLSL_STR);
+	cvl_gl_program_cache_put("cvl_tonemap_reinhard05", prg);
+    }
+    glUseProgram(prg);
+    glUniform1f(glGetUniformLocation(prg, "f"), expf(-f));
+    glUniform1f(glGetUniformLocation(prg, "c"), c);
+    glUniform1f(glGetUniformLocation(prg, "l"), l);
+    glUniform1f(glGetUniformLocation(prg, "m"), m);
+    glUniform1f(glGetUniformLocation(prg, "min_lum"), min_lum);
+    glUniform1f(glGetUniformLocation(prg, "max_lum"), max_lum);
+    glUniform3fv(glGetUniformLocation(prg, "I_a_global"), 1, I_a_global);
+    cvl_transform(dst, rgb);
+    cvl_frame_set_format(dst, CVL_RGB);
+    cvl_convert_format_inplace(dst, CVL_XYZ);
 
     cvl_check_errors();
 }
