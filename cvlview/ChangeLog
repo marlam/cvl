@@ -1,3 +1,7 @@
+2008-01-14  Martin Lambers <marlam@marlam.de>
+
+	* conf/conf.cpp: Fix error message for invalid content.
+
 2008-01-10  Martin Lambers <marlam@marlam.de>
 
 	* NEWS: Update.
