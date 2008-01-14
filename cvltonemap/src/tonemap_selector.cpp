@@ -854,10 +854,10 @@ void TonemapReinhard05ParameterSelector::update()
     _lock = true;
     _f_spinbox->setValue(0.0);
     _f_slider->setValue(0);
-    _c_spinbox->setValue(0.0);
-    _c_slider->setValue(0);
-    _l_spinbox->setValue(1.0);
-    _l_slider->setValue(100);
+    _c_spinbox->setValue(0.5);
+    _c_slider->setValue(50);
+    _l_spinbox->setValue(0.5);
+    _l_slider->setValue(50);
     _lock = false;
     emit _tonemap_selector->tonemap_changed();
 }
