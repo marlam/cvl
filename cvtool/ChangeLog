@@ -5,6 +5,8 @@
 	cvl/glsl/hdr/tonemap_reinhard02_step2.glsl: Add
 	cvl_tonemap_reinhard02().
 	* cvl/glsl/hdr/tonemap_reinhard02_step2.glsl: Fix the prescaling step.
+	* cvl/cvl/cvl_hdr.h, cvl/cvl_hdr.c, cvtool/cmd_tonemap.c: Change
+	interfaces to allow faster use in interactive applications.
 
 2008-01-13  Martin Lambers <marlam@marlam.de>
 

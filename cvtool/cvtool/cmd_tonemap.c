@@ -131,8 +131,12 @@ int cmd_tonemap(int argc, char *argv[])
 	}
 	else if (method.value == TM_TUMBLIN99)
 	{
+	    cvl_frame_t *tmp = cvl_frame_new(cvl_frame_width(frame), cvl_frame_height(frame), 
+		    1, CVL_UNKNOWN, CVL_FLOAT, CVL_TEXTURE);
+	    float log_avg_lum = cvl_log_avg_lum(frame, tmp, max_abs_lum.value);
+	    cvl_frame_free(tmp);
 	    cvl_tonemap_tumblin99(tonemapped_frame, frame, max_abs_lum.value,
-		    tr99_disp_adapt_level.value, tr99_max_contrast.value);
+		    log_avg_lum, tr99_disp_adapt_level.value, tr99_max_contrast.value);
 	}
 	else if (method.value == TM_DRAGO03)
 	{
@@ -141,12 +145,15 @@ int cmd_tonemap(int argc, char *argv[])
 	}
 	else if (method.value == TM_DURAND02)
 	{
+	    cvl_frame_t *tmp = cvl_frame_new(cvl_frame_width(frame), cvl_frame_height(frame), 
+		    4, CVL_UNKNOWN, CVL_FLOAT, CVL_TEXTURE);
 	    // Limit kernel size to 9x9 because the graphics card cannot handle more
-	    cvl_tonemap_durand02(tonemapped_frame, frame, max_abs_lum.value,
+	    cvl_tonemap_durand02(tonemapped_frame, frame, max_abs_lum.value, tmp,
 		    mh_mini(4, cvl_gauss_sigma_to_k(durand02_sigma_spatial.value)),
 		    durand02_sigma_spatial.value,
 		    durand02_sigma_luminance.value,
 		    durand02_base_contrast.value);
+	    cvl_frame_free(tmp);
 	}
 	cvl_frame_free(frame);
 	cvl_convert_format_inplace(tonemapped_frame, format);

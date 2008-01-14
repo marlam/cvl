@@ -24,12 +24,12 @@
 
 #include "cvl_frame.h"
 
-float cvl_log_avg_lum(cvl_frame_t *frame, float max_abs_lum);
+float cvl_log_avg_lum(cvl_frame_t *frame, cvl_frame_t *tmp, float max_abs_lum);
 
 void cvl_tonemap_schlick94(cvl_frame_t *dst, cvl_frame_t *src, float p);
 
-void cvl_tonemap_tumblin99(cvl_frame_t *dst, cvl_frame_t *src, float max_abs_lum, 
-	float display_adaptation_level, float max_displayable_contrast);
+void cvl_tonemap_tumblin99(cvl_frame_t *dst, cvl_frame_t *src, float max_abs_lum,
+	float log_avg_lum, float display_adaptation_level, float max_displayable_contrast);
 
 void cvl_tonemap_drago03(cvl_frame_t *dst, cvl_frame_t *src, float max_abs_lum, float bias, float max_disp_lum);
 
@@ -39,7 +39,7 @@ void cvl_tonemap_reinhard05(cvl_frame_t *dst, cvl_frame_t *src,
 	float f, float c, float l);
 
 void cvl_tonemap_durand02(cvl_frame_t *dst, cvl_frame_t *src, float max_abs_lum, 
-	int k, float sigma_spatial, float sigma_luminance, float base_contrast);
+	cvl_frame_t *tmp, int k, float sigma_spatial, float sigma_luminance, float base_contrast);
 
 void cvl_tonemap_reinhard02(cvl_frame_t *dst, cvl_frame_t *src, 
 	cvl_frame_t *tmp, float log_avg_lum,

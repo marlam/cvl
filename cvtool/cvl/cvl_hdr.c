@@ -65,16 +65,21 @@
 
 /**
  * \param frame		The frame.
+ * \param tmp		A frame for temporary results.
  * \param max_abs_lum	Maximum absolute luminance.
- * \return	The log average luminance.
+ * \return		The log average luminance.
  *
  * Computes the log average luminance of the given frame, with respect to the
- * given maximum absolute luminance.
+ * given maximum absolute luminance.\n
+ * The frame \a tmp must have and least one channel and the type #CVL_FLOAT.
  */
-float cvl_log_avg_lum(cvl_frame_t *frame, float max_abs_lum)
+float cvl_log_avg_lum(cvl_frame_t *frame, cvl_frame_t *tmp, float max_abs_lum)
 {
     cvl_assert(frame != NULL);
     cvl_assert(cvl_frame_format(frame) == CVL_XYZ);
+    cvl_assert(tmp != NULL);
+    cvl_assert(cvl_frame_channels(tmp) >= 1);
+    cvl_assert(cvl_frame_type(tmp) == CVL_FLOAT);
     cvl_assert(max_abs_lum > 0.0f);
     if (cvl_error())
 	return 0.0f;
@@ -89,12 +94,9 @@ float cvl_log_avg_lum(cvl_frame_t *frame, float max_abs_lum)
     }
     glUseProgram(prg);
     glUniform1f(glGetUniformLocation(prg, "max_abs_lum"), max_abs_lum);
-    cvl_frame_t *tmp = cvl_frame_new(cvl_frame_width(frame), cvl_frame_height(frame), 
-	    1, CVL_UNKNOWN, CVL_FLOAT, CVL_TEXTURE);
     cvl_transform(tmp, frame);
     cvl_reduce(tmp, CVL_REDUCE_SUM, 0, &log_avg_lum);
     log_avg_lum = expf(log_avg_lum / (float)cvl_frame_size(frame));
-    cvl_frame_free(tmp);
     return log_avg_lum;
 }
 
@@ -139,7 +141,7 @@ void cvl_tonemap_schlick94(cvl_frame_t *dst, cvl_frame_t *src, float p)
 
 
 // Helper function
-static float cvl_tonemap_tr_gamma(float L)
+static float cvl_tonemap_tumblin_gamma(float L)
 {
     return (L > 100.0f) ? 2.655f : 1.855f + 0.4f * logf(L + 2.3e-5f) / logf(10.0f);
 }
@@ -148,11 +150,14 @@ static float cvl_tonemap_tr_gamma(float L)
  * \param dst				The destination frame.
  * \param src				The source frame.
  * \param max_abs_lum			Maximum absolute luminance.
+ * \param log_avg_lum			The log-average luminance.
  * \param display_adaptation_level	Display adaptation level.
  * \param max_displayable_contrast	Maximum displayable contrast.
  *
  * Applies tone mapping to the high dynamic range frame \a src and writes the
  * result to \a dst. Input and output must be in #CVL_XYZ format.\n
+ * The \a log_avg_lum parameter must be the log average luminance of \a src
+ * scaled to \a max_abs_lum. See cvl_log_avg_lum().
  * The \a display_adaptation_level parameter must be greater than zero.
  * The \a max_displayable_contrast parameter must be greater than zero.\n
  * See also section 7.2.2 in 
@@ -160,8 +165,8 @@ static float cvl_tonemap_tr_gamma(float L)
  * High Dynamic Range Imaging: Acquisition, Display and Image-based Lighting,
  * Morgan Kaufmann, 2005, ISBN 0-12-585263-0
  */
-void cvl_tonemap_tumblin99(cvl_frame_t *dst, cvl_frame_t *src, float max_abs_lum, 
-	float display_adaptation_level, float max_displayable_contrast)
+void cvl_tonemap_tumblin99(cvl_frame_t *dst, cvl_frame_t *src, float max_abs_lum,
+	float log_avg_lum, float display_adaptation_level, float max_displayable_contrast)
 {
     cvl_assert(dst != NULL);
     cvl_assert(src != NULL);
@@ -174,9 +179,9 @@ void cvl_tonemap_tumblin99(cvl_frame_t *dst, cvl_frame_t *src, float max_abs_lum
     if (cvl_error())
 	return;
 
-    float world_adaptation_level = cvl_log_avg_lum(src, max_abs_lum);
-    float gamma_d = cvl_tonemap_tr_gamma(display_adaptation_level);
-    float gamma_w = cvl_tonemap_tr_gamma(world_adaptation_level);
+    float world_adaptation_level = log_avg_lum;
+    float gamma_d = cvl_tonemap_tumblin_gamma(display_adaptation_level);
+    float gamma_w = cvl_tonemap_tumblin_gamma(world_adaptation_level);
     float gamma_wd = gamma_w / (1.855f + 0.4f * logf(display_adaptation_level) / logf(10.0f));
     float m = powf(sqrtf(max_displayable_contrast), gamma_wd - 1.0f);
     GLuint prg;
@@ -325,6 +330,7 @@ void cvl_tonemap_reinhard05(cvl_frame_t *dst, cvl_frame_t *src,
  * \param dst			The destination frame.
  * \param src			The source frame.
  * \param max_abs_lum		Maximum absolute luminance.
+ * \param tmp			A frame for temporary results.
  * \param k			Mask size 2*k+1 x 2*k+1.
  * \param sigma_spatial		Spatial sigma.
  * \param sigma_luminance	Luminance sigma.
@@ -332,6 +338,7 @@ void cvl_tonemap_reinhard05(cvl_frame_t *dst, cvl_frame_t *src,
  *
  * Applies tone mapping to the high dynamic range frame \a src and writes the
  * result to \a dst. Input and output must be in #CVL_XYZ format.\n
+ * The temporary frame \a tmp must have four channels of type #CVL_FLOAT.
  * The sigma values must be greater than zero, and the \a base_contrast
  * parameter must be grater than 1.\n
  * See also:
@@ -339,15 +346,18 @@ void cvl_tonemap_reinhard05(cvl_frame_t *dst, cvl_frame_t *src,
  * High-Dynamic-Range Images, Proc. ACM SIGGRAPH 2002, pp. 257-266.
  */
 void cvl_tonemap_durand02(cvl_frame_t *dst, cvl_frame_t *src, float max_abs_lum, 
-	int k, float sigma_spatial, float sigma_luminance, float base_contrast)
+	cvl_frame_t *tmp, int k, float sigma_spatial, float sigma_luminance, float base_contrast)
 {
     cvl_assert(dst != NULL);
     cvl_assert(src != NULL);
     cvl_assert(dst != src);
     cvl_assert(cvl_frame_format(dst) == CVL_XYZ);
     cvl_assert(cvl_frame_format(src) == CVL_XYZ);
+    cvl_assert(tmp != NULL);
+    cvl_assert(cvl_frame_channels(tmp) == 4);
+    cvl_assert(cvl_frame_type(tmp) == CVL_FLOAT);
     cvl_assert(max_abs_lum > 0.0f);
-    cvl_assert(k >= 0);
+    cvl_assert(k >= 0 && k <= 32);
     cvl_assert(sigma_spatial > 0.0f);
     cvl_assert(sigma_luminance > 0.0f);
     cvl_assert(base_contrast > 1.0f);
@@ -368,13 +378,8 @@ void cvl_tonemap_durand02(cvl_frame_t *dst, cvl_frame_t *src, float max_abs_lum,
     
     GLuint prg;
     char *prg_name;
+    float mask[2 * k + 1];
 
-    float *mask;
-    if (!(mask = malloc((2 * k + 1) * sizeof(float))))
-    {
-	cvl_error_set(CVL_ERROR_MEM, "%s", strerror(errno));
-	return;
-    }
     mh_gauss_mask(k, sigma_spatial, mask, NULL);
 
     prg_name = cvl_asprintf("cvl_tonemap_durand02_step1_k=%d", k);
@@ -392,8 +397,6 @@ void cvl_tonemap_durand02(cvl_frame_t *dst, cvl_frame_t *src, float max_abs_lum,
     glUniform1fv(glGetUniformLocation(prg, "mask"), 2 * k + 1, mask);
     glUniform1f(glGetUniformLocation(prg, "max_abs_lum"), max_abs_lum);
     glUniform1f(glGetUniformLocation(prg, "sigma_luminance"), sigma_luminance);
-    cvl_frame_t *tmp = cvl_frame_new(cvl_frame_width(src), cvl_frame_height(src), 
-	    4, CVL_UNKNOWN, CVL_FLOAT, CVL_TEXTURE);
     cvl_transform(tmp, src);
 
     float min_log_base, max_log_base;
@@ -416,7 +419,6 @@ void cvl_tonemap_durand02(cvl_frame_t *dst, cvl_frame_t *src, float max_abs_lum,
     glUniform1f(glGetUniformLocation(prg, "compression_factor"), compression_factor);
     glUniform1f(glGetUniformLocation(prg, "log_absolute_scale"), log_absolute_scale);
     cvl_transform(dst, tmp);
-    cvl_frame_free(tmp);
 
     cvl_check_errors();
 }
@@ -455,6 +457,9 @@ void cvl_tonemap_reinhard02(cvl_frame_t *dst, cvl_frame_t *src,
     cvl_assert(dst != src);
     cvl_assert(cvl_frame_format(dst) == CVL_XYZ);
     cvl_assert(cvl_frame_format(src) == CVL_XYZ);
+    cvl_assert(tmp != NULL);
+    cvl_assert(cvl_frame_channels(tmp) == 4);
+    cvl_assert(cvl_frame_type(tmp) == CVL_FLOAT);
     cvl_assert(brightness >= 0.0f && brightness <= 1.0f);
     cvl_assert(white >= 0.0f && white < 100.0f);
     cvl_assert(sharpness >= 0.0f && sharpness < 100.0f);
