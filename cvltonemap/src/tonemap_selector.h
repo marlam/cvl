@@ -92,6 +92,7 @@ class TonemapSelector : public QWidget
 	static const int DRAGO03		= 3;
 	static const int REINHARD05		= 4;
 	static const int DURAND02		= 5;
+	static const int REINHARD02		= 6;
 
 	int active_tonemap_method() const 
 	{ 
@@ -117,6 +118,7 @@ class TonemapSelector : public QWidget
     friend class TonemapDrago03ParameterSelector;
     friend class TonemapReinhard05ParameterSelector;
     friend class TonemapDurand02ParameterSelector;
+    friend class TonemapReinhard02ParameterSelector;
 };
 
 /* Range Selection */
@@ -511,6 +513,80 @@ class TonemapDurand02ParameterSelector : public TonemapParameterSelector
 	float get_base_contrast() const
 	{
 	    return static_cast<float>(_base_contrast_spinbox->value());
+	}
+
+	void get_parameters(Conf *conf) const;
+	void set_parameters(Conf *conf);
+};
+
+/* Reinhard02 */
+
+class TonemapReinhard02ParameterSelector : public TonemapParameterSelector
+{
+    Q_OBJECT
+
+    private:
+	TonemapSelector *_tonemap_selector;
+	cvl_frame_t **_frame;
+	QDoubleSpinBox *_brightness_spinbox;
+	QSlider *_brightness_slider;
+	QDoubleSpinBox *_white_spinbox;
+	QSlider *_white_slider;
+	QDoubleSpinBox *_sharpness_spinbox;
+	QSlider *_sharpness_slider;
+	QDoubleSpinBox *_threshold_spinbox;
+	QSlider *_threshold_slider;
+	bool _lock;
+
+    private slots:
+	void set_brightness(double x);
+        void brightness_slider_changed(int x);
+	void set_white(double x);
+        void white_slider_changed(int x);
+	void set_sharpness(double x);
+        void sharpness_slider_changed(int x);
+	void set_threshold(double x);
+        void threshold_slider_changed(int x);
+
+    public:
+	TonemapReinhard02ParameterSelector(
+		TonemapSelector *tonemap_selector, cvl_frame_t **frame);
+	~TonemapReinhard02ParameterSelector();
+	void update();
+	
+	const char *name() const
+	{
+	    return "Reinhard 02";
+	}
+	
+	const char *id() const
+	{
+	    return "reinhard02";
+	}
+
+	bool is_global() const
+	{
+	    return false;
+	}
+
+	float get_brightness() const
+	{
+	    return static_cast<float>(_brightness_spinbox->value());
+	}
+
+	float get_white() const
+	{
+	    return static_cast<float>(_white_spinbox->value());
+	}
+
+	float get_sharpness() const
+	{
+	    return static_cast<float>(_sharpness_spinbox->value());
+	}
+
+	float get_threshold() const
+	{
+	    return static_cast<float>(_threshold_spinbox->value() / 100.0f);
 	}
 
 	void get_parameters(Conf *conf) const;

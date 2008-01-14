@@ -51,7 +51,7 @@ TonemapSelector::TonemapSelector(cvl_frame_t **frame, QWidget *parent)
     _frame = frame;
 
     /* When adding a new method, adjust only this block: ---> */
-    _method_count = 6;
+    _method_count = 7;
     _parameter_selector = new TonemapParameterSelector *[_method_count];
     _parameter_selector[0] = new TonemapRangeSelectionParameterSelector(this, _frame);
     _parameter_selector[1] = new TonemapSchlick94ParameterSelector(this, _frame);
@@ -59,6 +59,7 @@ TonemapSelector::TonemapSelector(cvl_frame_t **frame, QWidget *parent)
     _parameter_selector[3] = new TonemapDrago03ParameterSelector(this, _frame);
     _parameter_selector[4] = new TonemapReinhard05ParameterSelector(this, _frame);
     _parameter_selector[5] = new TonemapDurand02ParameterSelector(this, _frame);
+    _parameter_selector[6] = new TonemapReinhard02ParameterSelector(this, _frame);
     /* <--- End. */
 
     _postproc_selector = new PostprocSelector *[_method_count];
@@ -1058,4 +1059,165 @@ void TonemapDurand02ParameterSelector::set_parameters(Conf *conf)
     _sigma_spatial_spinbox->setValue(conf->get(mh_string("%s-sigmaspatial", id()).c_str(), 0.01, 9.99, 0.4));
     _sigma_luminance_spinbox->setValue(conf->get(mh_string("%s-sigmaluminance", id()).c_str(), 0.01, 9.99, 1.0));
     _base_contrast_spinbox->setValue(conf->get(mh_string("%s-basecontrast", id()).c_str(), 1.01, 9.99, 5.0));
+}
+
+
+/* Reinhard02 */
+
+TonemapReinhard02ParameterSelector::TonemapReinhard02ParameterSelector(
+	TonemapSelector *tonemap_selector, cvl_frame_t **frame)
+{
+    _tonemap_selector = tonemap_selector;
+    _frame = frame;
+    _lock = false;
+
+    QGridLayout *layout = new QGridLayout();
+
+    QLabel *l0 = new QLabel("Brightness:");
+    layout->addWidget(l0, 0, 0);
+    _brightness_spinbox = new QDoubleSpinBox();
+    _brightness_spinbox->setRange(0.001, 1.000);
+    _brightness_spinbox->setDecimals(3);
+    _brightness_spinbox->setSingleStep(0.01);
+    connect(_brightness_spinbox, SIGNAL(valueChanged(double)), this, SLOT(set_brightness(double)));
+    layout->addWidget(_brightness_spinbox, 0, 1);
+    _brightness_slider = new QSlider(Qt::Horizontal, this);
+    _brightness_slider->setRange(1, 1000);
+    connect(_brightness_slider, SIGNAL(valueChanged(int)), this, SLOT(brightness_slider_changed(int)));
+    layout->addWidget(_brightness_slider, 1, 0, 1, 2);
+
+    QLabel *l1 = new QLabel("White Value:");
+    layout->addWidget(l1, 2, 0);
+    _white_spinbox = new QDoubleSpinBox();
+    _white_spinbox->setRange(0.1, 99.9);
+    _white_spinbox->setDecimals(2);
+    _white_spinbox->setSingleStep(0.1);
+    connect(_white_spinbox, SIGNAL(valueChanged(double)), this, SLOT(set_white(double)));
+    layout->addWidget(_white_spinbox, 2, 1);
+    _white_slider = new QSlider(Qt::Horizontal, this);
+    _white_slider->setRange(1, 999);
+    connect(_white_slider, SIGNAL(valueChanged(int)), this, SLOT(white_slider_changed(int)));
+    layout->addWidget(_white_slider, 3, 0, 1, 2);
+
+    QLabel *l2 = new QLabel("Sharpness:");
+    layout->addWidget(l2, 4, 0);
+    _sharpness_spinbox = new QDoubleSpinBox();
+    _sharpness_spinbox->setRange(0.01, 99.99);
+    _sharpness_spinbox->setDecimals(2);
+    _sharpness_spinbox->setSingleStep(0.1);
+    connect(_sharpness_spinbox, SIGNAL(valueChanged(double)), this, SLOT(set_sharpness(double)));
+    layout->addWidget(_sharpness_spinbox, 4, 1);
+    _sharpness_slider = new QSlider(Qt::Horizontal, this);
+    _sharpness_slider->setRange(1, 9999);
+    connect(_sharpness_slider, SIGNAL(valueChanged(int)), this, SLOT(sharpness_slider_changed(int)));
+    layout->addWidget(_sharpness_slider, 5, 0, 1, 2);
+
+    QLabel *l3 = new QLabel("Threshold:");
+    layout->addWidget(l3, 6, 0);
+    _threshold_spinbox = new QDoubleSpinBox();
+    _threshold_spinbox->setRange(0.001, 1.000);
+    _threshold_spinbox->setDecimals(4);
+    _threshold_spinbox->setSingleStep(0.1);
+    connect(_threshold_spinbox, SIGNAL(valueChanged(double)), this, SLOT(set_threshold(double)));
+    layout->addWidget(_threshold_spinbox, 6, 1);
+    _threshold_slider = new QSlider(Qt::Horizontal, this);
+    _threshold_slider->setRange(1, 1000);
+    connect(_threshold_slider, SIGNAL(valueChanged(int)), this, SLOT(threshold_slider_changed(int)));
+    layout->addWidget(_threshold_slider, 7, 0, 1, 2);
+
+    layout->setRowStretch(8, 1);
+    setLayout(layout);
+
+    update();
+}
+
+TonemapReinhard02ParameterSelector::~TonemapReinhard02ParameterSelector()
+{
+}
+
+void TonemapReinhard02ParameterSelector::update()
+{
+    _lock = true;
+    _brightness_spinbox->setValue(1.0);
+    _brightness_slider->setValue(100);
+    _white_spinbox->setValue(10.0);
+    _white_slider->setValue(100);
+    _sharpness_spinbox->setValue(10.0);
+    _sharpness_slider->setValue(1000);
+    _threshold_spinbox->setValue(0.005);
+    _threshold_slider->setValue(500);
+    _lock = false;
+    emit _tonemap_selector->tonemap_changed();
+}
+
+void TonemapReinhard02ParameterSelector::set_brightness(double x)
+{
+    _lock = true;
+    _brightness_slider->setValue(mh_iround(1000.0 * x));
+    _lock = false;
+    emit _tonemap_selector->tonemap_changed();
+}
+
+void TonemapReinhard02ParameterSelector::brightness_slider_changed(int x)
+{
+    if (!_lock)
+	_brightness_spinbox->setValue(static_cast<double>(x) / 1000.0);
+}
+
+void TonemapReinhard02ParameterSelector::set_white(double x)
+{
+    _lock = true;
+    _white_slider->setValue(mh_iround(100.0 * x));
+    _lock = false;
+    emit _tonemap_selector->tonemap_changed();
+}
+
+void TonemapReinhard02ParameterSelector::white_slider_changed(int x)
+{
+    if (!_lock)
+	_white_spinbox->setValue(static_cast<double>(x) / 100.0);
+}
+
+void TonemapReinhard02ParameterSelector::set_sharpness(double x)
+{
+    _lock = true;
+    _sharpness_slider->setValue(mh_iround(100.0 * x));
+    _lock = false;
+    emit _tonemap_selector->tonemap_changed();
+}
+
+void TonemapReinhard02ParameterSelector::sharpness_slider_changed(int x)
+{
+    if (!_lock)
+	_sharpness_spinbox->setValue(static_cast<double>(x) / 100.0);
+}
+
+void TonemapReinhard02ParameterSelector::set_threshold(double x)
+{
+    _lock = true;
+    _threshold_slider->setValue(mh_iround(1000.0 * x));
+    _lock = false;
+    emit _tonemap_selector->tonemap_changed();
+}
+
+void TonemapReinhard02ParameterSelector::threshold_slider_changed(int x)
+{
+    if (!_lock)
+	_threshold_spinbox->setValue(static_cast<double>(x) / 1000.0);
+}
+
+void TonemapReinhard02ParameterSelector::get_parameters(Conf *conf) const
+{
+    conf->put(mh_string("%s-brightness", id()).c_str(), _brightness_spinbox->value());
+    conf->put(mh_string("%s-white", id()).c_str(), _white_spinbox->value());
+    conf->put(mh_string("%s-sharpness", id()).c_str(), _sharpness_spinbox->value());
+    conf->put(mh_string("%s-threshold", id()).c_str(), _sharpness_spinbox->value());
+}
+
+void TonemapReinhard02ParameterSelector::set_parameters(Conf *conf)
+{
+    _brightness_spinbox->setValue(conf->get(mh_string("%s-brightness", id()).c_str(), 0.01, 9.99, 1.0));
+    _white_spinbox->setValue(conf->get(mh_string("%s-white", id()).c_str(), 0.01, 9.99, 1.0));
+    _sharpness_spinbox->setValue(conf->get(mh_string("%s-sharpness", id()).c_str(), 0.01, 9.99, 1.0));
+    _threshold_spinbox->setValue(conf->get(mh_string("%s-threshold", id()).c_str(), 0.01, 9.99, 1.0));
 }

@@ -227,6 +227,30 @@ void ViewArea::paintGL()
 		    mh_mini(4, cvl_gauss_sigma_to_k(sigma_spatial)),
 		    sigma_spatial, sigma_luminance, base_contrast);
 	}
+	else if (_tonemap_selector->active_tonemap_method() == TonemapSelector::REINHARD02)
+	{
+	    static cvl_frame_t *frame = NULL;
+	    static float log_avg_lum;
+	    static cvl_frame_t *tmp = NULL;
+	    if (frame != *_frame)
+	    {
+		log_avg_lum = cvl_log_avg_lum(*_frame, 1.0f);
+		cvl_frame_free(tmp);
+		tmp = cvl_frame_new(cvl_frame_width(*_frame), cvl_frame_height(*_frame), 4, CVL_UNKNOWN, CVL_FLOAT, CVL_TEXTURE);
+		frame = *_frame;
+	    }
+	    TonemapReinhard02ParameterSelector *parameter_selector
+		= reinterpret_cast<TonemapReinhard02ParameterSelector *>(
+			_tonemap_selector->parameter_selector());
+	    float brightness = parameter_selector->get_brightness();
+	    float white = parameter_selector->get_white();
+	    float sharpness = parameter_selector->get_sharpness();
+	    float threshold = parameter_selector->get_threshold();
+	    cvl_tonemap_reinhard02(_frame1, *_frame, 
+		    tmp, log_avg_lum, 
+		    brightness, white, sharpness, threshold);
+	    // FIXME: Free the tmp frame
+	}
 
 	/* Postprocessing */
 	
