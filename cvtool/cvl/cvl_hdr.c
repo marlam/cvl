@@ -59,6 +59,8 @@
 #include "glsl/hdr/tonemap_reinhard05.glsl.h"
 #include "glsl/hdr/tonemap_durand02_step1.glsl.h"
 #include "glsl/hdr/tonemap_durand02_step2.glsl.h"
+#include "glsl/hdr/tonemap_reinhard02_step1.glsl.h"
+#include "glsl/hdr/tonemap_reinhard02_step2.glsl.h"
 
 
 /**
@@ -415,6 +417,113 @@ void cvl_tonemap_durand02(cvl_frame_t *dst, cvl_frame_t *src, float max_abs_lum,
     glUniform1f(glGetUniformLocation(prg, "log_absolute_scale"), log_absolute_scale);
     cvl_transform(dst, tmp);
     cvl_frame_free(tmp);
+
+    cvl_check_errors();
+}
+
+
+/**
+ * \param dst			The destination frame.
+ * \param src			The source frame.
+ * \param tmp			A frame for temporary results.
+ * \param log_avg_lum		The log-average luminance of \a src.
+ * \param brightness		Brightness parameter.
+ * \param white			Lowest value that will be mapped to white.
+ * \param sharpness		Sharpness parameter.
+ * \param threshold		Threshold parameter.
+ *
+ * Applies tone mapping to the high dynamic range frame \a src and writes the
+ * result to \a dst. Input and output must be in #CVL_XYZ format.\n
+ * The temporary frame \a tmp must have four channels of type #CVL_FLOAT.
+ * The \a log_avg_lum parameter must be the log-average luminance of \a src
+ * (unscaled).
+ * The \a brightness parameter must be from [0,1].
+ * The \a white parameter must be from [0,100).
+ * The \a sharpness parameter must be from [0,100).
+ * The \a threshold parameter must be from [0,1].\n
+ * See also:
+ * E. Reinhard and M. Stark and P. Shirley and J. Ferwerda.
+ * Photographic Tone Reproduction for Digital Images.
+ * Proc. ACM SIGGRAPH 2002, pp. 267-276.
+ */
+void cvl_tonemap_reinhard02(cvl_frame_t *dst, cvl_frame_t *src, 
+	cvl_frame_t *tmp, float log_avg_lum,
+	float brightness, float white, float sharpness, float threshold)
+{
+    cvl_assert(dst != NULL);
+    cvl_assert(src != NULL);
+    cvl_assert(dst != src);
+    cvl_assert(cvl_frame_format(dst) == CVL_XYZ);
+    cvl_assert(cvl_frame_format(src) == CVL_XYZ);
+    cvl_assert(brightness >= 0.0f && brightness <= 1.0f);
+    cvl_assert(white >= 0.0f && white < 100.0f);
+    cvl_assert(sharpness >= 0.0f && sharpness < 100.0f);
+    cvl_assert(threshold >= 0.0f && threshold <= 1.0f);
+    if (cvl_error())
+	return;
+
+    GLuint prg;
+    const int k[4] = { 3, 6, 9, 12 };
+    const float sigma[4] = { 2.4f, 4.8f, 7.2f, 9.6f };
+    float mask0[2 * k[0] + 1];
+    float mask0_weightsum;
+    float mask1[2 * k[1] + 1];
+    float mask1_weightsum;
+    float mask2[2 * k[2] + 1];
+    float mask2_weightsum;
+    float mask3[2 * k[3] + 1];
+    float mask3_weightsum;
+
+    mh_gauss_mask(k[0], sigma[0], mask0, &mask0_weightsum);
+    mh_gauss_mask(k[1], sigma[1], mask1, &mask1_weightsum);
+    mh_gauss_mask(k[2], sigma[2], mask2, &mask2_weightsum);
+    mh_gauss_mask(k[3], sigma[3], mask3, &mask3_weightsum);
+    
+    if ((prg = cvl_gl_program_cache_get("cvl_tonemap_reinhard02_step1")) == 0)
+    {
+	prg = cvl_gl_program_new_src("cvl_tonemap_reinhard02_step1", NULL, 
+		CVL_TONEMAP_REINHARD02_STEP1_GLSL_STR);
+	cvl_gl_program_cache_put("cvl_tonemap_reinhard02_step1", prg);
+    }
+    glUseProgram(prg);
+    glUniform1fv(glGetUniformLocation(prg, "mask_0"), 2 * k[0] + 1, mask0);
+    glUniform1fv(glGetUniformLocation(prg, "mask_1"), 2 * k[1] + 1, mask1);
+    glUniform1fv(glGetUniformLocation(prg, "mask_2"), 2 * k[2] + 1, mask2);
+    glUniform1fv(glGetUniformLocation(prg, "mask_3"), 2 * k[3] + 1, mask3);
+    glUniform1f(glGetUniformLocation(prg, "factor_0"), 1.0f / mask0_weightsum);
+    glUniform1f(glGetUniformLocation(prg, "factor_1"), 1.0f / mask1_weightsum);
+    glUniform1f(glGetUniformLocation(prg, "factor_2"), 1.0f / mask2_weightsum);
+    glUniform1f(glGetUniformLocation(prg, "factor_3"), 1.0f / mask3_weightsum);
+    glUniform1f(glGetUniformLocation(prg, "xstep"), 1.0f / (float)cvl_frame_width(src));
+    cvl_transform(tmp, src);
+    
+    if ((prg = cvl_gl_program_cache_get("cvl_tonemap_reinhard02_step2")) == 0)
+    {
+	prg = cvl_gl_program_new_src("cvl_tonemap_reinhard02_step2", NULL, 
+		CVL_TONEMAP_REINHARD02_STEP2_GLSL_STR);
+	cvl_gl_program_cache_put("cvl_tonemap_reinhard02_step2", prg);
+    }
+    glUseProgram(prg);
+    glUniform1fv(glGetUniformLocation(prg, "mask_0"), 2 * k[0] + 1, mask0);
+    glUniform1fv(glGetUniformLocation(prg, "mask_1"), 2 * k[1] + 1, mask1);
+    glUniform1fv(glGetUniformLocation(prg, "mask_2"), 2 * k[2] + 1, mask2);
+    glUniform1fv(glGetUniformLocation(prg, "mask_3"), 2 * k[3] + 1, mask3);
+    glUniform1f(glGetUniformLocation(prg, "factor_0"), 1.0f / mask0_weightsum);
+    glUniform1f(glGetUniformLocation(prg, "factor_1"), 1.0f / mask1_weightsum);
+    glUniform1f(glGetUniformLocation(prg, "factor_2"), 1.0f / mask2_weightsum);
+    glUniform1f(glGetUniformLocation(prg, "factor_3"), 1.0f / mask3_weightsum);
+    glUniform1f(glGetUniformLocation(prg, "s_0"), sigma[0]);
+    glUniform1f(glGetUniformLocation(prg, "s_1"), sigma[1]);
+    glUniform1f(glGetUniformLocation(prg, "s_2"), sigma[2]);
+    glUniform1f(glGetUniformLocation(prg, "s_3"), sigma[3]);
+    glUniform1f(glGetUniformLocation(prg, "ystep"), 1.0f / (float)cvl_frame_height(tmp));
+    glUniform1f(glGetUniformLocation(prg, "log_avg_lum"), log_avg_lum);
+    glUniform1f(glGetUniformLocation(prg, "brightness"), brightness);
+    glUniform1f(glGetUniformLocation(prg, "white"), white);
+    glUniform1f(glGetUniformLocation(prg, "sharpness"), sharpness);
+    glUniform1f(glGetUniformLocation(prg, "threshold"), threshold);
+    cvl_frame_t *srcs[2] = { src, tmp };
+    cvl_transform_multi(&dst, 1, srcs, 2, "textures");
 
     cvl_check_errors();
 }

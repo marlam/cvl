@@ -1,3 +1,10 @@
+2008-01-14  Martin Lambers <marlam@marlam.de>
+
+	* cvl/cvl/cvl_hdr.h, cvl/cvl_hdr.c, cvl/Makefile.am,
+	cvl/glsl/hdr/tonemap_reinhard02_step1.glsl,
+	cvl/glsl/hdr/tonemap_reinhard02_step2.glsl: Add
+	cvl_tonemap_reinhard02().
+
 2008-01-13  Martin Lambers <marlam@marlam.de>
 
 	* cvl/cvl/cvl_hdr.h, cvl/cvl_hdr.c, cvl/Makefile.am,

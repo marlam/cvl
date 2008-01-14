@@ -41,4 +41,8 @@ void cvl_tonemap_reinhard05(cvl_frame_t *dst, cvl_frame_t *src,
 void cvl_tonemap_durand02(cvl_frame_t *dst, cvl_frame_t *src, float max_abs_lum, 
 	int k, float sigma_spatial, float sigma_luminance, float base_contrast);
 
+void cvl_tonemap_reinhard02(cvl_frame_t *dst, cvl_frame_t *src, 
+	cvl_frame_t *tmp, float log_avg_lum,
+	float brightness, float white, float sharpness, float threshold);
+
 #endif

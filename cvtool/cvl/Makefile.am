@@ -107,6 +107,8 @@ nodist_libcvl_la_SOURCES = \
 	glsl/hdr/tonemap_reinhard05.glsl.h		\
 	glsl/hdr/tonemap_durand02_step1.glsl.h		\
 	glsl/hdr/tonemap_durand02_step2.glsl.h		\
+	glsl/hdr/tonemap_reinhard02_step1.glsl.h	\
+	glsl/hdr/tonemap_reinhard02_step2.glsl.h	\
 	glsl/visualization/vector2_color.glsl.h
 
 EXTRA_DIST = cvl/cvl_version.h.in \
@@ -166,6 +168,8 @@ EXTRA_DIST = cvl/cvl_version.h.in \
 	glsl/hdr/tonemap_reinhard05.glsl		\
 	glsl/hdr/tonemap_durand02_step1.glsl		\
 	glsl/hdr/tonemap_durand02_step2.glsl		\
+	glsl/hdr/tonemap_reinhard02_step1.glsl		\
+	glsl/hdr/tonemap_reinhard02_step2.glsl		\
 	glsl/visualization/vector2_color.glsl
 
 BUILT_SOURCES = $(nodist_libcvl_la_SOURCES)
