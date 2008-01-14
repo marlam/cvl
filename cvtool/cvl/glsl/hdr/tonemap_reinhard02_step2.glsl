@@ -85,7 +85,7 @@ void main()
     float old_Y = XYZ.g;
 
     /* Linear prescaling */
-    float scale_factor = (brightness / log_avg_lum) * old_Y;
+    float scale_factor = brightness / log_avg_lum;
     float Lm = scale_factor * old_Y;
     g_0 *= scale_factor;
     g_1 *= scale_factor;
