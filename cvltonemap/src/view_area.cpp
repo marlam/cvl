@@ -60,6 +60,8 @@ ViewArea::ViewArea(cvl_frame_t **frame,
     _processed_frame = NULL;
     _render_frame = NULL;
     _recompute = true;
+    _last_method = -1;
+    _tmpframe = NULL;
     _frame1 = NULL;
     _frame2 = NULL;
     setMinimumSize(min_size, min_size);
@@ -79,6 +81,7 @@ ViewArea::~ViewArea()
 	cvl_frame_free(_frame1);
 	cvl_frame_free(_frame2);
 	cvl_frame_free(_render_frame);
+	cvl_frame_free(_tmpframe);
 	cvl_deinit();
     }
 }
@@ -142,8 +145,15 @@ void ViewArea::paintGL()
 		    3, CVL_RGB, CVL_UINT8, CVL_TEXTURE);
 	}
 
+	int method = _tonemap_selector->active_tonemap_method();
+	if (_processed_frame != *_frame || method != _last_method)
+	{
+	    cvl_frame_free(_tmpframe);
+	    _tmpframe = NULL;
+	}
+
 	/* Tone Mapping */
-	if (_tonemap_selector->active_tonemap_method() == TonemapSelector::RANGE_SELECTION)
+	if (method == TonemapSelector::RANGE_SELECTION)
 	{
 	    TonemapRangeSelectionParameterSelector *parameter_selector
 		= reinterpret_cast<TonemapRangeSelectionParameterSelector *>(
@@ -152,7 +162,7 @@ void ViewArea::paintGL()
 	    float lum_max = parameter_selector->get_max_luminance();
 	    cvl_luminance_range(_frame1, *_frame, lum_min, lum_max);
 	}
-	else if (_tonemap_selector->active_tonemap_method() == TonemapSelector::SCHLICK94)
+	else if (method == TonemapSelector::SCHLICK94)
 	{
 	    TonemapSchlick94ParameterSelector *parameter_selector
 		= reinterpret_cast<TonemapSchlick94ParameterSelector *>(
@@ -160,17 +170,24 @@ void ViewArea::paintGL()
 	    float p = parameter_selector->get_p();
 	    cvl_tonemap_schlick94(_frame1, *_frame, p);
 	}
-	else if (_tonemap_selector->active_tonemap_method() == TonemapSelector::TUMBLIN99)
+	else if (method == TonemapSelector::TUMBLIN99)
 	{
+	    if (!_tmpframe)
+	    {
+		_tmpframe = cvl_frame_new(
+			cvl_frame_width(*_frame), cvl_frame_height(*_frame), 
+			1, CVL_UNKNOWN, CVL_FLOAT, CVL_TEXTURE);
+	    }
 	    TonemapTumblin99ParameterSelector *parameter_selector
 		= reinterpret_cast<TonemapTumblin99ParameterSelector *>(
 			_tonemap_selector->parameter_selector());
 	    float max_abs_lum = parameter_selector->get_max_abs_lum();
+	    float log_avg_lum = cvl_log_avg_lum(*_frame, _tmpframe, max_abs_lum);
 	    float disp_adapt_level = parameter_selector->get_disp_adapt_level();
 	    float max_contrast = parameter_selector->get_max_contrast();
-	    cvl_tonemap_tumblin99(_frame1, *_frame, max_abs_lum, disp_adapt_level, max_contrast);
+	    cvl_tonemap_tumblin99(_frame1, *_frame, max_abs_lum, log_avg_lum, disp_adapt_level, max_contrast);
 	}
-	else if (_tonemap_selector->active_tonemap_method() == TonemapSelector::DRAGO03)
+	else if (method == TonemapSelector::DRAGO03)
 	{
 	    TonemapDrago03ParameterSelector *parameter_selector
 		= reinterpret_cast<TonemapDrago03ParameterSelector *>(
@@ -180,28 +197,26 @@ void ViewArea::paintGL()
 	    float max_disp_lum = parameter_selector->get_max_disp_lum();
 	    cvl_tonemap_drago03(_frame1, *_frame, max_abs_lum, bias, max_disp_lum);
 	}
-	else if (_tonemap_selector->active_tonemap_method() == TonemapSelector::REINHARD05)
+	else if (method == TonemapSelector::REINHARD05)
 	{
-	    static cvl_frame_t *frame = NULL;
 	    static float min_lum;
 	    static float avg_lum;
 	    static float log_avg_lum;
-	    static cvl_frame_t *rgb = NULL;
 	    static float channel_avg[4];
-	    if (frame != *_frame)
+	    if (!_tmpframe)
 	    {
+		_tmpframe = cvl_frame_new(
+			cvl_frame_width(*_frame), cvl_frame_height(*_frame),
+			3, CVL_RGB, CVL_FLOAT, CVL_TEXTURE);
 		cvl_reduce(*_frame, CVL_REDUCE_MIN, 1, &min_lum);
 		cvl_reduce(*_frame, CVL_REDUCE_SUM, 1, &avg_lum);
 		avg_lum /= static_cast<float>(cvl_frame_size(*_frame));
-		log_avg_lum = cvl_log_avg_lum(*_frame, 1.0f);
-		cvl_frame_free(rgb);
-		rgb = cvl_frame_new(cvl_frame_width(*_frame), cvl_frame_height(*_frame), 3, CVL_RGB, CVL_FLOAT, CVL_TEXTURE);
-		cvl_convert_format(rgb, *_frame);
-		cvl_reduce(rgb, CVL_REDUCE_SUM, -1, channel_avg);
+		log_avg_lum = cvl_log_avg_lum(*_frame, _tmpframe, 1.0f);
+		cvl_convert_format(_tmpframe, *_frame);
+		cvl_reduce(_tmpframe, CVL_REDUCE_SUM, -1, channel_avg);
 		channel_avg[0] /= static_cast<float>(cvl_frame_size(*_frame));
 		channel_avg[1] /= static_cast<float>(cvl_frame_size(*_frame));
 		channel_avg[2] /= static_cast<float>(cvl_frame_size(*_frame));
-		frame = *_frame;
 	    }
 	    TonemapReinhard05ParameterSelector *parameter_selector
 		= reinterpret_cast<TonemapReinhard05ParameterSelector *>(
@@ -210,12 +225,16 @@ void ViewArea::paintGL()
 	    float c = parameter_selector->get_c();
 	    float l = parameter_selector->get_l();
 	    cvl_tonemap_reinhard05(_frame1, *_frame, 
-		    min_lum, avg_lum, log_avg_lum, rgb, channel_avg,
+		    min_lum, avg_lum, log_avg_lum, _tmpframe, channel_avg,
 		    f, c, l);
-	    // FIXME: Free the RGB frame
 	}
-	else if (_tonemap_selector->active_tonemap_method() == TonemapSelector::DURAND02)
+	else if (method == TonemapSelector::DURAND02)
 	{
+	    if (!_tmpframe)
+	    {
+		_tmpframe = cvl_frame_new(cvl_frame_width(*_frame), cvl_frame_height(*_frame),
+     			4, CVL_UNKNOWN, CVL_FLOAT, CVL_TEXTURE);
+	    }
 	    TonemapDurand02ParameterSelector *parameter_selector
 		= reinterpret_cast<TonemapDurand02ParameterSelector *>(
 			_tonemap_selector->parameter_selector());
@@ -223,21 +242,19 @@ void ViewArea::paintGL()
 	    float sigma_spatial = parameter_selector->get_sigma_spatial();
 	    float sigma_luminance = parameter_selector->get_sigma_luminance();
 	    float base_contrast = parameter_selector->get_base_contrast();
-	    cvl_tonemap_durand02(_frame1, *_frame, max_abs_lum,
+	    cvl_tonemap_durand02(_frame1, *_frame, max_abs_lum, _tmpframe,
 		    mh_mini(4, cvl_gauss_sigma_to_k(sigma_spatial)),
 		    sigma_spatial, sigma_luminance, base_contrast);
 	}
-	else if (_tonemap_selector->active_tonemap_method() == TonemapSelector::REINHARD02)
+	else if (method == TonemapSelector::REINHARD02)
 	{
-	    static cvl_frame_t *frame = NULL;
 	    static float log_avg_lum;
-	    static cvl_frame_t *tmp = NULL;
-	    if (frame != *_frame)
+	    if (!_tmpframe)
 	    {
-		log_avg_lum = cvl_log_avg_lum(*_frame, 1.0f);
-		cvl_frame_free(tmp);
-		tmp = cvl_frame_new(cvl_frame_width(*_frame), cvl_frame_height(*_frame), 4, CVL_UNKNOWN, CVL_FLOAT, CVL_TEXTURE);
-		frame = *_frame;
+		_tmpframe = cvl_frame_new(
+			cvl_frame_width(*_frame), cvl_frame_height(*_frame), 
+			4, CVL_UNKNOWN, CVL_FLOAT, CVL_TEXTURE);
+		log_avg_lum = cvl_log_avg_lum(*_frame, _tmpframe, 1.0f);
 	    }
 	    TonemapReinhard02ParameterSelector *parameter_selector
 		= reinterpret_cast<TonemapReinhard02ParameterSelector *>(
@@ -247,9 +264,8 @@ void ViewArea::paintGL()
 	    float sharpness = parameter_selector->get_sharpness();
 	    float threshold = parameter_selector->get_threshold();
 	    cvl_tonemap_reinhard02(_frame1, *_frame, 
-		    tmp, log_avg_lum, 
+		    _tmpframe, log_avg_lum, 
 		    brightness, white, sharpness, threshold);
-	    // FIXME: Free the tmp frame
 	}
 
 	/* Postprocessing */
@@ -308,6 +324,7 @@ void ViewArea::paintGL()
 	cvl_convert_format(_render_frame, src);
 
 	_processed_frame = *_frame;
+	_last_method = method;
     	_recompute = false;
     }
 

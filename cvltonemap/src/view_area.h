@@ -55,6 +55,10 @@ class ViewArea : public QGLWidget
 	cvl_frame_t *_render_frame;
 	// Recompute _render_frame?
 	bool _recompute;
+	// Last used tone mapping method
+	int _last_method;
+	// Temporary buffer, method specific
+	cvl_frame_t *_tmpframe;
 	// Processing buffers
 	cvl_frame_t *_frame1, *_frame2;
 	// Used area of the framebuffer
