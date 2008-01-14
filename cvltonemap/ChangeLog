@@ -5,6 +5,7 @@
 	Add support for the reinhard02 method.
 	* src/view_area.h, src/view_area.cpp: Update to new CVL interfaces.
 	Improves performance.
+	* conf/conf.cpp: Fix error message for invalid contents.
 
 2008-01-13  Martin Lambers <marlam@marlam.de>
 

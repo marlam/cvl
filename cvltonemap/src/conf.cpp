@@ -105,7 +105,7 @@ void Conf::load(const char *filename) throw (err)
     if (error)
     {
 	erase();
-	throw err(err::ERR_IO, "The contents of " + string(filename) + " are invalid", strerror(errno));
+	throw err(err::ERR_IO, "Reading from " + string(filename) + " failed", "Invalid content");
     }
     if (ferror(f))
     {
