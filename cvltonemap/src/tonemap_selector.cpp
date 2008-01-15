@@ -51,15 +51,16 @@ TonemapSelector::TonemapSelector(cvl_frame_t **frame, QWidget *parent)
     _frame = frame;
 
     /* When adding a new method, adjust only this block: ---> */
-    _method_count = 7;
+    _method_count = 8;
     _parameter_selector = new TonemapParameterSelector *[_method_count];
     _parameter_selector[0] = new TonemapRangeSelectionParameterSelector(this, _frame);
     _parameter_selector[1] = new TonemapSchlick94ParameterSelector(this, _frame);
     _parameter_selector[2] = new TonemapTumblin99ParameterSelector(this, _frame);
     _parameter_selector[3] = new TonemapDrago03ParameterSelector(this, _frame);
     _parameter_selector[4] = new TonemapReinhard05ParameterSelector(this, _frame);
-    _parameter_selector[5] = new TonemapDurand02ParameterSelector(this, _frame);
-    _parameter_selector[6] = new TonemapReinhard02ParameterSelector(this, _frame);
+    _parameter_selector[5] = new TonemapAshikhmin02ParameterSelector(this, _frame);
+    _parameter_selector[6] = new TonemapDurand02ParameterSelector(this, _frame);
+    _parameter_selector[7] = new TonemapReinhard02ParameterSelector(this, _frame);
     /* <--- End. */
 
     _postproc_selector = new PostprocSelector *[_method_count];
@@ -920,6 +921,86 @@ void TonemapReinhard05ParameterSelector::set_parameters(Conf *conf)
 }
 
 
+/* Ashikhmin02 */
+
+TonemapAshikhmin02ParameterSelector::TonemapAshikhmin02ParameterSelector(
+	TonemapSelector *tonemap_selector, cvl_frame_t **frame)
+{
+    _tonemap_selector = tonemap_selector;
+    _frame = frame;
+    _lock = false;
+
+    QGridLayout *layout = new QGridLayout();
+
+    _max_abs_lum_selector = new MaxAbsLumSelector(id(), _frame, this);
+    layout->addWidget(_max_abs_lum_selector, 0, 0, 1, 2);
+    connect(_max_abs_lum_selector, SIGNAL(maxabslum_changed()), this, SLOT(max_abs_lum_changed()));
+
+    QLabel *l3 = new QLabel("Threshold:");
+    layout->addWidget(l3, 2, 0);
+    _threshold_spinbox = new QDoubleSpinBox();
+    _threshold_spinbox->setRange(0.001, 1.000);
+    _threshold_spinbox->setDecimals(4);
+    _threshold_spinbox->setSingleStep(0.1);
+    connect(_threshold_spinbox, SIGNAL(valueChanged(double)), this, SLOT(set_threshold(double)));
+    layout->addWidget(_threshold_spinbox, 2, 1);
+    _threshold_slider = new QSlider(Qt::Horizontal, this);
+    _threshold_slider->setRange(1, 1000);
+    connect(_threshold_slider, SIGNAL(valueChanged(int)), this, SLOT(threshold_slider_changed(int)));
+    layout->addWidget(_threshold_slider, 3, 0, 1, 2);
+
+    layout->setRowStretch(4, 1);
+    setLayout(layout);
+
+    update();
+}
+
+TonemapAshikhmin02ParameterSelector::~TonemapAshikhmin02ParameterSelector()
+{
+}
+
+void TonemapAshikhmin02ParameterSelector::update()
+{
+    _lock = true;
+    _max_abs_lum_selector->update();
+    _threshold_spinbox->setValue(0.5);
+    _threshold_slider->setValue(500);
+    _lock = false;
+    emit _tonemap_selector->tonemap_changed();
+}
+
+void TonemapAshikhmin02ParameterSelector::max_abs_lum_changed()
+{
+    emit _tonemap_selector->tonemap_changed();
+}
+
+void TonemapAshikhmin02ParameterSelector::set_threshold(double x)
+{
+    _lock = true;
+    _threshold_slider->setValue(mh_iround(1000.0 * x));
+    _lock = false;
+    emit _tonemap_selector->tonemap_changed();
+}
+
+void TonemapAshikhmin02ParameterSelector::threshold_slider_changed(int x)
+{
+    if (!_lock)
+	_threshold_spinbox->setValue(static_cast<double>(x) / 1000.0);
+}
+
+void TonemapAshikhmin02ParameterSelector::get_parameters(Conf *conf) const
+{
+    _max_abs_lum_selector->get_parameters(conf);
+    conf->put(mh_string("%s-threshold", id()).c_str(), _threshold_spinbox->value());
+}
+
+void TonemapAshikhmin02ParameterSelector::set_parameters(Conf *conf)
+{
+    _max_abs_lum_selector->set_parameters(conf);
+    _threshold_spinbox->setValue(conf->get(mh_string("%s-threshold", id()).c_str(), 0.01, 9.99, 1.0));
+}
+
+
 /* Durand02 */
 
 TonemapDurand02ParameterSelector::TonemapDurand02ParameterSelector(
@@ -1211,7 +1292,7 @@ void TonemapReinhard02ParameterSelector::get_parameters(Conf *conf) const
     conf->put(mh_string("%s-brightness", id()).c_str(), _brightness_spinbox->value());
     conf->put(mh_string("%s-white", id()).c_str(), _white_spinbox->value());
     conf->put(mh_string("%s-sharpness", id()).c_str(), _sharpness_spinbox->value());
-    conf->put(mh_string("%s-threshold", id()).c_str(), _sharpness_spinbox->value());
+    conf->put(mh_string("%s-threshold", id()).c_str(), _threshold_spinbox->value());
 }
 
 void TonemapReinhard02ParameterSelector::set_parameters(Conf *conf)

@@ -228,6 +228,26 @@ void ViewArea::paintGL()
 		    min_lum, avg_lum, log_avg_lum, _tmpframe, channel_avg,
 		    f, c, l);
 	}
+	else if (method == TonemapSelector::ASHIKHMIN02)
+	{
+	    if (!_tmpframe)
+	    {
+		_tmpframe = cvl_frame_new(
+			cvl_frame_width(*_frame), cvl_frame_height(*_frame), 
+			4, CVL_UNKNOWN, CVL_FLOAT, CVL_TEXTURE);
+	    }
+	    TonemapAshikhmin02ParameterSelector *parameter_selector
+		= reinterpret_cast<TonemapAshikhmin02ParameterSelector *>(
+			_tonemap_selector->parameter_selector());
+	    float max_abs_lum = parameter_selector->get_max_abs_lum();
+	    float min_abs_lum;
+    	    cvl_reduce(*_frame, CVL_REDUCE_MIN, 1, &min_abs_lum);
+	    min_abs_lum *= max_abs_lum;
+	    float threshold = parameter_selector->get_threshold();
+	    cvl_tonemap_ashikhmin02(_frame1, *_frame, 
+		    min_abs_lum, max_abs_lum,
+		    _tmpframe, threshold);
+	}
 	else if (method == TonemapSelector::DURAND02)
 	{
 	    if (!_tmpframe)

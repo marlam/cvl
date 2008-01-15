@@ -91,8 +91,9 @@ class TonemapSelector : public QWidget
 	static const int TUMBLIN99		= 2;
 	static const int DRAGO03		= 3;
 	static const int REINHARD05		= 4;
-	static const int DURAND02		= 5;
-	static const int REINHARD02		= 6;
+	static const int ASHIKHMIN02		= 5;
+	static const int DURAND02		= 6;
+	static const int REINHARD02		= 7;
 
 	int active_tonemap_method() const 
 	{ 
@@ -117,6 +118,7 @@ class TonemapSelector : public QWidget
     friend class TonemapTumblin99ParameterSelector;
     friend class TonemapDrago03ParameterSelector;
     friend class TonemapReinhard05ParameterSelector;
+    friend class TonemapAshikhmin02ParameterSelector;
     friend class TonemapDurand02ParameterSelector;
     friend class TonemapReinhard02ParameterSelector;
 };
@@ -441,6 +443,60 @@ class TonemapReinhard05ParameterSelector : public TonemapParameterSelector
 	float get_l() const
 	{
 	    return static_cast<float>(_l_spinbox->value());
+	}
+
+	void get_parameters(Conf *conf) const;
+	void set_parameters(Conf *conf);
+};
+
+/* Ashikhmin02 */
+
+class TonemapAshikhmin02ParameterSelector : public TonemapParameterSelector
+{
+    Q_OBJECT
+
+    private:
+	TonemapSelector *_tonemap_selector;
+	cvl_frame_t **_frame;
+	MaxAbsLumSelector *_max_abs_lum_selector;
+	QDoubleSpinBox *_threshold_spinbox;
+	QSlider *_threshold_slider;
+	bool _lock;
+
+    private slots:
+	void max_abs_lum_changed();
+	void set_threshold(double x);
+        void threshold_slider_changed(int x);
+
+    public:
+	TonemapAshikhmin02ParameterSelector(
+		TonemapSelector *tonemap_selector, cvl_frame_t **frame);
+	~TonemapAshikhmin02ParameterSelector();
+	void update();
+	
+	const char *name() const
+	{
+	    return "Ashikhmin 02";
+	}
+	
+	const char *id() const
+	{
+	    return "ashikhmin02";
+	}
+
+	bool is_global() const
+	{
+	    return false;
+	}
+
+	float get_max_abs_lum() const
+	{
+	    return _max_abs_lum_selector->value();
+	}
+
+	float get_threshold() const
+	{
+	    return static_cast<float>(_threshold_spinbox->value() / 100.0f);
 	}
 
 	void get_parameters(Conf *conf) const;
