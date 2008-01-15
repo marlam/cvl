@@ -105,6 +105,8 @@ nodist_libcvl_la_SOURCES = \
 	glsl/hdr/tonemap_tumblin99.glsl.h		\
 	glsl/hdr/tonemap_drago03.glsl.h			\
 	glsl/hdr/tonemap_reinhard05.glsl.h		\
+	glsl/hdr/tonemap_ashikhmin02_step1.glsl.h	\
+	glsl/hdr/tonemap_ashikhmin02_step2.glsl.h	\
 	glsl/hdr/tonemap_durand02_step1.glsl.h		\
 	glsl/hdr/tonemap_durand02_step2.glsl.h		\
 	glsl/hdr/tonemap_reinhard02_step1.glsl.h	\
@@ -166,6 +168,8 @@ EXTRA_DIST = cvl/cvl_version.h.in \
 	glsl/hdr/tonemap_tumblin99.glsl			\
 	glsl/hdr/tonemap_drago03.glsl			\
 	glsl/hdr/tonemap_reinhard05.glsl		\
+	glsl/hdr/tonemap_ashikhmin02_step1.glsl		\
+	glsl/hdr/tonemap_ashikhmin02_step2.glsl		\
 	glsl/hdr/tonemap_durand02_step1.glsl		\
 	glsl/hdr/tonemap_durand02_step2.glsl		\
 	glsl/hdr/tonemap_reinhard02_step1.glsl		\

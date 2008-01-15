@@ -57,6 +57,8 @@
 #include "glsl/hdr/tonemap_tumblin99.glsl.h"
 #include "glsl/hdr/tonemap_drago03.glsl.h"
 #include "glsl/hdr/tonemap_reinhard05.glsl.h"
+#include "glsl/hdr/tonemap_ashikhmin02_step1.glsl.h"
+#include "glsl/hdr/tonemap_ashikhmin02_step2.glsl.h"
 #include "glsl/hdr/tonemap_durand02_step1.glsl.h"
 #include "glsl/hdr/tonemap_durand02_step2.glsl.h"
 #include "glsl/hdr/tonemap_reinhard02_step1.glsl.h"
@@ -272,8 +274,8 @@ void cvl_tonemap_drago03(cvl_frame_t *dst, cvl_frame_t *src, float max_abs_lum, 
  * The \a l parameter must be from [0,1] (default: 1).
  * * The \a max_disp_lum parameter must be greater than zero.\n
  * See also:
- * E. Reinhard and K. Devlin\n
- * Dynamic range reduction inspired by photoreceptor physiology\m
+ * E. Reinhard and K. Devlin.
+ * Dynamic range reduction inspired by photoreceptor physiology.
  * Transactions on Visualization and Computer Graphics, Volume 11, Issue 1,
  * Jan.-Feb. 2005, pp 13-24.
  */
@@ -321,6 +323,107 @@ void cvl_tonemap_reinhard05(cvl_frame_t *dst, cvl_frame_t *src,
     cvl_transform(dst, rgb);
     cvl_frame_set_format(dst, CVL_RGB);
     cvl_convert_format_inplace(dst, CVL_XYZ);
+
+    cvl_check_errors();
+}
+
+
+/**
+ * \param dst			The destination frame.
+ * \param src			The source frame.
+ * \param min_abs_lum		Minimum absolute luminance.
+ * \param max_abs_lum		Maximum absolute luminance.
+ * \param tmp			A frame for temporary results.
+ * \param threshold		Threshold parameter.
+ *
+ * Applies tone mapping to the high dynamic range frame \a src and writes the
+ * result to \a dst. Input and output must be in #CVL_XYZ format.\n
+ * The temporary frame \a tmp must have four channels of type #CVL_FLOAT.
+ * The \a threshold parameter must be from [0,1].\n
+ * See also:
+ * M. Ashikhmin. 
+ * A tone mapping algorithm for high contrast images.
+ * EGRW 2002: Proceedings of the 13th Eurographics workshop on Rendering, pp. 145-156.
+ */
+void cvl_tonemap_ashikhmin02(cvl_frame_t *dst, cvl_frame_t *src, 
+	float min_abs_lum, float max_abs_lum,
+	cvl_frame_t *tmp, float threshold)
+{
+    cvl_assert(dst != NULL);
+    cvl_assert(src != NULL);
+    cvl_assert(dst != src);
+    cvl_assert(cvl_frame_format(dst) == CVL_XYZ);
+    cvl_assert(cvl_frame_format(src) == CVL_XYZ);
+    cvl_assert(min_abs_lum > 0.0f);
+    cvl_assert(max_abs_lum > 0.0f);
+    cvl_assert(max_abs_lum >= min_abs_lum);
+    cvl_assert(tmp != NULL);
+    cvl_assert(cvl_frame_channels(tmp) == 4);
+    cvl_assert(cvl_frame_type(tmp) == CVL_FLOAT);
+    cvl_assert(threshold >= 0.0f && threshold <= 1.0f);
+    if (cvl_error())
+	return;
+
+    GLuint prg;
+    const int k[4] = { 2, 4, 6, 8 };
+    const float sigma[4] = { 1.2f, 2.4f, 3.6f, 4.8f };
+    float mask0[2 * k[0] + 1];
+    float mask0_weightsum;
+    float mask1[2 * k[1] + 1];
+    float mask1_weightsum;
+    float mask2[2 * k[2] + 1];
+    float mask2_weightsum;
+    float mask3[2 * k[3] + 1];
+    float mask3_weightsum;
+
+    mh_gauss_mask(k[0], sigma[0], mask0, &mask0_weightsum);
+    mh_gauss_mask(k[1], sigma[1], mask1, &mask1_weightsum);
+    mh_gauss_mask(k[2], sigma[2], mask2, &mask2_weightsum);
+    mh_gauss_mask(k[3], sigma[3], mask3, &mask3_weightsum);
+    
+    if ((prg = cvl_gl_program_cache_get("cvl_tonemap_ashikhmin02_step1")) == 0)
+    {
+	prg = cvl_gl_program_new_src("cvl_tonemap_ashikhmin02_step1", NULL, 
+		CVL_TONEMAP_ASHIKHMIN02_STEP1_GLSL_STR);
+	cvl_gl_program_cache_put("cvl_tonemap_ashikhmin02_step1", prg);
+    }
+    glUseProgram(prg);
+    glUniform1fv(glGetUniformLocation(prg, "mask_0"), 2 * k[0] + 1, mask0);
+    glUniform1fv(glGetUniformLocation(prg, "mask_1"), 2 * k[1] + 1, mask1);
+    glUniform1fv(glGetUniformLocation(prg, "mask_2"), 2 * k[2] + 1, mask2);
+    glUniform1fv(glGetUniformLocation(prg, "mask_3"), 2 * k[3] + 1, mask3);
+    glUniform1f(glGetUniformLocation(prg, "factor_0"), 1.0f / mask0_weightsum);
+    glUniform1f(glGetUniformLocation(prg, "factor_1"), 1.0f / mask1_weightsum);
+    glUniform1f(glGetUniformLocation(prg, "factor_2"), 1.0f / mask2_weightsum);
+    glUniform1f(glGetUniformLocation(prg, "factor_3"), 1.0f / mask3_weightsum);
+    glUniform1f(glGetUniformLocation(prg, "xstep"), 1.0f / (float)cvl_frame_width(src));
+    cvl_transform(tmp, src);
+    
+    if ((prg = cvl_gl_program_cache_get("cvl_tonemap_ashikhmin02_step2")) == 0)
+    {
+	prg = cvl_gl_program_new_src("cvl_tonemap_ashikhmin02_step2", NULL, 
+		CVL_TONEMAP_ASHIKHMIN02_STEP2_GLSL_STR);
+	cvl_gl_program_cache_put("cvl_tonemap_ashikhmin02_step2", prg);
+    }
+    glUseProgram(prg);
+    glUniform1fv(glGetUniformLocation(prg, "mask_0"), 2 * k[0] + 1, mask0);
+    glUniform1fv(glGetUniformLocation(prg, "mask_1"), 2 * k[1] + 1, mask1);
+    glUniform1fv(glGetUniformLocation(prg, "mask_2"), 2 * k[2] + 1, mask2);
+    glUniform1fv(glGetUniformLocation(prg, "mask_3"), 2 * k[3] + 1, mask3);
+    glUniform1f(glGetUniformLocation(prg, "factor_0"), 1.0f / mask0_weightsum);
+    glUniform1f(glGetUniformLocation(prg, "factor_1"), 1.0f / mask1_weightsum);
+    glUniform1f(glGetUniformLocation(prg, "factor_2"), 1.0f / mask2_weightsum);
+    glUniform1f(glGetUniformLocation(prg, "factor_3"), 1.0f / mask3_weightsum);
+    glUniform1f(glGetUniformLocation(prg, "s_0"), sigma[0]);
+    glUniform1f(glGetUniformLocation(prg, "s_1"), sigma[1]);
+    glUniform1f(glGetUniformLocation(prg, "s_2"), sigma[2]);
+    glUniform1f(glGetUniformLocation(prg, "s_3"), sigma[3]);
+    glUniform1f(glGetUniformLocation(prg, "ystep"), 1.0f / (float)cvl_frame_height(tmp));
+    glUniform1f(glGetUniformLocation(prg, "min_abs_lum"), min_abs_lum);
+    glUniform1f(glGetUniformLocation(prg, "max_abs_lum"), max_abs_lum);
+    glUniform1f(glGetUniformLocation(prg, "t"), threshold);
+    cvl_frame_t *srcs[2] = { src, tmp };
+    cvl_transform_multi(&dst, 1, srcs, 2, "textures");
 
     cvl_check_errors();
 }

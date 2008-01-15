@@ -38,6 +38,10 @@ void cvl_tonemap_reinhard05(cvl_frame_t *dst, cvl_frame_t *src,
 	cvl_frame_t *rgb, const float channel_avg[3],
 	float f, float c, float l);
 
+void cvl_tonemap_ashikhmin02(cvl_frame_t *dst, cvl_frame_t *src, 
+	float min_abs_lum, float max_abs_lum,
+	cvl_frame_t *tmp, float threshold);
+
 void cvl_tonemap_durand02(cvl_frame_t *dst, cvl_frame_t *src, float max_abs_lum, 
 	cvl_frame_t *tmp, int k, float sigma_spatial, float sigma_luminance, float base_contrast);
 
