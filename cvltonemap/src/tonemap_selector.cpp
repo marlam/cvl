@@ -916,8 +916,8 @@ void TonemapReinhard05ParameterSelector::get_parameters(Conf *conf) const
 void TonemapReinhard05ParameterSelector::set_parameters(Conf *conf)
 {
     _f_spinbox->setValue(conf->get(mh_string("%s-f", id()).c_str(), -8.0, 8.0, 0.0));
-    _c_spinbox->setValue(conf->get(mh_string("%s-c", id()).c_str(), 0.0, 1.0, 0.0));
-    _l_spinbox->setValue(conf->get(mh_string("%s-l", id()).c_str(), 0.0, 1.0, 1.0));
+    _c_spinbox->setValue(conf->get(mh_string("%s-c", id()).c_str(), 0.0, 1.0, 0.5));
+    _l_spinbox->setValue(conf->get(mh_string("%s-l", id()).c_str(), 0.0, 1.0, 0.5));
 }
 
 
@@ -939,13 +939,13 @@ TonemapAshikhmin02ParameterSelector::TonemapAshikhmin02ParameterSelector(
     QLabel *l3 = new QLabel("Threshold:");
     layout->addWidget(l3, 2, 0);
     _threshold_spinbox = new QDoubleSpinBox();
-    _threshold_spinbox->setRange(0.001, 1.000);
+    _threshold_spinbox->setRange(0.001, 10.000);
     _threshold_spinbox->setDecimals(4);
     _threshold_spinbox->setSingleStep(0.1);
     connect(_threshold_spinbox, SIGNAL(valueChanged(double)), this, SLOT(set_threshold(double)));
     layout->addWidget(_threshold_spinbox, 2, 1);
     _threshold_slider = new QSlider(Qt::Horizontal, this);
-    _threshold_slider->setRange(1, 1000);
+    _threshold_slider->setRange(1, 10000);
     connect(_threshold_slider, SIGNAL(valueChanged(int)), this, SLOT(threshold_slider_changed(int)));
     layout->addWidget(_threshold_slider, 3, 0, 1, 2);
 
@@ -997,7 +997,7 @@ void TonemapAshikhmin02ParameterSelector::get_parameters(Conf *conf) const
 void TonemapAshikhmin02ParameterSelector::set_parameters(Conf *conf)
 {
     _max_abs_lum_selector->set_parameters(conf);
-    _threshold_spinbox->setValue(conf->get(mh_string("%s-threshold", id()).c_str(), 0.01, 9.99, 1.0));
+    _threshold_spinbox->setValue(conf->get(mh_string("%s-threshold", id()).c_str(), 0.001, 10.0, 1.0));
 }
 
 
@@ -1297,8 +1297,8 @@ void TonemapReinhard02ParameterSelector::get_parameters(Conf *conf) const
 
 void TonemapReinhard02ParameterSelector::set_parameters(Conf *conf)
 {
-    _brightness_spinbox->setValue(conf->get(mh_string("%s-brightness", id()).c_str(), 0.01, 9.99, 1.0));
-    _white_spinbox->setValue(conf->get(mh_string("%s-white", id()).c_str(), 0.01, 9.99, 1.0));
-    _sharpness_spinbox->setValue(conf->get(mh_string("%s-sharpness", id()).c_str(), 0.01, 9.99, 1.0));
-    _threshold_spinbox->setValue(conf->get(mh_string("%s-threshold", id()).c_str(), 0.01, 9.99, 1.0));
+    _brightness_spinbox->setValue(conf->get(mh_string("%s-brightness", id()).c_str(), 0.01, 1.0, 1.0));
+    _white_spinbox->setValue(conf->get(mh_string("%s-white", id()).c_str(), 0.01, 99.9, 10.0));
+    _sharpness_spinbox->setValue(conf->get(mh_string("%s-sharpness", id()).c_str(), 0.01, 99.99, 10.0));
+    _threshold_spinbox->setValue(conf->get(mh_string("%s-threshold", id()).c_str(), 0.001, 1.0, 0.005));
 }
