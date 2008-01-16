@@ -1,7 +1,7 @@
 \input texinfo   @c -*-texinfo-*-
 @afourpaper
 @setfilename cvtool.info
-@set UPDATED January 8, 2008
+@set UPDATED January 16, 2008
 @set UPDATED-MONTH January 2008
 @set EDITION 0.2.3
 @set VERSION 0.2.3
@@ -1255,13 +1255,17 @@ frame pair 0: standard deviation = 0.1969 0.1969 0.0000
 @code{tonemap -m|--method=tumblin99 [-l|--max-absolute-luminance=@var{l}] [--display-adaptation-level=@var{d}]
 [--max-displayable-contrast=@var{c}]}
 @code{tonemap -m|--method=drago03 [-l|--max-absolute-luminance=@var{l}] [--max-display-luminance=@var{d}] [--bias=@var{b}]}
+@code{tonemap -m|--method=reinhard05 [--intensity=@var{i}] [--light-adaptation=@var{l}] [--chromatic-adaptation=@var{c}]}
+@code{tonemap -m|--method=ashikhmin02 [-l|--max-absolute-luminance=@var{l}] [--local-contrast=@var{c}]}
 @code{tonemap -m|--method=durand02 [-l|--max-absolute-luminance=@var{l}] [--sigma-spatial=@var{ss}] [--sigma-color=@var{sc}] [--base-contrast=@var{bc}]}
+@code{tonemap -m|--method=reinhard02 [--key-value=@var{a}] [--white=@var{w}] [--sharpness=@var{s}] [--epsilon=@var{e}]}
 
 Tone map frames. 
 
 High dynamic range (HDR) frames are read from standard input, and low dynamic
 range (LDR) frames are written to standard output.  See the original papers for
-a description of the parameters.
+a description of the parameters. For some methods, the results should be gamma
+corrected.
 
 The default for the maximum absolute luminance is to get it from the file (if specified), or else 150.0.
 
@@ -1271,8 +1275,13 @@ The defaults for tumblin99 are @var{d}=100.0, @var{c}=70.0.
 
 The defaults for drago03 are @var{d}=200.0, @var{b}=0.85.
 
-The defaults for durand02 are @var{ss}=0.3, @var{sc}=0.4, @var{bc}=2.0. The
-results of this method need to be gamma corrected!
+The defaults for reinhard05 are @var{i}=0.0, @var{l}=0.5, @var{c}=0.5.
+
+The default for ashikhmin02 is @var{c}=0.5.
+
+The defaults for durand02 are @var{ss}=0.3, @var{sc}=0.4, @var{bc}=2.0. 
+
+The defaults for reinhard02 are @var{a}=0.1, @var{w}=1.0, @var{s}=10.0, @var{e}=0.5.
 
 
 See also:
