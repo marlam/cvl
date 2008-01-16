@@ -339,7 +339,7 @@ void cvl_tonemap_reinhard05(cvl_frame_t *dst, cvl_frame_t *src,
  * Applies tone mapping to the high dynamic range frame \a src and writes the
  * result to \a dst. Input and output must be in #CVL_XYZ format.\n
  * The temporary frame \a tmp must have four channels of type #CVL_FLOAT.
- * The \a threshold parameter must be from [0,1].\n
+ * The \a threshold parameter must be from [0,10].\n
  * See also:
  * M. Ashikhmin. 
  * A tone mapping algorithm for high contrast images.
@@ -360,13 +360,13 @@ void cvl_tonemap_ashikhmin02(cvl_frame_t *dst, cvl_frame_t *src,
     cvl_assert(tmp != NULL);
     cvl_assert(cvl_frame_channels(tmp) == 4);
     cvl_assert(cvl_frame_type(tmp) == CVL_FLOAT);
-    cvl_assert(threshold >= 0.0f && threshold <= 1.0f);
+    cvl_assert(threshold >= 0.0f && threshold <= 10.0f);
     if (cvl_error())
 	return;
 
     GLuint prg;
-    const int k[4] = { 2, 4, 6, 8 };
-    const float sigma[4] = { 1.2f, 2.4f, 3.6f, 4.8f };
+    const int k[4] = { 1, 3, 5, 7 };
+    const float sigma[4] = { 0.4f, 1.2f, 2.0f, 2.8f };
     float mask0[2 * k[0] + 1];
     float mask0_weightsum;
     float mask1[2 * k[1] + 1];
