@@ -3,6 +3,9 @@
 	* cvl/cvl_hdr.c, cvl/glsl/hdr/tonemap_ashikhmin02_step1.glsl,
 	cvl/glsl/hdr/tonemap_ashikhmin02_step2.glsl: Fix
 	cvl_tonemap_ashikhmin02().
+	* cvl/cvl_hdr.c, cvl/glsl/hdr/tonemap_ashikhmin02_step1.glsl,
+	cvl/glsl/hdr/tonemap_ashikhmin02_step2.glsl: Tweak
+	cvl_tonemap_ashikhmin02().
 
 2008-01-15  Martin Lambers <marlam@marlam.de>
 

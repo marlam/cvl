@@ -365,8 +365,8 @@ void cvl_tonemap_ashikhmin02(cvl_frame_t *dst, cvl_frame_t *src,
 	return;
 
     GLuint prg;
-    const int k[4] = { 1, 3, 5, 7 };
-    const float sigma[4] = { 0.4f, 1.2f, 2.0f, 2.8f };
+    const int k[4] = { 1, 2, 3, 4 };
+    const float sigma[4] = { 0.4f, 0.8f, 1.2f, 1.6f };
     float mask0[2 * k[0] + 1];
     float mask0_weightsum;
     float mask1[2 * k[1] + 1];

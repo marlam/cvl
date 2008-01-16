@@ -22,9 +22,9 @@
 #version 110
 
 const int k_0 = 1;
-const int k_1 = 3;
-const int k_2 = 5;
-const int k_3 = 7;
+const int k_1 = 2;
+const int k_2 = 3;
+const int k_3 = 4;
 uniform float mask_0[2 * k_0 + 1];
 uniform float mask_1[2 * k_1 + 1];
 uniform float mask_2[2 * k_2 + 1];
