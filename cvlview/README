@@ -1,6 +1,6 @@
-CVLView is an interactive viewer for arbritrary data that is stored in pfs
-files. It is based on the CVL library, and thus uses the GPU for data
-processing.
+CVLView is an interactive viewer for arbritrary floating point data that is
+stored in pfs files. It is based on the CVL library, and thus uses the GPU for
+data processing.
 
 See http://cvtool.sourceforge.net/cvlview.html for more information on this
 software.
