@@ -8,6 +8,7 @@
 	cvl_tonemap_ashikhmin02().
 	* cvtool/cmd_tonemap.c, doc/cvtool.texi, tests/cmd_tonemap.sh: Add the
 	methods reinhard05, ashikhmin02, reinhard02 to the tonemap command.
+	* README, NEWS, doc/cvl.texi: Update for version 0.2.3.
 
 2008-01-15  Martin Lambers <marlam@marlam.de>
 

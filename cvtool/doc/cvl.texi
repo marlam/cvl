@@ -1,7 +1,7 @@
 \input texinfo   @c -*-texinfo-*-
 @afourpaper
 @setfilename cvl.info
-@set UPDATED January 11, 2008
+@set UPDATED January 16, 2008
 @set UPDATED-MONTH January 2008
 @set EDITION 0.2.3
 @set VERSION 0.2.3

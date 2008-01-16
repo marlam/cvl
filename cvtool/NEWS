@@ -2,10 +2,12 @@ Version 0.2.3:
 - Bug fixes.
 - CVL:
   - New function cvl_mix().
-  - New tonemap functions for the methods schlick94 and tumblin99.
+  - New tonemap functions for the methods schlick94, tumblin99, ashikhmin02,
+    reinhard02, reinhard05.
 - Cvtool:
   - New command 'mix'.
-  - New methods schlick94 and tumblin99 for the tonemap command.
+  - New methods schlick94, tumblin99, ashikhmin02, reinhard02, and reinhard05
+    for the tonemap command.
 
 Version 0.2.2:
 - Bug fixes.
