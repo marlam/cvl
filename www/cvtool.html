@@ -62,11 +62,14 @@ applies a Gauss filter to image.ppm and writes the result to filtered-image.ppm.
 </p>
 
 <p>
-Cvtool is based on CVL and does all of the processing on the GPU, which is much faster than the CPU
-for many tasks, especially when processing large images or videos.
-However, each instance of cvtool must create an OpenGL context, compile and link the necessary
-shader programs for the GPU, and destroy the OpenGL context when done. For small data sets, this
-constant overhead can outweigh the benefits of the GPU.
+Cvtool is based on CVL and does all of the processing on the graphics processing unit (GPU), which
+is much faster than the CPU for many tasks, especially when processing large images or videos.
+</p>
+
+<p>
+Full floating point precision is supported both in storage and in processing. Cvtool can perform
+transformations, color manipulations, blending, filtering and much more both with conventional image
+files and with arbitrary floating point data, including high dynamic range (HDR) images.
 </p>
 
 <p>

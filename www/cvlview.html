@@ -49,14 +49,14 @@
 <br>
 
 <p>
-CVLView is a viewer for arbitrary data that is stored in 
+CVLView is a viewer for arbitrary floating point data that is stored in 
 <a href="http://www.mpi-inf.mpg.de/resources/pfstools/">pfs</a> files.
 </p>
 
 <p>
-It is similar to the pfsview and pfsglview tools from 
-<a href="http://www.mpi-inf.mpg.de/resources/pfstools/">pfstools</a>, but 
-tries to be useful for many types of data.
+All of the data processing that is necessary for visualization is done on the graphics processing
+unit (GPU) for optimal performance. CVLView supports range selection, gamma correction, pseudo
+colors, and more.
 </p>
 
 <p>
@@ -65,7 +65,7 @@ newer.
 </p>
 
 <p>
-Some example files for testing:
+Some example files:
 <ul>
 <li><a href="examples/vessel-skeleton.pfs"><code>vessel-skeleton.pfs</code></a> (1.7M)<br>
 The structure of vessels in the human eye, represented by the vessel midlines and their widths.</li>

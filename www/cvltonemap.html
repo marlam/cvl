@@ -49,21 +49,20 @@
 <br>
 
 <p>
-CVLTonemap is an interactive viewer and tone mapping tool for high dynamic range images.
+CVLTonemap is an interactive viewer and tone mapping tool for high dynamic range (HDR) images.  By
+performing the tone mapping on the graphics processing unit (GPU), CVLTonemap can immediately
+display the results of method and parameter changes.
 </p>
 
 <p>
-It supports the <a href="http://www.mpi-inf.mpg.de/resources/pfstools/">pfs</a> file format.  The <a
-href="http://www.mpi-inf.mpg.de/resources/pfstools/">pfstools</a> can be used to import other file
-formats. 
+CVLTonemap supports the <a href="http://www.mpi-inf.mpg.de/resources/pfstools/">pfs</a> file format.
+The <a href="http://www.mpi-inf.mpg.de/resources/pfstools/">pfstools</a> can be used to import other
+file formats, like EXR, RGBE, and others.
 </p>
 
 <p>
-Currently, only two tone mapping methods are implemented: the global <a
-href="http://www.mpi-inf.mpg.de/resources/tmo/logmap/">Drago 03</a> method
-and the local <a href="http://people.csail.mit.edu/fredo/PUBLI/Siggraph2002/">Durand 02</a> 
-method. Tone mapping is computationally expensive; you'll need a fast graphcis card to use this
-program interactively.
+CVLTonemap currently supports seven tone mapping operators: the global methods Schlick94, Tumblin99,
+Drago03, and Reinhard05, and the local methods Ashikhmin02, Durand02, and Reinhard02.
 </p>
 
 <p>
@@ -72,7 +71,7 @@ newer.
 </p>
 
 <p>
-Some example files for testing. These files were downloaded from the
+Some example image files for testing. These files were downloaded from the
 <a href="http://www.mpi-inf.mpg.de/resources/hdr/gallery.html">HDR image gallery at the MPI</a>
 and converted to PFS format with the <a href="http://www.mpi-inf.mpg.de/resources/pfstools/">pfstools</a>.
 <ul>
