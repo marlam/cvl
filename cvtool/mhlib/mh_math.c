@@ -36,7 +36,6 @@
 
 #include "mh_assert.h"
 #include "mh_alloc.h"
-#define extern /* empty */	/* Create a symbol for the inline functions */
 #include "mh_math.h"
 
 
