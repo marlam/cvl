@@ -49,7 +49,7 @@ extern "C"
  *
  * Rounds a double.
  */ 
-extern inline int mh_iround(double x)
+static inline int mh_iround(double x)
 {
     return (int)lround(x);
 }
@@ -60,7 +60,7 @@ extern inline int mh_iround(double x)
  *
  * Rounds a float.
  */ 
-extern inline int mh_iroundf(float x)
+static inline int mh_iroundf(float x)
 {
     return (int)lroundf(x);
 }
@@ -72,7 +72,7 @@ extern inline int mh_iroundf(float x)
  * 
  * Returns \a x raised to the power of \a y.
  */
-extern inline int mh_powi(int x, int y)
+static inline int mh_powi(int x, int y)
 {
     mh_assert(y >= 0);
 
@@ -96,7 +96,7 @@ extern inline int mh_powi(int x, int y)
  * 
  * Returns \a x raised to the power of \a y.
  */
-extern inline size_t mh_pows(size_t x, size_t y)
+static inline size_t mh_pows(size_t x, size_t y)
 {
     size_t result = 1;
     if (x == 2 && y > 0)
@@ -118,7 +118,7 @@ extern inline size_t mh_pows(size_t x, size_t y)
  * 
  * Returns the minimum of two doubles.
  */
-extern inline double mh_min(double a, double b)
+static inline double mh_min(double a, double b)
 {
     return fmin(a, b);
 }
@@ -130,7 +130,7 @@ extern inline double mh_min(double a, double b)
  * 
  * Returns the maximum of two doubles.
  */
-extern inline double mh_max(double a, double b)
+static inline double mh_max(double a, double b)
 {
     return fmax(a, b);
 }
@@ -143,7 +143,7 @@ extern inline double mh_max(double a, double b)
  * 
  * Returns the minimum of three doubles.
  */
-extern inline double mh_min3(double a, double b, double c)
+static inline double mh_min3(double a, double b, double c)
 {
     return mh_min(mh_min(a, b), c);
 }
@@ -156,7 +156,7 @@ extern inline double mh_min3(double a, double b, double c)
  * 
  * Returns the maximum of three doubles.
  */
-extern inline double mh_max3(double a, double b, double c)
+static inline double mh_max3(double a, double b, double c)
 {
     return mh_max(mh_max(a, b), c);
 }
@@ -170,7 +170,7 @@ extern inline double mh_max3(double a, double b, double c)
  * 
  * Returns the minimum of four doubles.
  */
-extern inline double mh_min4(double a, double b, double c, double d)
+static inline double mh_min4(double a, double b, double c, double d)
 {
     return mh_min(mh_min(a, b), mh_min(c, d));
 }
@@ -184,7 +184,7 @@ extern inline double mh_min4(double a, double b, double c, double d)
  * 
  * Returns the maximum of four doubles.
  */
-extern inline double mh_max4(double a, double b, double c, double d)
+static inline double mh_max4(double a, double b, double c, double d)
 {
     return mh_max(mh_max(a, b), mh_max(c, d));
 }
@@ -196,7 +196,7 @@ extern inline double mh_max4(double a, double b, double c, double d)
  * 
  * Returns the minimum of two floats.
  */
-extern inline float mh_minf(float a, float b)
+static inline float mh_minf(float a, float b)
 {
     return fminf(a, b);
 }
@@ -208,7 +208,7 @@ extern inline float mh_minf(float a, float b)
  * 
  * Returns the maximum of two floats.
  */
-extern inline float mh_maxf(float a, float b)
+static inline float mh_maxf(float a, float b)
 {
     return fmaxf(a, b);
 }
@@ -221,7 +221,7 @@ extern inline float mh_maxf(float a, float b)
  * 
  * Returns the minimum of three floats.
  */
-extern inline float mh_min3f(float a, float b, float c)
+static inline float mh_min3f(float a, float b, float c)
 {
     return mh_minf(mh_minf(a, b), c);
 }
@@ -234,7 +234,7 @@ extern inline float mh_min3f(float a, float b, float c)
  * 
  * Returns the maximum of three floats.
  */
-extern inline float mh_max3f(float a, float b, float c)
+static inline float mh_max3f(float a, float b, float c)
 {
     return mh_maxf(mh_maxf(a, b), c);
 }
@@ -248,7 +248,7 @@ extern inline float mh_max3f(float a, float b, float c)
  * 
  * Returns the minimum of four floats.
  */
-extern inline float mh_min4f(float a, float b, float c, float d)
+static inline float mh_min4f(float a, float b, float c, float d)
 {
     return mh_minf(mh_minf(a, b), mh_minf(c, d));
 }
@@ -262,7 +262,7 @@ extern inline float mh_min4f(float a, float b, float c, float d)
  * 
  * Returns the maximum of four floats.
  */
-extern inline float mh_max4f(float a, float b, float c, float d)
+static inline float mh_max4f(float a, float b, float c, float d)
 {
     return mh_maxf(mh_maxf(a, b), mh_maxf(c, d));
 }
@@ -274,7 +274,7 @@ extern inline float mh_max4f(float a, float b, float c, float d)
  * 
  * Returns the minimum of two ints.
  */
-extern inline int mh_mini(int a, int b)
+static inline int mh_mini(int a, int b)
 {
     return a < b ? a : b;
 }
@@ -286,7 +286,7 @@ extern inline int mh_mini(int a, int b)
  * 
  * Returns the maximum of two ints.
  */
-extern inline int mh_maxi(int a, int b)
+static inline int mh_maxi(int a, int b)
 {
     return a > b ? a : b;
 }
@@ -299,7 +299,7 @@ extern inline int mh_maxi(int a, int b)
  * 
  * Returns the minimum of three ints.
  */
-extern inline int mh_min3i(int a, int b, int c)
+static inline int mh_min3i(int a, int b, int c)
 {
     return mh_mini(mh_mini(a, b), c);
 }
@@ -312,7 +312,7 @@ extern inline int mh_min3i(int a, int b, int c)
  * 
  * Returns the maximum of three ints.
  */
-extern inline int mh_max3i(int a, int b, int c)
+static inline int mh_max3i(int a, int b, int c)
 {
     return mh_maxi(mh_maxi(a, b), c);
 }
@@ -326,7 +326,7 @@ extern inline int mh_max3i(int a, int b, int c)
  * 
  * Returns the minimum of four ints.
  */
-extern inline int mh_min4i(int a, int b, int c, int d)
+static inline int mh_min4i(int a, int b, int c, int d)
 {
     return mh_mini(mh_mini(a, b), mh_mini(c, d));
 }
@@ -340,7 +340,7 @@ extern inline int mh_min4i(int a, int b, int c, int d)
  * 
  * Returns the maximum of four ints.
  */
-extern inline int mh_max4i(int a, int b, int c, int d)
+static inline int mh_max4i(int a, int b, int c, int d)
 {
     return mh_maxi(mh_maxi(a, b), mh_maxi(c, d));
 }
@@ -353,7 +353,7 @@ extern inline int mh_max4i(int a, int b, int c, int d)
  * 
  * Returns the minimum of two size_ts.
  */
-extern inline size_t mh_mins(size_t a, size_t b)
+static inline size_t mh_mins(size_t a, size_t b)
 {
     return a < b ? a : b;
 }
@@ -365,7 +365,7 @@ extern inline size_t mh_mins(size_t a, size_t b)
  * 
  * Returns the maximum of two size_ts.
  */
-extern inline size_t mh_maxs(size_t a, size_t b)
+static inline size_t mh_maxs(size_t a, size_t b)
 {
     return a > b ? a : b;
 }
@@ -378,7 +378,7 @@ extern inline size_t mh_maxs(size_t a, size_t b)
  * 
  * Returns the minimum of three size_ts.
  */
-extern inline size_t mh_min3s(size_t a, size_t b, size_t c)
+static inline size_t mh_min3s(size_t a, size_t b, size_t c)
 {
     return mh_mins(mh_mins(a, b), c);
 }
@@ -391,7 +391,7 @@ extern inline size_t mh_min3s(size_t a, size_t b, size_t c)
  * 
  * Returns the maximum of three size_ts.
  */
-extern inline size_t mh_max3s(size_t a, size_t b, size_t c)
+static inline size_t mh_max3s(size_t a, size_t b, size_t c)
 {
     return mh_maxs(mh_maxs(a, b), c);
 }
@@ -405,7 +405,7 @@ extern inline size_t mh_max3s(size_t a, size_t b, size_t c)
  * 
  * Returns the minimum of four size_ts.
  */
-extern inline size_t mh_min4s(size_t a, size_t b, size_t c, size_t d)
+static inline size_t mh_min4s(size_t a, size_t b, size_t c, size_t d)
 {
     return mh_mins(mh_mins(a, b), mh_mins(c, d));
 }
@@ -419,7 +419,7 @@ extern inline size_t mh_min4s(size_t a, size_t b, size_t c, size_t d)
  * 
  * Returns the maximum of four size_ts.
  */
-extern inline size_t mh_max4s(size_t a, size_t b, size_t c, size_t d)
+static inline size_t mh_max4s(size_t a, size_t b, size_t c, size_t d)
 {
     return mh_maxs(mh_maxs(a, b), mh_maxs(c, d));
 }
@@ -431,7 +431,7 @@ extern inline size_t mh_max4s(size_t a, size_t b, size_t c, size_t d)
  *
  * Returns \a x clamped to [\a min, \a max].
  */
-extern inline double mh_clamp(double x, double min, double max)
+static inline double mh_clamp(double x, double min, double max)
 {
     return mh_min(max, mh_max(min, x));
 }
@@ -443,7 +443,7 @@ extern inline double mh_clamp(double x, double min, double max)
  *
  * Returns \a x clamped to [\a min, \a max].
  */
-extern inline float mh_clampf(float x, float min, float max)
+static inline float mh_clampf(float x, float min, float max)
 {
     return mh_minf(max, mh_maxf(min, x));
 }
@@ -455,7 +455,7 @@ extern inline float mh_clampf(float x, float min, float max)
  *
  * Returns \a x clamped to [\a min, \a max].
  */
-extern inline int mh_clampi(int x, int min, int max)
+static inline int mh_clampi(int x, int min, int max)
 {
     return mh_mini(max, mh_maxi(min, x));
 }
@@ -467,7 +467,7 @@ extern inline int mh_clampi(int x, int min, int max)
  *
  * Returns \a x clamped to [\a min, \a max].
  */
-extern inline size_t mh_clamps(size_t x, size_t min, size_t max)
+static inline size_t mh_clamps(size_t x, size_t min, size_t max)
 {
     return mh_mins(max, mh_maxs(min, x));
 }
@@ -481,7 +481,7 @@ extern inline size_t mh_clamps(size_t x, size_t min, size_t max)
  * can be mapped into [0,bound-1] in this way. \a bound must be greater than
  * zero.
  */
-extern inline int mh_coord_reflect(int c, int bound)
+static inline int mh_coord_reflect(int c, int bound)
 {
     mh_assert(bound > 0);
 
@@ -508,7 +508,7 @@ extern inline int mh_coord_reflect(int c, int bound)
  * can be mapped into [0,bound-1] in this way. \a bound must be greater than
  * zero.
  */
-extern inline int mh_coord_wrap(int c, int bound)
+static inline int mh_coord_wrap(int c, int bound)
 {
     mh_assert(bound > 0);
 
@@ -529,7 +529,7 @@ extern inline int mh_coord_wrap(int c, int bound)
  * can be mapped into [0,bound-1] in this way. \a bound must be greater than
  * zero.
  */
-extern inline int mh_coord_clamp(int c, int bound)
+static inline int mh_coord_clamp(int c, int bound)
 {
     mh_assert(bound > 0);
 
@@ -572,7 +572,7 @@ int mh_lcm(int a, int b);
  * Checks if the product of two ints fits into an int.
  * Used to prevent arithmetic overflows.
  */ 
-extern inline bool mh_pfiti(int a, int b)
+static inline bool mh_pfiti(int a, int b)
 {
     /* Adapted from the comp.lang.c FAQ, see http://c-faq.com/misc/sd26.html */
     if (a < 0)
@@ -590,7 +590,7 @@ extern inline bool mh_pfiti(int a, int b)
  * Checks if the product of two size_t's into a size_t. 
  * Used to prevent arithmetic overflows.
  */ 
-extern inline bool mh_pfits(size_t a, size_t b)
+static inline bool mh_pfits(size_t a, size_t b)
 {
     return (b == 0 || !(SIZE_MAX / b < a));
 }
@@ -681,7 +681,7 @@ void mh_shuffle(void *a, size_t s, size_t n);
  *
  * Converts degrees to radians.
  */
-extern inline float mh_deg_to_rad(float x)
+static inline float mh_deg_to_rad(float x)
 {
     return (x * ((float)M_PI / 180.0f));
 }
@@ -692,7 +692,7 @@ extern inline float mh_deg_to_rad(float x)
  *
  * Converts radians to degrees.
  */
-extern inline float mh_rad_to_deg(float x)
+static inline float mh_rad_to_deg(float x)
 {
     return (x * (180.0f / (float)M_PI));
 }
@@ -703,7 +703,7 @@ extern inline float mh_rad_to_deg(float x)
  * 
  * Normalizes an angle to [0,2PI].
  */
-extern inline float mh_angle_0_to_2pi(float x)
+static inline float mh_angle_0_to_2pi(float x)
 {
     x = x / (2.0f * (float)M_PI);
     x -= floorf(x);
@@ -716,7 +716,7 @@ extern inline float mh_angle_0_to_2pi(float x)
  * 
  * Normalizes an angle to [-PI,+PI].
  */
-extern inline float mh_angle_mpi_to_ppi(float x)
+static inline float mh_angle_mpi_to_ppi(float x)
 {
     x = (x + (float)M_PI) / (2.0f * (float)M_PI);
     x -= floor(x);
@@ -729,7 +729,7 @@ extern inline float mh_angle_mpi_to_ppi(float x)
  *
  * Returns true if \a x is a power of two, and false otherwise.
  */
-extern inline bool mh_is_power_of_two(int x)
+static inline bool mh_is_power_of_two(int x)
 {
     return (x > 0 && (x & (x - 1)) == 0);
 }
@@ -740,7 +740,7 @@ extern inline bool mh_is_power_of_two(int x)
  *
  * Returns the next power of two that is greater than or equal to \a x.
  */
-extern inline int mh_next_power_of_two(int x)
+static inline int mh_next_power_of_two(int x)
 {
     int p = 1;
     while (p < x)
@@ -754,7 +754,7 @@ extern inline int mh_next_power_of_two(int x)
  *
  * Returns the logarithm of x with base 2, rounded towards zero.
  */
-extern inline int mh_log2(int x)
+static inline int mh_log2(int x)
 {
     mh_assert(x > 0);
 
