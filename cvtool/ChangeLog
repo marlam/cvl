@@ -3,6 +3,7 @@
 	* mhlib/mh_alloc.h, mhlib/mh_alloc.c, mhlib/mh_math.h,
 	mhlib/mh_math.c: Do not use "extern inline" because its semantics are
 	incompatiblie between gcc-4.3 and prior versions.
+	* cvtool/cvtool.c, cvtool/Makefile.am: Remove the test command.
 
 2008-01-16  Martin Lambers <marlam@marlam.de>
 

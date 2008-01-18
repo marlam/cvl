@@ -95,7 +95,6 @@ COMMAND_DECL(scale)
 COMMAND_DECL(select)
 COMMAND_DECL(shear)
 COMMAND_DECL(split)
-COMMAND_DECL(test)
 COMMAND_DECL(tonemap)
 COMMAND_DECL(unsharpmask)
 COMMAND_DECL(version)
@@ -139,7 +138,6 @@ cvtool_command_t commands[] =
     COMMAND(select),
     COMMAND(shear),
     COMMAND(split),
-    COMMAND(test),
     COMMAND(tonemap),
     COMMAND(unsharpmask),
     COMMAND(version),
