@@ -1,3 +1,9 @@
+2008-01-18  Martin Lambers <marlam@marlam.de>
+
+	* mhlib/mh_alloc.h, mhlib/mh_alloc.c, mhlib/mh_math.h,
+	mhlib/mh_math.c: Do not use "extern inline" because its semantics are
+	incompatiblie between gcc-4.3 and prior versions.
+
 2008-01-16  Martin Lambers <marlam@marlam.de>
 
 	* README: Update for version 0.2.1.

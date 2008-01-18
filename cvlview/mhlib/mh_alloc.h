@@ -42,26 +42,26 @@ extern "C"
 
 void mh_alloc_failure(void);
 
-extern inline bool mh_alloc_check(size_t a, size_t b)
+static inline bool mh_alloc_check(size_t a, size_t b)
 {
     return (b == 0 || !(SIZE_MAX / b < a));
 }
 
-extern inline size_t mh_alloc_mul(size_t a, size_t b)
+static inline size_t mh_alloc_mul(size_t a, size_t b)
 {
     if (!mh_alloc_check(a, b))
 	mh_alloc_failure();
     return a * b;
 }
 
-extern inline size_t mh_alloc_mul3(size_t a, size_t b, size_t c)
+static inline size_t mh_alloc_mul3(size_t a, size_t b, size_t c)
 {
     if (!mh_alloc_check(a, b))
 	mh_alloc_failure();
     return mh_alloc_mul(a * b, c);
 }
 
-extern inline void *mh_alloc(size_t size)
+static inline void *mh_alloc(size_t size)
 {
     void *ptr;
     if (!(ptr = malloc(size))) 
@@ -69,7 +69,7 @@ extern inline void *mh_alloc(size_t size)
     return ptr;
 }
 
-extern inline void *mh_realloc(void *ptr, size_t newsize)
+static inline void *mh_realloc(void *ptr, size_t newsize)
 {
     if (!(ptr = realloc(ptr, newsize)))
 	mh_alloc_failure();
