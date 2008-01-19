@@ -7,7 +7,7 @@
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation; either version 2 of the License, or
+ *   the Free Software Foundation; either version 3 of the License, or
  *   (at your option) any later version.
  *
  *   This program is distributed in the hope that it will be useful,
@@ -489,7 +489,7 @@ void CVLTonemap::show_aboutbox()
 		"<p>This is %1 version %2, using CVL version %3.</p>"
 		"<p>Copyright (C) 2008  Martin Lambers and others.<br>"
 		"This is free software. You may redistribute copies of it under the terms of "
-		"the <a href=\"http://www.gnu.org/licenses/old-licenses/gpl-2.0.html\">"
+		"the <a href=\"http://www.gnu.org/licenses/gpl.html\">"
 		"GNU General Public License</a>.<br>"
 		"There is NO WARRANTY, to the extent permitted by law.</p>"
 		"See <a href=\"http://cvtool.sourceforge.net/cvltonemap.html\">"

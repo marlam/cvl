@@ -1,3 +1,6 @@
+Version 0.2.1:
+- Updated license to GPLv3 or later.
+
 Version 0.2.0:
 - Added support for the tonemap methods Schlick 94 and Tumblin 99.
 - Bug fixes.
