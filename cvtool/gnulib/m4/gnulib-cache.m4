@@ -23,9 +23,11 @@ gl_MODULES([getopt inttostr localcharset pipe striconv strndup strverscmp vaspri
 gl_AVOID([])
 gl_SOURCE_BASE([gnulib])
 gl_M4_BASE([gnulib/m4])
+gl_PO_BASE([])
 gl_DOC_BASE([doc])
 gl_TESTS_BASE([tests])
 gl_LIB([libgnu])
 gl_MAKEFILE_NAME([])
 gl_LIBTOOL
 gl_MACRO_PREFIX([gl])
+gl_PO_DOMAIN([])
