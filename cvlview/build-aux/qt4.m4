@@ -3,11 +3,11 @@ dnl qt4.m4
 dnl 
 dnl This file is part of cvlview, an image viewer using the CVL library.
 dnl
-dnl Copyright (C) 2007  Martin Lambers <marlam@marlam.de>
+dnl Copyright (C) 2007, 2008  Martin Lambers <marlam@marlam.de>
 dnl
 dnl   This program is free software; you can redistribute it and/or modify
 dnl   it under the terms of the GNU General Public License as published by
-dnl   the Free Software Foundation; either version 2 of the License, or
+dnl   the Free Software Foundation; either version 3 of the License, or
 dnl   (at your option) any later version.
 dnl
 dnl   This program is distributed in the hope that it will be useful,
