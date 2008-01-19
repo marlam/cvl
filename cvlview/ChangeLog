@@ -1,6 +1,7 @@
 2008-01-19  Martin Lambers <marlam@marlam.de>
 
 	* *: Update license to GPLv3 or later.
+	* gnulib/*: Update gnulib.
 
 2008-01-18  Martin Lambers <marlam@marlam.de>
 
