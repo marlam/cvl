@@ -1,3 +1,7 @@
+2008-01-20  Martin Lambers <marlam@marlam.de>
+
+	* gnulib/*: Add missing files.
+
 2008-01-19  Martin Lambers <marlam@marlam.de>
 
 	* mhlib, cvl, cvtool: Update license to GPLv3 or later.
