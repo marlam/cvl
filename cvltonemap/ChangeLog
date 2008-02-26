@@ -1,3 +1,7 @@
+2008-02-26  Martin Lambers <marlam@marlam.de>
+
+	* gnulib/*: Update gnulib. Import havelib module.
+
 2008-01-19  Martin Lambers <marlam@marlam.de>
 
 	* *: Update license to GPLv3 or later.

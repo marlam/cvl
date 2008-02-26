@@ -182,6 +182,7 @@ AC_DEFUN([gltests_LIBSOURCES], [
 # This macro records the list of files which have been installed by
 # gnulib-tool and may be removed by future gnulib-tool invocations.
 AC_DEFUN([gl_FILE_LIST], [
+  build-aux/config.rpath
   build-aux/link-warning.h
   lib/alloca.in.h
   lib/asnprintf.c
@@ -219,6 +220,9 @@ AC_DEFUN([gl_FILE_LIST], [
   m4/include_next.m4
   m4/intmax_t.m4
   m4/inttypes_h.m4
+  m4/lib-ld.m4
+  m4/lib-link.m4
+  m4/lib-prefix.m4
   m4/longlong.m4
   m4/size_max.m4
   m4/stdint.m4
