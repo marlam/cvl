@@ -40,6 +40,8 @@ AC_DEFUN([gl_INIT],
   m4_pushdef([AC_LIBSOURCES], m4_defn([gl_LIBSOURCES]))
   gl_source_base='gnulib'
   gl_FUNC_ALLOCA
+  gl_ENVIRON
+  gl_UNISTD_MODULE_INDICATOR([environ])
   gl_ERROR
   m4_ifdef([AM_XGETTEXT_OPTION],
     [AM_XGETTEXT_OPTION([--flag=error:3:c-format])
@@ -291,6 +293,7 @@ AC_DEFUN([gl_FILE_LIST], [
   m4/absolute-header.m4
   m4/alloca.m4
   m4/codeset.m4
+  m4/environ.m4
   m4/eoverflow.m4
   m4/error.m4
   m4/exitfail.m4
