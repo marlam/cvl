@@ -128,5 +128,5 @@ AH_VERBATIM([W32_NATIVE],
 dnl Ouput
 AC_CONFIG_FILES([Makefile build-aux/Makefile gnulib/Makefile \
 	mhlib/Makefile cvl/Makefile cvl/cvl/cvl_version.h cvtool/Makefile \
-	doc/Makefile doc/doxy/Makefile tests/Makefile])
+	doc/Makefile doc/doxy/Makefile doc/doxy/doxyfile tests/Makefile])
 AC_OUTPUT

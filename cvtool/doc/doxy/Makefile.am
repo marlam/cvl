@@ -1,31 +1,21 @@
-EXTRA_DIST = doxyfile html doxyrun.stamp
+EXTRA_DIST = doxyfile doxyrun.stamp cvl-reference
 
 doxy: doxyrun.stamp
 
-doxyrun.stamp:
-	rm -f html/* && cd ../../cvl && doxygen ../doc/doxy/doxyfile && touch ../doc/doxy/doxyrun.stamp
-
-#
+doxyrun.stamp: doxyfile
+	doxygen $(builddir)/doxyfile && touch doxyrun.stamp
 
 maintainer-clean-local:
-	rm -f doxyrun.stamp html/*
+	rm -f doxyrun.stamp $(builddir)/cvl-reference/*
 
 install-data-local: doxy
-	installfiles=`echo $(srcdir)/html/*`; \
-	if test "$$installfiles" = '$(srcdir)/html/*'; \
-	then echo '-- Nothing to install' ; \
-	else \
-	  $(mkinstalldirs) $(datadir)/doc/$(PACKAGE)/cvl-reference; \
+	installfiles=`echo $(builddir)/cvl-reference/*`; \
+	if test "$$installfiles" != '$(builddir)/cvl-reference/*'; then \
+	  $(mkinstalldirs) $(DESTDIR)$(docdir)/cvl-reference; \
 	  for i in $$installfiles; do \
-	    echo '-- Installing '$$i ; \
-	    $(INSTALL_DATA) $$i $(datadir)/doc/$(PACKAGE)/cvl-reference; \
+	    $(INSTALL_DATA) $$i $(DESTDIR)$(docdir)/cvl-reference; \
 	  done; \
 	fi
 
 uninstall-local:
-	rm -rf $(datadir)/doc/$(PACKAGE)
-
-dist-hook-local: doxy
-	cp $(srcdir)/html/* $(distdir)/html
-
-.PHONY: dist-hook-local
+	rm -rf $(DESTDIR)$(docdir)/cvl-reference

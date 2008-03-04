@@ -1,3 +1,8 @@
+2008-03-05  Martin Lambers <marlam@marlam.de>
+
+	* configure.ac, doc/doxy/Makefile.am, doc/doxy/doxyfile.in,
+	doc/doxy/cvl-reference: Clean up rules for doxygen.
+
 2008-03-04  Martin Lambers <marlam@marlam.de>
 
 	* mhlib/Makefile.am, cvl/Makefile.am, cvtool/Makefile.am: Do not break
