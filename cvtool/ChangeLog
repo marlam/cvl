@@ -4,6 +4,7 @@
 	VPATH builds.
 	* cvl/Makefile.am: Make GLSL rule more robust.
 	* tests/*: Enable tests for VPATH builds.
+	* doc/Makefile.am: Cleanup.
 
 2008-02-26  Martin Lambers <marlam@marlam.de>
 
