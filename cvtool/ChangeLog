@@ -1,6 +1,7 @@
 2008-03-04  Martin Lambers <marlam@marlam.de>
 
-	* cvl/Makefile.am, cvtool/Makefile.am: Do not break VPATH builds.
+	* mhlib/Makefile.am, cvl/Makefile.am, cvtool/Makefile.am: Do not break
+	VPATH builds.
 
 2008-02-26  Martin Lambers <marlam@marlam.de>
 
