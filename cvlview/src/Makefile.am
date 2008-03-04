@@ -51,7 +51,7 @@ cvlview_LDADD = \
 
 cvlview_CPPFLAGS = \
 	-I$(top_builddir)/gnulib -I$(top_srcdir)/gnulib	\
-	-I$(top_builddir)/mhlib -I$(top_srcdir)/mhlib
+	-I$(top_srcdir)/mhlib
 
 cvlview_CXXFLAGS = $(QT4_CXXFLAGS)
 

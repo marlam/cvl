@@ -11,4 +11,4 @@ libmh_a_SOURCES = \
 	mh_timer.c mh_timer.h \
 	mh_cxxstring.cpp mh_cxxstring.h
 EXTRA_DIST = mh.h
-AM_CPPFLAGS = -I$(top_srcdir)/gnulib
+AM_CPPFLAGS = -I$(top_builddir)/gnulib -I$(top_srcdir)/gnulib

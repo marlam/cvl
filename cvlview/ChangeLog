@@ -1,6 +1,7 @@
 2008-03-04  Martin Lambers <marlam@marlam.de>
 
-	* src/Makefile.am: Fix potential problems with VPATH builds.
+	* mhlib/Makefile.am, src/Makefile.am: Fix potential problems with
+	VPATH builds.
 
 2008-02-26  Martin Lambers <marlam@marlam.de>
 
