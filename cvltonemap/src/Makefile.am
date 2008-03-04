@@ -36,7 +36,7 @@ cvltonemap_LDADD = \
 
 cvltonemap_CPPFLAGS = \
 	-I$(top_builddir)/gnulib -I$(top_srcdir)/gnulib	\
-	-I$(top_builddir)/mhlib -I$(top_srcdir)/mhlib
+	-I$(top_srcdir)/mhlib
 
 cvltonemap_CXXFLAGS = $(QT4_CXXFLAGS)
 
