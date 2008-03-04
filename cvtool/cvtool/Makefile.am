@@ -45,4 +45,8 @@ cvtool_LDADD = $(CAIRO_LIBS) $(LTLIBICONV)	\
 	$(top_builddir)/mhlib/libmh.la		\
 	$(top_builddir)/gnulib/libgnu.la
 
-AM_CPPFLAGS = -I$(top_srcdir)/gnulib -I$(top_srcdir)/mhlib -I$(top_srcdir)/cvl $(CAIRO_CPPFLAGS)
+AM_CPPFLAGS = \
+	-I$(top_builddir)/gnulib -I$(top_srcdir)/gnulib				\
+	-I$(top_builddir)/mhlib -I$(top_srcdir)/mhlib				\
+	-I$(top_builddir)/cvl -I$(top_builddir)/cvl/cvl -I$(top_srcdir)/cvl	\
+	$(CAIRO_CPPFLAGS)
