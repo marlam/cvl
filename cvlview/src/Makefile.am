@@ -50,8 +50,8 @@ cvlview_LDADD = \
 	$(QT4_LIBS) $(CVL_LIBS)
 
 cvlview_CPPFLAGS = \
-	-I$(top_srcdir)/gnulib			\
-	-I$(top_srcdir)/mhlib
+	-I$(top_builddir)/gnulib -I$(top_srcdir)/gnulib	\
+	-I$(top_builddir)/mhlib -I$(top_srcdir)/mhlib
 
 cvlview_CXXFLAGS = $(QT4_CXXFLAGS)
 
@@ -63,14 +63,3 @@ moc_%.cpp: %.h
 
 rcc_%.cpp: %.qrc $(RESOURCES)
 	$(QT4_RCC) -o $@ $<
-
-%.glsl.h: %.glsl
-	MACRONAME="`echo $< | sed -e s/^.*\\\/// -e s/\\\.glsl$$// -e s/-/_/g | tr [:lower:] [:upper:]`_GLSL_STR"; \
-	(echo "#ifndef $$MACRONAME"; \
-	 echo "#define $$MACRONAME \\"; \
-	 sed -e s/\\\\/\\\\\\\\/g \
-	     -e s/\"/\\\\\"/g \
-	     -e s/^/\"/ \
-	     -e s/$$/\\\\n\"\\\\/ < $<; \
-	 echo \"\"; \
-	 echo "#endif") > $@
