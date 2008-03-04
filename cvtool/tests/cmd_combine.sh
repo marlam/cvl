@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 
-. cmd_tests_common.sh
+. $CVTOOL_TESTS_COMMON
+
+cmd_tests_init
 
 $CVTOOL create -w20 -h10 -cred   > w20-h10-red.pnm	
 $CVTOOL create -w10 -h20 -cgreen > w10-h20-green.pnm	

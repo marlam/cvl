@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 
-. cmd_tests_common.sh
+. $CVTOOL_TESTS_COMMON
+
+cmd_tests_init
 
 $CVTOOL create -f lum   -w 9 -h 9 -c 0x111111 > 11.pnm 
 $CVTOOL create -f lum   -w 9 -h 9 -c 0xeeeeee > ee.pnm 

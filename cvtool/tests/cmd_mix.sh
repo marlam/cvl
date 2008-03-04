@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 
-. cmd_tests_common.sh
+. $CVTOOL_TESTS_COMMON
+
+cmd_tests_init
 
 $CVTOOL create -n 1 -w 99 -h 99 -c r000g000b000 > 000.pnm
 $CVTOOL create -n 1 -w 99 -h 99 -c r100g100b100 > 100.pnm

@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 
-. cmd_tests_common.sh
+. $CVTOOL_TESTS_COMMON
+
+cmd_tests_init
 
 $CVTOOL create -f color -n 5 -w 10 -h 10 -c black	> tmp.pnm 
 $CVTOOL foreach -n 2 "$CVTOOL invert" < tmp.pnm > tmpi.pnm 

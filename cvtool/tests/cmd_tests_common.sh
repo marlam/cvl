@@ -1,10 +1,13 @@
 set -e
-CWDBAK="`pwd`"
-CVTOOL="$CWDBAK/../cvtool/cvtool"
-TTMP="`mktemp -d -t cvtool-tests.XXXXXX`"
-cd "$TTMP"
+
+function cmd_tests_init() {
+	TTMP="`mktemp -d cvtool-tests.XXXXXX`"
+	cd "$TTMP"
+	CVTOOL="../$CVTOOL"
+}
 
 function cmd_tests_cleanup() {
-	cd "$CWDBAK"
+	cd ..
 	rm -r "$TTMP"
+	CVTOOL="`echo $CVTOOL | sed -e s/^\\\.\\\.\\\///`"
 }

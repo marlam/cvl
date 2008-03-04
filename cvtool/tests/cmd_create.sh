@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 
-. cmd_tests_common.sh
+. $CVTOOL_TESTS_COMMON
+
+cmd_tests_init
 
 $CVTOOL create -t uint8 -f lum   -n 1 -w 10 -h 10 -c red	> /dev/null 
 $CVTOOL create -t float -f lum   -n 2 -w 10 -h 10 -c green	> /dev/null 

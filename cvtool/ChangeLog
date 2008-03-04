@@ -3,6 +3,7 @@
 	* mhlib/Makefile.am, cvl/Makefile.am, cvtool/Makefile.am: Do not break
 	VPATH builds.
 	* cvl/Makefile.am: Make GLSL rule more robust.
+	* tests/*: Enable tests for VPATH builds.
 
 2008-02-26  Martin Lambers <marlam@marlam.de>
 

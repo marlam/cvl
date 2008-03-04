@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 
-. cmd_tests_common.sh
+. $CVTOOL_TESTS_COMMON
+
+cmd_tests_init
 
 $CVTOOL create -f lum   -t uint8 -w 100 -h 100 -c 0xffffff > ff.pgm
 $CVTOOL create -f lum   -t uint8 -w 100 -h 100 -c 0x000000 > 00.pgm

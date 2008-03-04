@@ -1,3 +1,7 @@
+TESTS_ENVIRONMENT = \
+	CVTOOL=$(top_builddir)/cvtool/cvtool \
+	CVTOOL_TESTS_COMMON=$(top_srcdir)/tests/cmd_tests_common.sh
+
 testscripts = \
 	cmd_affine.sh		\
 	cmd_blend.sh		\
