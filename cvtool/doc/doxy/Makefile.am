@@ -1,8 +1,11 @@
 EXTRA_DIST = doxyfile doxyrun.stamp cvl-reference
 
-doxy: doxyrun.stamp
+doxy: cvl-reference doxyrun.stamp
 
-doxyrun.stamp: doxyfile
+cvl-reference:
+	mkdir cvl-reference
+
+doxyrun.stamp: 
 	doxygen $(builddir)/doxyfile && touch doxyrun.stamp
 
 maintainer-clean-local:
