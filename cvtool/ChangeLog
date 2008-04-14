@@ -1,3 +1,8 @@
+2008-04-14  Martin Lambers <marlam@marlam.de>
+
+	* cvl/cvl_intern.c: Use GL_CLAMP_TO_EDGE instead of GL_CLAMP for all
+	textures.
+
 2008-03-05  Martin Lambers <marlam@marlam.de>
 
 	* configure.ac, doc/doxy/Makefile.am, doc/doxy/doxyfile.in,
