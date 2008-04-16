@@ -171,6 +171,7 @@ CVLView::CVLView()
     connect(_gamma_selector, SIGNAL(gamma_changed()), _view_area, SLOT(recompute()));
     connect(_pseudocolor_selector, SIGNAL(pseudocolor_changed()), _view_area, SLOT(recompute()));
     connect(_heightmap_selector, SIGNAL(heightmap_changed()), _view_area, SLOT(update()));
+    connect(_heightmap_selector, SIGNAL(make_gl_context_current()), _view_area, SLOT(make_gl_context_current()));
     connect(_view_area, SIGNAL(update_size(int, int)), _viewpoint_selector, SLOT(update_view_area_size(int, int)));
 
     _pixel_info = new PixelInfo(this);

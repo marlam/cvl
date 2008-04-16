@@ -101,6 +101,7 @@ void HeightmapSelector::_button_clicked()
 
 void HeightmapSelector::update()
 {
+    emit make_gl_context_current();
     int active_channel = channel();
     int channels = (*_frame) ? cvl_frame_channels(*_frame) : 0;
     _ch0_button->setEnabled(channels >= 1);

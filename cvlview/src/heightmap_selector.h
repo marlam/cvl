@@ -78,6 +78,7 @@ class HeightmapSelector : public QWidget
         void reset();
 
     signals:
+	void make_gl_context_current();
 	void heightmap_changed();
 };
 

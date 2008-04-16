@@ -4,6 +4,8 @@
 	src/view_area.h, src/view_area.cpp, src/cvlview.h, src/cvlview.cpp,
 	src/Makefile.am: Add widgets to select 3D views via height maps. The
 	functionality is not yet implemented.
+	* src/heightmap_selector.h, src/heightmap_selector.cpp,
+	src/cvlview.cpp: Make GL context current before using CVL functions.
 
 2008-04-14  Martin Lambers <marlam@marlam.de>
 
