@@ -37,6 +37,7 @@
 #include "range_selector.h"
 #include "gamma_selector.h"
 #include "pseudocolor_selector.h"
+#include "heightmap_selector.h"
 
 
 class ViewArea : public QGLWidget
@@ -57,6 +58,7 @@ class ViewArea : public QGLWidget
 	RangeSelector *_range_selector;
 	GammaSelector *_gamma_selector;
 	PseudocolorSelector *_pseudocolor_selector;
+	HeightmapSelector *_heightmap_selector;
 	// Last processing parameters
 	cvl_frame_t *_processed_frame;
 	// Image to be rendered
@@ -100,6 +102,7 @@ class ViewArea : public QGLWidget
 		RangeSelector *range_selector,
 		GammaSelector *gamma_selector,
 		PseudocolorSelector *pseudocolor_selector,
+		HeightmapSelector *heightmap_selector,
 		QWidget *parent = NULL);
 	~ViewArea();
 

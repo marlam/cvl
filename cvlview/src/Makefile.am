@@ -14,6 +14,7 @@ cvlview_SOURCES = main.cpp					\
 	range_selector.h range_selector.cpp			\
 	gamma_selector.h gamma_selector.cpp			\
 	pseudocolor_selector.h pseudocolor_selector.cpp		\
+	heightmap_selector.h heightmap_selector.cpp		\
 	view_area.h view_area.cpp				\
 	pixel_info.h pixel_info.cpp
 
@@ -36,6 +37,7 @@ nodist_cvlview_SOURCES = \
 	moc_range_selector.cpp		\
 	moc_gamma_selector.cpp		\
 	moc_pseudocolor_selector.cpp	\
+	moc_heightmap_selector.cpp	\
 	moc_view_area.cpp		\
 	moc_pixel_info.cpp		\
 	rcc_cvlview.cpp

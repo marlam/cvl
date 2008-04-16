@@ -49,6 +49,7 @@
 #include "range_selector.h"
 #include "gamma_selector.h"
 #include "pseudocolor_selector.h"
+#include "heightmap_selector.h"
 #include "view_area.h"
 #include "pixel_info.h"
 
@@ -77,6 +78,7 @@ class CVLView : public QMainWindow
 	RangeSelector *_range_selector;
 	GammaSelector *_gamma_selector;
 	PseudocolorSelector *_pseudocolor_selector;
+	HeightmapSelector *_heightmap_selector;
 	ViewArea *_view_area;
 	PixelInfo *_pixel_info;
 

@@ -43,6 +43,7 @@
 #include "range_selector.h"
 #include "gamma_selector.h"
 #include "pseudocolor_selector.h"
+#include "heightmap_selector.h"
 #include "view_area.h"
 
 
@@ -54,6 +55,7 @@ ViewArea::ViewArea(cvl_frame_t **frame,
 	RangeSelector *range_selector,
 	GammaSelector *gamma_selector,
 	PseudocolorSelector *pseudocolor_selector,
+	HeightmapSelector *heightmap_selector,
 	QWidget *parent)
     : QGLWidget(QGLFormat(QGL::SampleBuffers), parent)
 {
@@ -76,6 +78,7 @@ ViewArea::ViewArea(cvl_frame_t **frame,
     _range_selector = range_selector;
     _gamma_selector = gamma_selector;
     _pseudocolor_selector = pseudocolor_selector;
+    _heightmap_selector = heightmap_selector;
     _fb_x = -1;
     
     // The following is necessary to force a call to initializeGL(), so that the

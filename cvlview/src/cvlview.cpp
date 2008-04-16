@@ -58,6 +58,7 @@
 #include "range_selector.h"
 #include "gamma_selector.h"
 #include "pseudocolor_selector.h"
+#include "heightmap_selector.h"
 #include "view_area.h"
 #include "pixel_info.h"
 #include "cvlview.h"
@@ -142,6 +143,11 @@ CVLView::CVLView()
     connect(this, SIGNAL(new_datafile()), _pseudocolor_selector, SLOT(reset()));
     _pseudocolor_selector->setFixedWidth(tools_width);
 
+    _heightmap_selector = new HeightmapSelector(&_frame, _widget);
+    connect(this, SIGNAL(new_frame()), _heightmap_selector, SLOT(update()));
+    connect(this, SIGNAL(new_datafile()), _heightmap_selector, SLOT(reset()));
+    _heightmap_selector->setFixedWidth(tools_width);
+
     _view_area = new ViewArea(&_frame, 2 * tools_width + tools_width / 4,
 	    _channel_selector,
 	    _viewpoint_selector,
@@ -149,6 +155,7 @@ CVLView::CVLView()
 	    _range_selector,
 	    _gamma_selector,
 	    _pseudocolor_selector,
+	    _heightmap_selector,
 	    _widget);
     connect(this, SIGNAL(new_frame()), _view_area, SLOT(recompute()));
     connect(this, SIGNAL(make_gl_context_current()), _view_area, SLOT(make_gl_context_current()));
@@ -163,6 +170,7 @@ CVLView::CVLView()
     connect(_range_selector, SIGNAL(make_gl_context_current()), _view_area, SLOT(make_gl_context_current()));
     connect(_gamma_selector, SIGNAL(gamma_changed()), _view_area, SLOT(recompute()));
     connect(_pseudocolor_selector, SIGNAL(pseudocolor_changed()), _view_area, SLOT(recompute()));
+    connect(_heightmap_selector, SIGNAL(heightmap_changed()), _view_area, SLOT(update()));
     connect(_view_area, SIGNAL(update_size(int, int)), _viewpoint_selector, SLOT(update_view_area_size(int, int)));
 
     _pixel_info = new PixelInfo(this);
@@ -189,6 +197,7 @@ CVLView::CVLView()
     _toolbox->addItem(_range_selector, "Range Selection");
     _toolbox->addItem(_gamma_selector, "Gamma Correction");
     _toolbox->addItem(_pseudocolor_selector, "Pseudo Color");
+    _toolbox->addItem(_heightmap_selector, "3D View");
 
     QGridLayout *layout = new QGridLayout;
     layout->addWidget(_frame_info, 0, 0);
