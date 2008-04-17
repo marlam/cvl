@@ -257,14 +257,10 @@ void ViewArea::paintGL()
 
     /* Use OpenGL for rendering */
     cvl_gl_state_save();
+    glClearColor(0.3f, 0.3f, 0.3f, 0.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnable(GL_TEXTURE_2D);
     glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    glViewport(0, 0, _width, _height);
-    glClearColor(0.3f, 0.3f, 0.3f, 0.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
-    glScalef(zoom, zoom, 1.0f);
     glBindTexture(GL_TEXTURE_2D, render_texture);
     if (_interpolation_selector->is_enabled())
     {
@@ -278,20 +274,103 @@ void ViewArea::paintGL()
     }
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glBegin(GL_QUADS);
-    glTexCoord2f(0.0f, 0.0f);
-    glVertex3f(-x + xo, +y - yo, 0.0f);
-    glTexCoord2f(1.0f, 0.0f);
-    glVertex3f(+x + xo, +y - yo, 0.0f);
-    glTexCoord2f(1.0f, 1.0f);
-    glVertex3f(+x + xo, -y - yo, 0.0f);
-    glTexCoord2f(0.0f, 1.0f);
-    glVertex3f(-x + xo, -y - yo, 0.0f);
-    glEnd();
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    glViewport(0, 0, _width, _height);
+    glScalef(zoom, zoom, 1.0f);
+    if (!_heightmap_selector->is_enabled())
+    {
+	/* Flat view */
+	glBegin(GL_QUADS);
+	glTexCoord2f(0.0f, 0.0f);
+	glVertex3f(-x + xo, +y - yo, 0.0f);
+	glTexCoord2f(1.0f, 0.0f);
+	glVertex3f(+x + xo, +y - yo, 0.0f);
+	glTexCoord2f(1.0f, 1.0f);
+	glVertex3f(+x + xo, -y - yo, 0.0f);
+	glTexCoord2f(0.0f, 1.0f);
+	glVertex3f(-x + xo, -y - yo, 0.0f);
+	glEnd();
+    }
+    else if (_heightmap_selector->mode() == HeightmapSelector::QUADS)
+    {
+	/* Separate quads */
+	float vl = -x + xo;
+	float vw = 2.0f * x;
+	float vt = -y - yo;
+	float vh = 2.0f * y;
+	float qw = vw / static_cast<float>(w);
+	float qh = vh / static_cast<float>(h);
+	float tw = 1.0f / static_cast<float>(w);
+	float th = 1.0f / static_cast<float>(h);
+	for (int yy = 0; yy < h; yy++)
+	{
+    	    float ry = static_cast<float>(yy) / static_cast<float>(h);
+	    for (int xx = 0; xx < w; xx++)
+	    {
+		float rx = static_cast<float>(xx) / static_cast<float>(w);
+		float ql = vl + rx * vw;
+		float qt = vt + ry * vh;
+		float d = 0.0f; // TODO
+		/*
+		float d = (static_cast<float>(frame_data.depth[y * frame_data.width + x]) / 255.0f)
+		    * frame_data.depth_scale_factor - 0.5f * frame_data.depth_scale_factor;
+		*/
+		glBegin(GL_QUADS);
+		glTexCoord2f(rx, 1.0f - ry);
+		glVertex3f(ql, qt, d);
+		glTexCoord2f(rx + tw, 1.0f - ry);
+		glVertex3f(ql + qw, qt, d);
+		glTexCoord2f(rx + tw, 1.0f - (ry + th));
+		glVertex3f(ql + qw, qt + qh, d);
+		glTexCoord2f(rx, 1.0f - (ry + th));
+		glVertex3f(ql, qt + qh, d);
+		glEnd();
+	    }
+	}
+    }
+    else
+    {
+	/* Connected strip */
+	float vl = -x + xo;
+	float vw = 2.0f * x;
+	float vt = -y - yo;
+	float vh = 2.0f * y;
+	for (int yy = 0; yy < h - 1; yy++)
+    	{
+	    float ry = static_cast<float>(yy) / static_cast<float>(h) + 0.5f / static_cast<float>(h);
+	    float ryn = static_cast<float>(yy + 1) / static_cast<float>(h) + 0.5f / static_cast<float>(h);
+	    glBegin(GL_TRIANGLE_STRIP);
+	    for (int xx = 0; xx < w; xx++)
+	    {
+		//mh_msg_wrn("yy=%d xx=%d", yy, xx);
+		float rx = static_cast<float>(xx) / static_cast<float>(w) + 0.5f / static_cast<float>(w);
+		float vx = vl + rx * vw;
+		float vy = vt + ry * vh;
+		float vyn = vt + ryn * vh;
+		float d = 0.0f;	// TODO
+		/*
+		float d = (static_cast<float>(frame_data.depth[y * frame_data.width + x]) / 255.0f)
+		    * frame_data.depth_scale_factor - 0.5f * frame_data.depth_scale_factor;
+		*/
+		float dn = 0.0f; // TODO
+		/*
+		float dn = (static_cast<float>(frame_data.depth[(y + 1) * frame_data.width + x]) / 255.0f)
+		    * frame_data.depth_scale_factor - 0.5f * frame_data.depth_scale_factor;
+		*/
+		glTexCoord2f(rx, 1.0f - ry);
+		glVertex3f(vx, vy, d);
+		glTexCoord2f(rx, 1.0f - ryn);
+		glVertex3f(vx, vyn, dn);
+	    }
+	    glEnd();
+    	}
+    }
     glBindTexture(GL_TEXTURE_2D, 0);
     cvl_gl_state_restore();
 
-    /* Save area of the framebuffer that was rendered to */
+    /* Save area of the framebuffer that was rendered to. This is only correct
+     * for flat view, but it's good enough for 3D view. */
     _fb_x = mh_clampi(mh_iroundf(_width / 2.0f + (-x + xo) * 0.5f * zoom * static_cast<float>(_width)), 0, _width - 1);
     _fb_y = mh_clampi(mh_iroundf(_height / 2.0f - (+y - yo) * 0.5f * zoom * static_cast<float>(_height)), 0, _height - 1);
     _fb_w = mh_clampi(mh_iroundf(x * zoom * static_cast<float>(_width)), 1, _width - _fb_x);

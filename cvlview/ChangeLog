@@ -2,6 +2,8 @@
 
 	* src/heightmap_selector.h, src/heightmap_selector.cpp: Remove unused
 	lock.
+	* src/view_area.cpp: Start of 3D view implementation. No depth and no
+	navigation yet.
 
 2008-04-16  Martin Lambers <marlam@marlam.de>
 
