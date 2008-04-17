@@ -43,7 +43,6 @@ class HeightmapSelector : public QWidget
 	QRadioButton *_ch3_button;
 	QRadioButton *_quads_button;
 	QRadioButton *_strip_button;
-	bool _lock;
 
     private slots:
 	void _set_enable(int e);

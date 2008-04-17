@@ -39,7 +39,6 @@
 HeightmapSelector::HeightmapSelector(cvl_frame_t **frame, QWidget *parent) : QWidget(parent)
 {
     _frame = frame;
-    _lock = false;
     QVBoxLayout *layout = new QVBoxLayout;
 
     _enable_box = new QCheckBox("Use height map");
