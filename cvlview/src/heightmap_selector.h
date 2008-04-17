@@ -27,6 +27,8 @@
 #include <QWidget>
 #include <QCheckBox>
 #include <QRadioButton>
+#include <QDoubleSpinBox>
+#include <QSlider>
 
 #include <cvl/cvl.h>
 
@@ -43,33 +45,43 @@ class HeightmapSelector : public QWidget
 	QRadioButton *_ch3_button;
 	QRadioButton *_quads_button;
 	QRadioButton *_strip_button;
+	QDoubleSpinBox *_height_factor_spinbox;
+	QSlider *_height_factor_slider;
+	bool _lock;
 
     private slots:
 	void _set_enable(int e);
         void _button_clicked();
+	void _set_height_factor(double f);
+	void _height_factor_slider_changed(int f);
 
     public:
         enum { QUADS, STRIP };
 	HeightmapSelector(cvl_frame_t **frame, QWidget *parent = NULL);	
 	~HeightmapSelector();
 
-	bool is_enabled()
+	bool is_enabled() const
 	{
 	    return _enable_box->isChecked();
 	}
 
-	int mode()
+	int mode() const
 	{
 	    return _quads_button->isChecked() ? QUADS : STRIP;
 	}
 
-	int channel()
+	int channel() const
 	{
 	    return _ch0_button->isChecked() ? 0 
 		: _ch1_button->isChecked() ? 1
 		: _ch2_button->isChecked() ? 2
 		: _ch3_button->isChecked() ? 3
 		: -1;
+	}
+
+	float height_factor() const
+	{
+	    return _height_factor_spinbox->value();
 	}
 
     public slots:
