@@ -24,6 +24,9 @@
 
 #include "config.h"
 
+#define GLEW_STATIC 1
+#include <GL/glew.h>
+
 #include <QGLWidget>
 #include <QImage>
 #include <QMouseEvent>
@@ -31,6 +34,7 @@
 
 #include <cvl/cvl.h>
 
+#include "channel_info.h"
 #include "channel_selector.h"
 #include "viewpoint_selector.h"
 #include "interpolation_selector.h"
@@ -52,6 +56,7 @@ class ViewArea : public QGLWidget
 	// Lock
 	bool _lock;
 	// Selector widgets to get parameters from
+	ChannelInfo *_channel_info;
 	ChannelSelector *_channel_selector;
 	ViewpointSelector *_viewpoint_selector;
 	InterpolationSelector *_interpolation_selector;
@@ -67,6 +72,12 @@ class ViewArea : public QGLWidget
 	bool _recompute;
 	// Processing buffers
 	cvl_frame_t *_frame1, *_frame2;
+	// Program for heightmap rendering
+	GLuint _heightmap_quads_prg;
+	GLuint _heightmap_strip_prg;
+	// Rotation for heightmap rendering
+	float _rotation_x;
+	float _rotation_y;
 	// Used area of the framebuffer
 	int _fb_x, _fb_y, _fb_w, _fb_h;
 	// Mouse position
@@ -74,9 +85,11 @@ class ViewArea : public QGLWidget
 	// Pixel info
 	float _pixel_val[4];
 	float _pixel_lum;
-	// Dragging
+	// Dragging and rotating
 	bool _dragging;
 	QPoint _drag_startpoint;
+	bool _rotating;
+	QPoint _rotate_startpoint;
 	// Error handling
 	bool _cvl_init_failed;
 	bool _rendering_fails;
@@ -96,6 +109,7 @@ class ViewArea : public QGLWidget
     public:
 	ViewArea(cvl_frame_t **frame, 
 		int min_size,
+		ChannelInfo *channel_info,
 		ChannelSelector *channel_selector,
 		ViewpointSelector *viewpoint_selector,
 		InterpolationSelector *interpolation_selector,

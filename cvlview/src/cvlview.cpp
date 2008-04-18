@@ -24,7 +24,8 @@
 #include <climits>
 #include <cstdio>
 
-#include <GL/gl.h>
+#define GLEW_STATIC 1
+#include <GL/glew.h>
 
 #include <QtCore>
 #include <QCoreApplication>
@@ -149,6 +150,7 @@ CVLView::CVLView()
     _heightmap_selector->setFixedWidth(tools_width);
 
     _view_area = new ViewArea(&_frame, 2 * tools_width + tools_width / 4,
+	    _channel_info,
 	    _channel_selector,
 	    _viewpoint_selector,
 	    _interpolation_selector,

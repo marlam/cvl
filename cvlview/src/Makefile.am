@@ -24,9 +24,15 @@ endif
 
 RESOURCES = icons/appicon.png icons/prev.png icons/next.png
 
-EXTRA_DIST = cvlview.qrc $(RESOURCES)
+EXTRA_DIST = cvlview.qrc $(RESOURCES)	\
+	heightmap_quads_vs.glsl		\
+	heightmap_strip_vs.glsl		\
+	heightmap_fs.glsl
 
 nodist_cvlview_SOURCES = \
+	heightmap_quads_vs.glsl.h	\
+	heightmap_strip_vs.glsl.h	\
+	heightmap_fs.glsl.h		\
 	moc_cvlview.cpp			\
 	moc_dataset_selector.cpp	\
 	moc_channel_selector.cpp	\
@@ -65,3 +71,16 @@ moc_%.cpp: %.h
 
 rcc_%.cpp: %.qrc $(RESOURCES)
 	$(QT4_RCC) -o $@ $<
+
+%.glsl.h: %.glsl
+	DIRNAME="`echo $@ | sed -e s/\\\.glsl\\\.h$$// -e s/[a-zA-Z0-9_-]*$$// -e s/\\\/$$//`"; \
+	if [ -n "$$DIRNAME" ]; then mkdir -p "$$DIRNAME"; fi; \
+	MACRONAME="`echo $< | sed -e s/^.*\\\/// -e s/\\\.glsl$$// -e s/-/_/g | tr [a-z] [A-Z]`_GLSL_STR"; \
+	(echo "#ifndef $$MACRONAME"; \
+	 echo "#define $$MACRONAME \\"; \
+	 sed -e s/\\\\/\\\\\\\\/g \
+	     -e s/\"/\\\\\"/g \
+	     -e s/^/\"/ \
+	     -e s/$$/\\\\n\"\\\\/ < $<; \
+	 echo \"\"; \
+	 echo "#endif") > $@

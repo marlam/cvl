@@ -43,25 +43,38 @@ HeightmapSelector::HeightmapSelector(cvl_frame_t **frame, QWidget *parent) : QWi
     _frame = frame;
     QGridLayout *layout = new QGridLayout;
 
-    _enable_box = new QCheckBox("Use height map");
+    _enable_box = new QCheckBox("Enable 3D View");
     _enable_box->setCheckState(Qt::Unchecked);
-    connect(_enable_box, SIGNAL(stateChanged(int)), this, SLOT(_set_enable(int)));
-    layout->addWidget(_enable_box, 0, 0, 1, 4);
+    connect(_enable_box, SIGNAL(stateChanged(int)), this, SLOT(_button_clicked()));
+    layout->addWidget(_enable_box, 0, 0, 1, 6);
 
-    QLabel *heightmap_label = new QLabel("Height map channel:");
-    layout->addWidget(heightmap_label, 1, 0, 1, 4);
+    QLabel *mode_label = new QLabel("Mode:");
+    layout->addWidget(mode_label, 1, 0, 1, 2);
+    _quads_button = new QRadioButton("Quads");
+    connect(_quads_button, SIGNAL(clicked()), this, SLOT(_button_clicked()));
+    layout->addWidget(_quads_button, 1, 2, 1, 2);
+    _strip_button = new QRadioButton("Surface");
+    connect(_strip_button, SIGNAL(clicked()), this, SLOT(_button_clicked()));
+    layout->addWidget(_strip_button, 1, 4, 1, 2);
+    QButtonGroup *mode_group = new QButtonGroup();
+    mode_group->addButton(_quads_button);
+    mode_group->addButton(_strip_button);
+    _quads_button->setChecked(true);
+
+    QLabel *channel_label = new QLabel("Z channel:");
+    layout->addWidget(channel_label, 2, 0, 1, 2);
     _ch0_button = new QRadioButton("0");
     connect(_ch0_button, SIGNAL(clicked()), this, SLOT(_button_clicked()));
-    layout->addWidget(_ch0_button, 2, 0, 1, 1);
+    layout->addWidget(_ch0_button, 2, 2, 1, 1);
     _ch1_button = new QRadioButton("1");
     connect(_ch1_button, SIGNAL(clicked()), this, SLOT(_button_clicked()));
-    layout->addWidget(_ch1_button, 2, 1, 1, 1);
+    layout->addWidget(_ch1_button, 2, 3, 1, 1);
     _ch2_button = new QRadioButton("2");
     connect(_ch2_button, SIGNAL(clicked()), this, SLOT(_button_clicked()));
-    layout->addWidget(_ch2_button, 2, 2, 1, 1);
+    layout->addWidget(_ch2_button, 2, 4, 1, 1);
     _ch3_button = new QRadioButton("3");
     connect(_ch3_button, SIGNAL(clicked()), this, SLOT(_button_clicked()));
-    layout->addWidget(_ch3_button, 2, 3, 1, 1);
+    layout->addWidget(_ch3_button, 2, 5, 1, 1);
     QButtonGroup *heightmap_group = new QButtonGroup();
     heightmap_group->addButton(_ch0_button);
     heightmap_group->addButton(_ch1_button);
@@ -69,18 +82,31 @@ HeightmapSelector::HeightmapSelector(cvl_frame_t **frame, QWidget *parent) : QWi
     heightmap_group->addButton(_ch3_button);
     _ch0_button->setChecked(true);
 
-    QLabel *mode_label = new QLabel("View mode:");
-    layout->addWidget(mode_label, 3, 0, 1, 4);
-    _quads_button = new QRadioButton("Quads");
-    connect(_quads_button, SIGNAL(clicked()), this, SLOT(_button_clicked()));
-    layout->addWidget(_quads_button, 4, 0, 1, 2);
-    _strip_button = new QRadioButton("Surface");
-    connect(_strip_button, SIGNAL(clicked()), this, SLOT(_button_clicked()));
-    layout->addWidget(_strip_button, 4, 2, 1, 2);
-    QButtonGroup *mode_group = new QButtonGroup();
-    mode_group->addButton(_quads_button);
-    mode_group->addButton(_strip_button);
-    _quads_button->setChecked(true);
+    QLabel *data_label = new QLabel("Data:");
+    layout->addWidget(data_label, 3, 0, 1, 2);
+    _height_button = new QRadioButton("Height");
+    connect(_height_button, SIGNAL(clicked()), this, SLOT(_button_clicked()));
+    layout->addWidget(_height_button, 3, 2, 1, 2);
+    _distance_button = new QRadioButton("Distance");
+    connect(_distance_button, SIGNAL(clicked()), this, SLOT(_button_clicked()));
+    layout->addWidget(_distance_button, 3, 4, 1, 2);
+    QButtonGroup *data_group = new QButtonGroup();
+    data_group->addButton(_height_button);
+    data_group->addButton(_distance_button);
+    _height_button->setChecked(true);
+
+    QLabel *range_label = new QLabel("Range:");
+    layout->addWidget(range_label, 4, 0, 1, 2);
+    _minmax_button = new QRadioButton("Full");
+    connect(_minmax_button, SIGNAL(clicked()), this, SLOT(_button_clicked()));
+    layout->addWidget(_minmax_button, 4, 2, 1, 2);
+    _range_button = new QRadioButton("Selected");
+    connect(_range_button, SIGNAL(clicked()), this, SLOT(_button_clicked()));
+    layout->addWidget(_range_button, 4, 4, 1, 2);
+    QButtonGroup *range_group = new QButtonGroup();
+    range_group->addButton(_minmax_button);
+    range_group->addButton(_range_button);
+    _minmax_button->setChecked(true);
 
     QLabel *height_factor_label = new QLabel("Height factor:");
     layout->addWidget(height_factor_label, 5, 0, 1, 2);
@@ -90,24 +116,24 @@ HeightmapSelector::HeightmapSelector(cvl_frame_t **frame, QWidget *parent) : QWi
     _height_factor_spinbox->setDecimals(4);
     _height_factor_spinbox->setValue(1.0);
     connect(_height_factor_spinbox, SIGNAL(valueChanged(double)), this, SLOT(_set_height_factor(double)));
-    layout->addWidget(_height_factor_spinbox, 5, 2, 1, 2);
+    layout->addWidget(_height_factor_spinbox, 5, 2, 1, 4);
     _height_factor_slider = new QSlider(Qt::Horizontal, this);
     _height_factor_slider->setRange(-460517, +460517);	// exp(+4.60517) = 99.9999
     _height_factor_slider->setValue(0);
     connect(_height_factor_slider, SIGNAL(valueChanged(int)), this, SLOT(_height_factor_slider_changed(int)));
-    layout->addWidget(_height_factor_slider, 6, 0, 1, 4);
+    layout->addWidget(_height_factor_slider, 6, 0, 1, 6);
 
-    layout->setRowStretch(7, 1);
+    _showcube_box = new QCheckBox("Show Cube");
+    _showcube_box->setCheckState(Qt::Checked);
+    connect(_showcube_box, SIGNAL(stateChanged(int)), this, SLOT(_button_clicked()));
+    layout->addWidget(_showcube_box, 7, 0, 1, 6);
+
+    layout->setRowStretch(8, 1);
     setLayout(layout);
 }
 
 HeightmapSelector::~HeightmapSelector()
 {
-}
-
-void HeightmapSelector::_set_enable(int e UNUSED)
-{
-    emit heightmap_changed();
 }
 
 void HeightmapSelector::_button_clicked()

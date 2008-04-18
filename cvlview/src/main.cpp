@@ -25,6 +25,9 @@
 #include <cstdio>
 #include <cstdlib>
 
+#define GLEW_STATIC 1
+#include <GL/glew.h>
+
 #ifdef W32_NATIVE
 #include <ios>
 #include <windows.h>

@@ -43,20 +43,26 @@ class HeightmapSelector : public QWidget
 	QRadioButton *_ch1_button;
 	QRadioButton *_ch2_button;
 	QRadioButton *_ch3_button;
+	QRadioButton *_height_button;
+	QRadioButton *_distance_button;
 	QRadioButton *_quads_button;
 	QRadioButton *_strip_button;
+	QRadioButton *_minmax_button;
+	QRadioButton *_range_button;
 	QDoubleSpinBox *_height_factor_spinbox;
 	QSlider *_height_factor_slider;
+	QCheckBox *_showcube_box;
 	bool _lock;
 
     private slots:
-	void _set_enable(int e);
         void _button_clicked();
 	void _set_height_factor(double f);
 	void _height_factor_slider_changed(int f);
 
     public:
         enum { QUADS, STRIP };
+        enum { HEIGHT, DISTANCE };
+        enum { MINMAX, RANGE };
 	HeightmapSelector(cvl_frame_t **frame, QWidget *parent = NULL);	
 	~HeightmapSelector();
 
@@ -79,9 +85,24 @@ class HeightmapSelector : public QWidget
 		: -1;
 	}
 
+	int data() const
+	{
+	    return _height_button->isChecked() ? HEIGHT : DISTANCE;
+	}
+
+	int range() const
+	{
+	    return _minmax_button->isChecked() ? MINMAX : RANGE;
+	}
+
 	float height_factor() const
 	{
 	    return _height_factor_spinbox->value();
+	}
+
+	bool show_cube() const
+	{
+	    return _showcube_box->isChecked();
 	}
 
     public slots:

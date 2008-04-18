@@ -1,3 +1,11 @@
+2008-04-18  Martin Lambers <marlam@marlam.de>
+
+	* src/heightmap_selector.h, src/heightmap_selector.cpp,
+	src/heightmap_quads_vs.glsl, src/heightmap_strip_vs.glsl,
+	src/heightmap_fs.glsl, src/view_area.h, src/view_area.cpp,
+	src/cvlview.h, src/cvlview.cpp, src/main.cpp, src/Makefile.am: Improve
+	3D view implementation. Still buggy.
+
 2008-04-17  Martin Lambers <marlam@marlam.de>
 
 	* src/heightmap_selector.h, src/heightmap_selector.cpp: Remove unused

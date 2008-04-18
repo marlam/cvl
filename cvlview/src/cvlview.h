@@ -24,7 +24,8 @@
 
 #include "config.h"
 
-#include <GL/gl.h>
+#define GLEW_STATIC 1
+#include <GL/glew.h>
 
 #include <QtCore>
 #include <QMainWindow>

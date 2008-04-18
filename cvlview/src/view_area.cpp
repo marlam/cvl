@@ -37,6 +37,7 @@
 
 #include "mh.h"
 
+#include "channel_info.h"
 #include "channel_selector.h"
 #include "viewpoint_selector.h"
 #include "interpolation_selector.h"
@@ -46,9 +47,14 @@
 #include "heightmap_selector.h"
 #include "view_area.h"
 
+#include "heightmap_quads_vs.glsl.h"
+#include "heightmap_strip_vs.glsl.h"
+#include "heightmap_fs.glsl.h"
+
 
 ViewArea::ViewArea(cvl_frame_t **frame, 
 	int min_size,
+	ChannelInfo *channel_info,
 	ChannelSelector *channel_selector,
 	ViewpointSelector *viewpoint_selector,
 	InterpolationSelector *interpolation_selector,
@@ -63,15 +69,21 @@ ViewArea::ViewArea(cvl_frame_t **frame,
     _lock = false;
     _mouse_pos = QPoint(0, 0);
     _dragging = false;
+    _rotating = false;
     _rendering_fails = false;
     _processed_frame = NULL;
     _render_frame = NULL;
     _recompute = true;
     _frame1 = NULL;
     _frame2 = NULL;
+    _heightmap_quads_prg = 0;
+    _heightmap_strip_prg = 0;
+    _rotation_x = 0.0f;
+    _rotation_y = 0.0f;
     setMinimumSize(min_size, min_size);
     setMouseTracking(true);
 
+    _channel_info = channel_info;
     _channel_selector = channel_selector;
     _viewpoint_selector = viewpoint_selector;
     _interpolation_selector = interpolation_selector;
@@ -95,6 +107,8 @@ ViewArea::~ViewArea()
 	cvl_frame_free(_frame1);
 	cvl_frame_free(_frame2);
 	cvl_frame_free(_render_frame);
+	cvl_gl_program_free(_heightmap_quads_prg);
+	cvl_gl_program_free(_heightmap_strip_prg);
 	cvl_deinit();
     }
 }
@@ -126,6 +140,15 @@ void ViewArea::initializeGL()
     else
     {
 	_cvl_init_failed = false;
+	_heightmap_quads_prg = cvl_gl_program_new_src("heightmap-quads", 
+	    	HEIGHTMAP_QUADS_VS_GLSL_STR, HEIGHTMAP_FS_GLSL_STR);
+	_heightmap_strip_prg = cvl_gl_program_new_src("heightmap-strip", 
+		HEIGHTMAP_STRIP_VS_GLSL_STR, HEIGHTMAP_FS_GLSL_STR);
+	if (cvl_error())
+	{
+	    _rendering_fails = true;
+	    cvl_error_msgbox();
+	}
     }
 }
 
@@ -246,23 +269,45 @@ void ViewArea::paintGL()
     int x_offset = _viewpoint_selector->get_x_offset();
     int y_offset = _viewpoint_selector->get_y_offset();
 
+    /* Use OpenGL for rendering */
+    // Gather all data that requires CVL here, because we cannot mix GL and CVL
+    // calls. This includes all calls to selector widgets.
+    GLuint render_texture = cvl_frame_texture(_render_frame);
+    GLuint data_texture = cvl_frame_texture(*_frame);
+    bool interpolate = _interpolation_selector->is_enabled();
+    bool flat_view = !_heightmap_selector->is_enabled();
+    int height_channel = _heightmap_selector->channel();
+    int height_mode = _heightmap_selector->mode();
+    float height_factor = _heightmap_selector->height_factor();
+    float channel_min = _heightmap_selector->range() == HeightmapSelector::MINMAX
+	? _channel_info->get_min(height_channel) 
+	: _range_selector->get_range_min(height_channel);
+    float channel_max = _heightmap_selector->range() == HeightmapSelector::MINMAX
+	? _channel_info->get_max(height_channel) 
+	: _range_selector->get_range_max(height_channel);
+    int height_invert = (_heightmap_selector->data() == HeightmapSelector::HEIGHT ? 0 : 1);
+    bool height_showcube = _heightmap_selector->show_cube();
     int w = cvl_frame_width(_render_frame);
     int h = cvl_frame_height(_render_frame);
+    cvl_gl_state_save();	// No CVL calls allowed from now on!
     float x = static_cast<float>(w) / static_cast<float>(_width);
     float y = static_cast<float>(h) / static_cast<float>(_height);
     float xo = static_cast<float>(2 * x_offset) / static_cast<float>(_width);
     float yo = static_cast<float>(2 * y_offset) / static_cast<float>(_height);
-
-    GLuint render_texture = cvl_frame_texture(_render_frame);
-
-    /* Use OpenGL for rendering */
-    cvl_gl_state_save();
     glClearColor(0.3f, 0.3f, 0.3f, 0.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnable(GL_TEXTURE_2D);
+    glActiveTexture(GL_TEXTURE1);
+    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+    glBindTexture(GL_TEXTURE_2D, data_texture);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glActiveTexture(GL_TEXTURE0);
     glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
     glBindTexture(GL_TEXTURE_2D, render_texture);
-    if (_interpolation_selector->is_enabled())
+    if (interpolate)
     {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -274,103 +319,170 @@ void ViewArea::paintGL()
     }
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    glViewport(0, 0, _width, _height);
-    glScalef(zoom, zoom, 1.0f);
-    if (!_heightmap_selector->is_enabled())
+    if (flat_view)
     {
 	/* Flat view */
+	glDisable(GL_DEPTH_TEST);
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	glViewport(0, 0, _width, _height);
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+	glScalef(zoom, zoom, 1.0f);
 	glBegin(GL_QUADS);
 	glTexCoord2f(0.0f, 0.0f);
-	glVertex3f(-x + xo, +y - yo, 0.0f);
+	glVertex2f(-x + xo, +y - yo);
 	glTexCoord2f(1.0f, 0.0f);
-	glVertex3f(+x + xo, +y - yo, 0.0f);
+	glVertex2f(+x + xo, +y - yo);
 	glTexCoord2f(1.0f, 1.0f);
-	glVertex3f(+x + xo, -y - yo, 0.0f);
+	glVertex2f(+x + xo, -y - yo);
 	glTexCoord2f(0.0f, 1.0f);
-	glVertex3f(-x + xo, -y - yo, 0.0f);
+	glVertex2f(-x + xo, -y - yo);
 	glEnd();
-    }
-    else if (_heightmap_selector->mode() == HeightmapSelector::QUADS)
-    {
-	/* Separate quads */
-	float vl = -x + xo;
-	float vw = 2.0f * x;
-	float vt = -y - yo;
-	float vh = 2.0f * y;
-	float qw = vw / static_cast<float>(w);
-	float qh = vh / static_cast<float>(h);
-	float tw = 1.0f / static_cast<float>(w);
-	float th = 1.0f / static_cast<float>(h);
-	for (int yy = 0; yy < h; yy++)
-	{
-    	    float ry = static_cast<float>(yy) / static_cast<float>(h);
-	    for (int xx = 0; xx < w; xx++)
-	    {
-		float rx = static_cast<float>(xx) / static_cast<float>(w);
-		float ql = vl + rx * vw;
-		float qt = vt + ry * vh;
-		float d = 0.0f; // TODO
-		/*
-		float d = (static_cast<float>(frame_data.depth[y * frame_data.width + x]) / 255.0f)
-		    * frame_data.depth_scale_factor - 0.5f * frame_data.depth_scale_factor;
-		*/
-		glBegin(GL_QUADS);
-		glTexCoord2f(rx, 1.0f - ry);
-		glVertex3f(ql, qt, d);
-		glTexCoord2f(rx + tw, 1.0f - ry);
-		glVertex3f(ql + qw, qt, d);
-		glTexCoord2f(rx + tw, 1.0f - (ry + th));
-		glVertex3f(ql + qw, qt + qh, d);
-		glTexCoord2f(rx, 1.0f - (ry + th));
-		glVertex3f(ql, qt + qh, d);
-		glEnd();
-	    }
-	}
     }
     else
     {
-	/* Connected strip */
-	float vl = -x + xo;
-	float vw = 2.0f * x;
-	float vt = -y - yo;
-	float vh = 2.0f * y;
-	for (int yy = 0; yy < h - 1; yy++)
-    	{
-	    float ry = static_cast<float>(yy) / static_cast<float>(h) + 0.5f / static_cast<float>(h);
-	    float ryn = static_cast<float>(yy + 1) / static_cast<float>(h) + 0.5f / static_cast<float>(h);
-	    glBegin(GL_TRIANGLE_STRIP);
-	    for (int xx = 0; xx < w; xx++)
+	/* 3D view */
+	glEnable(GL_DEPTH_TEST);
+	glViewport(0, 0, _width, _height);
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	float vpw = static_cast<float>(_width);
+	float vph = static_cast<float>(_height);
+	glFrustum(-vpw / 2.0f, +vpw / 2.0f, -vph / 2.0f, +vph / 2.0f, 1.0f, 1.0f + mh_maxf(vpw, vph));
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+	glTranslatef(xo, -yo, -1.5f);
+	glScalef(zoom * static_cast<float>(mh_maxi(w, h)), 
+		zoom * static_cast<float>(mh_maxi(w, h)), 1.0f);
+	glRotatef(_rotation_x, 1.0f, 0.0f, 0.0f);
+	glRotatef(_rotation_y, 0.0f, 1.0f, 0.0f);
+	float frame_width = static_cast<float>(w);
+	float frame_height = static_cast<float>(h);
+	float cuboid_left, cuboid_top, cuboid_width, cuboid_height;
+	if (w >= h)
+	{
+	    cuboid_width = 1.0f;
+	    cuboid_height = frame_height / frame_width;
+	    cuboid_left = -0.5f + 0.0f;
+	    cuboid_top = -0.5f + (cuboid_width - cuboid_height) / 2.0f;
+	}
+	else
+	{
+	    cuboid_width = frame_width / frame_height;
+	    cuboid_height = 1.0f;
+	    cuboid_left = -0.5f + (cuboid_height - cuboid_width) / 2.0f;
+	    cuboid_top = -0.5f + 0.0f;
+	}
+	float quad_width = cuboid_width / frame_width;
+	float quad_height = cuboid_height / frame_height;
+	if (height_mode == HeightmapSelector::QUADS)
+	{
+	    /* Separate quads */
+	    glUseProgram(_heightmap_quads_prg);
+	    glUniform1i(glGetUniformLocation(_heightmap_quads_prg, "tex"), 0);
+	    glUniform1i(glGetUniformLocation(_heightmap_quads_prg, "heightmap"), 1);
+	    glUniform1i(glGetUniformLocation(_heightmap_quads_prg, "channel"), height_channel);
+	    glUniform1f(glGetUniformLocation(_heightmap_quads_prg, "factor"), height_factor);
+	    glUniform1f(glGetUniformLocation(_heightmap_quads_prg, "channel_min"), channel_min);
+	    glUniform1f(glGetUniformLocation(_heightmap_quads_prg, "channel_max"), channel_max);
+	    glUniform1i(glGetUniformLocation(_heightmap_quads_prg, "invert"), height_invert);
+	    for (int y = 0; y < h; y++)
 	    {
-		//mh_msg_wrn("yy=%d xx=%d", yy, xx);
-		float rx = static_cast<float>(xx) / static_cast<float>(w) + 0.5f / static_cast<float>(w);
-		float vx = vl + rx * vw;
-		float vy = vt + ry * vh;
-		float vyn = vt + ryn * vh;
-		float d = 0.0f;	// TODO
-		/*
-		float d = (static_cast<float>(frame_data.depth[y * frame_data.width + x]) / 255.0f)
-		    * frame_data.depth_scale_factor - 0.5f * frame_data.depth_scale_factor;
-		*/
-		float dn = 0.0f; // TODO
-		/*
-		float dn = (static_cast<float>(frame_data.depth[(y + 1) * frame_data.width + x]) / 255.0f)
-		    * frame_data.depth_scale_factor - 0.5f * frame_data.depth_scale_factor;
-		*/
-		glTexCoord2f(rx, 1.0f - ry);
-		glVertex3f(vx, vy, d);
-		glTexCoord2f(rx, 1.0f - ryn);
-		glVertex3f(vx, vyn, dn);
+		float ry = static_cast<float>(y) / frame_height;
+		for (int x = 0; x < w; x++)
+		{
+		    float rx = static_cast<float>(x) / frame_width;
+		    glMultiTexCoord2f(1, rx + 0.5f / frame_width, 1.0f - ry - 0.5 / frame_height);
+		    glBegin(GL_QUADS);
+		    glMultiTexCoord2f(0, rx, 1.0f - ry);
+		    glVertex2f(cuboid_left + rx * cuboid_width, cuboid_top + ry * cuboid_height);
+		    glMultiTexCoord2f(0, rx + quad_width, 1.0f - ry);
+		    glVertex2f(cuboid_left + rx * cuboid_width + quad_width, cuboid_top + ry * cuboid_height);
+		    glMultiTexCoord2f(0, rx + quad_width, 1.0f - (ry + quad_height));
+		    glVertex2f(cuboid_left + rx * cuboid_width + quad_width, cuboid_top + ry * cuboid_height + quad_height);
+		    glMultiTexCoord2f(0, rx, 1.0f - (ry + quad_height));
+		    glVertex2f(cuboid_left + rx * cuboid_width, cuboid_top + ry * cuboid_height + quad_height);
+		    glEnd();
+		}
 	    }
+	}
+	else
+	{
+	    /* Connected surface */
+	    glUseProgram(_heightmap_strip_prg);
+	    glUniform1i(glGetUniformLocation(_heightmap_strip_prg, "tex"), 0);
+	    glUniform1i(glGetUniformLocation(_heightmap_strip_prg, "heightmap"), 1);
+	    glUniform1i(glGetUniformLocation(_heightmap_strip_prg, "channel"), height_channel);
+	    glUniform1f(glGetUniformLocation(_heightmap_strip_prg, "factor"), height_factor);
+	    glUniform1f(glGetUniformLocation(_heightmap_strip_prg, "channel_min"), channel_min);
+	    glUniform1f(glGetUniformLocation(_heightmap_strip_prg, "channel_max"), channel_max);
+	    glUniform1i(glGetUniformLocation(_heightmap_strip_prg, "invert"), height_invert);
+	    float ry_next = 0.0f + 0.5f / frame_height;
+	    for (int y = 0; y < h; y++)
+	    {
+		float ry = ry_next;
+		ry_next = (static_cast<float>(y + 1) + 0.5f) / frame_height;
+		glBegin(GL_TRIANGLE_STRIP);
+		for (int x = 0; x < w; x++)
+		{
+		    float rx = (static_cast<float>(x) + 0.5f) / frame_width;
+		    glMultiTexCoord2f(0, rx, 1.0f - ry);
+		    glVertex2f(cuboid_left + rx * cuboid_width, cuboid_top + ry * cuboid_height);
+		    glMultiTexCoord2f(0, rx, 1.0f - ry_next);
+		    glVertex2f(cuboid_left + rx * cuboid_width, cuboid_top + ry_next * cuboid_height);
+		}
+		glEnd();
+	    }
+	}
+	glUseProgram(0);
+	glDisable(GL_TEXTURE_2D);
+	if (height_showcube)
+	{
+	    glColor3f(1.0f, 1.0f, 1.0f);
+	    glBegin(GL_LINE_LOOP);
+	    glVertex3f(-0.5f, -0.5f, -0.5f);
+	    glVertex3f(+0.5f, -0.5f, -0.5f);
+	    glVertex3f(+0.5f, +0.5f, -0.5f);
+	    glVertex3f(-0.5f, +0.5f, -0.5f);
 	    glEnd();
-    	}
+	    glBegin(GL_LINE_LOOP);
+	    glVertex3f(-0.5f, -0.5f, +0.5f);
+	    glVertex3f(+0.5f, -0.5f, +0.5f);
+	    glVertex3f(+0.5f, +0.5f, +0.5f);
+	    glVertex3f(-0.5f, +0.5f, +0.5f);
+	    glEnd();
+	    glBegin(GL_LINE_LOOP);
+	    glVertex3f(-0.5f, -0.5f, -0.5f);
+	    glVertex3f(+0.5f, -0.5f, -0.5f);
+	    glVertex3f(+0.5f, -0.5f, +0.5f);
+	    glVertex3f(-0.5f, -0.5f, +0.5f);
+	    glEnd();
+	    glBegin(GL_LINE_LOOP);
+	    glVertex3f(-0.5f, +0.5f, -0.5f);
+	    glVertex3f(+0.5f, +0.5f, -0.5f);
+	    glVertex3f(+0.5f, +0.5f, +0.5f);
+	    glVertex3f(-0.5f, +0.5f, +0.5f);
+	    glEnd();
+	    glBegin(GL_LINE_LOOP);
+	    glVertex3f(-0.5f, -0.5f, -0.5f);
+	    glVertex3f(-0.5f, -0.5f, +0.5f);
+	    glVertex3f(-0.5f, +0.5f, +0.5f);
+	    glVertex3f(-0.5f, +0.5f, -0.5f);
+	    glEnd();
+	    glBegin(GL_LINE_LOOP);
+	    glVertex3f(+0.5f, -0.5f, -0.5f);
+	    glVertex3f(+0.5f, -0.5f, +0.5f);
+	    glVertex3f(+0.5f, +0.5f, +0.5f);
+	    glVertex3f(+0.5f, +0.5f, -0.5f);
+	    glEnd();
+	}
     }
-    glBindTexture(GL_TEXTURE_2D, 0);
+    glFlush();
     cvl_gl_state_restore();
+    cvl_gl_check_errors("GL rendering");
 
-    /* Save area of the framebuffer that was rendered to. This is only correct
-     * for flat view, but it's good enough for 3D view. */
+    /* Save area of the framebuffer that was rendered to */
     _fb_x = mh_clampi(mh_iroundf(_width / 2.0f + (-x + xo) * 0.5f * zoom * static_cast<float>(_width)), 0, _width - 1);
     _fb_y = mh_clampi(mh_iroundf(_height / 2.0f - (+y - yo) * 0.5f * zoom * static_cast<float>(_height)), 0, _height - 1);
     _fb_w = mh_clampi(mh_iroundf(x * zoom * static_cast<float>(_width)), 1, _width - _fb_x);
@@ -453,6 +565,11 @@ void ViewArea::mousePressEvent(QMouseEvent *event)
 	_drag_startpoint = event->pos();
 	_dragging = true;
     }
+    if (event->button() == Qt::RightButton)
+    {
+	_rotate_startpoint = event->pos();
+	_rotating = true;
+    }
 }
 
 void ViewArea::mouseReleaseEvent(QMouseEvent *event)
@@ -463,6 +580,10 @@ void ViewArea::mouseReleaseEvent(QMouseEvent *event)
     if (event->button() == Qt::LeftButton)
     {
 	_dragging = false;
+    }
+    if (event->button() == Qt::RightButton)
+    {
+	_rotating = false;
     }
 }
 
@@ -475,7 +596,6 @@ void ViewArea::mouseMoveEvent(QMouseEvent *event)
 
     if (_dragging)
     {
-	// Drag
        	QPoint drag_endpoint = event->pos();
 	int drag_offset_x = mh_iroundf(static_cast<float>(drag_endpoint.x() - _drag_startpoint.x())
 		/ _viewpoint_selector->get_zoomfactor());
@@ -486,6 +606,18 @@ void ViewArea::mouseMoveEvent(QMouseEvent *event)
 	_viewpoint_selector->set_x_offset(_viewpoint_selector->get_x_offset() + drag_offset_x);
 	_viewpoint_selector->set_y_offset(_viewpoint_selector->get_y_offset() + drag_offset_y);
 	unlock();
+	update();
+    }
+    if (_rotating)
+    {
+       	QPoint rotate_endpoint = event->pos();
+	int rotate_offset_x = mh_iroundf(static_cast<float>(rotate_endpoint.x() - _rotate_startpoint.x())
+		/ _viewpoint_selector->get_zoomfactor());
+	int rotate_offset_y = mh_iroundf(static_cast<float>(rotate_endpoint.y() - _rotate_startpoint.y())
+		/ _viewpoint_selector->get_zoomfactor());
+	_rotate_startpoint = rotate_endpoint;
+	_rotation_y += 0.1f * static_cast<float>(rotate_offset_x);
+	_rotation_x += 0.1f * static_cast<float>(rotate_offset_y);
 	update();
     }
 
