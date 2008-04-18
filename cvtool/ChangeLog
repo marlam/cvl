@@ -2,6 +2,7 @@
 
 	* cvl/cvl_gl.c: Save both modelview and projection matrix in
 	cvl_gl_state_save().
+	* configure.ac, doc/cvl.texi, doc/cvtool.texi: Bump version to 0.2.4.
 
 2008-04-14  Martin Lambers <marlam@marlam.de>
 
