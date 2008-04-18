@@ -111,15 +111,15 @@ HeightmapSelector::HeightmapSelector(cvl_frame_t **frame, QWidget *parent) : QWi
     QLabel *height_factor_label = new QLabel("Height factor:");
     layout->addWidget(height_factor_label, 5, 0, 1, 2);
     _height_factor_spinbox = new QDoubleSpinBox();
-    _height_factor_spinbox->setRange(0.0000, 99.9999);
+    _height_factor_spinbox->setRange(0.00, 9.99);
     _height_factor_spinbox->setSingleStep(0.01);
-    _height_factor_spinbox->setDecimals(4);
+    _height_factor_spinbox->setDecimals(2);
     _height_factor_spinbox->setValue(1.0);
     connect(_height_factor_spinbox, SIGNAL(valueChanged(double)), this, SLOT(_set_height_factor(double)));
     layout->addWidget(_height_factor_spinbox, 5, 2, 1, 4);
     _height_factor_slider = new QSlider(Qt::Horizontal, this);
-    _height_factor_slider->setRange(-460517, +460517);	// exp(+4.60517) = 99.9999
-    _height_factor_slider->setValue(0);
+    _height_factor_slider->setRange(0, 999);
+    _height_factor_slider->setValue(100);
     connect(_height_factor_slider, SIGNAL(valueChanged(int)), this, SLOT(_height_factor_slider_changed(int)));
     layout->addWidget(_height_factor_slider, 6, 0, 1, 6);
 
@@ -144,7 +144,7 @@ void HeightmapSelector::_button_clicked()
 void HeightmapSelector::_set_height_factor(double f)
 {
     _lock = true;
-    _height_factor_slider->setValue(mh_iround(log(mh_max(f, 0.00001)) * 100000.0));
+    _height_factor_slider->setValue(mh_iround(f * 100.0));
     _lock = false;
     emit heightmap_changed();
 }
@@ -153,7 +153,7 @@ void HeightmapSelector::_height_factor_slider_changed(int f)
 {
     if (!_lock)
     {
-	_height_factor_spinbox->setValue(mh_clamp(exp(static_cast<double>(f) / 100000.0), 0.0000, 99.9999));
+	_height_factor_spinbox->setValue(static_cast<double>(f) / 100.0);
     }
 }
 

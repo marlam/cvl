@@ -8,6 +8,7 @@
 	* configure.ac: Require CVL >= 0.2.4 because of a bug fix in
 	cvl_gl_state_save(). 3D view should work now.
 	* configure.ac, doc/cvlview.texi: Bump version to 0.3.0.
+	* src/heightmap_selector.cpp, src/view_area.cpp: 3D view tweaks.
 
 2008-04-17  Martin Lambers <marlam@marlam.de>
 

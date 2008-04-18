@@ -352,9 +352,9 @@ void ViewArea::paintGL()
 	glFrustum(-vpw / 2.0f, +vpw / 2.0f, -vph / 2.0f, +vph / 2.0f, 1.0f, 1.0f + mh_maxf(vpw, vph));
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
-	glTranslatef(xo, -yo, -1.5f);
-	glScalef(zoom * static_cast<float>(mh_maxi(w, h)), 
-		zoom * static_cast<float>(mh_maxi(w, h)), 1.0f);
+	glTranslatef(xo * vpw, -yo * vph, -2.0f);
+	glScalef(zoom * 1.5f * static_cast<float>(mh_maxi(w, h)), 
+		zoom * 1.5f * static_cast<float>(mh_maxi(w, h)), 1.0f);
 	glRotatef(_rotation_x, 1.0f, 0.0f, 0.0f);
 	glRotatef(_rotation_y, 0.0f, 1.0f, 0.0f);
 	float frame_width = static_cast<float>(w);
