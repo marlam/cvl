@@ -5,6 +5,8 @@
 	src/heightmap_fs.glsl, src/view_area.h, src/view_area.cpp,
 	src/cvlview.h, src/cvlview.cpp, src/main.cpp, src/Makefile.am: Improve
 	3D view implementation. Still buggy.
+	* configure.ac: Require CVL >= 0.2.4 because of a bug fix in
+	cvl_gl_state_save(). 3D view should work now.
 
 2008-04-17  Martin Lambers <marlam@marlam.de>
 
