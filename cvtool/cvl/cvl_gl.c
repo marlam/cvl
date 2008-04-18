@@ -840,6 +840,9 @@ void cvl_gl_program_cache_put(const char *name, GLuint program)
  */
 void cvl_gl_state_save(void)
 {
+    glMatrixMode(GL_PROJECTION);
+    glPushMatrix();
+    glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
     glPushClientAttrib(GL_CLIENT_ALL_ATTRIB_BITS);
     glPushAttrib(GL_ALL_ATTRIB_BITS);
@@ -859,5 +862,8 @@ void cvl_gl_state_restore(void)
     // Reinitialize extensions
     glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, cvl_context()->cvl_gl_fbo);
     glPopAttrib();
+    glMatrixMode(GL_MODELVIEW);
+    glPopMatrix();
+    glMatrixMode(GL_PROJECTION);
     glPopMatrix();
 }
