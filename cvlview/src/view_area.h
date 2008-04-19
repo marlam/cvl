@@ -75,6 +75,12 @@ class ViewArea : public QGLWidget
 	// Program for heightmap rendering
 	GLuint _heightmap_quads_prg;
 	GLuint _heightmap_strip_prg;
+	// Data buffers for heightmap rendering
+	GLuint _heightmap_texcoord0_buffer;
+	GLuint _heightmap_texcoord1_buffer;
+	GLuint _heightmap_vertex_buffer;
+	int _heightmap_buffers_mode;
+	bool _heightmap_buffers_are_current;
 	// Rotation for heightmap rendering
 	float _rotation_x;
 	float _rotation_y;

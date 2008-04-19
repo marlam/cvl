@@ -78,6 +78,10 @@ ViewArea::ViewArea(cvl_frame_t **frame,
     _frame2 = NULL;
     _heightmap_quads_prg = 0;
     _heightmap_strip_prg = 0;
+    _heightmap_texcoord0_buffer = 0;
+    _heightmap_texcoord1_buffer = 0;
+    _heightmap_vertex_buffer = 0;
+    _heightmap_buffers_are_current = false;
     _rotation_x = 0.0f;
     _rotation_y = 0.0f;
     setMinimumSize(min_size, min_size);
@@ -187,6 +191,7 @@ void ViewArea::paintGL()
 		    4, CVL_UNKNOWN, CVL_FLOAT, CVL_TEXTURE);
 	    _frame2 = cvl_frame_new(cvl_frame_width(*_frame), cvl_frame_height(*_frame), 
 		    4, CVL_UNKNOWN, CVL_FLOAT, CVL_TEXTURE);
+	    _heightmap_buffers_are_current = false;
 	}
 	cvl_frame_free(_render_frame);
 
@@ -379,6 +384,95 @@ void ViewArea::paintGL()
 	if (height_mode == HeightmapSelector::QUADS)
 	{
 	    /* Separate quads */
+	    if (!_heightmap_buffers_are_current || _heightmap_buffers_mode != HeightmapSelector::QUADS)
+	    {
+		glDeleteBuffers(1, &_heightmap_texcoord0_buffer);
+		glDeleteBuffers(1, &_heightmap_texcoord1_buffer);
+		glDeleteBuffers(1, &_heightmap_vertex_buffer);
+		GLfloat *buf = new GLfloat[4 * 2 * w * h];
+		for (int y = 0; y < h; y++)
+		{
+		    float ry = static_cast<float>(y) / frame_height;
+		    for (int x = 0; x < w; x++)
+		    {
+			float rx = static_cast<float>(x) / frame_width;
+			buf[8 * (y * w + x) + 0] = rx + 0.5f / frame_width;
+			buf[8 * (y * w + x) + 1] = 1.0f - ry - 0.5 / frame_height;
+			buf[8 * (y * w + x) + 2] = buf[8 * (y * w + x) + 0];
+			buf[8 * (y * w + x) + 3] = buf[8 * (y * w + x) + 1];
+			buf[8 * (y * w + x) + 4] = buf[8 * (y * w + x) + 0];
+			buf[8 * (y * w + x) + 5] = buf[8 * (y * w + x) + 1];
+			buf[8 * (y * w + x) + 6] = buf[8 * (y * w + x) + 0];
+			buf[8 * (y * w + x) + 7] = buf[8 * (y * w + x) + 1];
+		    }
+		}
+		glClientActiveTexture(GL_TEXTURE1);
+		glGenBuffersARB(1, &_heightmap_texcoord1_buffer);
+		glBindBufferARB(GL_ARRAY_BUFFER_ARB, _heightmap_texcoord1_buffer);
+		glBufferDataARB(GL_ARRAY_BUFFER_ARB, 4 * 2 * w * h * sizeof(float),
+			buf, GL_STATIC_DRAW_ARB);
+		glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+		glTexCoordPointer(2, GL_FLOAT, 0, 0);
+		for (int y = 0; y < h; y++)
+		{
+		    float ry = static_cast<float>(y) / frame_height;
+		    for (int x = 0; x < w; x++)
+		    {
+			float rx = static_cast<float>(x) / frame_width;
+			buf[8 * (y * w + x) + 0] = rx;
+			buf[8 * (y * w + x) + 1] = 1.0f - ry;
+			buf[8 * (y * w + x) + 2] = rx + quad_width;
+			buf[8 * (y * w + x) + 3] = 1.0f - ry;
+			buf[8 * (y * w + x) + 4] = rx + quad_width;
+			buf[8 * (y * w + x) + 5] = 1.0f - ry - quad_height;
+			buf[8 * (y * w + x) + 6] = rx;
+			buf[8 * (y * w + x) + 7] = 1.0f - ry - quad_height;
+		    }
+		}
+		glClientActiveTexture(GL_TEXTURE0);
+		glGenBuffersARB(1, &_heightmap_texcoord0_buffer);
+		glBindBufferARB(GL_ARRAY_BUFFER_ARB, _heightmap_texcoord0_buffer);
+		glBufferDataARB(GL_ARRAY_BUFFER_ARB, 4 * 2 * w * h * sizeof(float),
+			buf, GL_STATIC_DRAW_ARB);
+		glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+		glTexCoordPointer(2, GL_FLOAT, 0, 0);
+		for (int y = 0; y < h; y++)
+		{
+		    float ry = static_cast<float>(y) / frame_height;
+		    for (int x = 0; x < w; x++)
+		    {
+			float rx = static_cast<float>(x) / frame_width;
+			buf[8 * (y * w + x) + 0] = cuboid_left + rx * cuboid_width;
+			buf[8 * (y * w + x) + 1] = cuboid_top + ry * cuboid_height;
+			buf[8 * (y * w + x) + 2] = cuboid_left + rx * cuboid_width + quad_width;
+			buf[8 * (y * w + x) + 3] = cuboid_top + ry * cuboid_height;
+			buf[8 * (y * w + x) + 4] = cuboid_left + rx * cuboid_width + quad_width;
+			buf[8 * (y * w + x) + 5] = cuboid_top + ry * cuboid_height + quad_height;
+			buf[8 * (y * w + x) + 6] = cuboid_left + rx * cuboid_width;
+			buf[8 * (y * w + x) + 7] = cuboid_top + ry * cuboid_height + quad_height;
+		    }
+		}
+		glGenBuffersARB(1, &_heightmap_vertex_buffer);
+		glBindBufferARB(GL_ARRAY_BUFFER_ARB, _heightmap_vertex_buffer);
+		glBufferDataARB(GL_ARRAY_BUFFER_ARB, 4 * 2 * w * h * sizeof(float),
+			buf, GL_STATIC_DRAW_ARB);
+		glEnableClientState(GL_VERTEX_ARRAY);
+		glVertexPointer(2, GL_FLOAT, 0, 0);
+		delete[] buf;
+		_heightmap_buffers_mode = HeightmapSelector::QUADS;
+		_heightmap_buffers_are_current = true;
+	    }
+	    glClientActiveTexture(GL_TEXTURE1);
+    	    glBindBufferARB(GL_ARRAY_BUFFER_ARB, _heightmap_texcoord1_buffer);
+	    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+	    glTexCoordPointer(2, GL_FLOAT, 0, 0);
+    	    glClientActiveTexture(GL_TEXTURE0);
+	    glBindBufferARB(GL_ARRAY_BUFFER_ARB, _heightmap_texcoord0_buffer);
+	    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+	    glTexCoordPointer(2, GL_FLOAT, 0, 0);
+    	    glBindBufferARB(GL_ARRAY_BUFFER_ARB, _heightmap_vertex_buffer);
+	    glEnableClientState(GL_VERTEX_ARRAY);
+	    glVertexPointer(2, GL_FLOAT, 0, 0);
 	    glUseProgram(_heightmap_quads_prg);
 	    glUniform1i(glGetUniformLocation(_heightmap_quads_prg, "tex"), 0);
 	    glUniform1i(glGetUniformLocation(_heightmap_quads_prg, "heightmap"), 1);
@@ -387,29 +481,75 @@ void ViewArea::paintGL()
 	    glUniform1f(glGetUniformLocation(_heightmap_quads_prg, "channel_min"), channel_min);
 	    glUniform1f(glGetUniformLocation(_heightmap_quads_prg, "channel_max"), channel_max);
 	    glUniform1i(glGetUniformLocation(_heightmap_quads_prg, "invert"), height_invert);
-	    for (int y = 0; y < h; y++)
-	    {
-		float ry = static_cast<float>(y) / frame_height;
-		for (int x = 0; x < w; x++)
-		{
-		    float rx = static_cast<float>(x) / frame_width;
-		    glMultiTexCoord2f(1, rx + 0.5f / frame_width, 1.0f - ry - 0.5 / frame_height);
-		    glBegin(GL_QUADS);
-		    glMultiTexCoord2f(0, rx, 1.0f - ry);
-		    glVertex2f(cuboid_left + rx * cuboid_width, cuboid_top + ry * cuboid_height);
-		    glMultiTexCoord2f(0, rx + quad_width, 1.0f - ry);
-		    glVertex2f(cuboid_left + rx * cuboid_width + quad_width, cuboid_top + ry * cuboid_height);
-		    glMultiTexCoord2f(0, rx + quad_width, 1.0f - (ry + quad_height));
-		    glVertex2f(cuboid_left + rx * cuboid_width + quad_width, cuboid_top + ry * cuboid_height + quad_height);
-		    glMultiTexCoord2f(0, rx, 1.0f - (ry + quad_height));
-		    glVertex2f(cuboid_left + rx * cuboid_width, cuboid_top + ry * cuboid_height + quad_height);
-		    glEnd();
-		}
-	    }
+	    glDrawArrays(GL_QUADS, 0, 4 * w * h);
+	    glUseProgram(0);
+	    glClientActiveTexture(GL_TEXTURE1);
+	    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+	    glClientActiveTexture(GL_TEXTURE0);
+	    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+	    glDisableClientState(GL_VERTEX_ARRAY);
 	}
 	else
 	{
 	    /* Connected surface */
+	    if (!_heightmap_buffers_are_current || _heightmap_buffers_mode != HeightmapSelector::STRIP)
+	    {
+		glDeleteBuffers(1, &_heightmap_texcoord0_buffer);
+		glDeleteBuffers(1, &_heightmap_texcoord1_buffer);
+		glDeleteBuffers(1, &_heightmap_vertex_buffer);
+		GLfloat *buf = new GLfloat[2 * 2 * w * (h - 1)];
+		float ry_next = 0.0f + 0.5f / frame_height;
+		for (int y = 0; y < h - 1; y++)
+		{
+		    float ry = ry_next;
+		    ry_next = (static_cast<float>(y + 1) + 0.5f) / frame_height;
+		    for (int x = 0; x < w; x++)
+		    {
+			float rx = (static_cast<float>(x) + 0.5f) / frame_width;
+			buf[4 * (y * w + x) + 0] = rx;
+			buf[4 * (y * w + x) + 1] = 1.0f - ry;
+			buf[4 * (y * w + x) + 2] = rx;
+			buf[4 * (y * w + x) + 3] = 1.0f - ry_next;
+		    }
+		}
+		glClientActiveTexture(GL_TEXTURE0);
+		glGenBuffersARB(1, &_heightmap_texcoord0_buffer);
+		glBindBufferARB(GL_ARRAY_BUFFER_ARB, _heightmap_texcoord0_buffer);
+		glBufferDataARB(GL_ARRAY_BUFFER_ARB, 2 * 2 * w * (h - 1) * sizeof(float),
+			buf, GL_STATIC_DRAW_ARB);
+		glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+		glTexCoordPointer(2, GL_FLOAT, 0, 0);
+		ry_next = 0.0f + 0.5f / frame_height;
+		for (int y = 0; y < h - 1; y++)
+		{
+		    float ry = ry_next;
+		    ry_next = (static_cast<float>(y + 1) + 0.5f) / frame_height;
+		    for (int x = 0; x < w; x++)
+		    {
+			float rx = (static_cast<float>(x) + 0.5f) / frame_width;
+			buf[4 * (y * w + x) + 0] = cuboid_left + rx * cuboid_width;
+			buf[4 * (y * w + x) + 1] = cuboid_top + ry * cuboid_height;
+			buf[4 * (y * w + x) + 2] = cuboid_left + rx * cuboid_width;
+			buf[4 * (y * w + x) + 3] = cuboid_top + ry_next * cuboid_height;
+		    }
+		}
+		glGenBuffersARB(1, &_heightmap_vertex_buffer);
+		glBindBufferARB(GL_ARRAY_BUFFER_ARB, _heightmap_vertex_buffer);
+		glBufferDataARB(GL_ARRAY_BUFFER_ARB, 2 * 2 * w * (h - 1) * sizeof(float),
+			buf, GL_STATIC_DRAW_ARB);
+		glEnableClientState(GL_VERTEX_ARRAY);
+		glVertexPointer(2, GL_FLOAT, 0, 0);
+		delete[] buf;
+		_heightmap_buffers_mode = HeightmapSelector::STRIP;
+		_heightmap_buffers_are_current = true;
+	    }
+    	    glClientActiveTexture(GL_TEXTURE0);
+	    glBindBufferARB(GL_ARRAY_BUFFER_ARB, _heightmap_texcoord0_buffer);
+	    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+	    glTexCoordPointer(2, GL_FLOAT, 0, 0);
+    	    glBindBufferARB(GL_ARRAY_BUFFER_ARB, _heightmap_vertex_buffer);
+	    glEnableClientState(GL_VERTEX_ARRAY);
+	    glVertexPointer(2, GL_FLOAT, 0, 0);
 	    glUseProgram(_heightmap_strip_prg);
 	    glUniform1i(glGetUniformLocation(_heightmap_strip_prg, "tex"), 0);
 	    glUniform1i(glGetUniformLocation(_heightmap_strip_prg, "heightmap"), 1);
@@ -418,24 +558,17 @@ void ViewArea::paintGL()
 	    glUniform1f(glGetUniformLocation(_heightmap_strip_prg, "channel_min"), channel_min);
 	    glUniform1f(glGetUniformLocation(_heightmap_strip_prg, "channel_max"), channel_max);
 	    glUniform1i(glGetUniformLocation(_heightmap_strip_prg, "invert"), height_invert);
-	    float ry_next = 0.0f + 0.5f / frame_height;
-	    for (int y = 0; y < h; y++)
+	    for (int y = 0; y < h - 1; y++)
 	    {
-		float ry = ry_next;
-		ry_next = (static_cast<float>(y + 1) + 0.5f) / frame_height;
-		glBegin(GL_TRIANGLE_STRIP);
-		for (int x = 0; x < w; x++)
-		{
-		    float rx = (static_cast<float>(x) + 0.5f) / frame_width;
-		    glMultiTexCoord2f(0, rx, 1.0f - ry);
-		    glVertex2f(cuboid_left + rx * cuboid_width, cuboid_top + ry * cuboid_height);
-		    glMultiTexCoord2f(0, rx, 1.0f - ry_next);
-		    glVertex2f(cuboid_left + rx * cuboid_width, cuboid_top + ry_next * cuboid_height);
-		}
-		glEnd();
+		glDrawArrays(GL_TRIANGLE_STRIP, y * 2 * w, 2 * w);
 	    }
+	    glUseProgram(0);
+	    glClientActiveTexture(GL_TEXTURE1);
+	    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+	    glClientActiveTexture(GL_TEXTURE0);
+	    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+	    glDisableClientState(GL_VERTEX_ARRAY);
 	}
-	glUseProgram(0);
 	glDisable(GL_TEXTURE_2D);
 	if (height_showcube)
 	{
