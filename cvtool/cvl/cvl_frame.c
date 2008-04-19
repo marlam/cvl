@@ -423,10 +423,16 @@ void cvl_frame_set_type(cvl_frame_t *frame, cvl_type_t type)
 
     if (type != frame->type)
     {
-	(void)cvl_frame_texture(frame);
+	cvl_frame_t *tmpframe = cvl_frame_new(
+		cvl_frame_width(frame), cvl_frame_height(frame), cvl_frame_channels(frame),
+		cvl_frame_format(frame), type, CVL_TEXTURE);
+	glUseProgram(0);
+	cvl_transform(tmpframe, frame);
 	frame->type = type;
-	// The type conversion will be done automatically with the next
-	// rendering or readback step.
+	GLuint tmptex = frame->tex;
+	frame->tex = tmpframe->tex;
+	tmpframe->tex = tmptex;
+	cvl_frame_free(tmpframe);
     }
 }
 

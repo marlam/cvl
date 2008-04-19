@@ -1,3 +1,10 @@
+2008-04-19  Martin Lambers <marlam@marlam.de>
+
+	* cvl/cvl_frame.c: Explicitly convert the frame in
+	cvl_frame_set_type(). Do not defer conversion to the next usage of the
+	frame, because then it might be done over and over again. This fixes
+	a performance problem in CVLView.
+
 2008-04-18  Martin Lambers <marlam@marlam.de>
 
 	* cvl/cvl_gl.c: Save both modelview and projection matrix in
