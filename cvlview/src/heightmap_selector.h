@@ -51,7 +51,7 @@ class HeightmapSelector : public QWidget
 	QRadioButton *_range_button;
 	QDoubleSpinBox *_height_factor_spinbox;
 	QSlider *_height_factor_slider;
-	QCheckBox *_showcube_box;
+	QCheckBox *_showcuboid_box;
 	bool _lock;
 
     private slots:
@@ -100,9 +100,9 @@ class HeightmapSelector : public QWidget
 	    return _height_factor_spinbox->value();
 	}
 
-	bool show_cube() const
+	bool show_cuboid() const
 	{
-	    return _showcube_box->isChecked();
+	    return _showcuboid_box->isChecked();
 	}
 
     public slots:

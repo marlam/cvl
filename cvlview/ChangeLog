@@ -2,6 +2,8 @@
 
 	* src/view_area.h, src/view_area.cpp: Use buffer objects for texture
 	coordinates and vertices to speed up 3D view rendering.
+	* src/heightmap_selector.h, src/heightmap_selector.cpp,
+	src/view_area.cpp: 3D view tweaks.
 
 2008-04-18  Martin Lambers <marlam@marlam.de>
 

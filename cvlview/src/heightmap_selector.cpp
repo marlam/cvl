@@ -82,7 +82,7 @@ HeightmapSelector::HeightmapSelector(cvl_frame_t **frame, QWidget *parent) : QWi
     heightmap_group->addButton(_ch3_button);
     _ch0_button->setChecked(true);
 
-    QLabel *data_label = new QLabel("Data:");
+    QLabel *data_label = new QLabel("Z data type:");
     layout->addWidget(data_label, 3, 0, 1, 2);
     _height_button = new QRadioButton("Height");
     connect(_height_button, SIGNAL(clicked()), this, SLOT(_button_clicked()));
@@ -123,10 +123,10 @@ HeightmapSelector::HeightmapSelector(cvl_frame_t **frame, QWidget *parent) : QWi
     connect(_height_factor_slider, SIGNAL(valueChanged(int)), this, SLOT(_height_factor_slider_changed(int)));
     layout->addWidget(_height_factor_slider, 6, 0, 1, 6);
 
-    _showcube_box = new QCheckBox("Show Cube");
-    _showcube_box->setCheckState(Qt::Checked);
-    connect(_showcube_box, SIGNAL(stateChanged(int)), this, SLOT(_button_clicked()));
-    layout->addWidget(_showcube_box, 7, 0, 1, 6);
+    _showcuboid_box = new QCheckBox("Show Cuboid");
+    _showcuboid_box->setCheckState(Qt::Checked);
+    connect(_showcuboid_box, SIGNAL(stateChanged(int)), this, SLOT(_button_clicked()));
+    layout->addWidget(_showcuboid_box, 7, 0, 1, 6);
 
     layout->setRowStretch(8, 1);
     setLayout(layout);

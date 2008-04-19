@@ -291,7 +291,7 @@ void ViewArea::paintGL()
 	? _channel_info->get_max(height_channel) 
 	: _range_selector->get_range_max(height_channel);
     int height_invert = (_heightmap_selector->data() == HeightmapSelector::HEIGHT ? 0 : 1);
-    bool height_showcube = _heightmap_selector->show_cube();
+    bool height_showcuboid = _heightmap_selector->show_cuboid();
     int w = cvl_frame_width(_render_frame);
     int h = cvl_frame_height(_render_frame);
     cvl_gl_state_save();	// No CVL calls allowed from now on!
@@ -344,6 +344,11 @@ void ViewArea::paintGL()
 	glTexCoord2f(0.0f, 1.0f);
 	glVertex2f(-x + xo, -y - yo);
 	glEnd();
+	/* Save area of the framebuffer that was rendered to */
+	_fb_x = mh_clampi(mh_iroundf(_width / 2.0f + (-x + xo) * 0.5f * zoom * static_cast<float>(_width)), 0, _width - 1);
+	_fb_y = mh_clampi(mh_iroundf(_height / 2.0f - (+y - yo) * 0.5f * zoom * static_cast<float>(_height)), 0, _height - 1);
+	_fb_w = mh_clampi(mh_iroundf(x * zoom * static_cast<float>(_width)), 1, _width - _fb_x);
+	_fb_h = mh_clampi(mh_iroundf(y * zoom * static_cast<float>(_height)), 1, _height - _fb_y);
     }
     else
     {
@@ -364,7 +369,7 @@ void ViewArea::paintGL()
 	glRotatef(_rotation_y, 0.0f, 1.0f, 0.0f);
 	float frame_width = static_cast<float>(w);
 	float frame_height = static_cast<float>(h);
-	float cuboid_left, cuboid_top, cuboid_width, cuboid_height;
+	float cuboid_left, cuboid_top, cuboid_width, cuboid_height, cuboid_right, cuboid_bottom;
 	if (w >= h)
 	{
 	    cuboid_width = 1.0f;
@@ -379,6 +384,8 @@ void ViewArea::paintGL()
 	    cuboid_left = -0.5f + (cuboid_height - cuboid_width) / 2.0f;
 	    cuboid_top = -0.5f + 0.0f;
 	}
+	cuboid_right = cuboid_left + cuboid_width;
+	cuboid_bottom = cuboid_top + cuboid_height;
 	float quad_width = cuboid_width / frame_width;
 	float quad_height = cuboid_height / frame_height;
 	if (height_mode == HeightmapSelector::QUADS)
@@ -570,56 +577,58 @@ void ViewArea::paintGL()
 	    glDisableClientState(GL_VERTEX_ARRAY);
 	}
 	glDisable(GL_TEXTURE_2D);
-	if (height_showcube)
+	if (height_showcuboid)
 	{
 	    glColor3f(1.0f, 1.0f, 1.0f);
 	    glBegin(GL_LINE_LOOP);
-	    glVertex3f(-0.5f, -0.5f, -0.5f);
-	    glVertex3f(+0.5f, -0.5f, -0.5f);
-	    glVertex3f(+0.5f, +0.5f, -0.5f);
-	    glVertex3f(-0.5f, +0.5f, -0.5f);
+	    glVertex3f(cuboid_left, cuboid_top, -0.5f);
+	    glVertex3f(cuboid_right, cuboid_top, -0.5f);
+	    glVertex3f(cuboid_right, cuboid_bottom, -0.5f);
+	    glVertex3f(cuboid_left, cuboid_bottom, -0.5f);
 	    glEnd();
 	    glBegin(GL_LINE_LOOP);
-	    glVertex3f(-0.5f, -0.5f, +0.5f);
-	    glVertex3f(+0.5f, -0.5f, +0.5f);
-	    glVertex3f(+0.5f, +0.5f, +0.5f);
-	    glVertex3f(-0.5f, +0.5f, +0.5f);
+	    glVertex3f(cuboid_left, cuboid_top, +0.5f);
+	    glVertex3f(cuboid_right, cuboid_top, +0.5f);
+	    glVertex3f(cuboid_right, cuboid_bottom, +0.5f);
+	    glVertex3f(cuboid_left, cuboid_bottom, +0.5f);
 	    glEnd();
 	    glBegin(GL_LINE_LOOP);
-	    glVertex3f(-0.5f, -0.5f, -0.5f);
-	    glVertex3f(+0.5f, -0.5f, -0.5f);
-	    glVertex3f(+0.5f, -0.5f, +0.5f);
-	    glVertex3f(-0.5f, -0.5f, +0.5f);
+	    glVertex3f(cuboid_left, cuboid_top, -0.5f);
+	    glVertex3f(cuboid_right, cuboid_top, -0.5f);
+	    glVertex3f(cuboid_right, cuboid_top, +0.5f);
+	    glVertex3f(cuboid_left, cuboid_top, +0.5f);
 	    glEnd();
 	    glBegin(GL_LINE_LOOP);
-	    glVertex3f(-0.5f, +0.5f, -0.5f);
-	    glVertex3f(+0.5f, +0.5f, -0.5f);
-	    glVertex3f(+0.5f, +0.5f, +0.5f);
-	    glVertex3f(-0.5f, +0.5f, +0.5f);
+	    glVertex3f(cuboid_left, cuboid_bottom, -0.5f);
+	    glVertex3f(cuboid_right, cuboid_bottom, -0.5f);
+	    glVertex3f(cuboid_right, cuboid_bottom, +0.5f);
+	    glVertex3f(cuboid_left, cuboid_bottom, +0.5f);
 	    glEnd();
 	    glBegin(GL_LINE_LOOP);
-	    glVertex3f(-0.5f, -0.5f, -0.5f);
-	    glVertex3f(-0.5f, -0.5f, +0.5f);
-	    glVertex3f(-0.5f, +0.5f, +0.5f);
-	    glVertex3f(-0.5f, +0.5f, -0.5f);
+	    glVertex3f(cuboid_left, cuboid_top, -0.5f);
+	    glVertex3f(cuboid_left, cuboid_top, +0.5f);
+	    glVertex3f(cuboid_left, cuboid_bottom, +0.5f);
+	    glVertex3f(cuboid_left, cuboid_bottom, -0.5f);
 	    glEnd();
 	    glBegin(GL_LINE_LOOP);
-	    glVertex3f(+0.5f, -0.5f, -0.5f);
-	    glVertex3f(+0.5f, -0.5f, +0.5f);
-	    glVertex3f(+0.5f, +0.5f, +0.5f);
-	    glVertex3f(+0.5f, +0.5f, -0.5f);
+	    glVertex3f(cuboid_right, cuboid_top, -0.5f);
+	    glVertex3f(cuboid_right, cuboid_top, +0.5f);
+	    glVertex3f(cuboid_right, cuboid_bottom, +0.5f);
+	    glVertex3f(cuboid_right, cuboid_bottom, -0.5f);
 	    glEnd();
 	}
+	/* Save area of the framebuffer that was rendered to.
+	 * FIXME: Compute the real values by applying the modelview and
+	 * projection to the eight corners of the cuboid and pick the min/max
+	 * values. */
+	_fb_x = 0;
+	_fb_y = 0;
+	_fb_w = _width;
+	_fb_h = _height;
     }
     glFlush();
     cvl_gl_state_restore();
     cvl_gl_check_errors("GL rendering");
-
-    /* Save area of the framebuffer that was rendered to */
-    _fb_x = mh_clampi(mh_iroundf(_width / 2.0f + (-x + xo) * 0.5f * zoom * static_cast<float>(_width)), 0, _width - 1);
-    _fb_y = mh_clampi(mh_iroundf(_height / 2.0f - (+y - yo) * 0.5f * zoom * static_cast<float>(_height)), 0, _height - 1);
-    _fb_w = mh_clampi(mh_iroundf(x * zoom * static_cast<float>(_width)), 1, _width - _fb_x);
-    _fb_h = mh_clampi(mh_iroundf(y * zoom * static_cast<float>(_height)), 1, _height - _fb_y);
 
     unlock();
 }
