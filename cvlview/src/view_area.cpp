@@ -37,6 +37,9 @@
 
 #include "mh.h"
 
+#include "glv.h"
+using namespace glv;
+
 #include "channel_info.h"
 #include "channel_selector.h"
 #include "scale_selector.h"
@@ -635,22 +638,30 @@ void ViewArea::paintGL()
     cvl_gl_state_restore();
     cvl_gl_check_errors("GL rendering");
     /* Save area of the framebuffer that was rendered to. */
+    mat4 P;
+    glGetFloatv(GL_PROJECTION_MATRIX, P.ml);
+    P.transpose();
+    mat4 M;
+    glGetFloatv(GL_MODELVIEW_MATRIX, M.ml);
+    M.transpose();
+    mat4 PM = P * M;
     int fbl = 0;
     int fbr = _width - 1;
     int fbt = 0;
     int fbb = _height - 1;
-    /* TODO: Get PorjectionModelviewMatrix. Apply to eight corners of cuboid.
-     * Store the min/max values. Like this:
-     * for (int c = 0; c < 8; c++)
-     * {
-     * 		int cx, cy;
-     * 		...;
-     * 		fbl = mh_maxi(0, mh_mini(fbl, cx));
-     * 		fbr = mh_mini(_width - 1, mh_maxi(fbr, cx));
-     * 		fbt = mh_maxi(0, mh_mini(fbt, cy));
-     * 		fbb = mh_mini(_height - 1, mh_maxi(fbb, cy));
-     * }
-     */
+    /* TODO
+    for (int c = 0; c < 8; c++)
+    {
+	vec4 src(vec3(cuboid_corner[c]), 1.0);
+	vec4 dst = PM * src;
+	int cx = mh_iroundf(dst.x);
+	int cy = mh_iroundf(dst.y);
+	fbl = mh_maxi(0, mh_mini(fbl, cx));
+	fbr = mh_mini(_width - 1, mh_maxi(fbr, cx));
+	fbt = mh_maxi(0, mh_mini(fbt, cy));
+	fbb = mh_mini(_height - 1, mh_maxi(fbb, cy));
+    }
+    */
     _fb_x = fbl;
     _fb_y = fbt;
     _fb_w = fbr - fbl + 1;

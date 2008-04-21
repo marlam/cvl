@@ -20,6 +20,8 @@
 	* src/view_area.h, src/view_area.cpp: More tweaks.
 	* configure.ac, Makefile.am, glv/glv.h, glv/Makefile.am: Add beginnings
 	of vector and matrix classes.
+	* src/Makefile.am, src/view_area.cpp: Use new vector and matrix
+	classes.
 
 2008-04-19  Martin Lambers <marlam@marlam.de>
 
