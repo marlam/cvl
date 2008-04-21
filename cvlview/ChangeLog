@@ -18,6 +18,8 @@
 	src/heightmap_selector.h, src/heightmap_selector.cpp,
 	src/view_area.cpp: More GUI tweaks.
 	* src/view_area.h, src/view_area.cpp: More tweaks.
+	* glv/glv.h, glv/Makefile.am: Add beginnings of vector and matrix
+	classes.
 
 2008-04-19  Martin Lambers <marlam@marlam.de>
 
