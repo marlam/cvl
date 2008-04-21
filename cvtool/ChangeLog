@@ -4,6 +4,7 @@
 	four channels.
 	* cvl/cvl/cvl_color.h, cvl/cvl_color.c: New function
 	cvl_convert_format_forced().
+	* configure.ac: Bump library version number.
 
 2008-04-19  Martin Lambers <marlam@marlam.de>
 
