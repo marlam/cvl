@@ -17,6 +17,7 @@
 	src/channel_selector.cpp, src/range_selector.cpp,
 	src/heightmap_selector.h, src/heightmap_selector.cpp,
 	src/view_area.cpp: More GUI tweaks.
+	* src/view_area.h, src/view_area.cpp: More tweaks.
 
 2008-04-19  Martin Lambers <marlam@marlam.de>
 

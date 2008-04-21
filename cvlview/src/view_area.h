@@ -78,6 +78,8 @@ class ViewArea : public QGLWidget
 	bool _recompute;
 	// Processing buffers
 	cvl_frame_t *_frame1, *_frame2;
+	// 2D or 3D view?
+	bool _flat_view;
 	// Program for heightmap rendering
 	GLuint _heightmap_quads_prg;
 	GLuint _heightmap_strip_prg;
