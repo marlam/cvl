@@ -36,10 +36,11 @@
 
 #include "channel_info.h"
 #include "channel_selector.h"
-#include "zoom_selector.h"
+#include "scale_selector.h"
 #include "translation_selector.h"
 #include "rotation_selector.h"
 #include "interpolation_selector.h"
+#include "color_selector.h"
 #include "range_selector.h"
 #include "gamma_selector.h"
 #include "pseudocolor_selector.h"
@@ -60,10 +61,11 @@ class ViewArea : public QGLWidget
 	// Selector widgets to get parameters from
 	ChannelInfo *_channel_info;
 	ChannelSelector *_channel_selector;
-	ZoomSelector *_zoom_selector;
+	ScaleSelector *_scale_selector;
 	TranslationSelector *_translation_selector;
 	RotationSelector *_rotation_selector;
 	InterpolationSelector *_interpolation_selector;
+	ColorSelector *_color_selector;
 	RangeSelector *_range_selector;
 	GammaSelector *_gamma_selector;
 	PseudocolorSelector *_pseudocolor_selector;
@@ -85,9 +87,6 @@ class ViewArea : public QGLWidget
 	GLuint _heightmap_vertex_buffer;
 	int _heightmap_buffers_mode;
 	bool _heightmap_buffers_are_current;
-	// Rotation for heightmap rendering
-	float _rotation_x;
-	float _rotation_y;
 	// Used area of the framebuffer
 	int _fb_x, _fb_y, _fb_w, _fb_h;
 	// Mouse position
@@ -121,10 +120,11 @@ class ViewArea : public QGLWidget
 		int min_size,
 		ChannelInfo *channel_info,
 		ChannelSelector *channel_selector,
-		ZoomSelector *zoom_selector,
+		ScaleSelector *scale_selector,
 		TranslationSelector *translation_selector,
 		RotationSelector *rotation_selector,
 		InterpolationSelector *interpolation_selector,
+		ColorSelector *color_selector,
 		RangeSelector *range_selector,
 		GammaSelector *gamma_selector,
 		PseudocolorSelector *pseudocolor_selector,

@@ -1,5 +1,5 @@
 /*
- * zoom_selector.cpp
+ * scale_selector.cpp
  *
  * This file is part of cvlview, an image viewer using the CVL library.
  *
@@ -32,10 +32,10 @@
 
 #include "mh.h"
 
-#include "zoom_selector.h"
+#include "scale_selector.h"
 
 
-ZoomSelector::ZoomSelector(cvl_frame_t **frame, QWidget *parent) 
+ScaleSelector::ScaleSelector(cvl_frame_t **frame, QWidget *parent) 
 	: QWidget(parent)
 {
     _frame = frame;
@@ -45,41 +45,41 @@ ZoomSelector::ZoomSelector(cvl_frame_t **frame, QWidget *parent)
 
     QGridLayout *layout = new QGridLayout;
 
-    QLabel *zf_label = new QLabel("Zoom:");
+    QLabel *zf_label = new QLabel("Scale:");
     layout->addWidget(zf_label, 0, 0, 1, 2);
-    _zoomfactor_spinbox = new QDoubleSpinBox();
-    _zoomfactor_spinbox->setRange(0.01, 999.99);
-    _zoomfactor_spinbox->setSingleStep(0.01);
-    _zoomfactor_spinbox->setValue(1.0);
-    connect(_zoomfactor_spinbox, SIGNAL(valueChanged(double)), this, SLOT(_set_zoomfactor(double)));
-    layout->addWidget(_zoomfactor_spinbox, 0, 2, 1, 2);
+    _scalefactor_spinbox = new QDoubleSpinBox();
+    _scalefactor_spinbox->setRange(0.01, 999.99);
+    _scalefactor_spinbox->setSingleStep(0.01);
+    _scalefactor_spinbox->setValue(1.0);
+    connect(_scalefactor_spinbox, SIGNAL(valueChanged(double)), this, SLOT(_set_scalefactor(double)));
+    layout->addWidget(_scalefactor_spinbox, 0, 2, 1, 2);
     
-    _zoom_fit_button = new QPushButton(tr("&Fit"));
-    _zoom_fit_button->setShortcut(tr("f"));
-    _zoom_fit_button->setFixedSize(QSize(_zoom_fit_button->sizeHint().width() / 2, _zoom_fit_button->sizeHint().height()));
-    connect(_zoom_fit_button, SIGNAL(clicked()), this, SLOT(zoom_fit_button_clicked()));
-    layout->addWidget(_zoom_fit_button, 0, 4, 1, 1);
+    _scale_fit_button = new QPushButton(tr("&Fit"));
+    _scale_fit_button->setShortcut(tr("f"));
+    _scale_fit_button->setFixedSize(QSize(_scale_fit_button->sizeHint().width() / 2, _scale_fit_button->sizeHint().height()));
+    connect(_scale_fit_button, SIGNAL(clicked()), this, SLOT(scale_fit_button_clicked()));
+    layout->addWidget(_scale_fit_button, 0, 4, 1, 1);
     
-    _zoom_reset_button = new QPushButton(tr("1&:1"));
-    _zoom_reset_button->setShortcut(tr(":"));
-    _zoom_reset_button->setFixedSize(QSize(_zoom_reset_button->sizeHint().width() / 2, _zoom_reset_button->sizeHint().height()));
-    connect(_zoom_reset_button, SIGNAL(clicked()), this, SLOT(zoom_reset_button_clicked()));
-    layout->addWidget(_zoom_reset_button, 0, 5, 1, 1);
+    _scale_reset_button = new QPushButton(tr("1&:1"));
+    _scale_reset_button->setShortcut(tr(":"));
+    _scale_reset_button->setFixedSize(QSize(_scale_reset_button->sizeHint().width() / 2, _scale_reset_button->sizeHint().height()));
+    connect(_scale_reset_button, SIGNAL(clicked()), this, SLOT(scale_reset_button_clicked()));
+    layout->addWidget(_scale_reset_button, 0, 5, 1, 1);
 
     layout->setRowStretch(1, 1);
     setLayout(layout);
 }
 
-ZoomSelector::~ZoomSelector()
+ScaleSelector::~ScaleSelector()
 {
 }
 
-void ZoomSelector::reset()
+void ScaleSelector::reset()
 {
-    _zoomfactor_spinbox->setValue(1.0);
+    _scalefactor_spinbox->setValue(1.0);
 }
 
-void ZoomSelector::zoom_fit_button_clicked()
+void ScaleSelector::scale_fit_button_clicked()
 {
     if (!_frame || !*_frame)
 	return;
@@ -94,17 +94,17 @@ void ZoomSelector::zoom_fit_button_clicked()
     float wf = vw / iw;
     float wh = vh / ih;
 
-    _zoomfactor_spinbox->setValue(mh_minf(wf, wh));
+    _scalefactor_spinbox->setValue(mh_minf(wf, wh));
     emit view_changed();
 }
 
-void ZoomSelector::zoom_reset_button_clicked()
+void ScaleSelector::scale_reset_button_clicked()
 {
-    _zoomfactor_spinbox->setValue(1.0f);
+    _scalefactor_spinbox->setValue(1.0f);
     emit view_changed();
 }
 
-void ZoomSelector::_set_zoomfactor(double zf UNUSED)
+void ScaleSelector::_set_scalefactor(double zf UNUSED)
 {
     if (!_lock)
     {
@@ -112,8 +112,8 @@ void ZoomSelector::_set_zoomfactor(double zf UNUSED)
     }
 }
 
-void ZoomSelector::set_zoomfactor(float zf)
+void ScaleSelector::set_scalefactor(float zf)
 {
-    _zoomfactor_spinbox->setValue(zf);
+    _scalefactor_spinbox->setValue(zf);
     emit view_changed();
 }

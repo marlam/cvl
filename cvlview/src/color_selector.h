@@ -1,5 +1,5 @@
 /*
- * heightmap_quads_vs.glsl
+ * color_selector.h
  *
  * This file is part of cvlview, an image viewer using the CVL library.
  *
@@ -19,25 +19,51 @@
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#version 120
+#ifndef COLOR_SELECTOR_H
+#define COLOR_SELECTOR_H
 
-uniform int channel;
-uniform float factor;
-uniform float channel_min;
-uniform float channel_max;
-uniform int invert;
-uniform sampler2D heightmap;
+#include "config.h"
 
-void main()
+#include <QWidget>
+#include <QPushButton>
+#include <QColor>
+
+
+class ColorSelector : public QWidget
 {
-    gl_TexCoord[0] = gl_MultiTexCoord0;
-    vec4 data = texture2D(heightmap, gl_MultiTexCoord1.xy);
-    float height = (channel == 0 ? data.r : channel == 1 ? data.g : channel == 2 ? data.b : data.a);
-    height = clamp((height - channel_min) / (channel_max - channel_min), 0.0, 1.0);
-    if (invert == 1)
-    {
-	height = 1.0 - height;
-    }
-    height = factor * (height - 0.5);
-    gl_Position = gl_ModelViewProjectionMatrix * vec4(gl_Vertex.x, gl_Vertex.y, height, gl_Vertex.w);
-}
+    Q_OBJECT
+	
+    private:
+	QPushButton *_button;
+	QColor _color;
+
+    private slots:
+	void _button_clicked();
+
+    public:
+	ColorSelector(float r = 0.3f, float g = 0.3f, float b = 0.3f, QWidget *parent = NULL);	
+	~ColorSelector();
+
+	float get_r() const
+	{
+	    return _color.redF();
+	}
+
+	float get_g() const
+	{
+	    return _color.greenF();
+	}
+
+	float get_b() const
+	{
+	    return _color.blueF();
+	}
+
+    public slots:
+        void reset();
+
+    signals:
+	void color_changed();
+};
+
+#endif

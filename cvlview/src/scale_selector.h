@@ -1,5 +1,5 @@
 /*
- * zoom_selector.h
+ * scale_selector.h
  *
  * This file is part of cvlview, an image viewer using the CVL library.
  *
@@ -19,8 +19,8 @@
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef ZOOM_SELECTOR_H
-#define ZOOM_SELECTOR_H
+#ifndef SCALE_SELECTOR_H
+#define SCALE_SELECTOR_H
 
 #include "config.h"
 
@@ -31,34 +31,34 @@
 #include <cvl/cvl.h>
 
 
-class ZoomSelector : public QWidget
+class ScaleSelector : public QWidget
 {
     Q_OBJECT
 	
     private:
 	cvl_frame_t **_frame;
-	QPushButton *_zoom_fit_button;
-	QPushButton *_zoom_reset_button;
-	QDoubleSpinBox *_zoomfactor_spinbox;
+	QPushButton *_scale_fit_button;
+	QPushButton *_scale_reset_button;
+	QDoubleSpinBox *_scalefactor_spinbox;
 	int _view_area_width;
 	int _view_area_height;
 	bool _lock;
 
     private slots:
-	void zoom_fit_button_clicked();
-	void zoom_reset_button_clicked();
-	void _set_zoomfactor(double zf);
+	void scale_fit_button_clicked();
+	void scale_reset_button_clicked();
+	void _set_scalefactor(double zf);
 
     public:
-	ZoomSelector(cvl_frame_t **frame, QWidget *parent = NULL);	
-	~ZoomSelector();
+	ScaleSelector(cvl_frame_t **frame, QWidget *parent = NULL);	
+	~ScaleSelector();
 
-	float get_zoomfactor()
+	float get_scalefactor()
 	{
-	    return _zoomfactor_spinbox->value();
+	    return _scalefactor_spinbox->value();
 	}
 
-	void set_zoomfactor(float zf);
+	void set_scalefactor(float zf);
 
     public slots:
 	void update_view_area_size(int w, int h)

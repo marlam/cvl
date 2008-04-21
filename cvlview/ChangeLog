@@ -5,7 +5,14 @@
 	src/rotation_selector.h, src/rotation_selector.cpp,
 	src/interpolation_selector.cpp, src/channel_selector.cpp,
 	src/view_area.h, src/view_area.cpp, src/cvlview.h, src/cvlview.cpp,
-	src/Makefile.am: Beginings of GUI improvements. Unfinished.
+	src/Makefile.am: Beginnings of GUI improvements. Unfinished.
+	* src/color_selector.h, src/color_selector.cpp, src/scale_selector.h,
+	src/scale_selector.cpp, src/translation_selector.cpp,
+	src/rotation_selector.h, src/rotation_selector.cpp,
+	src/heightmap_selector.h, src/heightmap_selector.cpp,
+	src/heightmap_strip_vs.glsl, src/heightmap_quads_vs.glsl,
+	src/view_area.h, src/view_area.cpp, src/cvlview.h, src/cvlview.cpp,
+	src/Makefile.am: Finish GUI improvements.
 
 2008-04-19  Martin Lambers <marlam@marlam.de>
 

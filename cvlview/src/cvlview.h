@@ -43,10 +43,11 @@
 
 #include "dataset_selector.h"
 #include "channel_selector.h"
-#include "zoom_selector.h"
+#include "scale_selector.h"
 #include "translation_selector.h"
 #include "rotation_selector.h"
 #include "interpolation_selector.h"
+#include "color_selector.h"
 #include "frame_info.h"
 #include "channel_info.h"
 #include "range_selector.h"
@@ -75,10 +76,11 @@ class CVLView : public QMainWindow
 	QToolBox *_toolbox;
 	DatasetSelector *_dataset_selector;
 	ChannelSelector *_channel_selector;
-	ZoomSelector *_zoom_selector;
+	ScaleSelector *_scale_selector;
 	TranslationSelector *_translation_selector;
 	RotationSelector *_rotation_selector;
 	InterpolationSelector *_interpolation_selector;
+	ColorSelector *_color_selector;
 	FrameInfo *_frame_info;
 	ChannelInfo *_channel_info;
 	RangeSelector *_range_selector;

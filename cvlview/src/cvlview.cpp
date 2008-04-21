@@ -51,10 +51,11 @@
 
 #include "dataset_selector.h"
 #include "channel_selector.h"
-#include "zoom_selector.h"
+#include "scale_selector.h"
 #include "translation_selector.h"
 #include "rotation_selector.h"
 #include "interpolation_selector.h"
+#include "color_selector.h"
 #include "frame_info.h"
 #include "channel_info.h"
 #include "range_selector.h"
@@ -108,8 +109,8 @@ CVLView::CVLView()
     connect(this, SIGNAL(new_frame()), _channel_selector, SLOT(update()));
     connect(this, SIGNAL(new_datafile()), _channel_selector, SLOT(reset()));
 
-    _zoom_selector = new ZoomSelector(&_frame, _widget);
-    connect(this, SIGNAL(new_datafile()), _zoom_selector, SLOT(reset()));
+    _scale_selector = new ScaleSelector(&_frame, _widget);
+    connect(this, SIGNAL(new_datafile()), _scale_selector, SLOT(reset()));
 
     _translation_selector = new TranslationSelector(_widget);
     connect(this, SIGNAL(new_datafile()), _translation_selector, SLOT(reset()));
@@ -119,6 +120,9 @@ CVLView::CVLView()
 
     _interpolation_selector = new InterpolationSelector(_widget);
     connect(this, SIGNAL(new_datafile()), _interpolation_selector, SLOT(reset()));
+
+    _color_selector = new ColorSelector(0.3f, 0.3f, 0.3f, _widget);
+    connect(this, SIGNAL(new_datafile()), _color_selector, SLOT(reset()));
 
     _frame_info = new FrameInfo(&_datafile, &_frame, _widget);
     connect(this, SIGNAL(new_frame()), _frame_info, SLOT(update()));
@@ -155,10 +159,11 @@ CVLView::CVLView()
     _view_area = new ViewArea(&_frame, 2 * tools_width + tools_width / 4,
 	    _channel_info,
 	    _channel_selector,
-	    _zoom_selector,
+	    _scale_selector,
 	    _translation_selector,
 	    _rotation_selector,
 	    _interpolation_selector,
+	    _color_selector,
 	    _range_selector,
 	    _gamma_selector,
 	    _pseudocolor_selector,
@@ -169,11 +174,12 @@ CVLView::CVLView()
     connect(_frame_info, SIGNAL(make_gl_context_current()), _view_area, SLOT(make_gl_context_current()));
     connect(_channel_selector, SIGNAL(channel_changed()), _view_area, SLOT(recompute()));
     connect(_channel_selector, SIGNAL(make_gl_context_current()), _view_area, SLOT(make_gl_context_current()));
-    connect(_zoom_selector, SIGNAL(view_changed()), _view_area, SLOT(update()));
-    connect(_zoom_selector, SIGNAL(make_gl_context_current()), _view_area, SLOT(make_gl_context_current()));
+    connect(_scale_selector, SIGNAL(view_changed()), _view_area, SLOT(update()));
+    connect(_scale_selector, SIGNAL(make_gl_context_current()), _view_area, SLOT(make_gl_context_current()));
     connect(_translation_selector, SIGNAL(view_changed()), _view_area, SLOT(update()));
     connect(_rotation_selector, SIGNAL(view_changed()), _view_area, SLOT(update()));
     connect(_interpolation_selector, SIGNAL(interpolation_changed()), _view_area, SLOT(update()));
+    connect(_color_selector, SIGNAL(color_changed()), _view_area, SLOT(update()));
     connect(_channel_info, SIGNAL(make_gl_context_current()), _view_area, SLOT(make_gl_context_current()));
     connect(_range_selector, SIGNAL(range_changed()), _view_area, SLOT(recompute()));
     connect(_range_selector, SIGNAL(make_gl_context_current()), _view_area, SLOT(make_gl_context_current()));
@@ -181,7 +187,7 @@ CVLView::CVLView()
     connect(_pseudocolor_selector, SIGNAL(pseudocolor_changed()), _view_area, SLOT(recompute()));
     connect(_heightmap_selector, SIGNAL(heightmap_changed()), _view_area, SLOT(update()));
     connect(_heightmap_selector, SIGNAL(make_gl_context_current()), _view_area, SLOT(make_gl_context_current()));
-    connect(_view_area, SIGNAL(update_size(int, int)), _zoom_selector, SLOT(update_view_area_size(int, int)));
+    connect(_view_area, SIGNAL(update_size(int, int)), _scale_selector, SLOT(update_view_area_size(int, int)));
 
     _pixel_info = new PixelInfo(this);
     connect(_view_area, SIGNAL(update_pixel_info(int, int, int, const float *, const float *)), 
@@ -197,12 +203,14 @@ CVLView::CVLView()
     _toolbar1->addWidget(_channel_selector);
     _toolbar1->addSeparator();
     _toolbar1->addWidget(_interpolation_selector);
+    _toolbar1->addSeparator();
+    _toolbar1->addWidget(_color_selector);
 
     _toolbar2 = new QToolBar();
     _toolbar2->setEnabled(false);
     _toolbar2->setMovable(false);
     addToolBar(_toolbar2);
-    _toolbar2->addWidget(_zoom_selector);
+    _toolbar2->addWidget(_scale_selector);
     _toolbar2->addSeparator();
     _toolbar2->addWidget(_translation_selector);
     _toolbar2->addSeparator();

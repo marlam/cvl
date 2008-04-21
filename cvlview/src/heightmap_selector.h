@@ -32,6 +32,9 @@
 
 #include <cvl/cvl.h>
 
+#include "color_selector.h"
+
+
 class HeightmapSelector : public QWidget
 {
     Q_OBJECT
@@ -52,6 +55,7 @@ class HeightmapSelector : public QWidget
 	QDoubleSpinBox *_height_factor_spinbox;
 	QSlider *_height_factor_slider;
 	QCheckBox *_showcuboid_box;
+	ColorSelector *_color_selector;
 	bool _lock;
 
     private slots:
@@ -103,6 +107,13 @@ class HeightmapSelector : public QWidget
 	bool show_cuboid() const
 	{
 	    return _showcuboid_box->isChecked();
+	}
+
+	void get_cuboid_color(float *rgb)
+	{
+	    rgb[0] = _color_selector->get_r();
+	    rgb[1] = _color_selector->get_g();
+	    rgb[2] = _color_selector->get_b();
 	}
 
     public slots:

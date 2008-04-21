@@ -3,7 +3,7 @@
  *
  * This file is part of cvlview, an image viewer using the CVL library.
  *
- * Copyright (C) 2007, 2008  Martin Lambers <marlam@marlam.de>
+ * Copyright (C) 2008  Martin Lambers <marlam@marlam.de>
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -105,12 +105,20 @@ void RotationSelector::_set_y_rotation(double ry UNUSED)
 
 void RotationSelector::set_x_rotation(float rx)
 {
+    while (rx >= 360.0f)
+	rx -= 360.0f;
+    while (rx < 0.0f)
+	rx += 360.0f;
     _xrot_spinbox->setValue(rx);
     emit view_changed();
 }
 
 void RotationSelector::set_y_rotation(float ry)
 {
+    while (ry >= 360.0f)
+	ry -= 360.0f;
+    while (ry < 0.0f)
+	ry += 360.0f;
     _yrot_spinbox->setValue(ry);
     emit view_changed();
 }

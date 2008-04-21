@@ -39,10 +39,11 @@
 
 #include "channel_info.h"
 #include "channel_selector.h"
-#include "zoom_selector.h"
+#include "scale_selector.h"
 #include "translation_selector.h"
 #include "rotation_selector.h"
 #include "interpolation_selector.h"
+#include "color_selector.h"
 #include "range_selector.h"
 #include "gamma_selector.h"
 #include "pseudocolor_selector.h"
@@ -58,10 +59,11 @@ ViewArea::ViewArea(cvl_frame_t **frame,
 	int min_size,
 	ChannelInfo *channel_info,
 	ChannelSelector *channel_selector,
-	ZoomSelector *zoom_selector,
+	ScaleSelector *scale_selector,
 	TranslationSelector *translation_selector,
 	RotationSelector *rotation_selector,
 	InterpolationSelector *interpolation_selector,
+	ColorSelector *color_selector,
 	RangeSelector *range_selector,
 	GammaSelector *gamma_selector,
 	PseudocolorSelector *pseudocolor_selector,
@@ -86,17 +88,16 @@ ViewArea::ViewArea(cvl_frame_t **frame,
     _heightmap_texcoord1_buffer = 0;
     _heightmap_vertex_buffer = 0;
     _heightmap_buffers_are_current = false;
-    _rotation_x = 0.0f;
-    _rotation_y = 0.0f;
     setMinimumSize(min_size, min_size);
     setMouseTracking(true);
 
     _channel_info = channel_info;
     _channel_selector = channel_selector;
-    _zoom_selector = zoom_selector;
+    _scale_selector = scale_selector;
     _translation_selector = translation_selector;
     _rotation_selector = rotation_selector;
     _interpolation_selector = interpolation_selector;
+    _color_selector = color_selector;
     _range_selector = range_selector;
     _gamma_selector = gamma_selector;
     _pseudocolor_selector = pseudocolor_selector;
@@ -275,17 +276,20 @@ void ViewArea::paintGL()
 	return;
     }
     
-    /* Viewpoint selector */
-    float zoom = _zoom_selector->get_zoomfactor();
-    int x_offset = _translation_selector->get_x_offset();
-    int y_offset = _translation_selector->get_y_offset();
-
     /* Use OpenGL for rendering */
     // Gather all data that requires CVL here, because we cannot mix GL and CVL
     // calls. This includes all calls to selector widgets.
     GLuint render_texture = cvl_frame_texture(_render_frame);
     GLuint data_texture = cvl_frame_texture(*_frame);
+    float scale = _scale_selector->get_scalefactor();
+    int x_offset = _translation_selector->get_x_offset();
+    int y_offset = _translation_selector->get_y_offset();
+    float x_rotate = _rotation_selector->get_x_rotation();
+    float y_rotate = _rotation_selector->get_y_rotation();
     bool interpolate = _interpolation_selector->is_enabled();
+    float background_r = _color_selector->get_r();
+    float background_g = _color_selector->get_g();
+    float background_b = _color_selector->get_b();
     bool flat_view = !_heightmap_selector->is_enabled();
     int height_channel = _heightmap_selector->channel();
     int height_mode = _heightmap_selector->mode();
@@ -298,6 +302,8 @@ void ViewArea::paintGL()
 	: _range_selector->get_range_max(height_channel);
     int height_invert = (_heightmap_selector->data() == HeightmapSelector::HEIGHT ? 0 : 1);
     bool height_showcuboid = _heightmap_selector->show_cuboid();
+    float height_cuboid_color[3];
+    _heightmap_selector->get_cuboid_color(height_cuboid_color);
     int w = cvl_frame_width(_render_frame);
     int h = cvl_frame_height(_render_frame);
     cvl_gl_state_save();	// No CVL calls allowed from now on!
@@ -305,7 +311,7 @@ void ViewArea::paintGL()
     float y = static_cast<float>(h) / static_cast<float>(_height);
     float xo = static_cast<float>(2 * x_offset) / static_cast<float>(_width);
     float yo = static_cast<float>(2 * y_offset) / static_cast<float>(_height);
-    glClearColor(0.3f, 0.3f, 0.3f, 0.0f);
+    glClearColor(background_r, background_g, background_b, 0.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnable(GL_TEXTURE_2D);
     glActiveTexture(GL_TEXTURE1);
@@ -339,7 +345,7 @@ void ViewArea::paintGL()
 	glViewport(0, 0, _width, _height);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
-	glScalef(zoom, zoom, 1.0f);
+	glScalef(scale, scale, 1.0f);
 	glBegin(GL_QUADS);
 	glTexCoord2f(0.0f, 0.0f);
 	glVertex2f(-x + xo, +y - yo);
@@ -351,10 +357,10 @@ void ViewArea::paintGL()
 	glVertex2f(-x + xo, -y - yo);
 	glEnd();
 	/* Save area of the framebuffer that was rendered to */
-	_fb_x = mh_clampi(mh_iroundf(_width / 2.0f + (-x + xo) * 0.5f * zoom * static_cast<float>(_width)), 0, _width - 1);
-	_fb_y = mh_clampi(mh_iroundf(_height / 2.0f - (+y - yo) * 0.5f * zoom * static_cast<float>(_height)), 0, _height - 1);
-	_fb_w = mh_clampi(mh_iroundf(x * zoom * static_cast<float>(_width)), 1, _width - _fb_x);
-	_fb_h = mh_clampi(mh_iroundf(y * zoom * static_cast<float>(_height)), 1, _height - _fb_y);
+	_fb_x = mh_clampi(mh_iroundf(_width / 2.0f + (-x + xo) * 0.5f * scale * static_cast<float>(_width)), 0, _width - 1);
+	_fb_y = mh_clampi(mh_iroundf(_height / 2.0f - (+y - yo) * 0.5f * scale * static_cast<float>(_height)), 0, _height - 1);
+	_fb_w = mh_clampi(mh_iroundf(x * scale * static_cast<float>(_width)), 1, _width - _fb_x);
+	_fb_h = mh_clampi(mh_iroundf(y * scale * static_cast<float>(_height)), 1, _height - _fb_y);
     }
     else
     {
@@ -369,10 +375,10 @@ void ViewArea::paintGL()
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	glTranslatef(xo * vpw, -yo * vph, -2.0f);
-	glScalef(zoom * 1.5f * static_cast<float>(mh_maxi(w, h)), 
-		zoom * 1.5f * static_cast<float>(mh_maxi(w, h)), 1.0f);
-	glRotatef(_rotation_x, 1.0f, 0.0f, 0.0f);
-	glRotatef(_rotation_y, 0.0f, 1.0f, 0.0f);
+	glScalef(scale * 1.5f * static_cast<float>(mh_maxi(w, h)), 
+		scale * 1.5f * static_cast<float>(mh_maxi(w, h)), 1.0f);
+	glRotatef(x_rotate, 1.0f, 0.0f, 0.0f);
+	glRotatef(y_rotate, 0.0f, 1.0f, 0.0f);
 	float frame_width = static_cast<float>(w);
 	float frame_height = static_cast<float>(h);
 	float cuboid_left, cuboid_top, cuboid_width, cuboid_height, cuboid_right, cuboid_bottom;
@@ -585,42 +591,42 @@ void ViewArea::paintGL()
 	glDisable(GL_TEXTURE_2D);
 	if (height_showcuboid)
 	{
-	    glColor3f(1.0f, 1.0f, 1.0f);
+	    glColor3fv(height_cuboid_color);
 	    glBegin(GL_LINE_LOOP);
-	    glVertex3f(cuboid_left, cuboid_top, -0.5f);
-	    glVertex3f(cuboid_right, cuboid_top, -0.5f);
-	    glVertex3f(cuboid_right, cuboid_bottom, -0.5f);
-	    glVertex3f(cuboid_left, cuboid_bottom, -0.5f);
+	    glVertex3f(cuboid_left, cuboid_top, +height_factor / 2.0f);
+	    glVertex3f(cuboid_right, cuboid_top, +height_factor / 2.0f);
+	    glVertex3f(cuboid_right, cuboid_bottom, +height_factor / 2.0f);
+	    glVertex3f(cuboid_left, cuboid_bottom, +height_factor / 2.0f);
 	    glEnd();
 	    glBegin(GL_LINE_LOOP);
-	    glVertex3f(cuboid_left, cuboid_top, +0.5f);
-	    glVertex3f(cuboid_right, cuboid_top, +0.5f);
-	    glVertex3f(cuboid_right, cuboid_bottom, +0.5f);
-	    glVertex3f(cuboid_left, cuboid_bottom, +0.5f);
+	    glVertex3f(cuboid_left, cuboid_top, -height_factor / 2.0f);
+	    glVertex3f(cuboid_right, cuboid_top, -height_factor / 2.0f);
+	    glVertex3f(cuboid_right, cuboid_bottom, -height_factor / 2.0f);
+	    glVertex3f(cuboid_left, cuboid_bottom, -height_factor / 2.0f);
 	    glEnd();
 	    glBegin(GL_LINE_LOOP);
-	    glVertex3f(cuboid_left, cuboid_top, -0.5f);
-	    glVertex3f(cuboid_right, cuboid_top, -0.5f);
-	    glVertex3f(cuboid_right, cuboid_top, +0.5f);
-	    glVertex3f(cuboid_left, cuboid_top, +0.5f);
+	    glVertex3f(cuboid_left, cuboid_top, +height_factor / 2.0f);
+	    glVertex3f(cuboid_right, cuboid_top, +height_factor / 2.0f);
+	    glVertex3f(cuboid_right, cuboid_top, -height_factor / 2.0f);
+	    glVertex3f(cuboid_left, cuboid_top, -height_factor / 2.0f);
 	    glEnd();
 	    glBegin(GL_LINE_LOOP);
-	    glVertex3f(cuboid_left, cuboid_bottom, -0.5f);
-	    glVertex3f(cuboid_right, cuboid_bottom, -0.5f);
-	    glVertex3f(cuboid_right, cuboid_bottom, +0.5f);
-	    glVertex3f(cuboid_left, cuboid_bottom, +0.5f);
+	    glVertex3f(cuboid_left, cuboid_bottom, +height_factor / 2.0f);
+	    glVertex3f(cuboid_right, cuboid_bottom, +height_factor / 2.0f);
+	    glVertex3f(cuboid_right, cuboid_bottom, -height_factor / 2.0f);
+	    glVertex3f(cuboid_left, cuboid_bottom, -height_factor / 2.0f);
 	    glEnd();
 	    glBegin(GL_LINE_LOOP);
-	    glVertex3f(cuboid_left, cuboid_top, -0.5f);
-	    glVertex3f(cuboid_left, cuboid_top, +0.5f);
-	    glVertex3f(cuboid_left, cuboid_bottom, +0.5f);
-	    glVertex3f(cuboid_left, cuboid_bottom, -0.5f);
+	    glVertex3f(cuboid_left, cuboid_top, +height_factor / 2.0f);
+	    glVertex3f(cuboid_left, cuboid_top, -height_factor / 2.0f);
+	    glVertex3f(cuboid_left, cuboid_bottom, -height_factor / 2.0f);
+	    glVertex3f(cuboid_left, cuboid_bottom, +height_factor / 2.0f);
 	    glEnd();
 	    glBegin(GL_LINE_LOOP);
-	    glVertex3f(cuboid_right, cuboid_top, -0.5f);
-	    glVertex3f(cuboid_right, cuboid_top, +0.5f);
-	    glVertex3f(cuboid_right, cuboid_bottom, +0.5f);
-	    glVertex3f(cuboid_right, cuboid_bottom, -0.5f);
+	    glVertex3f(cuboid_right, cuboid_top, +height_factor / 2.0f);
+	    glVertex3f(cuboid_right, cuboid_top, -height_factor / 2.0f);
+	    glVertex3f(cuboid_right, cuboid_bottom, -height_factor / 2.0f);
+	    glVertex3f(cuboid_right, cuboid_bottom, +height_factor / 2.0f);
 	    glEnd();
 	}
 	/* Save area of the framebuffer that was rendered to.
@@ -746,9 +752,9 @@ void ViewArea::mouseMoveEvent(QMouseEvent *event)
     {
        	QPoint drag_endpoint = event->pos();
 	int drag_offset_x = mh_iroundf(static_cast<float>(drag_endpoint.x() - _drag_startpoint.x())
-		/ _zoom_selector->get_zoomfactor());
+		/ _scale_selector->get_scalefactor());
 	int drag_offset_y = mh_iroundf(static_cast<float>(drag_endpoint.y() - _drag_startpoint.y())
-		/ _zoom_selector->get_zoomfactor());
+		/ _scale_selector->get_scalefactor());
 	_drag_startpoint = drag_endpoint;
 	lock();
 	_translation_selector->set_x_offset(_translation_selector->get_x_offset() + drag_offset_x);
@@ -760,12 +766,16 @@ void ViewArea::mouseMoveEvent(QMouseEvent *event)
     {
        	QPoint rotate_endpoint = event->pos();
 	int rotate_offset_x = mh_iroundf(static_cast<float>(rotate_endpoint.x() - _rotate_startpoint.x())
-		/ _zoom_selector->get_zoomfactor());
+		/ _scale_selector->get_scalefactor());
 	int rotate_offset_y = mh_iroundf(static_cast<float>(rotate_endpoint.y() - _rotate_startpoint.y())
-		/ _zoom_selector->get_zoomfactor());
+		/ _scale_selector->get_scalefactor());
 	_rotate_startpoint = rotate_endpoint;
-	_rotation_y += 0.1f * static_cast<float>(rotate_offset_x);
-	_rotation_x += 0.1f * static_cast<float>(rotate_offset_y);
+	lock();
+	_rotation_selector->set_x_rotation(_rotation_selector->get_x_rotation() 
+		+ 0.1f * static_cast<float>(rotate_offset_y));
+	_rotation_selector->set_y_rotation(_rotation_selector->get_y_rotation() 
+		+ 0.1f * static_cast<float>(rotate_offset_x));
+	unlock();
 	update();
     }
 
@@ -777,10 +787,10 @@ void ViewArea::wheelEvent(QWheelEvent *event)
     if (_rendering_fails || !*_frame || _lock)
 	return;
 
-    float zoom = _zoom_selector->get_zoomfactor();
+    float scale = _scale_selector->get_scalefactor();
     int steps = event->delta() / 120;
-    float diff = static_cast<float>(steps) * mh_maxf(0.01f, zoom * 0.05f);
-    _zoom_selector->set_zoomfactor(zoom + diff);
+    float diff = static_cast<float>(steps) * mh_maxf(0.01f, scale * 0.05f);
+    _scale_selector->set_scalefactor(scale + diff);
     pixel_info();
 }
 
@@ -850,8 +860,8 @@ void ViewArea::pixel_info()
     float mouse_y = static_cast<float>(_mouse_pos.y());
     float mouse_x_centered = mouse_x - static_cast<float>(_width) / 2.0f;
     float mouse_y_centered = mouse_y - static_cast<float>(_height) / 2.0f;
-    float frame_x_centered = mouse_x_centered / _zoom_selector->get_zoomfactor() - static_cast<float>(_translation_selector->get_x_offset());
-    float frame_y_centered = mouse_y_centered / _zoom_selector->get_zoomfactor() - static_cast<float>(_translation_selector->get_y_offset());
+    float frame_x_centered = mouse_x_centered / _scale_selector->get_scalefactor() - static_cast<float>(_translation_selector->get_x_offset());
+    float frame_y_centered = mouse_y_centered / _scale_selector->get_scalefactor() - static_cast<float>(_translation_selector->get_y_offset());
     int frame_x = mh_iroundf(floorf(frame_x_centered + static_cast<float>(cvl_frame_width(*_frame)) / 2.0f));
     int frame_y = mh_iroundf(floorf(frame_y_centered + static_cast<float>(cvl_frame_height(*_frame)) / 2.0f));
 

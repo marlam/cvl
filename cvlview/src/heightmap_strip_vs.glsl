@@ -38,7 +38,6 @@ void main()
     {
 	height = 1.0 - height;
     }
-    height -= 0.5;
-    height *= factor;
+    height = factor * (height - 0.5);
     gl_Position = gl_ModelViewProjectionMatrix * vec4(gl_Vertex.x, gl_Vertex.y, height, gl_Vertex.w);
 }
