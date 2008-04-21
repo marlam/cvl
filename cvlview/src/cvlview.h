@@ -43,7 +43,9 @@
 
 #include "dataset_selector.h"
 #include "channel_selector.h"
-#include "viewpoint_selector.h"
+#include "zoom_selector.h"
+#include "translation_selector.h"
+#include "rotation_selector.h"
 #include "interpolation_selector.h"
 #include "frame_info.h"
 #include "channel_info.h"
@@ -68,11 +70,14 @@ class CVLView : public QMainWindow
 	cvl_frame_t *_frame;
 
 	QWidget *_widget;
-	QToolBar *_toolbar;
+	QToolBar *_toolbar1;
+	QToolBar *_toolbar2;
 	QToolBox *_toolbox;
 	DatasetSelector *_dataset_selector;
 	ChannelSelector *_channel_selector;
-	ViewpointSelector *_viewpoint_selector;
+	ZoomSelector *_zoom_selector;
+	TranslationSelector *_translation_selector;
+	RotationSelector *_rotation_selector;
 	InterpolationSelector *_interpolation_selector;
 	FrameInfo *_frame_info;
 	ChannelInfo *_channel_info;

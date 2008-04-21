@@ -1,3 +1,12 @@
+2008-04-21  Martin Lambers <marlam@marlam.de>
+
+	* src/zoom_selector.h, src/zoom_selector.cpp,
+	src/translation_selector.h, src/translation_selector.cpp,
+	src/rotation_selector.h, src/rotation_selector.cpp,
+	src/interpolation_selector.cpp, src/channel_selector.cpp,
+	src/view_area.h, src/view_area.cpp, src/cvlview.h, src/cvlview.cpp,
+	src/Makefile.am: Beginings of GUI improvements. Unfinished.
+
 2008-04-19  Martin Lambers <marlam@marlam.de>
 
 	* src/view_area.h, src/view_area.cpp: Use buffer objects for texture

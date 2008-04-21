@@ -39,7 +39,9 @@
 
 #include "channel_info.h"
 #include "channel_selector.h"
-#include "viewpoint_selector.h"
+#include "zoom_selector.h"
+#include "translation_selector.h"
+#include "rotation_selector.h"
 #include "interpolation_selector.h"
 #include "range_selector.h"
 #include "gamma_selector.h"
@@ -56,7 +58,9 @@ ViewArea::ViewArea(cvl_frame_t **frame,
 	int min_size,
 	ChannelInfo *channel_info,
 	ChannelSelector *channel_selector,
-	ViewpointSelector *viewpoint_selector,
+	ZoomSelector *zoom_selector,
+	TranslationSelector *translation_selector,
+	RotationSelector *rotation_selector,
 	InterpolationSelector *interpolation_selector,
 	RangeSelector *range_selector,
 	GammaSelector *gamma_selector,
@@ -89,7 +93,9 @@ ViewArea::ViewArea(cvl_frame_t **frame,
 
     _channel_info = channel_info;
     _channel_selector = channel_selector;
-    _viewpoint_selector = viewpoint_selector;
+    _zoom_selector = zoom_selector;
+    _translation_selector = translation_selector;
+    _rotation_selector = rotation_selector;
     _interpolation_selector = interpolation_selector;
     _range_selector = range_selector;
     _gamma_selector = gamma_selector;
@@ -270,9 +276,9 @@ void ViewArea::paintGL()
     }
     
     /* Viewpoint selector */
-    float zoom = _viewpoint_selector->get_zoomfactor();
-    int x_offset = _viewpoint_selector->get_x_offset();
-    int y_offset = _viewpoint_selector->get_y_offset();
+    float zoom = _zoom_selector->get_zoomfactor();
+    int x_offset = _translation_selector->get_x_offset();
+    int y_offset = _translation_selector->get_y_offset();
 
     /* Use OpenGL for rendering */
     // Gather all data that requires CVL here, because we cannot mix GL and CVL
@@ -740,13 +746,13 @@ void ViewArea::mouseMoveEvent(QMouseEvent *event)
     {
        	QPoint drag_endpoint = event->pos();
 	int drag_offset_x = mh_iroundf(static_cast<float>(drag_endpoint.x() - _drag_startpoint.x())
-		/ _viewpoint_selector->get_zoomfactor());
+		/ _zoom_selector->get_zoomfactor());
 	int drag_offset_y = mh_iroundf(static_cast<float>(drag_endpoint.y() - _drag_startpoint.y())
-		/ _viewpoint_selector->get_zoomfactor());
+		/ _zoom_selector->get_zoomfactor());
 	_drag_startpoint = drag_endpoint;
 	lock();
-	_viewpoint_selector->set_x_offset(_viewpoint_selector->get_x_offset() + drag_offset_x);
-	_viewpoint_selector->set_y_offset(_viewpoint_selector->get_y_offset() + drag_offset_y);
+	_translation_selector->set_x_offset(_translation_selector->get_x_offset() + drag_offset_x);
+	_translation_selector->set_y_offset(_translation_selector->get_y_offset() + drag_offset_y);
 	unlock();
 	update();
     }
@@ -754,9 +760,9 @@ void ViewArea::mouseMoveEvent(QMouseEvent *event)
     {
        	QPoint rotate_endpoint = event->pos();
 	int rotate_offset_x = mh_iroundf(static_cast<float>(rotate_endpoint.x() - _rotate_startpoint.x())
-		/ _viewpoint_selector->get_zoomfactor());
+		/ _zoom_selector->get_zoomfactor());
 	int rotate_offset_y = mh_iroundf(static_cast<float>(rotate_endpoint.y() - _rotate_startpoint.y())
-		/ _viewpoint_selector->get_zoomfactor());
+		/ _zoom_selector->get_zoomfactor());
 	_rotate_startpoint = rotate_endpoint;
 	_rotation_y += 0.1f * static_cast<float>(rotate_offset_x);
 	_rotation_x += 0.1f * static_cast<float>(rotate_offset_y);
@@ -771,10 +777,10 @@ void ViewArea::wheelEvent(QWheelEvent *event)
     if (_rendering_fails || !*_frame || _lock)
 	return;
 
-    float zoom = _viewpoint_selector->get_zoomfactor();
+    float zoom = _zoom_selector->get_zoomfactor();
     int steps = event->delta() / 120;
     float diff = static_cast<float>(steps) * mh_maxf(0.01f, zoom * 0.05f);
-    _viewpoint_selector->set_zoomfactor(zoom + diff);
+    _zoom_selector->set_zoomfactor(zoom + diff);
     pixel_info();
 }
 
@@ -844,8 +850,8 @@ void ViewArea::pixel_info()
     float mouse_y = static_cast<float>(_mouse_pos.y());
     float mouse_x_centered = mouse_x - static_cast<float>(_width) / 2.0f;
     float mouse_y_centered = mouse_y - static_cast<float>(_height) / 2.0f;
-    float frame_x_centered = mouse_x_centered / _viewpoint_selector->get_zoomfactor() - static_cast<float>(_viewpoint_selector->get_x_offset());
-    float frame_y_centered = mouse_y_centered / _viewpoint_selector->get_zoomfactor() - static_cast<float>(_viewpoint_selector->get_y_offset());
+    float frame_x_centered = mouse_x_centered / _zoom_selector->get_zoomfactor() - static_cast<float>(_translation_selector->get_x_offset());
+    float frame_y_centered = mouse_y_centered / _zoom_selector->get_zoomfactor() - static_cast<float>(_translation_selector->get_y_offset());
     int frame_x = mh_iroundf(floorf(frame_x_centered + static_cast<float>(cvl_frame_width(*_frame)) / 2.0f));
     int frame_y = mh_iroundf(floorf(frame_y_centered + static_cast<float>(cvl_frame_height(*_frame)) / 2.0f));
 

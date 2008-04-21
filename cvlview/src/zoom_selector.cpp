@@ -1,5 +1,5 @@
 /*
- * viewpoint_selector.cpp
+ * zoom_selector.cpp
  *
  * This file is part of cvlview, an image viewer using the CVL library.
  *
@@ -32,10 +32,10 @@
 
 #include "mh.h"
 
-#include "viewpoint_selector.h"
+#include "zoom_selector.h"
 
 
-ViewpointSelector::ViewpointSelector(cvl_frame_t **frame, QWidget *parent) 
+ZoomSelector::ZoomSelector(cvl_frame_t **frame, QWidget *parent) 
 	: QWidget(parent)
 {
     _frame = frame;
@@ -56,56 +56,30 @@ ViewpointSelector::ViewpointSelector(cvl_frame_t **frame, QWidget *parent)
     
     _zoom_fit_button = new QPushButton(tr("&Fit"));
     _zoom_fit_button->setShortcut(tr("f"));
+    _zoom_fit_button->setFixedSize(QSize(_zoom_fit_button->sizeHint().width() / 2, _zoom_fit_button->sizeHint().height()));
     connect(_zoom_fit_button, SIGNAL(clicked()), this, SLOT(zoom_fit_button_clicked()));
     layout->addWidget(_zoom_fit_button, 0, 4, 1, 1);
     
     _zoom_reset_button = new QPushButton(tr("1&:1"));
     _zoom_reset_button->setShortcut(tr(":"));
+    _zoom_reset_button->setFixedSize(QSize(_zoom_reset_button->sizeHint().width() / 2, _zoom_reset_button->sizeHint().height()));
     connect(_zoom_reset_button, SIGNAL(clicked()), this, SLOT(zoom_reset_button_clicked()));
     layout->addWidget(_zoom_reset_button, 0, 5, 1, 1);
-
-    QLabel *empty_label = new QLabel("");
-    layout->addWidget(empty_label, 0, 6, 1, 1);
-    
-    QLabel *xo_label = new QLabel("X:");
-    layout->addWidget(xo_label, 0, 7, 1, 1);
-    _x_offset_spinbox = new QSpinBox();
-    _x_offset_spinbox->setRange(-9999, +9999);
-    _x_offset_spinbox->setSingleStep(1);
-    _x_offset_spinbox->setValue(0);
-    connect(_x_offset_spinbox, SIGNAL(valueChanged(int)), this, SLOT(_set_x_offset(int)));
-    layout->addWidget(_x_offset_spinbox, 0, 8, 1, 2);
-    
-    QLabel *yo_label = new QLabel("Y:");
-    layout->addWidget(yo_label, 0, 10, 1, 1);
-    _y_offset_spinbox = new QSpinBox();
-    _y_offset_spinbox->setRange(-9999, +9999);
-    _y_offset_spinbox->setSingleStep(1);
-    _y_offset_spinbox->setValue(0);
-    connect(_y_offset_spinbox, SIGNAL(valueChanged(int)), this, SLOT(_set_y_offset(int)));
-    layout->addWidget(_y_offset_spinbox, 0, 11, 1, 2);
-    
-    _offset_reset_button = new QPushButton(tr("Ce&nter"));
-    _offset_reset_button->setShortcut(tr("n"));
-    connect(_offset_reset_button, SIGNAL(clicked()), this, SLOT(offset_reset_button_clicked()));
-    layout->addWidget(_offset_reset_button, 0, 13, 1, 2);
 
     layout->setRowStretch(1, 1);
     setLayout(layout);
 }
 
-ViewpointSelector::~ViewpointSelector()
+ZoomSelector::~ZoomSelector()
 {
 }
 
-void ViewpointSelector::reset()
+void ZoomSelector::reset()
 {
     _zoomfactor_spinbox->setValue(1.0);
-    _x_offset_spinbox->setValue(0);
-    _y_offset_spinbox->setValue(0);
 }
 
-void ViewpointSelector::zoom_fit_button_clicked()
+void ZoomSelector::zoom_fit_button_clicked()
 {
     if (!_frame || !*_frame)
 	return;
@@ -121,56 +95,25 @@ void ViewpointSelector::zoom_fit_button_clicked()
     float wh = vh / ih;
 
     _zoomfactor_spinbox->setValue(mh_minf(wf, wh));
-    emit viewpoint_changed();
+    emit view_changed();
 }
 
-void ViewpointSelector::zoom_reset_button_clicked()
+void ZoomSelector::zoom_reset_button_clicked()
 {
     _zoomfactor_spinbox->setValue(1.0f);
-    emit viewpoint_changed();
+    emit view_changed();
 }
 
-void ViewpointSelector::offset_reset_button_clicked()
-{
-    _lock = true;
-    _x_offset_spinbox->setValue(0);
-    _y_offset_spinbox->setValue(0);
-    _lock = false;
-    emit viewpoint_changed();
-}
-
-void ViewpointSelector::_set_zoomfactor(double zf UNUSED)
+void ZoomSelector::_set_zoomfactor(double zf UNUSED)
 {
     if (!_lock)
-	emit viewpoint_changed();
+    {
+	emit view_changed();
+    }
 }
 
-void ViewpointSelector::_set_x_offset(int xo UNUSED)
-{
-    if (!_lock)
-	emit viewpoint_changed();
-}
-
-void ViewpointSelector::_set_y_offset(int yo UNUSED)
-{
-    if (!_lock)
-	emit viewpoint_changed();
-}
-
-void ViewpointSelector::set_zoomfactor(float zf)
+void ZoomSelector::set_zoomfactor(float zf)
 {
     _zoomfactor_spinbox->setValue(zf);
-    emit viewpoint_changed();
-}
-
-void ViewpointSelector::set_x_offset(int xo)
-{
-    _x_offset_spinbox->setValue(xo);
-    emit viewpoint_changed();
-}
-
-void ViewpointSelector::set_y_offset(int yo)
-{
-    _y_offset_spinbox->setValue(yo);
-    emit viewpoint_changed();
+    emit view_changed();
 }

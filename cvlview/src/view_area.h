@@ -36,7 +36,9 @@
 
 #include "channel_info.h"
 #include "channel_selector.h"
-#include "viewpoint_selector.h"
+#include "zoom_selector.h"
+#include "translation_selector.h"
+#include "rotation_selector.h"
 #include "interpolation_selector.h"
 #include "range_selector.h"
 #include "gamma_selector.h"
@@ -58,7 +60,9 @@ class ViewArea : public QGLWidget
 	// Selector widgets to get parameters from
 	ChannelInfo *_channel_info;
 	ChannelSelector *_channel_selector;
-	ViewpointSelector *_viewpoint_selector;
+	ZoomSelector *_zoom_selector;
+	TranslationSelector *_translation_selector;
+	RotationSelector *_rotation_selector;
 	InterpolationSelector *_interpolation_selector;
 	RangeSelector *_range_selector;
 	GammaSelector *_gamma_selector;
@@ -117,7 +121,9 @@ class ViewArea : public QGLWidget
 		int min_size,
 		ChannelInfo *channel_info,
 		ChannelSelector *channel_selector,
-		ViewpointSelector *viewpoint_selector,
+		ZoomSelector *zoom_selector,
+		TranslationSelector *translation_selector,
+		RotationSelector *rotation_selector,
 		InterpolationSelector *interpolation_selector,
 		RangeSelector *range_selector,
 		GammaSelector *gamma_selector,

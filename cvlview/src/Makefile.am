@@ -7,7 +7,9 @@ cvlview_SOURCES = main.cpp					\
 	cvlview.h cvlview.cpp					\
 	dataset_selector.h dataset_selector.cpp			\
 	channel_selector.h channel_selector.cpp			\
-	viewpoint_selector.h viewpoint_selector.cpp		\
+	zoom_selector.h zoom_selector.cpp			\
+	translation_selector.h translation_selector.cpp		\
+	rotation_selector.h rotation_selector.cpp		\
 	interpolation_selector.h interpolation_selector.cpp	\
 	frame_info.h frame_info.cpp				\
 	channel_info.h channel_info.cpp				\
@@ -36,7 +38,9 @@ nodist_cvlview_SOURCES = \
 	moc_cvlview.cpp			\
 	moc_dataset_selector.cpp	\
 	moc_channel_selector.cpp	\
-	moc_viewpoint_selector.cpp	\
+	moc_zoom_selector.cpp		\
+	moc_translation_selector.cpp	\
+	moc_rotation_selector.cpp	\
 	moc_interpolation_selector.cpp	\
 	moc_frame_info.cpp		\
 	moc_channel_info.cpp		\

@@ -41,15 +41,19 @@ ChannelSelector::ChannelSelector(cvl_frame_t **frame, QWidget *parent)
     
     _channel_button[0] = new QPushButton(tr("&0"));
     _channel_button[0]->setShortcut(tr("0"));
+    _channel_button[0]->setFixedSize(QSize(_channel_button[0]->sizeHint().width() / 2, _channel_button[0]->sizeHint().height()));
     layout->addWidget(_channel_button[0], 0, 0);
     _channel_button[1] = new QPushButton(tr("&1"));
     _channel_button[1]->setShortcut(tr("1"));
+    _channel_button[1]->setFixedSize(QSize(_channel_button[1]->sizeHint().width() / 2, _channel_button[1]->sizeHint().height()));
     layout->addWidget(_channel_button[1], 0, 1);
     _channel_button[2] = new QPushButton(tr("&2"));
     _channel_button[2]->setShortcut(tr("2"));
+    _channel_button[2]->setFixedSize(QSize(_channel_button[2]->sizeHint().width() / 2, _channel_button[2]->sizeHint().height()));
     layout->addWidget(_channel_button[2], 0, 2);
     _channel_button[3] = new QPushButton(tr("&3"));
     _channel_button[3]->setShortcut(tr("3"));
+    _channel_button[3]->setFixedSize(QSize(_channel_button[3]->sizeHint().width() / 2, _channel_button[3]->sizeHint().height()));
     layout->addWidget(_channel_button[3], 0, 3);
     _color_button = new QPushButton(tr("&Color"));
     _color_button->setShortcut(tr("C"));

@@ -37,7 +37,6 @@
 #include <QToolBox>
 #include <QIcon>
 #include <QGridLayout>
-#include <QToolBox>
 #include <QMenuBar>
 #include <QMenu>
 #include <QCloseEvent>
@@ -52,7 +51,9 @@
 
 #include "dataset_selector.h"
 #include "channel_selector.h"
-#include "viewpoint_selector.h"
+#include "zoom_selector.h"
+#include "translation_selector.h"
+#include "rotation_selector.h"
 #include "interpolation_selector.h"
 #include "frame_info.h"
 #include "channel_info.h"
@@ -102,20 +103,22 @@ CVLView::CVLView()
     
     _dataset_selector = new DatasetSelector(&_datafile, _widget);
     connect(_dataset_selector, SIGNAL(dataset_changed()), this, SLOT(open_frame()));
-    _dataset_selector->setFixedWidth(tools_width / 3);
     
     _channel_selector = new ChannelSelector(&_frame, _widget);
     connect(this, SIGNAL(new_frame()), _channel_selector, SLOT(update()));
     connect(this, SIGNAL(new_datafile()), _channel_selector, SLOT(reset()));
-    _channel_selector->setFixedWidth(tools_width);
 
-    _viewpoint_selector = new ViewpointSelector(&_frame, _widget);
-    connect(this, SIGNAL(new_datafile()), _viewpoint_selector, SLOT(reset()));
-    _viewpoint_selector->setFixedWidth(tools_width + tools_width / 2 + tools_width / 4);
+    _zoom_selector = new ZoomSelector(&_frame, _widget);
+    connect(this, SIGNAL(new_datafile()), _zoom_selector, SLOT(reset()));
+
+    _translation_selector = new TranslationSelector(_widget);
+    connect(this, SIGNAL(new_datafile()), _translation_selector, SLOT(reset()));
+
+    _rotation_selector = new RotationSelector(_widget);
+    connect(this, SIGNAL(new_datafile()), _rotation_selector, SLOT(reset()));
 
     _interpolation_selector = new InterpolationSelector(_widget);
     connect(this, SIGNAL(new_datafile()), _interpolation_selector, SLOT(reset()));
-    _interpolation_selector->setFixedWidth(tools_width / 6);
 
     _frame_info = new FrameInfo(&_datafile, &_frame, _widget);
     connect(this, SIGNAL(new_frame()), _frame_info, SLOT(update()));
@@ -152,7 +155,9 @@ CVLView::CVLView()
     _view_area = new ViewArea(&_frame, 2 * tools_width + tools_width / 4,
 	    _channel_info,
 	    _channel_selector,
-	    _viewpoint_selector,
+	    _zoom_selector,
+	    _translation_selector,
+	    _rotation_selector,
 	    _interpolation_selector,
 	    _range_selector,
 	    _gamma_selector,
@@ -164,8 +169,10 @@ CVLView::CVLView()
     connect(_frame_info, SIGNAL(make_gl_context_current()), _view_area, SLOT(make_gl_context_current()));
     connect(_channel_selector, SIGNAL(channel_changed()), _view_area, SLOT(recompute()));
     connect(_channel_selector, SIGNAL(make_gl_context_current()), _view_area, SLOT(make_gl_context_current()));
-    connect(_viewpoint_selector, SIGNAL(viewpoint_changed()), _view_area, SLOT(update()));
-    connect(_viewpoint_selector, SIGNAL(make_gl_context_current()), _view_area, SLOT(make_gl_context_current()));
+    connect(_zoom_selector, SIGNAL(view_changed()), _view_area, SLOT(update()));
+    connect(_zoom_selector, SIGNAL(make_gl_context_current()), _view_area, SLOT(make_gl_context_current()));
+    connect(_translation_selector, SIGNAL(view_changed()), _view_area, SLOT(update()));
+    connect(_rotation_selector, SIGNAL(view_changed()), _view_area, SLOT(update()));
     connect(_interpolation_selector, SIGNAL(interpolation_changed()), _view_area, SLOT(update()));
     connect(_channel_info, SIGNAL(make_gl_context_current()), _view_area, SLOT(make_gl_context_current()));
     connect(_range_selector, SIGNAL(range_changed()), _view_area, SLOT(recompute()));
@@ -174,23 +181,32 @@ CVLView::CVLView()
     connect(_pseudocolor_selector, SIGNAL(pseudocolor_changed()), _view_area, SLOT(recompute()));
     connect(_heightmap_selector, SIGNAL(heightmap_changed()), _view_area, SLOT(update()));
     connect(_heightmap_selector, SIGNAL(make_gl_context_current()), _view_area, SLOT(make_gl_context_current()));
-    connect(_view_area, SIGNAL(update_size(int, int)), _viewpoint_selector, SLOT(update_view_area_size(int, int)));
+    connect(_view_area, SIGNAL(update_size(int, int)), _zoom_selector, SLOT(update_view_area_size(int, int)));
 
     _pixel_info = new PixelInfo(this);
     connect(_view_area, SIGNAL(update_pixel_info(int, int, int, const float *, const float *)), 
 	    _pixel_info, SLOT(update(int, int, int, const float *, const float *)));
     
-    _toolbar = new QToolBar();
-    _toolbar->setEnabled(false);
-    _toolbar->setMovable(false);
-    addToolBar(_toolbar);
-    _toolbar->addWidget(_dataset_selector);
-    _toolbar->addSeparator();
-    _toolbar->addWidget(_channel_selector);
-    _toolbar->addSeparator();
-    _toolbar->addWidget(_viewpoint_selector);
-    _toolbar->addSeparator();
-    _toolbar->addWidget(_interpolation_selector);
+    _toolbar1 = new QToolBar();
+    _toolbar1->setEnabled(false);
+    _toolbar1->setMovable(false);
+    addToolBar(_toolbar1);
+    addToolBarBreak();
+    _toolbar1->addWidget(_dataset_selector);
+    _toolbar1->addSeparator();
+    _toolbar1->addWidget(_channel_selector);
+    _toolbar1->addSeparator();
+    _toolbar1->addWidget(_interpolation_selector);
+
+    _toolbar2 = new QToolBar();
+    _toolbar2->setEnabled(false);
+    _toolbar2->setMovable(false);
+    addToolBar(_toolbar2);
+    _toolbar2->addWidget(_zoom_selector);
+    _toolbar2->addSeparator();
+    _toolbar2->addWidget(_translation_selector);
+    _toolbar2->addSeparator();
+    _toolbar2->addWidget(_rotation_selector);
 
     _toolbox = new QToolBox();
     _toolbox->setMinimumWidth(tools_width);
@@ -301,7 +317,8 @@ void CVLView::load_datafile(const char *filename)
 		qPrintable(QFileInfo(filename).completeSuffix()), 
 		PACKAGE_NAME).c_str());
     _frame_info->setEnabled(true);
-    _toolbar->setEnabled(true);
+    _toolbar1->setEnabled(true);
+    _toolbar2->setEnabled(true);
     _toolbox->setEnabled(true);
     _view_area->lock();
     emit new_datafile();
