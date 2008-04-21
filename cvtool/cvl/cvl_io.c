@@ -400,7 +400,7 @@ void cvl_read_pnm(FILE *f, cvl_frame_t **frame)
 	    {
 		cvl_frame_free(*frame);
 		*frame = NULL;
-		cvl_error_set(CVL_ERROR_DATA, "%s: %s", errmsg, "EOF or input error in PPM data");
+		cvl_error_set(CVL_ERROR_DATA, "%s: %s", errmsg, "EOF or input error in RGBA data");
 		return;
 	    }
 	}
