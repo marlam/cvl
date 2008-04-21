@@ -1154,6 +1154,22 @@ void cvl_convert_format(cvl_frame_t *dst, cvl_frame_t *src)
     }
 }
 
+/**
+ * \param dst		The destination frame.
+ * \param src		The source frame.
+ * \param src_format	An override for the format of \a src.
+ *
+ * Converts the format of frame \a src into the format of frame \a dst while
+ * transferring the contents of \a src to \a dst. The frame \a src is assumed to
+ * have the given format \a src_format, regardless of its real format.
+ */
+void cvl_convert_format_forced(cvl_frame_t *dst, cvl_frame_t *src, cvl_format_t src_format)
+{
+    cvl_format_t format_bak = src->format;
+    src->format = src_format;
+    cvl_convert_format(dst, src);
+    src->format = format_bak;
+}
 
 /**
  * \param frame		The frame.

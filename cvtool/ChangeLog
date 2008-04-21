@@ -2,6 +2,8 @@
 
 	* NEWS, cvl/cvl_io.c: Fix PAM support. Add support for PAM files with
 	four channels.
+	* cvl/cvl/cvl_color.h, cvl/cvl_color.c: New function
+	cvl_convert_format_forced().
 
 2008-04-19  Martin Lambers <marlam@marlam.de>
 

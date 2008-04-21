@@ -187,6 +187,7 @@ void cvl_channel_combine(cvl_frame_t *dst,
 void cvl_channel_extract(cvl_frame_t *dst, cvl_frame_t *src, int channel);
 
 void cvl_convert_format(cvl_frame_t *dst, cvl_frame_t *src);
+void cvl_convert_format_forced(cvl_frame_t *dst, cvl_frame_t *src, cvl_format_t src_format);
 void cvl_convert_format_inplace(cvl_frame_t *frame, cvl_format_t format);
 
 void cvl_invert(cvl_frame_t *dst, cvl_frame_t *src);
