@@ -105,7 +105,7 @@ void cvl_read_pnm(FILE *f, cvl_frame_t **frame)
 	return;
 
     const char errmsg[] = "Cannot read PNM frame";
-    typedef enum { PBM, PGM, PPM } subformat_t;
+    typedef enum { PBM, PGM, PPM, RGBA } subformat_t;
     subformat_t subformat;
     int width, height, size, maxval;
     int c;
@@ -196,7 +196,7 @@ void cvl_read_pnm(FILE *f, cvl_frame_t **frame)
 		    break;
 		    
 		case 'D':
-		    ok = (fscanf(f, "DEPTH %d", &depth) == 1 && depth == 1 && cvl_pnm_skip(f));
+		    ok = (fscanf(f, "DEPTH %d", &depth) == 1 && depth > 0 && cvl_pnm_skip(f));
 		    break;
 		    
 		case 'M':
@@ -205,12 +205,12 @@ void cvl_read_pnm(FILE *f, cvl_frame_t **frame)
 		    break;
 		    
 		case 'T':
-		    ok = (fscanf(f, "TUPLETYPE %13s", tupletype) == 1 && cvl_pnm_skip(f));
+		    ok = (fscanf(f, "TUPLTYPE %13s", tupletype) == 1 && cvl_pnm_skip(f));
 		    break;
 		    
 		case 'E':
 		    ok = (fgetc(f) == 'E' && fgetc(f) == 'N' && fgetc(f) == 'D' 
-			    && fgetc(f) == 'H' && fgetc(f) == 'D' && fgetc(f) == 'R' && fgetc(f) == EOF);
+			    && fgetc(f) == 'H' && fgetc(f) == 'D' && fgetc(f) == 'R' && fgetc(f) == '\n');
 		    header_end = true;
 		    break;
 		    
@@ -221,7 +221,7 @@ void cvl_read_pnm(FILE *f, cvl_frame_t **frame)
 	}
 	if (!header_end || !ok)
 	{
-	    cvl_error_set(CVL_ERROR_DATA, "%s: %s", errmsg, "invalid PAM header");
+	    cvl_error_set(CVL_ERROR_DATA, "%s: %s", errmsg, "PAM header invalid");
 	    return;
 	}
 	if (strcmp(tupletype, "BLACKANDWHITE") == 0)
@@ -235,6 +235,10 @@ void cvl_read_pnm(FILE *f, cvl_frame_t **frame)
 	else if (strcmp(tupletype, "RGB") == 0)
 	{
 	    subformat = PPM;
+	}
+	else if (strcmp(tupletype, "RGB_ALPHA") == 0)
+	{
+	    subformat = RGBA;
 	}
 	else
 	{
@@ -256,8 +260,9 @@ void cvl_read_pnm(FILE *f, cvl_frame_t **frame)
 	return;
     }
 
-    *frame = cvl_frame_new(width, height, subformat == PPM ? 3 : 1,
-	    subformat == PPM ? CVL_RGB : CVL_LUM, 
+    *frame = cvl_frame_new(width, height, 
+	    subformat == PPM ? 3 : subformat == RGBA ? 4 : 1,
+	    subformat == PPM ? CVL_RGB : subformat == RGBA ? CVL_UNKNOWN : CVL_LUM, 
 	    maxval < 256 ? CVL_UINT8 : CVL_FLOAT, CVL_MEM);
     size = width * height;
     if (subformat == PBM)
@@ -386,6 +391,52 @@ void cvl_read_pnm(FILE *f, cvl_frame_t **frame)
 	    free(ppmdata);
 	}
     }
+    else if (subformat == RGBA)
+    {
+	size_t rawsize = size * (maxval < 256 ? 1 : 2) * 4 * sizeof(uint8_t);
+	if (maxval < 256)
+	{
+	    if (fread(cvl_frame_pointer(*frame), rawsize, 1, f) != 1)
+	    {
+		cvl_frame_free(*frame);
+		*frame = NULL;
+		cvl_error_set(CVL_ERROR_DATA, "%s: %s", errmsg, "EOF or input error in PPM data");
+		return;
+	    }
+	}
+	else
+	{
+	    uint8_t *rgbadata;
+	    float *ptr = cvl_frame_pointer(*frame);
+	    if (!(rgbadata = malloc(rawsize)))
+	    {
+		cvl_error_set(CVL_ERROR_MEM, "%s", strerror(ENOMEM));
+		cvl_frame_free(*frame);
+		*frame = NULL;
+		return;
+	    }
+	    if (fread(rgbadata, rawsize, 1, f) != 1)
+	    {
+		cvl_frame_free(*frame);
+		*frame = NULL;
+		cvl_error_set(CVL_ERROR_DATA, "%s: EOF or input error in RGBA data", errmsg);
+		free(rgbadata);
+		return;
+	    }
+	    for (size_t i = 0; i < (size_t)size; i++)
+	    {
+		ptr[4 * i + 0] = (float)(((int)rgbadata[(4 * i + 0) * 2 + 0] << 8) | (int)rgbadata[(4 * i + 0) * 2 + 1]) / 65535.0f;
+		ptr[4 * i + 1] = (float)(((int)rgbadata[(4 * i + 1) * 2 + 0] << 8) | (int)rgbadata[(4 * i + 1) * 2 + 1]) / 65535.0f;
+		ptr[4 * i + 2] = (float)(((int)rgbadata[(4 * i + 2) * 2 + 0] << 8) | (int)rgbadata[(4 * i + 2) * 2 + 1]) / 65535.0f;
+		ptr[4 * i + 3] = (float)(((int)rgbadata[(4 * i + 3) * 2 + 0] << 8) | (int)rgbadata[(4 * i + 3) * 2 + 1]) / 65535.0f;
+	    }
+	    free(rgbadata);
+	}
+	cvl_frame_set_channel_name(*frame, 0, "R");
+	cvl_frame_set_channel_name(*frame, 1, "G");
+	cvl_frame_set_channel_name(*frame, 2, "B");
+	cvl_frame_set_channel_name(*frame, 3, "A");
+    }
 }
 
 /**
@@ -406,7 +457,6 @@ void cvl_write_pnm(FILE *f, cvl_frame_t *frame)
 
     bool error;
     size_t size = cvl_frame_width(frame) * cvl_frame_height(frame);
-    size_t components = (cvl_frame_format(frame) == CVL_LUM ? 1 : 3);
 
     cvl_frame_t *out;
     if (cvl_frame_format(frame) == CVL_LUM 
@@ -447,7 +497,7 @@ void cvl_write_pnm(FILE *f, cvl_frame_t *frame)
 			|| fwrite(np, 1 * size * sizeof(uint8_t), 1, f) != 1);
 		free(np);
 	    }
-	    else
+	    else if (cvl_frame_channels(out) <= 3)
 	    {
 		uint8_t *np;
 		if (!(np = malloc(3 * size * sizeof(uint8_t))))
@@ -463,11 +513,17 @@ void cvl_write_pnm(FILE *f, cvl_frame_t *frame)
 		{
 	    	    np[3 * i + 0] = p[4 * i + 0];
     		    np[3 * i + 1] = p[4 * i + 1];
-		    np[3 * i + 2] = (cvl_frame_channels(out) >= 3 ? p[4 * i + 2] : 0);
+		    np[3 * i + 2] = (cvl_frame_channels(out) == 3 ? p[4 * i + 2] : 0);
 		}
 		error = (fprintf(f, "P6\n%d %d\n255\n", cvl_frame_width(out), cvl_frame_height(out)) < 0
 			|| fwrite(np, 3 * size * sizeof(uint8_t), 1, f) != 1);
 		free(np);
+	    }
+	    else
+	    {
+		error = (fprintf(f, "P7\nWIDTH %d\nHEIGHT %d\nDEPTH 4\nMAXVAL 255\nTUPLTYPE RGB_ALPHA\nENDHDR\n", 
+			    cvl_frame_width(out), cvl_frame_height(out)) < 0
+			|| fwrite(p, 4 * size * sizeof(uint8_t), 1, f) != 1);
 	    }
 	}
 	else
@@ -475,7 +531,7 @@ void cvl_write_pnm(FILE *f, cvl_frame_t *frame)
 	    error = (fprintf(f, "P%d\n%d %d\n255\n", 
 	    		cvl_frame_format(out) == CVL_LUM ? 5 : 6,
 	    		cvl_frame_width(out), cvl_frame_height(out)) < 0
-	    	    || fwrite(p, components * size * sizeof(uint8_t), 1, f) != 1);
+	    	    || fwrite(p, (cvl_frame_format(frame) == CVL_LUM ? 1 : 3) * size * sizeof(uint8_t), 1, f) != 1);
 	}
     }
     else
@@ -505,7 +561,7 @@ void cvl_write_pnm(FILE *f, cvl_frame_t *frame)
 			|| fwrite(np, 1 * size * 2 * sizeof(uint8_t), 1, f) != 1);
 		free(np);
 	    }
-	    else
+	    else if (cvl_frame_channels(out) <= 3)
 	    {
 		uint8_t *np;
 		if (!(np = malloc(3 * size * 2 * sizeof(uint8_t))))
@@ -523,12 +579,12 @@ void cvl_write_pnm(FILE *f, cvl_frame_t *frame)
 		    v = fp[4 * i + 0];
 		    np[6 * i + 0] = (v >> 8);
 		    np[6 * i + 1] = (v & 0xff);
-		    v = fp[4 * i + 0];
+		    v = fp[4 * i + 1];
 		    np[6 * i + 2] = (v >> 8);
 		    np[6 * i + 3] = (v & 0xff);
-		    if (cvl_frame_channels(out) >= 3)
+		    if (cvl_frame_channels(out) == 3)
 		    {
-			v = fp[4 * i + 0];
+			v = fp[4 * i + 2];
 			np[6 * i + 4] = (v >> 8);
 			np[6 * i + 5] = (v & 0xff);
 		    }
@@ -542,9 +598,43 @@ void cvl_write_pnm(FILE *f, cvl_frame_t *frame)
 			|| fwrite(np, 3 * size * 2 * sizeof(uint8_t), 1, f) != 1);
 		free(np);
 	    }
+	    else
+	    {
+		uint8_t *np;
+		if (!(np = malloc(4 * size * 2 * sizeof(uint8_t))))
+		{
+		    cvl_error_set(CVL_ERROR_MEM, "%s", strerror(errno));
+		    if (out != frame)
+		    {
+			cvl_frame_free(out);
+		    }
+		    return;
+		}
+		for (size_t i = 0; i < size; i++)
+		{
+		    unsigned int v;
+		    v = fp[4 * i + 0];
+		    np[8 * i + 0] = (v >> 8);
+		    np[8 * i + 1] = (v & 0xff);
+		    v = fp[4 * i + 1];
+		    np[8 * i + 2] = (v >> 8);
+		    np[8 * i + 3] = (v & 0xff);
+		    v = fp[4 * i + 2];
+		    np[8 * i + 4] = (v >> 8);
+		    np[8 * i + 5] = (v & 0xff);
+		    v = fp[4 * i + 3];
+		    np[8 * i + 6] = (v >> 8);
+		    np[8 * i + 7] = (v & 0xff);
+		}
+		error = (fprintf(f, "P7\nWIDTH %d\nHEIGHT %d\nDEPTH 4\nMAXVAL 65535\nTUPLTYPE RGB_ALPHA\nENDHDR\n", 
+			    cvl_frame_width(out), cvl_frame_height(out)) < 0
+			|| fwrite(np, 4 * size * 2 * sizeof(uint8_t), 1, f) != 1);
+		free(np);
+	    }
 	}
 	else
 	{
+	    int components = (cvl_frame_format(frame) == CVL_LUM ? 1 : 3);
 	    uint8_t *np;
 	    if (!(np = malloc(size * components * 2 * sizeof(uint8_t))))
 	    {
