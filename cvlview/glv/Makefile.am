@@ -1,1 +1,1 @@
-EXTRA_DIST = glv.h
+EXTRA_DIST = glvm.h

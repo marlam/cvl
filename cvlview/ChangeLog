@@ -22,6 +22,8 @@
 	of vector and matrix classes.
 	* src/Makefile.am, src/view_area.cpp: Use new vector and matrix
 	classes.
+	* glv/glvm.h, glv/Makefile.am, src/view_area.cpp, src/Makefile.am:
+	More functionality for the vector and matrix classes.
 
 2008-04-19  Martin Lambers <marlam@marlam.de>
 

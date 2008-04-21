@@ -37,8 +37,8 @@
 
 #include "mh.h"
 
-#include "glv.h"
-using namespace glv;
+#include "glvm.h"
+using namespace glvm;
 
 #include "channel_info.h"
 #include "channel_selector.h"
@@ -639,10 +639,10 @@ void ViewArea::paintGL()
     cvl_gl_check_errors("GL rendering");
     /* Save area of the framebuffer that was rendered to. */
     mat4 P;
-    glGetFloatv(GL_PROJECTION_MATRIX, P.ml);
+    glGetFloatv(GL_PROJECTION_MATRIX, P.vl);
     P.transpose();
     mat4 M;
-    glGetFloatv(GL_MODELVIEW_MATRIX, M.ml);
+    glGetFloatv(GL_MODELVIEW_MATRIX, M.vl);
     M.transpose();
     mat4 PM = P * M;
     int fbl = 0;
