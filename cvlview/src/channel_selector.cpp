@@ -185,7 +185,17 @@ void ChannelSelector::update()
 	{
 	    _channel_button[c]->setEnabled(false);
 	}
-	_color_button->setEnabled(cvl_frame_format(*_frame) != CVL_LUM && cvl_frame_format(*_frame) != CVL_UNKNOWN);
+	_color_button->setEnabled(
+		cvl_frame_format(*_frame) == CVL_RGB 
+		|| cvl_frame_format(*_frame) == CVL_HSL 
+		|| cvl_frame_format(*_frame) == CVL_XYZ
+		|| (cvl_frame_channels(*_frame) >= 3 
+		    && cvl_frame_channel_name(*_frame, 0)
+		    && strcmp(cvl_frame_channel_name(*_frame, 0), "R") == 0
+		    && cvl_frame_channel_name(*_frame, 1)
+		    && strcmp(cvl_frame_channel_name(*_frame, 1), "G") == 0
+		    && cvl_frame_channel_name(*_frame, 2)
+		    && strcmp(cvl_frame_channel_name(*_frame, 2), "B") == 0));
 	if (_reset_on_next_update 
 		|| (_channel == -1 && !_color_button->isEnabled())
 		|| (_channel >= 0 && !_channel_button[_channel]->isEnabled()))

@@ -125,12 +125,19 @@ void ChannelInfo::update()
     	if (_processed_frame != *_frame || _processed_frame_extended != *_frame)
 	{
 	    cvl_statistics(*_frame, _min + 1, _max + 1, _median + 1, _mean + 1, _stddev + 1, _dynrange + 1);
-	    if (cvl_frame_format(*_frame) != CVL_LUM && cvl_frame_format(*_frame) != CVL_UNKNOWN)
+	    if (cvl_frame_format(*_frame) != CVL_LUM)
 	    {
 		float cmin[4], cmax[4], cmedian[4], cmean[4], cstddev[4], cdynrange[4];
 		cvl_frame_t *ctmp = cvl_frame_new(cvl_frame_width(*_frame), cvl_frame_height(*_frame),
 			1, CVL_LUM, CVL_FLOAT, CVL_TEXTURE);
-		cvl_convert_format(ctmp, *_frame);
+		if (cvl_frame_format(*_frame) == CVL_UNKNOWN)
+		{
+		    cvl_convert_format_forced(ctmp, *_frame, CVL_RGB);
+		}
+		else
+		{
+		    cvl_convert_format(ctmp, *_frame);
+		}
 		cvl_statistics(ctmp, cmin, cmax, cmedian, cmean, cstddev, cdynrange);
 		cvl_frame_free(ctmp);
 		_min[0] = cmin[0];
@@ -160,12 +167,19 @@ void ChannelInfo::update()
     	if (_processed_frame != *_frame)
 	{
 	    cvl_statistics(*_frame, _min + 1, _max + 1, NULL, NULL, NULL, NULL);
-	    if (cvl_frame_format(*_frame) != CVL_LUM && cvl_frame_format(*_frame) != CVL_UNKNOWN)
+	    if (cvl_frame_format(*_frame) != CVL_LUM)
 	    {
 		float cmin[4], cmax[4];
 		cvl_frame_t *ctmp = cvl_frame_new(cvl_frame_width(*_frame), cvl_frame_height(*_frame),
 			1, CVL_LUM, CVL_FLOAT, CVL_TEXTURE);
-		cvl_convert_format(ctmp, *_frame);
+		if (cvl_frame_format(*_frame) == CVL_UNKNOWN)
+		{
+		    cvl_convert_format_forced(ctmp, *_frame, CVL_RGB);
+		}
+		else
+		{
+		    cvl_convert_format(ctmp, *_frame);
+		}
 		cvl_statistics(ctmp, cmin, cmax, NULL, NULL, NULL, NULL);
 		cvl_frame_free(ctmp);
 		_min[0] = cmin[0];

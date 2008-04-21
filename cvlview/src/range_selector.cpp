@@ -563,11 +563,18 @@ void RangeSelector::update_histograms()
 		_histmax[c + 1] = _histogram[(c + 1) * _histogram_size + i];
 	}
     }
-    if (cvl_frame_format(*_frame) != CVL_LUM && cvl_frame_format(*_frame) != CVL_UNKNOWN)
+    if (cvl_frame_format(*_frame) != CVL_LUM)
     {
 	cvl_frame_t *ctmp = cvl_frame_new(cvl_frame_width(*_frame), cvl_frame_height(*_frame),
 		1, CVL_LUM, CVL_FLOAT, CVL_TEXTURE);
-	cvl_convert_format(ctmp, *_frame);
+	if (cvl_frame_format(*_frame) == CVL_UNKNOWN)
+	{
+	    cvl_convert_format_forced(ctmp, *_frame, CVL_RGB);
+	}
+	else
+	{
+	    cvl_convert_format(ctmp, *_frame);
+	}
 	cvl_histogram(ctmp, 0, _histogram_size, _lowerbound, _upperbound, _histogram);
 	cvl_frame_free(ctmp);
 	_histmax[0] = _histogram[0];
@@ -607,7 +614,7 @@ void RangeSelector::update()
     else if (cvl_frame_format(*_frame) == CVL_UNKNOWN)
     {
 	// Unknown data.
-    	for (int c = 0; c < 4; c++)
+    	for (int c = -1; c < 4; c++)
 	{
 	    _default_lowerbound[c + 1] = _channel_info->get_min(c);
 	    _default_upperbound[c + 1] = _channel_info->get_max(c);
@@ -658,22 +665,13 @@ void RangeSelector::update()
 
     // Build histograms
     update_histograms();
-    for (int c = 0; c < 4; c++)
+    for (int c = -1; c < 4; c++)
     {
 	if (_reset_on_next_update || _range_min[c + 1] > _range_max[c + 1] 
 		|| _range_min[c + 1] < _lowerbound[c + 1] || _range_max[c + 1] > _upperbound[c + 1])
 	{
 	    _range_min[c + 1] = _lowerbound[c + 1];
 	    _range_max[c + 1] = _upperbound[c + 1];
-	}
-    }
-    if (cvl_frame_format(*_frame) != CVL_LUM && cvl_frame_format(*_frame) != CVL_UNKNOWN)
-    {
-	if (_reset_on_next_update || _range_min[0] > _range_max[0]
-		|| _range_min[0] < _lowerbound[0] || _range_max[0] > _upperbound[0])
-	{
-	    _range_min[0] = _lowerbound[0];
-	    _range_max[0] = _upperbound[0];
 	}
     }
     

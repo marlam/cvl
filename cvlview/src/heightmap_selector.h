@@ -42,10 +42,7 @@ class HeightmapSelector : public QWidget
     private:
 	cvl_frame_t **_frame;
 	QCheckBox *_enable_box;
-	QRadioButton *_ch0_button;
-	QRadioButton *_ch1_button;
-	QRadioButton *_ch2_button;
-	QRadioButton *_ch3_button;
+	QRadioButton *_channel_button[4];
 	QRadioButton *_height_button;
 	QRadioButton *_distance_button;
 	QRadioButton *_quads_button;
@@ -57,6 +54,7 @@ class HeightmapSelector : public QWidget
 	QCheckBox *_showcuboid_box;
 	ColorSelector *_color_selector;
 	bool _lock;
+	bool _reset_on_next_update;
 
     private slots:
         void _button_clicked();
@@ -82,10 +80,10 @@ class HeightmapSelector : public QWidget
 
 	int channel() const
 	{
-	    return _ch0_button->isChecked() ? 0 
-		: _ch1_button->isChecked() ? 1
-		: _ch2_button->isChecked() ? 2
-		: _ch3_button->isChecked() ? 3
+	    return _channel_button[0]->isChecked() ? 0 
+		: _channel_button[1]->isChecked() ? 1
+		: _channel_button[2]->isChecked() ? 2
+		: _channel_button[3]->isChecked() ? 3
 		: -1;
 	}
 

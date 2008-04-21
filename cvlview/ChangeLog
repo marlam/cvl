@@ -13,6 +13,10 @@
 	src/heightmap_strip_vs.glsl, src/heightmap_quads_vs.glsl,
 	src/view_area.h, src/view_area.cpp, src/cvlview.h, src/cvlview.cpp,
 	src/Makefile.am: Finish GUI improvements.
+	* src/channel_info.cpp, src/color_selector.h, src/color_selector.cpp,
+	src/channel_selector.cpp, src/range_selector.cpp,
+	src/heightmap_selector.h, src/heightmap_selector.cpp,
+	src/view_area.cpp: More GUI tweaks.
 
 2008-04-19  Martin Lambers <marlam@marlam.de>
 

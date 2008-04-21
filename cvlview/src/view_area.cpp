@@ -206,7 +206,14 @@ void ViewArea::paintGL()
 	if (channel == -1)
 	{
 	    cvl_frame_set_format(_frame1, CVL_XYZ);
-	    cvl_convert_format(_frame1, *_frame);
+	    if (cvl_frame_format(*_frame) != CVL_UNKNOWN)
+	    {
+		cvl_convert_format(_frame1, *_frame);
+	    }
+	    else
+	    {
+		cvl_convert_format_forced(_frame1, *_frame, CVL_RGB);
+	    }
 	}
 	else
 	{

@@ -36,6 +36,7 @@ class ColorSelector : public QWidget
     private:
 	QPushButton *_button;
 	QColor _color;
+	float _default_color[3];
 
     private slots:
 	void _button_clicked();
@@ -58,6 +59,8 @@ class ColorSelector : public QWidget
 	{
 	    return _color.blueF();
 	}
+
+	void set_color(float r, float g, float b);
 
     public slots:
         void reset();

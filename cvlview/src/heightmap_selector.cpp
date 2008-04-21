@@ -40,8 +40,9 @@
 
 HeightmapSelector::HeightmapSelector(cvl_frame_t **frame, QWidget *parent) : QWidget(parent)
 {
-    _lock = false;
     _frame = frame;
+    _reset_on_next_update = true;
+    _lock = false;
     QGridLayout *layout = new QGridLayout;
 
     _enable_box = new QCheckBox("Enable 3D View");
@@ -64,24 +65,24 @@ HeightmapSelector::HeightmapSelector(cvl_frame_t **frame, QWidget *parent) : QWi
 
     QLabel *channel_label = new QLabel("Z channel:");
     layout->addWidget(channel_label, 2, 0, 1, 2);
-    _ch0_button = new QRadioButton("0");
-    connect(_ch0_button, SIGNAL(clicked()), this, SLOT(_button_clicked()));
-    layout->addWidget(_ch0_button, 2, 2, 1, 1);
-    _ch1_button = new QRadioButton("1");
-    connect(_ch1_button, SIGNAL(clicked()), this, SLOT(_button_clicked()));
-    layout->addWidget(_ch1_button, 2, 3, 1, 1);
-    _ch2_button = new QRadioButton("2");
-    connect(_ch2_button, SIGNAL(clicked()), this, SLOT(_button_clicked()));
-    layout->addWidget(_ch2_button, 2, 4, 1, 1);
-    _ch3_button = new QRadioButton("3");
-    connect(_ch3_button, SIGNAL(clicked()), this, SLOT(_button_clicked()));
-    layout->addWidget(_ch3_button, 2, 5, 1, 1);
+    _channel_button[0] = new QRadioButton("0");
+    connect(_channel_button[0], SIGNAL(clicked()), this, SLOT(_button_clicked()));
+    layout->addWidget(_channel_button[0], 2, 2, 1, 1);
+    _channel_button[1] = new QRadioButton("1");
+    connect(_channel_button[1], SIGNAL(clicked()), this, SLOT(_button_clicked()));
+    layout->addWidget(_channel_button[1], 2, 3, 1, 1);
+    _channel_button[2] = new QRadioButton("2");
+    connect(_channel_button[2], SIGNAL(clicked()), this, SLOT(_button_clicked()));
+    layout->addWidget(_channel_button[2], 2, 4, 1, 1);
+    _channel_button[3] = new QRadioButton("3");
+    connect(_channel_button[3], SIGNAL(clicked()), this, SLOT(_button_clicked()));
+    layout->addWidget(_channel_button[3], 2, 5, 1, 1);
     QButtonGroup *heightmap_group = new QButtonGroup();
-    heightmap_group->addButton(_ch0_button);
-    heightmap_group->addButton(_ch1_button);
-    heightmap_group->addButton(_ch2_button);
-    heightmap_group->addButton(_ch3_button);
-    _ch0_button->setChecked(true);
+    heightmap_group->addButton(_channel_button[0]);
+    heightmap_group->addButton(_channel_button[1]);
+    heightmap_group->addButton(_channel_button[2]);
+    heightmap_group->addButton(_channel_button[3]);
+    _channel_button[0]->setChecked(true);
 
     QLabel *data_label = new QLabel("Z data type:");
     layout->addWidget(data_label, 3, 0, 1, 2);
@@ -163,32 +164,111 @@ void HeightmapSelector::_height_factor_slider_changed(int f)
 void HeightmapSelector::update()
 {
     emit make_gl_context_current();
-    int active_channel = channel();
-    int channels = (*_frame) ? cvl_frame_channels(*_frame) : 0;
-    _ch0_button->setEnabled(channels >= 1);
-    _ch1_button->setEnabled(channels >= 2);
-    _ch2_button->setEnabled(channels >= 3);
-    _ch3_button->setEnabled(channels >= 4);
-    if (active_channel == 3 && channels >= 4)
+    if (_reset_on_next_update)
     {
-	_ch3_button->setChecked(true);
-    }
-    else if (active_channel == 2 && channels >= 3)
-    {
-	_ch2_button->setChecked(true);
-    }
-    else if (active_channel == 1 && channels >= 2)
-    {
-	_ch1_button->setChecked(true);
+	_enable_box->setCheckState(Qt::Unchecked);
+	_quads_button->setChecked(true);
+	_minmax_button->setChecked(true);
+	_height_factor_spinbox->setValue(1.0);
+	_showcuboid_box->setChecked(true);
+	_color_selector->set_color(1.0f, 1.0f, 1.0f);
+
+	if (!*_frame)
+	{
+	    _channel_button[0]->setEnabled(false);
+	    _channel_button[1]->setEnabled(false);
+	    _channel_button[2]->setEnabled(false);
+	    _channel_button[3]->setEnabled(false);
+	    _channel_button[0]->setChecked(true);
+	    _height_button->setChecked(true);
+	}
+	else
+	{
+	    int channels = cvl_frame_channels(*_frame);
+	    _channel_button[0]->setEnabled(channels >= 1);
+	    _channel_button[1]->setEnabled(channels >= 2);
+	    _channel_button[2]->setEnabled(channels >= 3);
+	    _channel_button[3]->setEnabled(channels >= 4);
+	    bool found_channel = false;
+	    for (int c = channels - 1; c >= 0 ; c--)
+	    {
+		if (cvl_frame_channel_name(*_frame, c))
+		{
+		    if (strstr(cvl_frame_channel_name(*_frame, c), "HEIGHT"))
+		    {
+			_channel_button[c]->setChecked(true);
+			_height_button->setChecked(true);
+			found_channel = true;
+			break;
+		    }
+		    else if (strstr(cvl_frame_channel_name(*_frame, c), "DEPTH"))
+		    {
+			_channel_button[c]->setChecked(true);
+			_distance_button->setChecked(true);
+			found_channel = true;
+			break;
+		    }
+		}
+	    }
+	    if (!found_channel && cvl_frame_format(*_frame) != CVL_XYZ)
+	    {
+		for (int c = channels - 1; c >= 0 ; c--)
+		{
+		    if (cvl_frame_channel_name(*_frame, c))
+		    {
+			if (strcmp(cvl_frame_channel_name(*_frame, c), "Z") == 0)
+			{
+			    _channel_button[c]->setChecked(true);
+			    _distance_button->setChecked(true);
+			    found_channel = true;
+			    break;
+			}
+			else if (strcmp(cvl_frame_channel_name(*_frame, c), "A") == 0)
+			{
+			    _channel_button[c]->setChecked(true);
+			    _height_button->setChecked(true);
+			    found_channel = true;
+			    break;
+			}
+		    }
+		}
+	    }
+	    if (!found_channel)
+	    {
+    		_channel_button[0]->setChecked(true);
+    		_height_button->setChecked(true);
+    	    }
+	}
+	_reset_on_next_update = false;
     }
     else
     {
-	_ch0_button->setChecked(true);
+	int active_channel = channel();
+	int channels = (*_frame) ? cvl_frame_channels(*_frame) : 0;
+	_channel_button[0]->setEnabled(channels >= 1);
+	_channel_button[1]->setEnabled(channels >= 2);
+	_channel_button[2]->setEnabled(channels >= 3);
+	_channel_button[3]->setEnabled(channels >= 4);
+	if (active_channel == 3 && channels >= 4)
+	{
+	    _channel_button[3]->setChecked(true);
+	}
+	else if (active_channel == 2 && channels >= 3)
+	{
+	    _channel_button[2]->setChecked(true);
+	}
+	else if (active_channel == 1 && channels >= 2)
+	{
+	    _channel_button[1]->setChecked(true);
+	}
+	else
+	{
+	    _channel_button[0]->setChecked(true);
+	}
     }
 }
 
 void HeightmapSelector::reset()
 {
-    _enable_box->setCheckState(Qt::Unchecked);
-    update();
+    _reset_on_next_update = true;
 }

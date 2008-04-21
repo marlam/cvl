@@ -36,16 +36,18 @@
 ColorSelector::ColorSelector(float r, float g, float b, QWidget *parent) 
 	: QWidget(parent)
 {
+    _default_color[0] = r;
+    _default_color[1] = g;
+    _default_color[2] = b;
+
     QGridLayout *layout = new QGridLayout;
 
-    _color = QColor(mh_iround(r * 255.0f), mh_iround(g * 255.0f), mh_iround(b * 255.0f));
     _button = new QPushButton();
     _button->setFixedSize(QSize(_button->sizeHint().width() / 2, _button->sizeHint().height()));
-    QPixmap pm(64, 64);
-    pm.fill(_color);
-    _button->setIcon(QIcon(pm));
     connect(_button, SIGNAL(clicked()), this, SLOT(_button_clicked()));
     layout->addWidget(_button, 0, 0);
+
+    set_color(r, g, b);
 
     layout->setRowStretch(1, 1);
     setLayout(layout);
@@ -57,18 +59,23 @@ ColorSelector::~ColorSelector()
 
 void ColorSelector::reset()
 {
-    _color = QColor(77, 77, 77);
+    set_color(_default_color[0], _default_color[1], _default_color[2]);
 }
 
 void ColorSelector::_button_clicked()
 {
-    QColor new_color = QColorDialog::getColor(_color, this);
-    if (new_color.isValid()) 
+    QColor color = QColorDialog::getColor(_color, this);
+    if (color.isValid()) 
     {
-	_color = new_color;
-	QPixmap pm(64, 64);
-	pm.fill(_color);
-	_button->setIcon(QIcon(pm));
+	set_color(color.redF(), color.greenF(), color.blueF());
     }
+}
+
+void ColorSelector::set_color(float r, float g, float b)
+{
+    _color = QColor(mh_iroundf(r * 255.0f), mh_iroundf(g * 255.0f), mh_iroundf(b * 255.0f));
+    QPixmap pm(64, 64);
+    pm.fill(_color);
+    _button->setIcon(QIcon(pm));
     emit color_changed();
 }
