@@ -105,7 +105,7 @@ void cvl_read_pnm(FILE *f, cvl_frame_t **frame)
 	return;
 
     const char errmsg[] = "Cannot read PNM frame";
-    typedef enum { PBM, PGM, PPM, RGBA } subformat_t;
+    typedef enum { PBM, PGM, LA, PPM, RGBA } subformat_t;
     subformat_t subformat;
     int width, height, size, maxval;
     int c;
@@ -228,15 +228,15 @@ void cvl_read_pnm(FILE *f, cvl_frame_t **frame)
 	{
 	    subformat = PBM;
 	}
-	else if (strcmp(tupletype, "GRAYSCALE") == 0)
+	else if (depth == 1)
 	{
 	    subformat = PGM;
 	}
-	else if (strcmp(tupletype, "RGB") == 0)
+	else if (depth == 3)
 	{
 	    subformat = PPM;
 	}
-	else if (strcmp(tupletype, "RGB_ALPHA") == 0)
+	else if (depth == 4)
 	{
 	    subformat = RGBA;
 	}
@@ -521,7 +521,7 @@ void cvl_write_pnm(FILE *f, cvl_frame_t *frame)
 	    }
 	    else
 	    {
-		error = (fprintf(f, "P7\nWIDTH %d\nHEIGHT %d\nDEPTH 4\nMAXVAL 255\nTUPLTYPE RGB_ALPHA\nENDHDR\n", 
+		error = (fprintf(f, "P7\nWIDTH %d\nHEIGHT %d\nDEPTH 4\nMAXVAL 255\nTUPLTYPE RGBA\nENDHDR\n", 
 			    cvl_frame_width(out), cvl_frame_height(out)) < 0
 			|| fwrite(p, 4 * size * sizeof(uint8_t), 1, f) != 1);
 	    }
