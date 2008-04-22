@@ -1,3 +1,7 @@
+2008-04-22  Martin Lambers <marlam@marlam.de>
+
+	* cvtool/cmd_channelextract.c: Fix number of channels in output.
+
 2008-04-21  Martin Lambers <marlam@marlam.de>
 
 	* NEWS, cvl/cvl_io.c: Fix PAM support. Add support for PAM files with

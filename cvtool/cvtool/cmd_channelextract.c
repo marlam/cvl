@@ -65,9 +65,10 @@ int cmd_channelextract(int argc, char *argv[])
 	{
 	    break;
 	}
-	newframe = cvl_frame_new_tpl(frame);
+	newframe = cvl_frame_new(cvl_frame_width(frame), cvl_frame_height(frame), 1,
+		cvl_frame_format(frame) == CVL_UNKNOWN ? CVL_UNKNOWN : CVL_LUM,
+		cvl_frame_type(frame), CVL_TEXTURE);
 	cvl_frame_set_taglist(newframe, cvl_taglist_copy(cvl_frame_taglist(frame)));
-	cvl_frame_set_format(newframe, cvl_frame_format(frame) == CVL_UNKNOWN ? CVL_UNKNOWN : CVL_LUM);
 	if (c.value >= 4 && c.value <= 6)
 	{
 	    if (cvl_frame_format(frame) != CVL_UNKNOWN)
