@@ -5,6 +5,8 @@
 	* cvl/cvl/cvl_visualization.h, cvl/cvl_visualization.c,
 	cvtool/cmd_visualize.c, tests/cmd_visualize.sh: Remove the defunct
 	needle visualization code.
+	* cvl/cvl_io.c: Fix writing of PNM frames with three channels and
+	format CVL_UNKNOWN.
 
 2008-04-21  Martin Lambers <marlam@marlam.de>
 

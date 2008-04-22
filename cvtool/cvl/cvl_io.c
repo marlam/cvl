@@ -587,7 +587,8 @@ void cvl_write_pnm(FILE *f, cvl_frame_t *frame)
 		    np[3 * i + 2] = p[4 * i + 2];
 		}
 		error = (fprintf(f, "P6\n%d %d\n255\n", cvl_frame_width(out), cvl_frame_height(out)) < 0
-			|| fwrite(p, 3 * size * sizeof(uint8_t), 1, f) != 1);
+			|| fwrite(np, 3 * size * sizeof(uint8_t), 1, f) != 1);
+		free(np);
 	    }
 	    else
 	    {
