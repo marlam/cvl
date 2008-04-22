@@ -45,7 +45,7 @@ ScaleSelector::ScaleSelector(cvl_frame_t **frame, QWidget *parent)
 
     QGridLayout *layout = new QGridLayout;
 
-    QLabel *zf_label = new QLabel("Scale:");
+    QLabel *zf_label = new QLabel("<strong>S</strong>");
     layout->addWidget(zf_label, 0, 0, 1, 2);
     _scalefactor_spinbox = new QDoubleSpinBox();
     _scalefactor_spinbox->setRange(0.01, 999.99);

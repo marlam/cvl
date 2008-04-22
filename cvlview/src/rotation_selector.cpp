@@ -40,32 +40,28 @@ RotationSelector::RotationSelector(QWidget *parent)
 
     QGridLayout *layout = new QGridLayout;
 
-    QLabel *rot_label = new QLabel("Rotation:");
-    layout->addWidget(rot_label, 0, 0, 1, 2);
+    QLabel *rot_label = new QLabel("<strong>R</strong>");
+    layout->addWidget(rot_label, 0, 0, 1, 1);
 
-    QLabel *xrot_label = new QLabel("X:");
-    layout->addWidget(xrot_label, 0, 2, 1, 1);
     _xrot_spinbox = new QDoubleSpinBox();
     _xrot_spinbox->setRange(0.0, 359.9);
     _xrot_spinbox->setWrapping(true);
     _xrot_spinbox->setSingleStep(1.0);
     _xrot_spinbox->setValue(0.0);
     connect(_xrot_spinbox, SIGNAL(valueChanged(double)), this, SLOT(_set_x_rotation(double)));
-    layout->addWidget(_xrot_spinbox, 0, 3, 1, 2);
+    layout->addWidget(_xrot_spinbox, 0, 1, 1, 2);
 
-    QLabel *yrot_label = new QLabel("Y:");
-    layout->addWidget(yrot_label, 0, 5, 1, 1);
     _yrot_spinbox = new QDoubleSpinBox();
     _yrot_spinbox->setRange(0.0, 359.9);
     _yrot_spinbox->setWrapping(true);
     _yrot_spinbox->setSingleStep(1.0);
     _yrot_spinbox->setValue(0.0);
     connect(_yrot_spinbox, SIGNAL(valueChanged(double)), this, SLOT(_set_y_rotation(double)));
-    layout->addWidget(_yrot_spinbox, 0, 6, 1, 2);
+    layout->addWidget(_yrot_spinbox, 0, 3, 1, 2);
     
     _reset_button = new QPushButton(tr("Reset"));
     connect(_reset_button, SIGNAL(clicked()), this, SLOT(_reset_button_clicked()));
-    layout->addWidget(_reset_button, 0, 8, 1, 1);
+    layout->addWidget(_reset_button, 0, 5, 1, 1);
 
     layout->setRowStretch(1, 1);
     setLayout(layout);

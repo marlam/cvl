@@ -40,30 +40,26 @@ TranslationSelector::TranslationSelector(QWidget *parent)
 
     QGridLayout *layout = new QGridLayout;
 
-    QLabel *translation_label = new QLabel("Translation:");
-    layout->addWidget(translation_label, 0, 0, 1, 2);
-    QLabel *xo_label = new QLabel("X:");
-    layout->addWidget(xo_label, 0, 2, 1, 1);
+    QLabel *translation_label = new QLabel("<strong>T</strong>");
+    layout->addWidget(translation_label, 0, 0, 1, 1);
     _x_offset_spinbox = new QSpinBox();
     _x_offset_spinbox->setRange(-9999, +9999);
     _x_offset_spinbox->setSingleStep(1);
     _x_offset_spinbox->setValue(0);
     connect(_x_offset_spinbox, SIGNAL(valueChanged(int)), this, SLOT(_set_x_offset(int)));
-    layout->addWidget(_x_offset_spinbox, 0, 3, 1, 2);
+    layout->addWidget(_x_offset_spinbox, 0, 1, 1, 2);
     
-    QLabel *yo_label = new QLabel("Y:");
-    layout->addWidget(yo_label, 0, 5, 1, 1);
     _y_offset_spinbox = new QSpinBox();
     _y_offset_spinbox->setRange(-9999, +9999);
     _y_offset_spinbox->setSingleStep(1);
     _y_offset_spinbox->setValue(0);
     connect(_y_offset_spinbox, SIGNAL(valueChanged(int)), this, SLOT(_set_y_offset(int)));
-    layout->addWidget(_y_offset_spinbox, 0, 6, 1, 2);
+    layout->addWidget(_y_offset_spinbox, 0, 3, 1, 2);
     
     _offset_reset_button = new QPushButton(tr("Ce&nter"));
     _offset_reset_button->setShortcut(tr("n"));
     connect(_offset_reset_button, SIGNAL(clicked()), this, SLOT(offset_reset_button_clicked()));
-    layout->addWidget(_offset_reset_button, 0, 8, 1, 2);
+    layout->addWidget(_offset_reset_button, 0, 5, 1, 2);
 
     layout->setRowStretch(1, 1);
     setLayout(layout);
