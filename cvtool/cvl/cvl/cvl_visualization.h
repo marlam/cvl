@@ -26,7 +26,4 @@
 
 void cvl_visualize_vector2_color(cvl_frame_t *dst, cvl_frame_t *src);
 
-cvl_frame_t *cvl_visualize_vector2_needle(cvl_frame_t *frame, 
-	int sample_x, int sample_y, int dist_x, int dist_y, float factor);
-
 #endif

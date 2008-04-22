@@ -36,9 +36,7 @@ void cmd_visualize_print_help(void)
 {
     mh_msg_fmt_req(
 	    "visualize scalar [-p|--pseudo-color] [-m|--min=<m>] [-M|--max=<M>] [-l|--log=<base>]\n"
-	    "visualize vector2 -m|--mode=color\n"
-	    "visualize vector2 -m|--mode=needle [-x|--sample-x=<x>] [-y|--sample-y=<y>] "
-	    "[-X|--dist-x=<dx>] [-Y|--dist-y=<dy>] [-f|--factor=<f>]\n"
+	    "visualize vector2\n"
 	    "\n"
 	    "visualize scalar: Visualizes scalar values by transforming values from [m,M] to [0,1] and "
 	    "writing the result as graylevel frames. M and m are automatically determined from the input "
@@ -47,15 +45,9 @@ void cmd_visualize_print_help(void)
 	    "pseudo colors are used instead of gray levels.\n"
 	    "visualize vector2: "
 	    "Reads vector fields as produced by other commands "
-	    "such as opticalflow, and visualizes them.\n"
-	    "Visualization as colors: Each of the x,y,z components, which range from -1 to 1, are "
-	    "transformed to R,G,B values that range from 0 to 1.\n"
-	    "Visualization as needle diagrams:\n"
-	    "Every x-th vector in horizontal direction and every y-th vector in vertical "
-	    "direction will be represented by a needle. The needles will have a distance of "
-	    "dx pixels in horizontal and dy pixels in vertical direction. The needle length "
-	    "is the length of the vector after it was scaled with the factor f. "
-	    "The default values are x=y=dx=dy=10, f=1.0.");
+	    "such as opticalflow, and visualizes them as colors: "
+	    "each of the x,y,z components, which range from -1 to 1, are "
+	    "transformed to R,G,B values that range from 0 to 1.");
 }
 
 
@@ -75,21 +67,8 @@ int cmd_visualize(int argc, char *argv[])
 	{ "log",          'l', MH_OPTION_FLOAT, &scalar_l, false },
 	mh_option_null
     };
-    const char *mode_names[] = { "color", "needle", NULL };
-    mh_option_name_t mode = { -1, mode_names };
-    mh_option_int_t sample_x = { 10, 1, INT_MAX };
-    mh_option_int_t sample_y = { 10, 1, INT_MAX };
-    mh_option_int_t dist_x = { 10, 1, INT_MAX };
-    mh_option_int_t dist_y = { 10, 1, INT_MAX };
-    mh_option_float_t factor = { 1.0, -FLT_MAX, true, FLT_MAX, true };
     mh_option_t vector2_options[] = 
     {
-	{ "mode",     'm', MH_OPTION_NAME,  &mode,     false },
-	{ "sample-x", 'x', MH_OPTION_INT,   &sample_x, false },
-	{ "sample-y", 'y', MH_OPTION_INT,   &sample_y, false },
-	{ "dist-x",   'X', MH_OPTION_INT,   &dist_x,   false },
-	{ "dist-y",   'Y', MH_OPTION_INT,   &dist_y,   false },
-	{ "factor",   'f', MH_OPTION_FLOAT, &factor,   false },
 	mh_option_null
     };
     cvl_frame_t *frame, *vis;
@@ -164,17 +143,9 @@ int cmd_visualize(int argc, char *argv[])
 	}
 	else // subcommand == VIS_VECTOR2
 	{
-	    if (mode.value == 0)
-	    {
-		vis = cvl_frame_new(cvl_frame_width(frame), cvl_frame_height(frame),
-			3, CVL_RGB, CVL_UINT8, CVL_TEXTURE);
-    		cvl_visualize_vector2_color(vis, frame);
-	    }
-	    else
-	    {
-		vis = cvl_visualize_vector2_needle(frame, sample_x.value, sample_y.value, 
-		     	dist_x.value, dist_y.value, factor.value);
-	    }
+    	    vis = cvl_frame_new(cvl_frame_width(frame), cvl_frame_height(frame),
+		    3, CVL_RGB, CVL_UINT8, CVL_TEXTURE);
+	    cvl_visualize_vector2_color(vis, frame);
 	}
 	cvl_frame_free(frame);
 	cvl_write(stdout, CVL_PNM, vis);

@@ -2,6 +2,9 @@
 
 	* cvtool/cmd_channelextract.c: Fix number of channels in output.
 	* cvtool/cmd_convert.c: Keep frame format if -f is not used.
+	* cvl/cvl/cvl_visualization.h, cvl/cvl_visualization.c,
+	cvtool/cmd_visualize.c, tests/cmd_visualize.sh: Remove the defunct
+	needle visualization code.
 
 2008-04-21  Martin Lambers <marlam@marlam.de>
 
