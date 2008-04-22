@@ -92,8 +92,10 @@ int cmd_convert(int argc, char *argv[])
 	{
 	    if (oldformat == CVL_LUM)
 		newformat = oldformat;
-	    else
+	    else if (cvl_frame_channels(frame) == 3)
 	     	newformat = (newtype == CVL_UINT8 ? CVL_RGB : CVL_XYZ);
+	    else
+		newformat = CVL_UNKNOWN;
 	}
 	else if (f.value == 0)
 	{

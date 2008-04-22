@@ -1,6 +1,7 @@
 2008-04-22  Martin Lambers <marlam@marlam.de>
 
 	* cvtool/cmd_channelextract.c: Fix number of channels in output.
+	* cvtool/cmd_convert.c: Keep frame format if -f is not used.
 
 2008-04-21  Martin Lambers <marlam@marlam.de>
 
