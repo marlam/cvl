@@ -37,9 +37,6 @@
 
 #include "mh.h"
 
-#include "glvm.h"
-using namespace glvm;
-
 #include "channel_info.h"
 #include "channel_selector.h"
 #include "scale_selector.h"
@@ -634,38 +631,34 @@ void ViewArea::paintGL()
 	glEnd();
 
     }
-    glFlush();
-    cvl_gl_state_restore();
-    cvl_gl_check_errors("GL rendering");
     /* Save area of the framebuffer that was rendered to. */
-    mat4 P;
-    glGetFloatv(GL_PROJECTION_MATRIX, P.vl);
-    P.transpose();
-    mat4 M;
-    glGetFloatv(GL_MODELVIEW_MATRIX, M.vl);
-    M.transpose();
-    mat4 PM = P * M;
-    int fbl = 0;
-    int fbr = _width - 1;
-    int fbt = 0;
-    int fbb = _height - 1;
-    /* TODO
+    double M[16], P[16];
+    int VP[4];
+    glGetDoublev(GL_PROJECTION_MATRIX, P);
+    glGetDoublev(GL_MODELVIEW_MATRIX, M);
+    glGetIntegerv(GL_VIEWPORT, VP);
+    int fbl = _width - 1;
+    int fbr = 0;
+    int fbt = _height - 1;
+    int fbb = 0;
     for (int c = 0; c < 8; c++)
     {
-	vec4 src(vec3(cuboid_corner[c]), 1.0);
-	vec4 dst = PM * src;
-	int cx = mh_iroundf(dst.x);
-	int cy = mh_iroundf(dst.y);
-	fbl = mh_maxi(0, mh_mini(fbl, cx));
-	fbr = mh_mini(_width - 1, mh_maxi(fbr, cx));
-	fbt = mh_maxi(0, mh_mini(fbt, cy));
-	fbb = mh_mini(_height - 1, mh_maxi(fbb, cy));
+	GLdouble vpx, vpy, vpz;
+	gluProject(cuboid_corners[c][0], cuboid_corners[c][1], cuboid_corners[c][2],
+		M, P, VP, &vpx, &vpy, &vpz);
+	vpy = static_cast<double>(_height - 1) - vpy;
+	fbl = mh_maxi(0, mh_mini(fbl, mh_iround(floor(vpx))));
+	fbr = mh_mini(_width - 1, mh_maxi(fbr, mh_iround(ceil(vpx))));
+	fbt = mh_maxi(0, mh_mini(fbt, mh_iround(floor(vpy))));
+	fbb = mh_mini(_height - 1, mh_maxi(fbb, mh_iround(ceil(vpy))));
     }
-    */
     _fb_x = fbl;
     _fb_y = fbt;
     _fb_w = fbr - fbl + 1;
     _fb_h = fbb - fbt + 1;
+    glFlush();
+    cvl_gl_state_restore();
+    cvl_gl_check_errors("GL rendering");
 
     unlock();
 }
