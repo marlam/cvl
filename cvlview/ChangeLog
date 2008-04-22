@@ -2,6 +2,7 @@
 
 	* src/view_area.cpp, src/Makefile.am: Fix computation of the used
 	viewport area for "Save current view" operations.
+	* configure.ac, Makefile.am: Remove unused vector/matrix lib.
 
 2008-04-21  Martin Lambers <marlam@marlam.de>
 
