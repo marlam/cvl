@@ -1,3 +1,10 @@
+2008-04-28  Martin Lambers <marlam@marlam.de>
+
+	* cvl/cvl/cvl_color.h, cvl/cvl_color.c,
+	cvl/glsl/color/pseudo_color.glsl, cvtool/cmd_visualize.c: Add an
+	invert option to pseudo coloring, to allow to use hue values in the
+	opposite direction.
+
 2008-04-22  Martin Lambers <marlam@marlam.de>
 
 	* cvtool/cmd_channelextract.c: Fix number of channels in output.

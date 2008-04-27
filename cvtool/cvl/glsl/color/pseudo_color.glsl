@@ -3,7 +3,7 @@
  * 
  * This file is part of CVL, a computer vision library.
  *
- * Copyright (C) 2007, 2008, 2008  Martin Lambers <marlam@marlam.de>
+ * Copyright (C) 2007, 2008  Martin Lambers <marlam@marlam.de>
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -28,11 +28,16 @@ uniform float factor;
 uniform float startcolor;
 uniform float lightness;
 uniform float xmin, xmax;
+uniform int invert;
 
 void main()
 {
     float x = texture2D(tex, gl_TexCoord[0].xy).CHANNEL;
     x = (clamp(x, xmin, xmax) - xmin) / (xmax - xmin);
+    if (bool(invert))
+    {
+	x = 1.0 - x;
+    }
 
     float H = (2.0 / 3.0) - startcolor - factor * x;
     if (H < -1.0)

@@ -1458,11 +1458,12 @@ void cvl_luminance_range(cvl_frame_t *dst, cvl_frame_t *src, float lum_min, floa
  * \param dst		The destination frame.
  * \param src		The source frame.
  * \param channel	The channel.
- * \param cyclic	Use cyclic pseudo colors?
- * \param startcolor    The color to map to the minimum value.
- * \param lightness	The usage of lightness variability.
  * \param min		The minimum value.
  * \param max		The maximum value.
+ * \param startcolor    The color to map to the minimum value.
+ * \param lightness	The usage of lightness variability.
+ * \param invert	Invert hue direction?
+ * \param cyclic	Use cyclic pseudo colors?
  * 
  * Transforms the values in channel \a channel (0-3) of the frame \a src to pseudo
  * colors and writes the result to \a dst. 
@@ -1470,20 +1471,25 @@ void cvl_luminance_range(cvl_frame_t *dst, cvl_frame_t *src, float lum_min, floa
  * minimum value. It must be from [0,1] and is usually 0 for blue.
  * The parameter \a lightness specifies the amount of lightness
  * variability in the pseudo color frame. It must be from [0,1] and is usually
- * 0. The channel values are expected to be in the range from \a min to \a max.
+ * 0.
+ * The channel values are expected to be in the range from \a min to \a max.
+ * If \a cyclic is set, then the used colors for the minimum and maximum colors
+ * are the same. If \a invert is set, then the startcolor will be used for the
+ * maximum instead of the minimum value.
  * The \a dst frame must be in #CVL_HSL format.
  */
 void cvl_pseudo_color(cvl_frame_t *dst, cvl_frame_t *src,
-	int channel, bool cyclic, float startcolor, float lightness, float min, float max)
+	int channel, float min, float max, 
+	float startcolor, float lightness, bool invert, bool cyclic)
 {
     cvl_assert(dst != NULL);
     cvl_assert(src != NULL);
     cvl_assert(dst != src);
     cvl_assert(cvl_frame_format(dst) == CVL_HSL);
     cvl_assert(channel >= 0 && channel <= cvl_frame_channels(src));
+    cvl_assert(min < max);
     cvl_assert(startcolor >= 0.0f && startcolor <= 1.0f);
     cvl_assert(lightness >= 0.0f && lightness <= 1.0f);
-    cvl_assert(min < max);
     if (cvl_error())
 	return;
 
@@ -1506,6 +1512,7 @@ void cvl_pseudo_color(cvl_frame_t *dst, cvl_frame_t *src,
     glUniform1f(glGetUniformLocation(prg, "lightness"), lightness);
     glUniform1f(glGetUniformLocation(prg, "xmin"), min);
     glUniform1f(glGetUniformLocation(prg, "xmax"), max);
+    glUniform1i(glGetUniformLocation(prg, "invert"), invert ? 1 : 0);
     cvl_transform(dst, src);
     cvl_check_errors();
 }

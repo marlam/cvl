@@ -39,7 +39,7 @@ void cmd_visualize_print_help(void)
 	    "visualize vector2\n"
 	    "\n"
 	    "visualize scalar: Visualizes scalar values by transforming values from [m,M] to [0,1] and "
-	    "writing the result as graylevel frames. M and m are automatically determined from the input "
+	    "writes the result as graylevel frames. M and m are automatically determined from the input "
 	    "if they are not given. By default, the transformation is linear. If --log is given, then "
 	    "the transformation will use the logarithm with the given base. If --pseudo-color is given, then "
 	    "pseudo colors are used instead of gray levels.\n"
@@ -135,7 +135,7 @@ int cmd_visualize(int argc, char *argv[])
 	    {
 		cvl_frame_t *tmp = cvl_frame_new(cvl_frame_width(vis), cvl_frame_height(vis), 
 			3, CVL_HSL, CVL_UINT8, CVL_TEXTURE);
-		cvl_pseudo_color(tmp, vis, 0, false, 0.0f, 0.0f, 0.0f, 1.0f);
+		cvl_pseudo_color(tmp, vis, 0, 0.0f, 1.0f, 0.0f, 0.0f, false, false);
 		cvl_frame_free(vis);
 		vis = tmp;
 	    }

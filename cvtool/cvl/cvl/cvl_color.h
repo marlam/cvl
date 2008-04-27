@@ -201,7 +201,8 @@ void cvl_transform_log(cvl_frame_t *dst, cvl_frame_t *src,
 	int channel, float min, float max, float base);
 void cvl_luminance_range(cvl_frame_t *dst, cvl_frame_t *src, float lum_min, float lum_max);
 void cvl_pseudo_color(cvl_frame_t *dst, cvl_frame_t *src,
-	int channel, bool cyclic, float startcolor, float lightness, float min, float max);
+	int channel, float min, float max, 
+	float startcolor, float lightness, bool invert, bool cyclic);
 void cvl_threshold(cvl_frame_t *dst, cvl_frame_t *src, int channel, float threshold);
 
 #endif
