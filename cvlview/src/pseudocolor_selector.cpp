@@ -42,6 +42,7 @@ PseudocolorSelector::PseudocolorSelector(ChannelSelector *channel_selector, QWid
     for (int c = -1; c <= 3; c++)
     {
 	_enabled[c + 1] = false;
+	_invert[c + 1] = false;
 	_cyclic[c + 1] = false;
 	_startcolor[c + 1] = 0.0f;
 	_lightness[c + 1] = 0.0f;
@@ -53,40 +54,45 @@ PseudocolorSelector::PseudocolorSelector(ChannelSelector *channel_selector, QWid
     connect(_enable_box, SIGNAL(stateChanged(int)), this, SLOT(_set_enable(int)));
     layout->addWidget(_enable_box, 0, 0, 1, 2);
 
+    _invert_box = new QCheckBox("Invert hue direction");
+    _invert_box->setCheckState(Qt::Unchecked);
+    connect(_invert_box, SIGNAL(stateChanged(int)), this, SLOT(_set_invert(int)));
+    layout->addWidget(_invert_box, 1, 0, 1, 2);
+
     _cyclic_box = new QCheckBox("Cyclic colors");
     _cyclic_box->setCheckState(Qt::Unchecked);
     connect(_cyclic_box, SIGNAL(stateChanged(int)), this, SLOT(_set_cyclic(int)));
-    layout->addWidget(_cyclic_box, 1, 0, 1, 2);
+    layout->addWidget(_cyclic_box, 2, 0, 1, 2);
 
     QLabel *startcolor_label = new QLabel("Start color:");
-    layout->addWidget(startcolor_label, 2, 0);
+    layout->addWidget(startcolor_label, 3, 0);
     _startcolor_spinbox = new QDoubleSpinBox();
     _startcolor_spinbox->setRange(0.00, 1.00);
     _startcolor_spinbox->setSingleStep(0.01);
     _startcolor_spinbox->setValue(0.0);
     connect(_startcolor_spinbox, SIGNAL(valueChanged(double)), this, SLOT(_set_startcolor(double)));
-    layout->addWidget(_startcolor_spinbox, 2, 1);
+    layout->addWidget(_startcolor_spinbox, 3, 1);
     _startcolor_slider = new QSlider(Qt::Horizontal, this);
     _startcolor_slider->setRange(0, 101);
     _startcolor_slider->setValue(0);
     connect(_startcolor_slider, SIGNAL(valueChanged(int)), this, SLOT(_startcolor_slider_changed(int)));
-    layout->addWidget(_startcolor_slider, 3, 0, 1, 2);
+    layout->addWidget(_startcolor_slider, 4, 0, 1, 2);
 
     QLabel *lightness_label = new QLabel("Lightness variability:");
-    layout->addWidget(lightness_label, 4, 0);
+    layout->addWidget(lightness_label, 5, 0);
     _lightness_spinbox = new QDoubleSpinBox();
     _lightness_spinbox->setRange(0.00, 1.00);
     _lightness_spinbox->setSingleStep(0.01);
     _lightness_spinbox->setValue(0.0);
     connect(_lightness_spinbox, SIGNAL(valueChanged(double)), this, SLOT(_set_lightness(double)));
-    layout->addWidget(_lightness_spinbox, 4, 1);
+    layout->addWidget(_lightness_spinbox, 5, 1);
     _lightness_slider = new QSlider(Qt::Horizontal, this);
     _lightness_slider->setRange(0, 101);
     _lightness_slider->setValue(0);
     connect(_lightness_slider, SIGNAL(valueChanged(int)), this, SLOT(_lightness_slider_changed(int)));
-    layout->addWidget(_lightness_slider, 5, 0, 1, 2);
+    layout->addWidget(_lightness_slider, 6, 0, 1, 2);
 
-    layout->setRowStretch(6, 1);
+    layout->setRowStretch(7, 1);
     setLayout(layout);
 }
 
@@ -99,6 +105,7 @@ void PseudocolorSelector::reset()
     _startcolor_slider->setValue(0);
     _lightness_slider->setValue(0);
     _enable_box->setCheckState(Qt::Unchecked);
+    _invert_box->setCheckState(Qt::Unchecked);
     _cyclic_box->setCheckState(Qt::Unchecked);
 }
 
@@ -106,6 +113,13 @@ void PseudocolorSelector::_set_enable(int e UNUSED)
 {
     int c = _channel_selector->get_channel() + 1;
     _enabled[c] = (_enable_box->checkState() == Qt::Checked);
+    emit pseudocolor_changed();
+}
+
+void PseudocolorSelector::_set_invert(int x UNUSED)
+{
+    int c = _channel_selector->get_channel() + 1;
+    _invert[c] = (_invert_box->checkState() == Qt::Checked);
     emit pseudocolor_changed();
 }
 
@@ -152,6 +166,7 @@ void PseudocolorSelector::update_channel()
 {
     int c = _channel_selector->get_channel() + 1;
     _enable_box->setCheckState(_enabled[c] ? Qt::Checked : Qt::Unchecked);
+    _invert_box->setCheckState(_invert[c] ? Qt::Checked : Qt::Unchecked);
     _cyclic_box->setCheckState(_cyclic[c] ? Qt::Checked : Qt::Unchecked);
     _startcolor_spinbox->setValue(_startcolor[c]);
     _lightness_spinbox->setValue(_lightness[c]);

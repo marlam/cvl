@@ -38,6 +38,7 @@ class PseudocolorSelector : public QWidget
     private:
 	ChannelSelector *_channel_selector;
 	QCheckBox *_enable_box;
+	QCheckBox *_invert_box;
 	QCheckBox *_cyclic_box;
 	QDoubleSpinBox *_startcolor_spinbox;
 	QSlider *_startcolor_slider;
@@ -45,12 +46,14 @@ class PseudocolorSelector : public QWidget
 	QSlider *_lightness_slider;
 	bool _lock;
 	bool _enabled[5];
+	bool _invert[5];
 	bool _cyclic[5];
 	float _startcolor[5];
 	float _lightness[5];
 
     private slots:
 	void _set_enable(int e UNUSED);
+	void _set_invert(int x UNUSED);
 	void _set_cyclic(int x UNUSED);
 	void _set_startcolor(double s);
         void _startcolor_slider_changed(int s);
@@ -64,6 +67,11 @@ class PseudocolorSelector : public QWidget
 	bool is_enabled(int c)
 	{
 	    return _enabled[c + 1];
+	}
+
+	bool is_inverse(int c)
+	{
+	    return _invert[c + 1];
 	}
 
 	bool is_cyclic(int c)

@@ -186,6 +186,7 @@ void ViewArea::paintGL()
 	float range_max = _range_selector->get_range_max(channel);
 	float gamma = _gamma_selector->get_gamma(channel);
 	bool pseudocolor = _pseudocolor_selector->is_enabled(channel);
+	bool pseudocolor_inverse = _pseudocolor_selector->is_inverse(channel);
 	bool pseudocolor_cyclic = _pseudocolor_selector->is_cyclic(channel);
 	float pseudocolor_startcolor = _pseudocolor_selector->get_startcolor(channel);
 	float pseudocolor_lightness = _pseudocolor_selector->get_lightness(channel);
@@ -250,8 +251,9 @@ void ViewArea::paintGL()
 	if (pseudocolor)
 	{
 	    cvl_frame_set_format(dst, CVL_HSL);
-	    cvl_pseudo_color(dst, src, (channel == -1 ? 1 : 0), pseudocolor_cyclic,
-	    	    pseudocolor_startcolor, pseudocolor_lightness, 0.0f, 1.0f);
+	    cvl_pseudo_color(dst, src, (channel == -1 ? 1 : 0), 0.0f, 1.0f,
+	    	    pseudocolor_startcolor, pseudocolor_lightness, 
+		    pseudocolor_inverse, pseudocolor_cyclic);
 	    src = dst;
 	    dst = (src == _frame1 ? _frame2 : _frame1);
 	}
