@@ -1,3 +1,7 @@
+2008-05-16  Martin Lambers <marlam@marlam.de>
+
+	* mhlib/mh_os.h: Remove non-portable MH_STDIN and MH_STDOUT macros.
+
 2008-04-28  Martin Lambers <marlam@marlam.de>
 
 	* cvl/cvl/cvl_color.h, cvl/cvl_color.c,

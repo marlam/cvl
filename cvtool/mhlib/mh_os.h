@@ -26,12 +26,8 @@
 
 #ifdef W32_NATIVE
 # define MH_DIRSEP '\\'
-# define MH_STDIN  "CON"
-# define MH_STDOUT "CON"
 #else
 # define MH_DIRSEP '/'
-# define MH_STDIN  "/dev/stdin"
-# define MH_STDOUT "/dev/stdout"
 #endif
 
 #ifdef __cplusplus
