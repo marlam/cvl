@@ -1,6 +1,7 @@
 Version 0.2.4:
 - The license was updated to GPLv3 or later.
 - Fixed build problems.
+- Bug fixes.
 - PAM files are now supported correctly, including those with two or four 
   channels.
 
