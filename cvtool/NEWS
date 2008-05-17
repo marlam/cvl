@@ -1,6 +1,6 @@
 Version 0.2.4:
 - The license was updated to GPLv3 or later.
-- VPATH builds now work correctly.
+- Fixed build problems.
 - PAM files are now supported correctly, including those with two or four 
   channels.
 
