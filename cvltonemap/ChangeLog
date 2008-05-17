@@ -2,6 +2,8 @@
 
 	* configure.ac: Bump version to 0.2.1. Require CVL >= 0.2.4 to benefit
 	from some bug fixes.
+	* NEWS, doc/cvltonemap.1, doc/cvltonemap.texi: Update for version
+	0.2.1.
 
 2008-05-16  Martin Lambers <marlam@marlam.de>
 

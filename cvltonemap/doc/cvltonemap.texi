@@ -1,10 +1,10 @@
 \input texinfo   @c -*-texinfo-*-
 @afourpaper
 @setfilename cvltonemap.info
-@set UPDATED January 9, 2008
-@set UPDATED-MONTH January 2008
-@set EDITION 0.2.0
-@set VERSION 0.2.0
+@set UPDATED May 17, 2008
+@set UPDATED-MONTH May 2008
+@set EDITION 0.2.1
+@set VERSION 0.2.1
 @settitle CVLTonemap @value{VERSION}
 
 @c Define new index for commands
