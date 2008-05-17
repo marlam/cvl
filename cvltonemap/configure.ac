@@ -20,7 +20,7 @@ dnl Process this file with autoconf to produce a configure script.
 #
 
 AC_PREREQ([2.61])
-AC_INIT([CVLTonemap], [0.2.0], [marlam@marlam.de])
+AC_INIT([CVLTonemap], [0.2.1], [marlam@marlam.de])
 AC_CONFIG_SRCDIR([src/cvltonemap.cpp])
 AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_MACRO_DIR([build-aux])
@@ -61,12 +61,12 @@ dnl CVL
 CVL_LIBS=""
 AC_LIB_HAVE_LINKFLAGS([cvl], [], 
 	[#include <cvl/cvl.h>
-	 #if CVL_VERSION_MAJOR < 0 || CVL_VERSION_MINOR < 2 || CVL_VERSION_PATCH < 3
+	 #if CVL_VERSION_MAJOR < 0 || CVL_VERSION_MINOR < 2 || CVL_VERSION_PATCH < 4
 	 CVL version too old
 	 #endif], 
 	[cvl_init();])
 if test "$HAVE_LIBCVL" != "yes"; then
-	AC_MSG_ERROR([could not find CVL >= 0.2.3])
+	AC_MSG_ERROR([could not find CVL >= 0.2.4])
 else
 	CVL_LIBS="$LIBCVL"
 fi

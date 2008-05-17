@@ -1,3 +1,8 @@
+2008-05-17  Martin Lambers <marlam@marlam.de>
+
+	* configure.ac: Bump version to 0.2.1. Require CVL >= 0.2.4 to benefit
+	from some bug fixes.
+
 2008-05-16  Martin Lambers <marlam@marlam.de>
 
 	* mhlib/mh_os.h: Remove non-portable MH_STDIN and MH_STDOUT macros.
