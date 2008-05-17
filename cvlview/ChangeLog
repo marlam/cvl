@@ -1,3 +1,7 @@
+2008-05-17  Martin Lambers <marlam@marlam.de>
+
+	* NEWS, doc/cvlview.1, doc/cvlview.texi: Update.
+
 2008-05-16  Martin Lambers <marlam@marlam.de>
 
 	* mhlib/mh_os.h: Remove non-portable MH_STDIN and MH_STDOUT macros.
