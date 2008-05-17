@@ -1,5 +1,7 @@
-Version 0.2.2:
-- Update license to GPLv3 or later.
+Version 0.3.0:
+- Updated license to GPLv3 or later.
+- Added new 3D view capability.
+- Fixed build problems.
 
 Version 0.2.1:
 - Bug fixes.
