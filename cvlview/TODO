@@ -1,0 +1,2 @@
+- Fix bug that adds a border around images when using "Save current view".
+- Add rotation around y axis for 3D view.

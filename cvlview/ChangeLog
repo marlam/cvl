@@ -1,3 +1,7 @@
+2008-06-17  Martin Lambers <marlam@marlam.de>
+
+	* TODO, Makefile.am: Add TODO file.
+
 2008-05-17  Martin Lambers <marlam@marlam.de>
 
 	* NEWS, doc/cvlview.1, doc/cvlview.texi: Update.
