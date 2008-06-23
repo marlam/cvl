@@ -2,6 +2,7 @@
 
 	* cvl/cvl_io.c: Fix error message when encountering an unexpected EOF
 	while reading PFS data.
+	* doc/cvtool.texi: Fix formatting of tonemap documentation.
 
 2008-05-17  Martin Lambers <marlam@marlam.de>
 

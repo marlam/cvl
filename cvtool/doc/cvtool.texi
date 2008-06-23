@@ -1251,13 +1251,12 @@ frame pair 0: standard deviation = 0.1969 0.1969 0.0000
 @node tonemap
 @subsection tonemap
 @cmindex tonemap
-@code{tonemap -m|--method=schlick94 [--brightness=@var{b}]}
-@code{tonemap -m|--method=tumblin99 [-l|--max-absolute-luminance=@var{l}] [--display-adaptation-level=@var{d}]
-[--max-displayable-contrast=@var{c}]}
-@code{tonemap -m|--method=drago03 [-l|--max-absolute-luminance=@var{l}] [--max-display-luminance=@var{d}] [--bias=@var{b}]}
-@code{tonemap -m|--method=reinhard05 [--intensity=@var{i}] [--light-adaptation=@var{l}] [--chromatic-adaptation=@var{c}]}
-@code{tonemap -m|--method=ashikhmin02 [-l|--max-absolute-luminance=@var{l}] [--local-contrast=@var{c}]}
-@code{tonemap -m|--method=durand02 [-l|--max-absolute-luminance=@var{l}] [--sigma-spatial=@var{ss}] [--sigma-color=@var{sc}] [--base-contrast=@var{bc}]}
+@code{tonemap -m|--method=schlick94 [--brightness=@var{b}]}@*
+@code{tonemap -m|--method=tumblin99 [-l|--max-absolute-luminance=@var{l}] [--display-adaptation-level=@var{d}] [--max-displayable-contrast=@var{c}]}@*
+@code{tonemap -m|--method=drago03 [-l|--max-absolute-luminance=@var{l}] [--max-display-luminance=@var{d}] [--bias=@var{b}]}@*
+@code{tonemap -m|--method=reinhard05 [--intensity=@var{i}] [--light-adaptation=@var{l}] [--chromatic-adaptation=@var{c}]}@*
+@code{tonemap -m|--method=ashikhmin02 [-l|--max-absolute-luminance=@var{l}] [--local-contrast=@var{c}]}@*
+@code{tonemap -m|--method=durand02 [-l|--max-absolute-luminance=@var{l}] [--sigma-spatial=@var{ss}] [--sigma-color=@var{sc}] [--base-contrast=@var{bc}]}@*
 @code{tonemap -m|--method=reinhard02 [--key-value=@var{a}] [--white=@var{w}] [--sharpness=@var{s}] [--epsilon=@var{e}]}
 
 Tone map frames. 
