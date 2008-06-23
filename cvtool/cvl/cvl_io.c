@@ -811,7 +811,8 @@ typedef enum
     CVL_PFS_CHANNELS,
     CVL_PFS_INPUT_ERROR, 
     CVL_PFS_INVALID_DATA_ERROR, 
-    CVL_PFS_UNSUPPORTED_FEATURE_ERROR 
+    CVL_PFS_UNSUPPORTED_FEATURE_ERROR,
+    CVL_PFS_EOF_IN_DATA
 } cvl_read_pfs_errtype_t;
 
 // Helper to read a PFS tag line
@@ -973,7 +974,7 @@ void cvl_read_pfs(FILE *f, cvl_frame_t **frame)
 	channel[i] = cvl_frame_new(width, height, 1, CVL_LUM, CVL_FLOAT, CVL_MEM);
 	if (fread(cvl_frame_pointer(channel[i]), sizeof(float), size, f) != size)
      	{
-	    errtype = (ferror(f) ? CVL_PFS_INPUT_ERROR : CVL_PFS_INVALID_DATA_ERROR);
+	    errtype = (ferror(f) ? CVL_PFS_INPUT_ERROR : CVL_PFS_EOF_IN_DATA);
 	    goto error_exit;
 	}
     }
@@ -1044,6 +1045,8 @@ error_exit:
 	cvl_error_set(CVL_ERROR_IO, "%s: %s", errmsg, strerror(errno));
     else if (errtype == CVL_PFS_INVALID_DATA_ERROR)
 	cvl_error_set(CVL_ERROR_DATA, "%s: %s", errmsg, "invalid header");
+    else if (errtype == CVL_PFS_EOF_IN_DATA)
+	cvl_error_set(CVL_ERROR_DATA, "%s: %s", errmsg, "incomplete data");
     else
 	cvl_error_set(CVL_ERROR_DATA, "%s: %s", errmsg, "unsupported data type");
     cvl_frame_free(channel[0]);

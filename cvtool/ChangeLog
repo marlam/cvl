@@ -1,3 +1,8 @@
+2008-06-23  Martin Lambers <marlam@marlam.de>
+
+	* cvl/cvl_io.c: Fix error message when encountering an unexpected EOF
+	while reading PFS data.
+
 2008-05-17  Martin Lambers <marlam@marlam.de>
 
 	* NEWS: Update.
