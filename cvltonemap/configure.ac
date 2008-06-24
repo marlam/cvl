@@ -59,7 +59,7 @@ AC_SEARCH_LIBS([sqrtf], [m])
 
 dnl CVL
 CVL_LIBS=""
-AC_LIB_HAVE_LINKFLAGS([cvl], [], 
+AC_LIB_HAVE_LINKFLAGS([cvl], [GLEW], 
 	[#include <cvl/cvl.h>
 	 #if CVL_VERSION_MAJOR < 0 || CVL_VERSION_MINOR < 2 || CVL_VERSION_PATCH < 4
 	 CVL version too old
