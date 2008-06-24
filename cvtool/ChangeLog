@@ -1,3 +1,8 @@
+2008-06-24  Martin Lambers <marlam@marlam.de>
+
+	* cvl/Makefile.am, cvtool/Makefile.am: Fix linking with libGLEW in
+	some situations.
+
 2008-06-23  Martin Lambers <marlam@marlam.de>
 
 	* cvl/cvl_io.c: Fix error message when encountering an unexpected EOF

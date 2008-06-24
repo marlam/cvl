@@ -182,7 +182,7 @@ BUILT_SOURCES = $(nodist_libcvl_la_SOURCES)
 
 CLEANFILES = $(BUILT_SOURCES)
 
-libcvl_la_LDFLAGS = -version-info $(LT_CURRENT):$(LT_REVISION):$(LT_AGE) $(GL_LIBS)
-libcvl_la_LIBADD = $(top_builddir)/mhlib/libmh.la $(top_builddir)/gnulib/libgnu.la
+libcvl_la_LDFLAGS = -version-info $(LT_CURRENT):$(LT_REVISION):$(LT_AGE)
+libcvl_la_LIBADD = $(GL_LIBS) $(top_builddir)/mhlib/libmh.la $(top_builddir)/gnulib/libgnu.la
 
 AM_CPPFLAGS = -I$(top_builddir)/gnulib -I$(top_srcdir)/gnulib -I$(top_srcdir)/mhlib

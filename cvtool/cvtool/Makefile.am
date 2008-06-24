@@ -40,9 +40,9 @@ cvtool_SOURCES = cvtool.c 	\
 	cmd_unsharpmask.c	\
 	cmd_visualize.c
 
-cvtool_LDADD = $(CAIRO_LIBS) $(LTLIBICONV)	\
-	$(top_builddir)/cvl/libcvl.la		\
-	$(top_builddir)/mhlib/libmh.la		\
+cvtool_LDADD = $(top_builddir)/cvl/libcvl.la		\
+	$(GL_LIBS) $(CAIRO_LIBS) $(LTLIBICONV)		\
+	$(top_builddir)/mhlib/libmh.la			\
 	$(top_builddir)/gnulib/libgnu.la
 
 AM_CPPFLAGS = \
