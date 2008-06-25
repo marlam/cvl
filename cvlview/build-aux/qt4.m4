@@ -74,7 +74,7 @@ if test "$windows" = "yes"; then
 else
 	AC_PATH_XTRA
 	QT4_LIBS="-lQtGui -lQtOpenGL -lQtCore"
-	QT4_LIBS="-Wl,-rpath,$QT4PFX/lib -L$QT4PFX/lib $QT4_LIBS $X_LIBS -lX11 -lXext -lXmu -lXt -lXi $X_EXTRA_LIBS -lGLU -lGL -lpthread"
+	QT4_LIBS="-Wl,-rpath,$QT4PFX/lib64 -L$QT4PFX/lib64 -Wl,-rpath,$QT4PFX/lib -L$QT4PFX/lib $QT4_LIBS $X_LIBS -lX11 -lXext -lXmu -lXt -lXi $X_EXTRA_LIBS -lGLU -lGL -lpthread"
 	QT4_CXXFLAGS="-I$QT4INCDIR -I$QT4INCDIR/QtGui -I$QT4INCDIR/QtCore -I$QT4INCDIR/QtOpenGL $X_CFLAGS -DQT_OPENGL_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DQT_SHARED"
 fi
 dnl Minimal set of files to test compiling and linking of a Qt application.

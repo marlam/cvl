@@ -1,3 +1,8 @@
+2008-06-25  Martin Lambers <marlam@marlam.de>
+
+	* build-aux/qt4.m4: Search Qt4 libs also in lib64. Reported by Rainer
+	Bachl. Thanks!
+
 2008-06-24  Martin Lambers <marlam@marlam.de>
 
 	* configure.ac: Fix linking with libGLEW in some situations.
