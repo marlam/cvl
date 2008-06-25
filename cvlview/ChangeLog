@@ -2,6 +2,7 @@
 
 	* build-aux/qt4.m4: Search Qt4 libs also in lib64. Reported by Rainer
 	Bachl. Thanks!
+	* TODO: Update.
 
 2008-06-24  Martin Lambers <marlam@marlam.de>
 
