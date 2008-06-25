@@ -1,3 +1,9 @@
+2008-06-25  Martin Lambers <marlam@marlam.de>
+
+	* cvl/cvl_io.c: Avoid to use cvl_channel_combine() in cvl_read_pfs()
+	because the source channels require too much graphics memory. Combine
+	the channels in main memory instead.
+
 2008-06-24  Martin Lambers <marlam@marlam.de>
 
 	* cvl/Makefile.am, cvtool/Makefile.am: Fix linking with libGLEW in

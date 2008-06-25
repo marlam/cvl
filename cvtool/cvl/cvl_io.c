@@ -812,7 +812,8 @@ typedef enum
     CVL_PFS_INPUT_ERROR, 
     CVL_PFS_INVALID_DATA_ERROR, 
     CVL_PFS_UNSUPPORTED_FEATURE_ERROR,
-    CVL_PFS_EOF_IN_DATA
+    CVL_PFS_EOF_IN_DATA,
+    CVL_PFS_ENOMEM
 } cvl_read_pfs_errtype_t;
 
 // Helper to read a PFS tag line
@@ -898,7 +899,7 @@ void cvl_read_pfs(FILE *f, cvl_frame_t **frame)
     char value[max_tag_len + 1];
     cvl_taglist_t *taglist = NULL;
     char endh_str[4];
-    cvl_frame_t *channel[4] = { NULL, NULL, NULL, NULL };
+    float *channel[4] = { NULL, NULL, NULL, NULL };
     cvl_context_t *ctx = cvl_context();
     int c;
     size_t l;
@@ -969,58 +970,118 @@ void cvl_read_pfs(FILE *f, cvl_frame_t **frame)
 	errtype = (ferror(f) ? CVL_PFS_INPUT_ERROR : CVL_PFS_INVALID_DATA_ERROR);
 	goto error_exit;
     }
-    for (int i = 0; i < channel_count; i++)
+    if (channel_count == 1)
     {
-	channel[i] = cvl_frame_new(width, height, 1, CVL_LUM, CVL_FLOAT, CVL_MEM);
-	if (fread(cvl_frame_pointer(channel[i]), sizeof(float), size, f) != size)
+	*frame = cvl_frame_new(width, height, 1, 
+		(strcmp(channel_name[0], "Y") == 0) ? CVL_LUM : CVL_UNKNOWN, 
+		CVL_FLOAT, CVL_MEM);
+	float *p = cvl_frame_pointer(*frame);
+	if (!p)
+    	{
+	    errtype = CVL_PFS_ENOMEM;
+	    goto error_exit;
+	}
+	if (fread(p, sizeof(float), size, f) != size)
      	{
 	    errtype = (ferror(f) ? CVL_PFS_INPUT_ERROR : CVL_PFS_EOF_IN_DATA);
 	    goto error_exit;
 	}
     }
-    if (channel_count == 1)
+    else
     {
-	*frame = cvl_frame_new(cvl_frame_width(channel[0]), cvl_frame_height(channel[0]), 
-    		1, (strcmp(channel_name[0], "Y") == 0) ? CVL_LUM : CVL_UNKNOWN, CVL_FLOAT, CVL_TEXTURE);
-	glUseProgram(0);
-	cvl_transform(*frame, channel[0]);
-    }
-    else if (channel_count == 2)
-    {
-	*frame = cvl_frame_new(cvl_frame_width(channel[0]), cvl_frame_height(channel[0]), 
-    		2, CVL_UNKNOWN, CVL_FLOAT, CVL_TEXTURE);
-	cvl_channel_combine(*frame, channel[0], channel[1], NULL, NULL);
-    }
-    else if (channel_count == 3)
-    {
-	cvl_frame_t *X, *Y, *Z;
-	X = (strcmp(channel_name[0], "X") == 0 ? channel[0] :
-		strcmp(channel_name[1], "X") == 0 ? channel[1] :
-		strcmp(channel_name[2], "X") == 0 ? channel[2] : NULL);
-	Y = (strcmp(channel_name[0], "Y") == 0 ? channel[0] :
-		strcmp(channel_name[1], "Y") == 0 ? channel[1] :
-		strcmp(channel_name[2], "Y") == 0 ? channel[2] : NULL);
-	Z = (strcmp(channel_name[0], "Z") == 0 ? channel[0] :
-		strcmp(channel_name[1], "Z") == 0 ? channel[1] :
-		strcmp(channel_name[2], "Z") == 0 ? channel[2] : NULL);
-	if (X && Y && Z)
+	for (int i = 0; i < channel_count; i++)
 	{
-	    *frame = cvl_frame_new(cvl_frame_width(channel[0]), cvl_frame_height(channel[0]), 
-		    3, CVL_XYZ, CVL_FLOAT, CVL_TEXTURE);
-	    cvl_channel_combine(*frame, X, Y, Z, NULL);
+	    if (!(channel[i] = malloc(size * sizeof(float))))
+	    {
+		errtype = CVL_PFS_ENOMEM;
+		goto error_exit;
+	    }
+	    if (fread(channel[i], sizeof(float), size, f) != size)
+	    {
+		errtype = (ferror(f) ? CVL_PFS_INPUT_ERROR : CVL_PFS_EOF_IN_DATA);
+		goto error_exit;
+	    }
+	}
+	if (channel_count == 2)
+	{
+	    *frame = cvl_frame_new(width, height, 2, CVL_UNKNOWN, CVL_FLOAT, CVL_MEM);
+	    float *p = cvl_frame_pointer(*frame);
+	    if (!p)
+	    {
+		errtype = CVL_PFS_ENOMEM;
+		goto error_exit;
+	    }
+	    for (size_t i = 0; i < size; i++)
+	    {
+		p[4 * i + 0] = channel[0][i];
+		p[4 * i + 1] = channel[1][i];
+		p[4 * i + 2] = 0.0f;
+		p[4 * i + 3] = 0.0f;
+	    }
+	}
+	else if (channel_count == 3)
+	{
+	    float *X, *Y, *Z;
+	    X = (strcmp(channel_name[0], "X") == 0 ? channel[0] :
+		    strcmp(channel_name[1], "X") == 0 ? channel[1] :
+		    strcmp(channel_name[2], "X") == 0 ? channel[2] : NULL);
+	    Y = (strcmp(channel_name[0], "Y") == 0 ? channel[0] :
+		    strcmp(channel_name[1], "Y") == 0 ? channel[1] :
+		    strcmp(channel_name[2], "Y") == 0 ? channel[2] : NULL);
+	    Z = (strcmp(channel_name[0], "Z") == 0 ? channel[0] :
+		    strcmp(channel_name[1], "Z") == 0 ? channel[1] :
+		    strcmp(channel_name[2], "Z") == 0 ? channel[2] : NULL);
+	    if (X && Y && Z)
+	    {
+		*frame = cvl_frame_new(width, height, 3, CVL_XYZ, CVL_FLOAT, CVL_MEM);
+		float *p = cvl_frame_pointer(*frame);
+		if (!p)
+		{
+		    errtype = CVL_PFS_ENOMEM;
+		    goto error_exit;
+		}
+		for (size_t i = 0; i < size; i++)
+		{
+		    p[3 * i + 0] = channel[0][i];
+		    p[3 * i + 1] = channel[1][i];
+		    p[3 * i + 2] = channel[2][i];
+		}
+	    }
+	    else
+	    {
+		*frame = cvl_frame_new(width, height, 3, CVL_UNKNOWN, CVL_FLOAT, CVL_MEM);
+		float *p = cvl_frame_pointer(*frame);
+		if (!p)
+		{
+		    errtype = CVL_PFS_ENOMEM;
+		    goto error_exit;
+		}
+		for (size_t i = 0; i < size; i++)
+		{
+		    p[4 * i + 0] = channel[0][i];
+		    p[4 * i + 1] = channel[1][i];
+		    p[4 * i + 2] = channel[2][i];
+		    p[4 * i + 3] = 0.0f;
+		}
+	    }
 	}
 	else
 	{
-	    *frame = cvl_frame_new(cvl_frame_width(channel[0]), cvl_frame_height(channel[0]), 
-		    3, CVL_UNKNOWN, CVL_FLOAT, CVL_TEXTURE);
-	    cvl_channel_combine(*frame, channel[0], channel[1], channel[2], NULL);
+	    *frame = cvl_frame_new(width, height, 4, CVL_UNKNOWN, CVL_FLOAT, CVL_MEM);
+    	    float *p = cvl_frame_pointer(*frame);
+	    if (!p)
+	    {
+		errtype = CVL_PFS_ENOMEM;
+		goto error_exit;
+	    }
+	    for (size_t i = 0; i < size; i++)
+	    {
+		p[4 * i + 0] = channel[0][i];
+		p[4 * i + 1] = channel[1][i];
+		p[4 * i + 2] = channel[2][i];
+		p[4 * i + 3] = channel[3][i];
+	    }
 	}
-    }
-    else
-    {
-	*frame = cvl_frame_new(cvl_frame_width(channel[0]), cvl_frame_height(channel[0]), 
-		4, CVL_UNKNOWN, CVL_FLOAT, CVL_TEXTURE);
-	cvl_channel_combine(*frame, channel[0], channel[1], channel[2], channel[3]);
     }
     if (cvl_frame_format(*frame) == CVL_UNKNOWN)
     {
@@ -1028,10 +1089,10 @@ void cvl_read_pfs(FILE *f, cvl_frame_t **frame)
 	    cvl_frame_set_channel_name(*frame, i, channel_name[i]);
     }
     cvl_frame_set_taglist(*frame, taglist);
-    cvl_frame_free(channel[0]);
-    cvl_frame_free(channel[1]);
-    cvl_frame_free(channel[2]);
-    cvl_frame_free(channel[3]);
+    free(channel[0]);
+    free(channel[1]);
+    free(channel[2]);
+    free(channel[3]);
 
     return;
 
@@ -1047,12 +1108,14 @@ error_exit:
 	cvl_error_set(CVL_ERROR_DATA, "%s: %s", errmsg, "invalid header");
     else if (errtype == CVL_PFS_EOF_IN_DATA)
 	cvl_error_set(CVL_ERROR_DATA, "%s: %s", errmsg, "incomplete data");
+    else if (errtype == CVL_PFS_ENOMEM)
+	cvl_error_set(CVL_ERROR_MEM, "%s: %s", errmsg, strerror(ENOMEM));
     else
 	cvl_error_set(CVL_ERROR_DATA, "%s: %s", errmsg, "unsupported data type");
-    cvl_frame_free(channel[0]);
-    cvl_frame_free(channel[1]);
-    cvl_frame_free(channel[2]);
-    cvl_frame_free(channel[3]);
+    free(channel[0]);
+    free(channel[1]);
+    free(channel[2]);
+    free(channel[3]);
     if (!*frame)
 	cvl_taglist_free(taglist);
     cvl_frame_free(*frame);
