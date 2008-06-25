@@ -3,11 +3,11 @@ dnl qt4.m4
 dnl 
 dnl This file is part of cvlview, an image viewer using the CVL library.
 dnl
-dnl Copyright (C) 2007  Martin Lambers <marlam@marlam.de>
+dnl Copyright (C) 2007, 2008  Martin Lambers <marlam@marlam.de>
 dnl
 dnl   This program is free software; you can redistribute it and/or modify
 dnl   it under the terms of the GNU General Public License as published by
-dnl   the Free Software Foundation; either version 2 of the License, or
+dnl   the Free Software Foundation; either version 3 of the License, or
 dnl   (at your option) any later version.
 dnl
 dnl   This program is distributed in the hope that it will be useful,
@@ -74,7 +74,7 @@ if test "$windows" = "yes"; then
 else
 	AC_PATH_XTRA
 	QT4_LIBS="-lQtGui -lQtOpenGL -lQtCore"
-	QT4_LIBS="-Wl,-rpath,$QT4PFX/lib -L$QT4PFX/lib $QT4_LIBS $X_LIBS -lX11 -lXext -lXmu -lXt -lXi $X_EXTRA_LIBS -lGLU -lGL -lpthread"
+	QT4_LIBS="-Wl,-rpath,$QT4PFX/lib64 -L$QT4PFX/lib64 -Wl,-rpath,$QT4PFX/lib -L$QT4PFX/lib $QT4_LIBS $X_LIBS -lX11 -lXext -lXmu -lXt -lXi $X_EXTRA_LIBS -lGLU -lGL -lpthread"
 	QT4_CXXFLAGS="-I$QT4INCDIR -I$QT4INCDIR/QtGui -I$QT4INCDIR/QtCore -I$QT4INCDIR/QtOpenGL $X_CFLAGS -DQT_OPENGL_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DQT_SHARED"
 fi
 dnl Minimal set of files to test compiling and linking of a Qt application.
