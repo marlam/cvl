@@ -37,9 +37,6 @@
 #include <GL/glew.h>
 #ifdef W32_NATIVE
 # include <GL/wglew.h>
-#elif defined _CVL_MESA
-# include <stdint.h>
-# include <GL/osmesa.h>
 #else
 # include <GL/glx.h>
 #endif
@@ -66,21 +63,8 @@
  */
 cvl_gl_context_t *cvl_gl_context_new(const char *display_name)
 {
-#ifdef W32_NATIVE
-
-    cvl__gl_context_t *c;
-    WNDCLASS wc;
-    PIXELFORMATDESCRIPTOR pfd;
-    int pixelformat;
-
-    if (!(c = malloc(sizeof(cvl__gl_context_t))))
-    {
-	return NULL;
-    }
-
-    /* The remaining W32 code in this function was adapted from 
-     * GLEW version 1.4.0, file glew/src/glewinfo.c, function 
-     * glewCreateContext() (W32 version).
+    /* The code in this function was adapted from GLEW version 1.4.0, 
+     * file glew/src/glewinfo.c, function glewCreateContext().
      *
      * Original copyright and license notice:
      *
@@ -113,6 +97,17 @@ cvl_gl_context_t *cvl_gl_context_new(const char *display_name)
      ** THE POSSIBILITY OF SUCH DAMAGE.
      */
 
+#ifdef W32_NATIVE
+
+    cvl__gl_context_t *c;
+    WNDCLASS wc;
+    PIXELFORMATDESCRIPTOR pfd;
+    int pixelformat;
+
+    if (!(c = malloc(sizeof(cvl__gl_context_t))))
+    {
+	return NULL;
+    }
     /* Register window class */
     ZeroMemory(&wc, sizeof(WNDCLASS));
     wc.hInstance = GetModuleHandle(NULL);
@@ -156,42 +151,11 @@ cvl_gl_context_t *cvl_gl_context_new(const char *display_name)
     cvl_gl_context_make_current((cvl_gl_context_t *)c);
     return (cvl_gl_context_t *)c;
 
-#elif defined _CVL_MESA
-
-    cvl__gl_context_t *c;
-
-    if (!(c = malloc(sizeof(cvl__gl_context_t))))
-    {
-	return NULL;
-    }
-    if (!(c->context = OSMesaCreateContext(OSMESA_RGBA, NULL)))
-    {
-	free(c);
-	return NULL;
-    }
-    cvl_gl_context_make_current((cvl_gl_context_t *)c);
-    return (cvl_gl_context_t *)c;
-
 #else
 
-    int glxversion_major, glxversion_minor;
-    const int single_buffer_attribs[] = 
-    { 
-	// The first line of the following list should be sufficient, but this
-	// causes massive problems with NVIDIAs proprietary 100.14.11 driver.
-	GLX_DRAWABLE_TYPE, GLX_PBUFFER_BIT, 
-	GLX_LEVEL, 0,
-	GLX_DOUBLEBUFFER, False,
-	GLX_STEREO, False,
-	GLX_RENDER_TYPE, GLX_RGBA_BIT,
-	GLX_X_RENDERABLE, True,
-	GLX_CONFIG_CAVEAT, GLX_NONE,
-	None 
-    };
-    const int pbuffer_attribs[] = { None };
-    GLXFBConfig *fbconfigs;
-    int fbconfigs_len;
     cvl__gl_context_t *c;
+    int attrib[] = { GLX_RGBA, GLX_DOUBLEBUFFER, None };
+    XSetWindowAttributes swa;
 
     if (!display_name)
     {
@@ -201,39 +165,38 @@ cvl_gl_context_t *cvl_gl_context_new(const char *display_name)
     {
 	return NULL;
     }
+    /* Open display */
     if (!(c->display = XOpenDisplay(display_name)))
     {
 	free(c);
 	return NULL;
     }
+    /* Query for glx */
     if (!glXQueryExtension(c->display, NULL, NULL))
     {
 	free(c);
 	return NULL;
     }
-    glXQueryVersion(c->display, &glxversion_major, &glxversion_minor);
-    if (glxversion_major < 1 || glxversion_minor < 3)
+    /* Choose visual */
+    if (!(c->visualinfo = glXChooseVisual(c->display, DefaultScreen(c->display), attrib)))
     {
 	free(c);
 	return NULL;
     }
-    if (!(fbconfigs = glXChooseFBConfig(c->display, DefaultScreen(c->display),
-		    single_buffer_attribs, &fbconfigs_len)))
+    /* Create context */
+    if (!(c->context = glXCreateContext(c->display, c->visualinfo, None, True)))
     {
 	free(c);
 	return NULL;
     }
-    if (!(c->pbuffer = glXCreatePbuffer(c->display, fbconfigs[0], pbuffer_attribs)))
-    {
-	free(c);
-	return NULL;
-    }
-    if (!(c->context = glXCreateNewContext(c->display, fbconfigs[0], GLX_RGBA_TYPE, NULL, True)))
-    {
-	free(c);
-	return NULL;
-    }
-    XFree(fbconfigs);
+    /* Create window */
+    c->colormap = XCreateColormap(c->display, RootWindow(c->display, c->visualinfo->screen), c->visualinfo->visual, AllocNone);
+    swa.border_pixel = 0;
+    swa.colormap = c->colormap;
+    c->window = XCreateWindow(c->display, RootWindow(c->display, c->visualinfo->screen), 
+	    0, 0, 1, 1, 0, c->visualinfo->depth, InputOutput, c->visualinfo->visual, 
+	    CWBorderPixel | CWColormap, &swa);
+    
     cvl_gl_context_make_current((cvl_gl_context_t *)c);
     return (cvl_gl_context_t *)c;
 
@@ -254,13 +217,9 @@ void cvl_gl_context_make_current(cvl_gl_context_t *ctx)
 
     wglMakeCurrent(_ctx->hdc, _ctx->hglrc);
 
-#elif defined _CVL_MESA
-
-    OSMesaMakeCurrent(_ctx->context, _ctx->buffer, GL_UNSIGNED_BYTE, 1, 1);
-
 #else
 
-    glXMakeContextCurrent(_ctx->display, _ctx->pbuffer, _ctx->pbuffer, _ctx->context);
+    glXMakeCurrent(_ctx->display, _ctx->window, _ctx->context);
 
 #endif
 }
@@ -286,20 +245,14 @@ void cvl_gl_context_free(cvl_gl_context_t *context)
 	free(_context);
     }
 
-#elif defined _CVL_MESA
-
-    if (_context)
-    {
-	OSMesaDestroyContext(_context->context);
-	free(_context);
-    }
-
 #else
 
     if (_context)
     {
 	glXDestroyContext(_context->display, _context->context);
-	glXDestroyPbuffer(_context->display, _context->pbuffer);
+	XDestroyWindow(_context->display, _context->window);
+	XFreeColormap(_context->display, _context->colormap);
+	XFree(_context->visualinfo);
 	XCloseDisplay(_context->display);
 	free(_context);
     }

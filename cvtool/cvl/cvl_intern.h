@@ -28,9 +28,6 @@
 #include <GL/glew.h>
 #ifdef W32_NATIVE
 # include <GL/wglew.h>
-#elif defined _CVL_MESA
-# include <stdint.h>
-# include <GL/osmesa.h>
 #else
 # include <GL/glx.h>
 #endif
@@ -43,13 +40,12 @@ typedef struct
     HWND hwnd;
     HDC hdc;
     HGLRC hglrc;
-#elif defined _CVL_MESA
-    OSMesaContext context;
-    uint32_t buffer[1];
 #else
     Display *display;
-    GLXPbuffer pbuffer;
     GLXContext context;
+    XVisualInfo* visualinfo;
+    Colormap colormap;
+    Window window;
 #endif
 } cvl__gl_context_t;
 
