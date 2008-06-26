@@ -1,3 +1,7 @@
+Version 0.3.1:
+- Better rotation handling in 3D view mode.
+- Capability to show a data pixel grid in 2D view mode.
+
 Version 0.3.0:
 - Updated license to GPLv3 or later.
 - Added new 3D view capability.

@@ -11,6 +11,7 @@
 	src/view_area.cpp, src/cvlview.h, src/cvlview.cpp, src/Makefile.am:
 	Add grid selector that allows to display a data pixel grid in flat view.
 	* TODO: Update.
+	* NEWS: Update.
 
 2008-06-25  Martin Lambers <marlam@marlam.de>
 
