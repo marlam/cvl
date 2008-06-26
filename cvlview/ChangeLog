@@ -14,6 +14,7 @@
 	* NEWS: Update.
 	* src/view_area.cpp: Fix "Save current view" functionality for 2D
 	view.
+	* TODO: Update.
 
 2008-06-25  Martin Lambers <marlam@marlam.de>
 
