@@ -29,12 +29,35 @@ uniform int src_height;
 uniform int dst_width;
 uniform int dst_height;
 
+// Implementation of round(). As of 20080626 only the NVIDIA driver supports
+// round(); the ATI driver does not.
+float myround(float x)
+{
+    float y;
+    if (x >= 0.0)
+    {
+	y = floor(x);
+	if (x - y >= 0.5)
+	{
+	    y += 1.0;
+	}
+    }
+    else
+    {
+	y = ceil(x);
+	if (y - x >= 0.5)
+	{
+	    y -= 1.0;
+	}
+    }
+    return y;
+}
 
 // Transform texture coordinates to an index.
 int coord_to_index(vec2 coord, int w, int h)
 {
-    int x = int(round((coord.x - (0.5 / float(w))) * float(w)));
-    int y = int(round((coord.y - (0.5 / float(h))) * float(h)));
+    int x = int(myround((coord.x - (0.5 / float(w))) * float(w)));
+    int y = int(myround((coord.y - (0.5 / float(h))) * float(h)));
     return y * w + x;
 }
 
