@@ -12,6 +12,7 @@ cvlview_SOURCES = main.cpp					\
 	rotation_selector.h rotation_selector.cpp		\
 	interpolation_selector.h interpolation_selector.cpp	\
 	color_selector.h color_selector.cpp			\
+	grid_selector.h grid_selector.cpp			\
 	frame_info.h frame_info.cpp				\
 	channel_info.h channel_info.cpp				\
 	range_selector.h range_selector.cpp			\
@@ -44,6 +45,7 @@ nodist_cvlview_SOURCES = \
 	moc_rotation_selector.cpp	\
 	moc_interpolation_selector.cpp	\
 	moc_color_selector.cpp		\
+	moc_grid_selector.cpp		\
 	moc_frame_info.cpp		\
 	moc_channel_info.cpp		\
 	moc_range_selector.cpp		\

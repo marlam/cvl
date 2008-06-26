@@ -44,6 +44,7 @@
 #include "rotation_selector.h"
 #include "interpolation_selector.h"
 #include "color_selector.h"
+#include "grid_selector.h"
 #include "range_selector.h"
 #include "gamma_selector.h"
 #include "pseudocolor_selector.h"
@@ -69,6 +70,7 @@ class ViewArea : public QGLWidget
 	RotationSelector *_rotation_selector;
 	InterpolationSelector *_interpolation_selector;
 	ColorSelector *_color_selector;
+	GridSelector *_grid_selector;
 	RangeSelector *_range_selector;
 	GammaSelector *_gamma_selector;
 	PseudocolorSelector *_pseudocolor_selector;
@@ -131,6 +133,7 @@ class ViewArea : public QGLWidget
 		RotationSelector *rotation_selector,
 		InterpolationSelector *interpolation_selector,
 		ColorSelector *color_selector,
+		GridSelector *grid_selector,
 		RangeSelector *range_selector,
 		GammaSelector *gamma_selector,
 		PseudocolorSelector *pseudocolor_selector,

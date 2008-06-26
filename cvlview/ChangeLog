@@ -7,6 +7,9 @@
 	src/view_area.cpp, src/cvlview.cpp, Makefile.am: Implement proper 3D
 	rotation with 2D mouse using gllib's ArcBall class.
 	* src/view_area.cpp: Only rotate when in 3D view mode.
+	* src/grid_selector.h, src/grid_selector.cpp, src/view_area.h,
+	src/view_area.cpp, src/cvlview.h, src/cvlview.cpp, src/Makefile.am:
+	Add grid selector that allows to display a data pixel grid in flat view.
 
 2008-06-25  Martin Lambers <marlam@marlam.de>
 

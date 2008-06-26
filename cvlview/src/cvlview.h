@@ -48,6 +48,7 @@
 #include "rotation_selector.h"
 #include "interpolation_selector.h"
 #include "color_selector.h"
+#include "grid_selector.h"
 #include "frame_info.h"
 #include "channel_info.h"
 #include "range_selector.h"
@@ -81,6 +82,7 @@ class CVLView : public QMainWindow
 	RotationSelector *_rotation_selector;
 	InterpolationSelector *_interpolation_selector;
 	ColorSelector *_color_selector;
+	GridSelector *_grid_selector;
 	FrameInfo *_frame_info;
 	ChannelInfo *_channel_info;
 	RangeSelector *_range_selector;

@@ -49,6 +49,7 @@ using namespace glvm;
 #include "rotation_selector.h"
 #include "interpolation_selector.h"
 #include "color_selector.h"
+#include "grid_selector.h"
 #include "range_selector.h"
 #include "gamma_selector.h"
 #include "pseudocolor_selector.h"
@@ -69,6 +70,7 @@ ViewArea::ViewArea(cvl_frame_t **frame,
 	RotationSelector *rotation_selector,
 	InterpolationSelector *interpolation_selector,
 	ColorSelector *color_selector,
+	GridSelector *grid_selector,
 	RangeSelector *range_selector,
 	GammaSelector *gamma_selector,
 	PseudocolorSelector *pseudocolor_selector,
@@ -105,6 +107,7 @@ ViewArea::ViewArea(cvl_frame_t **frame,
     _rotation_selector = rotation_selector;
     _interpolation_selector = interpolation_selector;
     _color_selector = color_selector;
+    _grid_selector = grid_selector;
     _range_selector = range_selector;
     _gamma_selector = gamma_selector;
     _pseudocolor_selector = pseudocolor_selector;
@@ -306,6 +309,10 @@ void ViewArea::paintGL()
     float background_r = _color_selector->get_r();
     float background_g = _color_selector->get_g();
     float background_b = _color_selector->get_b();
+    bool show_grid = _grid_selector->is_enabled();
+    float grid_r = _grid_selector->get_r();
+    float grid_g = _grid_selector->get_g();
+    float grid_b = _grid_selector->get_b();
     int height_channel = _heightmap_selector->channel();
     int height_mode = _heightmap_selector->mode();
     float height_factor = (_flat_view ? 0.0f : _heightmap_selector->height_factor());
@@ -396,6 +403,30 @@ void ViewArea::paintGL()
 	glTexCoord2f(0.0f, 0.0f);
 	glVertex2f(cuboid_left, cuboid_bottom);
 	glEnd();
+	if (show_grid)
+	{
+	    glDisable(GL_TEXTURE_2D);
+	    glDisable(GL_DEPTH_TEST);
+	    glEnable(GL_LINE_SMOOTH);
+	    glLineWidth(1.0f);
+	    glColor3f(grid_r, grid_g, grid_b);
+	    for (int y = 0; y <= h; y++)
+	    {
+		float yo = (static_cast<float>(y) / static_cast<float>(h)) * cuboid_height;
+		glBegin(GL_LINES);
+		glVertex2f(cuboid_left, cuboid_top + yo);
+		glVertex2f(cuboid_right, cuboid_top + yo);
+		glEnd();
+	    }
+	    for (int x = 0; x <= w; x++)
+    	    {
+		float xo = (static_cast<float>(x) / static_cast<float>(w)) * cuboid_width;
+		glBegin(GL_LINES);
+		glVertex2f(cuboid_left + xo, cuboid_top);
+		glVertex2f(cuboid_left + xo, cuboid_bottom);
+		glEnd();
+	    }
+	}
     }
     else if (height_mode == HeightmapSelector::QUADS)
     {

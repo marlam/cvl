@@ -59,6 +59,7 @@ using namespace glvm;
 #include "rotation_selector.h"
 #include "interpolation_selector.h"
 #include "color_selector.h"
+#include "grid_selector.h"
 #include "frame_info.h"
 #include "channel_info.h"
 #include "range_selector.h"
@@ -127,6 +128,9 @@ CVLView::CVLView()
     _color_selector = new ColorSelector(0.3f, 0.3f, 0.3f, _widget);
     connect(this, SIGNAL(new_datafile()), _color_selector, SLOT(reset()));
 
+    _grid_selector = new GridSelector(1.0f, 1.0f, 1.0f, _widget);
+    connect(this, SIGNAL(new_datafile()), _grid_selector, SLOT(reset()));
+
     _frame_info = new FrameInfo(&_datafile, &_frame, _widget);
     connect(this, SIGNAL(new_frame()), _frame_info, SLOT(update()));
     _frame_info->setFixedWidth(tools_width);
@@ -167,6 +171,7 @@ CVLView::CVLView()
 	    _rotation_selector,
 	    _interpolation_selector,
 	    _color_selector,
+	    _grid_selector,
 	    _range_selector,
 	    _gamma_selector,
 	    _pseudocolor_selector,
@@ -183,6 +188,7 @@ CVLView::CVLView()
     connect(_rotation_selector, SIGNAL(rotation_changed()), _view_area, SLOT(rotation_changed()));
     connect(_interpolation_selector, SIGNAL(interpolation_changed()), _view_area, SLOT(update()));
     connect(_color_selector, SIGNAL(color_changed()), _view_area, SLOT(update()));
+    connect(_grid_selector, SIGNAL(grid_changed()), _view_area, SLOT(update()));
     connect(_channel_info, SIGNAL(make_gl_context_current()), _view_area, SLOT(make_gl_context_current()));
     connect(_range_selector, SIGNAL(range_changed()), _view_area, SLOT(recompute()));
     connect(_range_selector, SIGNAL(make_gl_context_current()), _view_area, SLOT(make_gl_context_current()));
@@ -209,6 +215,8 @@ CVLView::CVLView()
     _toolbar1->addWidget(_interpolation_selector);
     _toolbar1->addSeparator();
     _toolbar1->addWidget(_color_selector);
+    _toolbar1->addSeparator();
+    _toolbar1->addWidget(_grid_selector);
 
     _toolbar2 = new QToolBar();
     _toolbar2->setEnabled(false);
