@@ -672,30 +672,48 @@ void ViewArea::paintGL()
 
     }
     /* Save area of the framebuffer that was rendered to. */
-    double M[16], P[16];
-    int VP[4];
-    glGetDoublev(GL_PROJECTION_MATRIX, P);
-    glGetDoublev(GL_MODELVIEW_MATRIX, M);
-    glGetIntegerv(GL_VIEWPORT, VP);
-    int fbl = _width - 1;
-    int fbr = 0;
-    int fbt = _height - 1;
-    int fbb = 0;
-    for (int c = 0; c < 8; c++)
+    if (_flat_view)
     {
-	GLdouble vpx, vpy, vpz;
-	gluProject(cuboid_corners[c][0], cuboid_corners[c][1], cuboid_corners[c][2],
-		M, P, VP, &vpx, &vpy, &vpz);
-	vpy = static_cast<double>(_height - 1) - vpy;
-	fbl = mh_maxi(0, mh_mini(fbl, mh_iround(floor(vpx))));
-	fbr = mh_mini(_width - 1, mh_maxi(fbr, mh_iround(ceil(vpx))));
-	fbt = mh_maxi(0, mh_mini(fbt, mh_iround(floor(vpy))));
-	fbb = mh_mini(_height - 1, mh_maxi(fbb, mh_iround(ceil(vpy))));
+	float x = static_cast<float>(w) / static_cast<float>(_width);
+     	float y = static_cast<float>(h) / static_cast<float>(_height);
+	float xo = static_cast<float>(2 * x_offset) / static_cast<float>(_width);
+	float yo = static_cast<float>(2 * y_offset) / static_cast<float>(_height);
+	int fbx = mh_iroundf(static_cast<float>(_width) / 2.0f + (-x + xo) * 0.5f * scale * static_cast<float>(_width));
+	int fby = mh_iroundf(static_cast<float>(_height) / 2.0f - (+y - yo) * 0.5f * scale * static_cast<float>(_height));
+	int fbw = mh_iroundf(x * scale * static_cast<float>(_width));
+	int fbh = mh_iroundf(y * scale * static_cast<float>(_height));
+	_fb_x = mh_clampi(fbx, 0, _width - 1);
+    	_fb_y = mh_clampi(fby, 0, _height - 1);
+    	_fb_w = mh_clampi(fbw + mh_mini(0, fbx), 1, _width - _fb_x);
+   	_fb_h = mh_clampi(fbh + mh_mini(0, fby), 1, _height - _fb_y);
     }
-    _fb_x = fbl;
-    _fb_y = fbt;
-    _fb_w = fbr - fbl + 1;
-    _fb_h = fbb - fbt + 1;
+    else
+    {
+	double M[16], P[16];
+	int VP[4];
+	glGetDoublev(GL_PROJECTION_MATRIX, P);
+	glGetDoublev(GL_MODELVIEW_MATRIX, M);
+	glGetIntegerv(GL_VIEWPORT, VP);
+	int fbl = _width - 1;
+	int fbr = 0;
+	int fbt = _height - 1;
+	int fbb = 0;
+	for (int c = 0; c < 8; c++)
+	{
+	    GLdouble vpx, vpy, vpz;
+	    gluProject(cuboid_corners[c][0], cuboid_corners[c][1], cuboid_corners[c][2],
+		    M, P, VP, &vpx, &vpy, &vpz);
+	    vpy = static_cast<double>(_height - 1) - vpy;
+	    fbl = mh_maxi(0, mh_mini(fbl, mh_iround(floor(vpx))));
+	    fbr = mh_mini(_width - 1, mh_maxi(fbr, mh_iround(ceil(vpx))));
+	    fbt = mh_maxi(0, mh_mini(fbt, mh_iround(floor(vpy))));
+	    fbb = mh_mini(_height - 1, mh_maxi(fbb, mh_iround(ceil(vpy))));
+	}
+	_fb_x = fbl;
+	_fb_y = fbt;
+	_fb_w = fbr - fbl + 1;
+	_fb_h = fbb - fbt + 1;
+    }
     glFlush();
     cvl_gl_state_restore();
     cvl_gl_check_errors("GL rendering");
