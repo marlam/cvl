@@ -1,3 +1,9 @@
+2008-06-26  Martin Lambers <marlam@marlam.de>
+
+	* gllib/Makefile.am, gllib/glvm.h, gllib/glvm-gl.h, gllib/arcball.h,
+	gllib/arcball.cpp, Makefile.am, configure.ac: Add gllib, a set of
+	useful routines for use with OpenGL.
+
 2008-06-25  Martin Lambers <marlam@marlam.de>
 
 	* build-aux/qt4.m4: Search Qt4 libs also in lib64. Reported by Rainer
