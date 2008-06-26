@@ -3,6 +3,9 @@
 	* gllib/Makefile.am, gllib/glvm.h, gllib/glvm-gl.h, gllib/arcball.h,
 	gllib/arcball.cpp, Makefile.am, configure.ac: Add gllib, a set of
 	useful routines for use with OpenGL.
+	* src/rotation_selector.h, src/rotation_selector.cpp, src/view_area.h,
+	src/view_area.cpp, src/cvlview.cpp, Makefile.am: Implement proper 3D
+	rotation with 2D mouse using gllib's ArcBall class.
 
 2008-06-25  Martin Lambers <marlam@marlam.de>
 

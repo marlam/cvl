@@ -28,6 +28,8 @@
 #include <QDoubleSpinBox>
 #include <QPushButton>
 
+#include "glvm.h"
+using namespace glvm;
 
 class RotationSelector : public QWidget
 {
@@ -37,12 +39,14 @@ class RotationSelector : public QWidget
 	QPushButton *_reset_button;
 	QDoubleSpinBox *_xrot_spinbox;
 	QDoubleSpinBox *_yrot_spinbox;
+	QDoubleSpinBox *_zrot_spinbox;
 	bool _lock;
 
     private slots:
 	void _reset_button_clicked();
 	void _set_x_rotation(double rx);
 	void _set_y_rotation(double ry);
+	void _set_z_rotation(double rz);
 
     public:
 	RotationSelector(QWidget *parent = NULL);	
@@ -58,14 +62,21 @@ class RotationSelector : public QWidget
 	    return _yrot_spinbox->value();
 	}
 
+	float get_z_rotation()
+	{
+	    return _zrot_spinbox->value();
+	}
+
 	void set_x_rotation(float rx);
 	void set_y_rotation(float ry);
+	void set_z_rotation(float rz);
 
     public slots:
         void reset();
+        void update_rotation(const quat &rotation);
 
     signals:
-	void view_changed();
+	void rotation_changed();
 };
 
 #endif

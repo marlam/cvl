@@ -34,6 +34,9 @@
 
 #include <cvl/cvl.h>
 
+#include "glvm.h"
+#include "arcball.h"
+
 #include "channel_info.h"
 #include "channel_selector.h"
 #include "scale_selector.h"
@@ -99,8 +102,8 @@ class ViewArea : public QGLWidget
 	// Dragging and rotating
 	bool _dragging;
 	QPoint _drag_startpoint;
-	bool _rotating;
-	QPoint _rotate_startpoint;
+	ArcBall *_arcball;
+	glvm::quat _rotation;
 	// Error handling
 	bool _cvl_init_failed;
 	bool _rendering_fails;
@@ -116,6 +119,7 @@ class ViewArea : public QGLWidget
 	void make_gl_context_current();
         void recompute();
         void update();
+	void rotation_changed();
 
     public:
 	ViewArea(cvl_frame_t **frame, 
@@ -155,6 +159,7 @@ class ViewArea : public QGLWidget
     signals:
 	void update_pixel_info(int x, int y, int channels, const float *val, const float *lum);
 	void update_size(int w, int h);
+	void update_rotation(const quat &rot);
 
     protected:
 	void initializeGL();

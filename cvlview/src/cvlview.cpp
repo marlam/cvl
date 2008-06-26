@@ -45,6 +45,9 @@
 #include <QFileInfo>
 #include <QStatusBar>
 
+#include "glvm.h"
+using namespace glvm;
+
 #include "err.h"
 #include "conf.h"
 #include "datafile.h"
@@ -177,7 +180,7 @@ CVLView::CVLView()
     connect(_scale_selector, SIGNAL(view_changed()), _view_area, SLOT(update()));
     connect(_scale_selector, SIGNAL(make_gl_context_current()), _view_area, SLOT(make_gl_context_current()));
     connect(_translation_selector, SIGNAL(view_changed()), _view_area, SLOT(update()));
-    connect(_rotation_selector, SIGNAL(view_changed()), _view_area, SLOT(update()));
+    connect(_rotation_selector, SIGNAL(rotation_changed()), _view_area, SLOT(rotation_changed()));
     connect(_interpolation_selector, SIGNAL(interpolation_changed()), _view_area, SLOT(update()));
     connect(_color_selector, SIGNAL(color_changed()), _view_area, SLOT(update()));
     connect(_channel_info, SIGNAL(make_gl_context_current()), _view_area, SLOT(make_gl_context_current()));
@@ -188,6 +191,7 @@ CVLView::CVLView()
     connect(_heightmap_selector, SIGNAL(heightmap_changed()), _view_area, SLOT(update()));
     connect(_heightmap_selector, SIGNAL(make_gl_context_current()), _view_area, SLOT(make_gl_context_current()));
     connect(_view_area, SIGNAL(update_size(int, int)), _scale_selector, SLOT(update_view_area_size(int, int)));
+    connect(_view_area, SIGNAL(update_rotation(const quat &)), _rotation_selector, SLOT(update_rotation(const quat &)));
 
     _pixel_info = new PixelInfo(this);
     connect(_view_area, SIGNAL(update_pixel_info(int, int, int, const float *, const float *)), 

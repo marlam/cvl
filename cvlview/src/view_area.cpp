@@ -37,6 +37,11 @@
 
 #include "mh.h"
 
+#include "glvm.h"
+#include "glvm-gl.h"
+using namespace glvm;
+#include "arcball.h"
+
 #include "channel_info.h"
 #include "channel_selector.h"
 #include "scale_selector.h"
@@ -75,7 +80,8 @@ ViewArea::ViewArea(cvl_frame_t **frame,
     _lock = false;
     _mouse_pos = QPoint(0, 0);
     _dragging = false;
-    _rotating = false;
+    _arcball = new ArcBall(min_size, min_size);
+    _rotation = quat(1.0f);
     _rendering_fails = false;
     _processed_frame = NULL;
     _render_frame = NULL;
@@ -168,6 +174,7 @@ void ViewArea::resizeGL(int width, int height)
 {
     _width = width;
     _height = height;
+    _arcball->resize(width, height);
     emit update_size(width, height);
 }
 
@@ -295,8 +302,6 @@ void ViewArea::paintGL()
     float scale = _scale_selector->get_scalefactor();
     int x_offset = _translation_selector->get_x_offset();
     int y_offset = _translation_selector->get_y_offset();
-    float x_rotate = (_flat_view ? 0.0f : _rotation_selector->get_x_rotation());
-    float y_rotate = (_flat_view ? 0.0f : _rotation_selector->get_y_rotation());
     bool interpolate = _interpolation_selector->is_enabled();
     float background_r = _color_selector->get_r();
     float background_g = _color_selector->get_g();
@@ -355,8 +360,7 @@ void ViewArea::paintGL()
 	    -2.0f * scale * static_cast<float>(y_offset), -2.0f);
     glScalef(scale * 2.0f * static_cast<float>(mh_maxi(w, h)), 
 	    scale * 2.0f * static_cast<float>(mh_maxi(w, h)), 1.0f);
-    glRotatef(x_rotate, 1.0f, 0.0f, 0.0f);
-    glRotatef(y_rotate, 0.0f, 1.0f, 0.0f);
+    glMultMatrix(_rotation.to_matrix4());
     float frame_width = static_cast<float>(w);
     float frame_height = static_cast<float>(h);
     float cuboid_left, cuboid_top, cuboid_width, cuboid_height, cuboid_right, cuboid_bottom;
@@ -665,6 +669,11 @@ void ViewArea::paintGL()
     unlock();
 }
 
+void ViewArea::make_gl_context_current()
+{
+    makeCurrent();
+}
+
 void ViewArea::recompute()
 {
     _recompute = true;
@@ -676,9 +685,13 @@ void ViewArea::update()
     updateGL();
 }
 
-void ViewArea::make_gl_context_current()
+void ViewArea::rotation_changed()
 {
-    makeCurrent();
+    _rotation.from_euler_angles(
+	    mh_deg_to_rad(_rotation_selector->get_x_rotation()),
+	    mh_deg_to_rad(_rotation_selector->get_y_rotation()),
+	    mh_deg_to_rad(_rotation_selector->get_z_rotation()));
+    update();
 }
 
 QImage ViewArea::get_image()
@@ -741,8 +754,7 @@ void ViewArea::mousePressEvent(QMouseEvent *event)
     }
     if (event->button() == Qt::RightButton)
     {
-	_rotate_startpoint = event->pos();
-	_rotating = true;
+	_arcball->start(event->pos().x(), event->pos().y());
     }
 }
 
@@ -757,7 +769,7 @@ void ViewArea::mouseReleaseEvent(QMouseEvent *event)
     }
     if (event->button() == Qt::RightButton)
     {
-	_rotating = false;
+	_arcball->stop();
     }
 }
 
@@ -782,20 +794,11 @@ void ViewArea::mouseMoveEvent(QMouseEvent *event)
 	unlock();
 	update();
     }
-    if (_rotating)
+    quat new_rotation = _arcball->rotation(event->pos().x(), event->pos().y(), _rotation);
+    if ((new_rotation - _rotation).magnitude() >= 0.00001f)
     {
-       	QPoint rotate_endpoint = event->pos();
-	int rotate_offset_x = mh_iroundf(static_cast<float>(rotate_endpoint.x() - _rotate_startpoint.x())
-		/ _scale_selector->get_scalefactor());
-	int rotate_offset_y = mh_iroundf(static_cast<float>(rotate_endpoint.y() - _rotate_startpoint.y())
-		/ _scale_selector->get_scalefactor());
-	_rotate_startpoint = rotate_endpoint;
-	lock();
-	_rotation_selector->set_x_rotation(_rotation_selector->get_x_rotation() 
-		+ 0.1f * static_cast<float>(rotate_offset_y));
-	_rotation_selector->set_y_rotation(_rotation_selector->get_y_rotation() 
-		+ 0.1f * static_cast<float>(rotate_offset_x));
-	unlock();
+	_rotation = new_rotation;
+	emit update_rotation(_rotation);
 	update();
     }
 
