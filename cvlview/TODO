@@ -1,4 +1,1 @@
 - Fix bug that adds a border around images when using "Save current view".
-- Add rotation around y axis for 3D view.
-- Add option to show a grid around pixels in 2D view. With free color
-  choosing.
