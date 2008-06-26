@@ -6,6 +6,7 @@
 	* src/rotation_selector.h, src/rotation_selector.cpp, src/view_area.h,
 	src/view_area.cpp, src/cvlview.cpp, Makefile.am: Implement proper 3D
 	rotation with 2D mouse using gllib's ArcBall class.
+	* src/view_area.cpp: Only rotate when in 3D view mode.
 
 2008-06-25  Martin Lambers <marlam@marlam.de>
 

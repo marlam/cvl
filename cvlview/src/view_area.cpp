@@ -360,7 +360,10 @@ void ViewArea::paintGL()
 	    -2.0f * scale * static_cast<float>(y_offset), -2.0f);
     glScalef(scale * 2.0f * static_cast<float>(mh_maxi(w, h)), 
 	    scale * 2.0f * static_cast<float>(mh_maxi(w, h)), 1.0f);
-    glMultMatrix(_rotation.to_matrix4());
+    if (!_flat_view)
+    {
+	glMultMatrix(_rotation.to_matrix4());
+    }
     float frame_width = static_cast<float>(w);
     float frame_height = static_cast<float>(h);
     float cuboid_left, cuboid_top, cuboid_width, cuboid_height, cuboid_right, cuboid_bottom;
