@@ -1,3 +1,8 @@
+2008-06-27  Martin Lambers <marlam@marlam.de>
+
+	* cvl/cvl_io.c: Fix loading of PFS files with one channel and unknown
+	format. The bug was introduced on 2008-06-25.
+
 2008-06-26  Martin Lambers <marlam@marlam.de>
 
 	* cvl/cvl_intern.h, cvl/cvl_gl.c: Replace the GLX implementation of

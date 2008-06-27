@@ -972,9 +972,7 @@ void cvl_read_pfs(FILE *f, cvl_frame_t **frame)
     }
     if (channel_count == 1)
     {
-	*frame = cvl_frame_new(width, height, 1, 
-		(strcmp(channel_name[0], "Y") == 0) ? CVL_LUM : CVL_UNKNOWN, 
-		CVL_FLOAT, CVL_MEM);
+	*frame = cvl_frame_new(width, height, 1, CVL_LUM, CVL_FLOAT, CVL_MEM);
 	float *p = cvl_frame_pointer(*frame);
 	if (!p)
     	{
@@ -985,6 +983,10 @@ void cvl_read_pfs(FILE *f, cvl_frame_t **frame)
      	{
 	    errtype = (ferror(f) ? CVL_PFS_INPUT_ERROR : CVL_PFS_EOF_IN_DATA);
 	    goto error_exit;
+	}
+	if (strcmp(channel_name[0], "Y") != 0)
+	{
+	    cvl_frame_set_format(*frame, CVL_UNKNOWN);
 	}
     }
     else
