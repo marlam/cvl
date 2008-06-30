@@ -849,7 +849,7 @@ void ViewArea::mouseMoveEvent(QMouseEvent *event)
     quat new_rotation = _arcball->rotation(event->pos().x(), event->pos().y(), _rotation);
     if ((new_rotation - _rotation).magnitude() >= 0.00001f)
     {
-	_rotation = new_rotation;
+	_rotation = normalize(new_rotation);
 	emit update_rotation(_rotation);
 	update();
     }

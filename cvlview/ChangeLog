@@ -1,3 +1,8 @@
+2008-06-30  Martin Lambers <marlam@marlam.de>
+
+	* src/view_area.cpp: Normalize rotation quaternion to guarantee that
+	it represents a rotation.
+
 2008-06-26  Martin Lambers <marlam@marlam.de>
 
 	* gllib/Makefile.am, gllib/glvm.h, gllib/glvm-gl.h, gllib/arcball.h,
