@@ -6,6 +6,8 @@
 	* gllib/glvm-color.h, Makefile.am: New GLVM module for color space
 	conversions.
 	* src/view_area.cpp: Use glvm-color module.
+	* src/view_area.cpp: Print luminance information in pixel info area
+	also for formats like RGBA, RGBZ, and others.
 
 2008-06-26  Martin Lambers <marlam@marlam.de>
 

@@ -916,7 +916,106 @@ void ViewArea::pixel_info()
 	}
 	else // UNKNOWN
 	{
-	    emit update_pixel_info(frame_x, frame_y, cvl_frame_channels(*_frame), _pixel_val, NULL);
+	    /* Try to find values from which to compute a luminance, so that
+	     * luminance values are also shown for RGBA, RGBZ and the like. */
+	    bool have_pixel_lum = false;
+	    if (!have_pixel_lum)
+	    {
+		int x = -1;
+		int y = -1;
+		int z = -1;
+		for (int c = 0; c < cvl_frame_channels(*_frame); c++)
+		{
+		    if (strcmp(cvl_frame_channel_name(*_frame, c), "X") == 0)
+		    {
+			x = c;
+		    }
+		    else if (strcmp(cvl_frame_channel_name(*_frame, c), "Y") == 0)
+		    {
+			y = c;
+		    }
+		    else if (strcmp(cvl_frame_channel_name(*_frame, c), "Z") == 0)
+		    {
+			z = c;
+		    }
+		}
+		if (x >= 0 && y >= 0 && z >= 0)
+		{
+		    _pixel_lum = xyz_to_lum(vec3(_pixel_val[x], _pixel_val[y], _pixel_val[z]));
+		    have_pixel_lum = true;
+		}
+	    }
+	    if (!have_pixel_lum)
+	    {
+		int r = -1;
+		int g = -1;
+		int b = -1;
+		for (int c = 0; c < cvl_frame_channels(*_frame); c++)
+		{
+		    if (strcmp(cvl_frame_channel_name(*_frame, c), "R") == 0)
+		    {
+			r = c;
+		    }
+		    else if (strcmp(cvl_frame_channel_name(*_frame, c), "G") == 0)
+		    {
+			g = c;
+		    }
+		    else if (strcmp(cvl_frame_channel_name(*_frame, c), "B") == 0)
+		    {
+			b = c;
+		    }
+		}
+		if (r >= 0 && g >= 0 && b >= 0)
+		{
+		    _pixel_lum = glvm::rgb_to_lum(vec3(_pixel_val[r], _pixel_val[g], _pixel_val[b]));
+		    have_pixel_lum = true;
+		}
+	    }
+	    if (!have_pixel_lum)
+	    {
+		int h = -1;
+		int s = -1;
+		int l = -1;
+		for (int c = 0; c < cvl_frame_channels(*_frame); c++)
+		{
+		    if (strcmp(cvl_frame_channel_name(*_frame, c), "H") == 0)
+		    {
+			h = c;
+		    }
+		    else if (strcmp(cvl_frame_channel_name(*_frame, c), "S") == 0)
+		    {
+			s = c;
+		    }
+		    else if (strcmp(cvl_frame_channel_name(*_frame, c), "L") == 0)
+		    {
+			l = c;
+		    }
+		}
+		if (h >= 0 && s >= 0 && l >= 0)
+		{
+		    _pixel_lum = glvm::rgb_to_lum(glvm::hsl_to_rgb(vec3(_pixel_val[h], _pixel_val[s], _pixel_val[l])));
+		    have_pixel_lum = true;
+		}
+	    }
+	    if (!have_pixel_lum)
+	    {
+		int y = -1;
+		for (int c = 0; c < cvl_frame_channels(*_frame); c++)
+		{
+		    if (strcmp(cvl_frame_channel_name(*_frame, c), "Y") == 0)
+		    {
+			y = c;
+			break;
+		    }
+		}
+		if (y >= 0)
+		{
+		    _pixel_lum = _pixel_val[y];
+		    have_pixel_lum = true;
+		}
+	    }
+	    emit update_pixel_info(frame_x, frame_y, cvl_frame_channels(*_frame), _pixel_val, 
+		    have_pixel_lum ? &_pixel_lum : NULL);
 	}
     }
     else
