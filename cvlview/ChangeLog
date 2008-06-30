@@ -8,6 +8,7 @@
 	* src/view_area.cpp: Use glvm-color module.
 	* src/view_area.cpp: Print luminance information in pixel info area
 	also for formats like RGBA, RGBZ, and others.
+	* TODO: Update.
 
 2008-06-26  Martin Lambers <marlam@marlam.de>
 
