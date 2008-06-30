@@ -13,6 +13,7 @@
 	src/heightmap_quads_vs.glsl, src/heightmap_strip_vs.glsl,
 	src/view_area.cpp: Always use selected range as height data. Apply
 	gamma correction to height data.
+	* src/heightmap_selector.cpp: Improve height factor selection.
 
 2008-06-26  Martin Lambers <marlam@marlam.de>
 
