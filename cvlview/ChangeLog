@@ -2,6 +2,9 @@
 
 	* src/view_area.cpp: Normalize rotation quaternion to guarantee that
 	it represents a rotation.
+	* gllib/glvm.h: Improvements.
+	* gllib/glvm-color.h, Makefile.am: New GLVM module for color space
+	conversions.
 
 2008-06-26  Martin Lambers <marlam@marlam.de>
 
