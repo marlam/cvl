@@ -51,6 +51,344 @@
 
 namespace glvm
 {
+    template<typename T>
+    inline T sin(const T x)
+    {
+	return ::sin(x);
+    }
+
+    template<>
+    inline float sin(const float x)
+    {
+	return ::sinf(x);
+    }
+
+    template<typename T>
+    inline T cos(const T x)
+    {
+	return ::cos(x);
+    }
+
+    template<>
+    inline float cos(const float x)
+    {
+	return ::cosf(x);
+    }
+
+    template<typename T>
+    inline T tan(const T x)
+    {
+	return ::tan(x);
+    }
+
+    template<>
+    inline float tan(const float x)
+    {
+	return ::tanf(x);
+    }
+
+    template<typename T>
+    inline T asin(const T x)
+    {
+	return ::asin(x);
+    }
+
+    template<>
+    inline float asin(const float x)
+    {
+	return ::asinf(x);
+    }
+
+    template<typename T>
+    inline T acos(const T x)
+    {
+	return ::acos(x);
+    }
+
+    template<>
+    inline float acos(const float x)
+    {
+	return ::acosf(x);
+    }
+
+    template<typename T>
+    inline T atan(const T x)
+    {
+	return ::atan(x);
+    }
+
+    template<>
+    inline float atan(const float x)
+    {
+	return ::atanf(x);
+    }
+
+    template<typename T>
+    inline T atan(const T x, const T y)
+    {
+	return ::atan2(x, y);
+    }
+
+    template<>
+    inline float atan(const float x, const float y)
+    {
+	return ::atan2f(x, y);
+    }
+
+    template<typename T>
+    inline T radians(const T x)
+    {
+	return x * static_cast<T>(M_PI / 180.0);
+    }
+
+    template<typename T>
+    inline T degrees(const T x)
+    {
+	return x * static_cast<T>(180.0 / M_PI);
+    }
+
+    template<typename T>
+    inline T pow(const T x, const T p)
+    {
+	return ::pow(x, p);
+    }
+
+    template<>
+    inline float pow(const float x, const float p)
+    {
+	return ::powf(x, p);
+    }
+
+    template<typename T>
+    inline T exp(const T x)
+    {
+	return ::exp(x);
+    }
+
+    template<>
+    inline float exp(const float x)
+    {
+	return ::expf(x);
+    }
+
+    template<typename T>
+    inline T exp2(const T x)
+    {
+	return ::exp2(x);
+    }
+
+    template<>
+    inline float exp2(const float x)
+    {
+	return ::exp2f(x);
+    }
+
+    template<typename T>
+    inline T log(const T x)
+    {
+	return ::log(x);
+    }
+
+    template<>
+    inline float log(const float x)
+    {
+	return ::logf(x);
+    }
+
+    template<typename T>
+    inline T log2(const T x)
+    {
+	return ::log2(x);
+    }
+
+    template<>
+    inline float log2(const float x)
+    {
+	return ::log2f(x);
+    }
+
+    template<typename T>
+    inline T log10(const T x)
+    {
+	return ::log10(x);
+    }
+
+    template<>
+    inline float log10(const float x)
+    {
+	return ::log10f(x);
+    }
+
+    template<typename T>
+    inline T sqrt(const T x)
+    {
+	return ::sqrt(x);
+    }
+
+    template<>
+    inline float sqrt(const float x)
+    {
+	return ::sqrtf(x);
+    }
+
+    template<typename T>
+    inline T inversesqrt(const T x)
+    {
+	return static_cast<T>(1) / glvm::sqrt(x);
+    }
+
+    template<typename T>
+    inline bool isfinite(const T x)
+    {
+	return static_cast<bool>(std::isfinite(x));
+    }
+
+    template<typename T>
+    inline bool isinf(const T x)
+    {
+	return static_cast<bool>(std::isinf(x));
+    }
+
+    template<typename T>
+    inline bool isnan(const T x)
+    {
+	return static_cast<bool>(std::isnan(x));
+    }
+
+    template<typename T>
+    inline bool isnormal(const T x)
+    {
+	return static_cast<bool>(std::isnormal(x));
+    }
+
+    template<typename T>
+    inline T abs(const T x)
+    {
+	return ::fabs(x);
+    }
+
+    template<>
+    inline float abs(const float x)
+    {
+	return ::fabsf(x);
+    }
+
+    template<>
+    inline int abs(const int x)
+    {
+	return ::abs(x);
+    }
+
+    template<typename T>
+    inline T sign(const T x)
+    {
+	return (x < static_cast<T>(0) ? static_cast<T>(-1) : x > static_cast<T>(0) ? static_cast<T>(+1) : static_cast<T>(0));
+    }
+
+    template<typename T>
+    inline T floor(const T x)
+    {
+	return ::floor(x);
+    }
+
+    template<>
+    inline float floor(const float x)
+    {
+	return ::floorf(x);
+    }
+
+    template<>
+    inline int floor(const int x)
+    {
+	return x;
+    }
+
+    template<typename T>
+    inline T ceil(const T x)
+    {
+	return ::ceil(x);
+    }
+
+    template<>
+    inline float ceil(const float x)
+    {
+	return ::ceilf(x);
+    }
+
+    template<>
+    inline int ceil(const int x)
+    {
+	return x;
+    }
+
+    template<typename T>
+    inline T round(const T x)
+    {
+	return ::round(x);
+    }
+
+    template<>
+    inline float round(const float x)
+    {
+	return ::roundf(x);
+    }
+
+    template<>
+    inline int round(const int x)
+    {
+	return x;
+    }
+
+    template<typename T>
+    inline T fract(const T x)
+    {
+	return x - glvm::floor(x);
+    }
+
+    template<typename T>
+    inline T min(const T x, const T y)
+    {
+	return (x < y ? x : y);
+    }
+
+    template<typename T>
+    inline T max(const T x, const T y)
+    {
+	return (x > y ? x : y);
+    }
+
+    template<typename T>
+    inline T clamp(const T x, const T minval, const T maxval)
+    {
+	return glvm::min(maxval, glvm::max(minval, x));
+    }
+
+    template<typename T>
+    inline T mix(const T x, const T y, const T alpha)
+    {
+	return x * (static_cast<T>(1) - alpha) + y * alpha;
+    }
+
+    template<typename T>
+    inline T step(const T x, const T edge)
+    {
+	return (x < edge ? static_cast<T>(0) : static_cast<T>(1));
+    }
+
+    template<typename T>
+    inline T smoothstep(const T x, const T edge0, const T edge1)
+    {
+	const T t = glvm::clamp((x - edge0) / (edge1 - edge0), static_cast<T>(0), static_cast<T>(1));
+	return t * t * (static_cast<T>(3) - t * static_cast<T>(2));
+    }
+
+    template<typename T>
+    inline T mod(const T x, const T y)
+    {
+	return x - glvm::floor(x / y) * y;
+    }
+
+
     template<typename T> class vector2
     {
 	public:
@@ -287,49 +625,70 @@ namespace glvm
 
 	/* Trigonometric functions */
 
-	vector2 sin() const;
+	vector2 sin() const
+	{
+	    return vector2(glvm::sin(x), glvm::sin(y));
+	}
 
 	friend vector2 sin(const vector2 &v)
 	{
     	    return v.sin();
        	}
 
-	vector2 cos() const;
+	vector2 cos() const
+	{
+	    return vector2(glvm::cos(x), glvm::cos(y));
+	}
 
 	friend vector2 cos(const vector2 &v)
 	{
     	    return v.cos();
        	}
 
-	vector2 tan() const;
+	vector2 tan() const
+	{
+	    return vector2(glvm::tan(x), glvm::tan(y));
+	}
 
 	friend vector2 tan(const vector2 &v)
 	{
     	    return v.tan();
        	}
 
-	vector2 asin() const;
+	vector2 asin() const
+	{
+	    return vector2(glvm::asin(x), glvm::asin(y));
+	}
 
 	friend vector2 asin(const vector2 &v)
 	{
     	    return v.asin();
        	}
 
-	vector2 acos() const;
+	vector2 acos() const
+	{
+	    return vector2(glvm::acos(x), glvm::acos(y));
+	}
 
 	friend vector2 acos(const vector2 &v)
 	{
     	    return v.acos();
        	}
 
-	vector2 atan() const;
+	vector2 atan() const
+	{
+	    return vector2(glvm::atan(x), glvm::atan(y));
+	}
 
 	friend vector2 atan(const vector2 &v)
 	{
     	    return v.atan();
        	}
 
-	vector2 atan(const vector2 &v) const;
+	vector2 atan(const vector2 &v) const
+	{
+	    return vector2(glvm::atan(x, v.x), glvm::atan(y, v.y));
+	}
 
 	friend vector2 atan(const vector2 &v, const vector2 &w)
 	{
@@ -358,49 +717,70 @@ namespace glvm
 
 	/* Exponential functions */
 
-	vector2 pow(const T p) const;
+	vector2 pow(const T p) const
+	{
+	    return vector2(glvm::pow(x, p), glvm::pow(y, p));
+	}
 
 	friend vector2 pow(const vector2 &v, const T p)
 	{
     	    return v.pow(p);
        	}
 
-	vector2 exp() const;
+	vector2 exp() const
+	{
+	    return vector2(glvm::exp(x), glvm::exp(y));
+	}
 
 	friend vector2 exp(const vector2 &v)
 	{
     	    return v.exp();
        	}
 
-	vector2 exp2() const;
+	vector2 exp2() const
+	{
+	    return vector2(glvm::exp2(x), glvm::exp2(y));
+	}
 
 	friend vector2 exp2(const vector2 &v)
 	{
     	    return v.exp2();
        	}
 
-	vector2 log() const;
+	vector2 log() const
+	{
+	    return vector2(glvm::log(x), glvm::log(y));
+	}
 
 	friend vector2 log(const vector2 &v)
 	{
     	    return v.log();
        	}
 
-	vector2 log2() const;
+	vector2 log2() const
+	{
+	    return vector2(glvm::log2(x), glvm::log2(y));
+	}
 
 	friend vector2 log2(const vector2 &v)
 	{
     	    return v.log2();
        	}
 
-	vector2 log10() const;
+	vector2 log10() const
+	{
+	    return vector2(glvm::log10(x), glvm::log10(y));
+	}
 
 	friend vector2 log10(const vector2 &v)
 	{
     	    return v.log10();
        	}
 
-	vector2 sqrt() const;
+	vector2 sqrt() const
+	{
+	    return vector2(glvm::sqrt(x), glvm::sqrt(y));
+	}
 
 	friend vector2 sqrt(const vector2 &v)
 	{
@@ -421,7 +801,7 @@ namespace glvm
 
 	vector2<bool> isfinite() const
 	{
-	    return vector2<bool>(isfinite(x), isfinite(y));
+	    return vector2<bool>(glvm::isfinite(x), glvm::isfinite(y));
 	}
 
 	friend vector2<bool> isfinite(const vector2 &v)
@@ -431,7 +811,7 @@ namespace glvm
 
 	vector2<bool> isinf() const
 	{
-	    return vector2<bool>(isinf(x), isinf(y));
+	    return vector2<bool>(glvm::isinf(x), glvm::isinf(y));
 	}
 
 	friend vector2<bool> isinf(const vector2 &v)
@@ -441,7 +821,7 @@ namespace glvm
 
 	vector2<bool> isnan() const
 	{
-	    return vector2<bool>(isnan(x), isnan(y));
+	    return vector2<bool>(glvm::isnan(x), glvm::isnan(y));
 	}
 
 	friend vector2<bool> isnan(const vector2 &v)
@@ -451,7 +831,7 @@ namespace glvm
 
 	vector2<bool> isnormal() const
 	{
-	    return vector2<bool>(isnormal(x), isnormal(y));
+	    return vector2<bool>(glvm::isnormal(x), glvm::isnormal(y));
 	}
 
 	friend vector2<bool> isnormal(const vector2 &v)
@@ -459,7 +839,10 @@ namespace glvm
 	    return v.isnormal();
 	}
 
-	vector2 abs() const;
+	vector2 abs() const
+	{
+	    return vector2(glvm::abs(x), glvm::abs(y));
+	}
 
 	friend vector2 abs(const vector2 &v)
 	{
@@ -468,9 +851,7 @@ namespace glvm
 
 	vector2 sign() const
 	{
-	    return vector2(
-		    x < static_cast<T>(0) ? static_cast<T>(-1) : x > static_cast<T>(0) ? static_cast<T>(+1) : static_cast<T>(0),
-		    y < static_cast<T>(0) ? static_cast<T>(-1) : y > static_cast<T>(0) ? static_cast<T>(+1) : static_cast<T>(0));
+	    return vector2(glvm::sign(x), glvm::sign(y));
 	}
 
 	friend vector2 sign(const vector2 &v)
@@ -478,21 +859,30 @@ namespace glvm
     	    return v.sign();
        	}
 
-	vector2 floor() const;
+	vector2 floor() const
+	{
+	    return vector2(glvm::floor(x), glvm::floor(y));
+	}
 
 	friend vector2 floor(const vector2 &v)
 	{
     	    return v.floor();
        	}
 
-	vector2 ceil() const;
+	vector2 ceil() const
+	{
+	    return vector2(glvm::ceil(x), glvm::ceil(y));
+	}
 
 	friend vector2 ceil(const vector2 &v)
 	{
     	    return v.ceil();
        	}
 
-	vector2 round() const;
+	vector2 round() const
+	{
+	    return vector2(glvm::round(x), glvm::round(y));
+	}
 
 	friend vector2 round(const vector2 &v)
 	{
@@ -663,7 +1053,10 @@ namespace glvm
 
 	/* Geometric functions */
 
-	T length() const;
+	T length() const
+	{
+	    return glvm::sqrt(x * x + y * y);
+	}
 
 	friend T length(const vector2 &v)
 	{
@@ -720,7 +1113,12 @@ namespace glvm
     	    return I.reflect(N);
        	}
 
-	vector2 refract(const vector2 &N, T eta) const;
+	vector2 refract(const vector2 &N, T eta) const
+	{
+	    const T d = N.dot(*this);
+	    const T k = static_cast<T>(1) - eta * eta * (static_cast<T>(1) - d * d);
+	    return k < static_cast<T>(0) ? vector2<T>(static_cast<T>(0)) : *this * eta - N * (eta * d + glvm::sqrt(k));
+	}
 
 	friend vector2 refract(const vector2 &I, const vector2 &N, T eta)
 	{
@@ -805,8 +1203,6 @@ namespace glvm
 	}
     };
 
-    /* These functions use optimized code (mostly for the <float> variant). */
-
     template<typename T>
     inline std::string vector2<T>::str() const
     {
@@ -833,255 +1229,6 @@ namespace glvm
 	return os.str();
     }
 
-    template<typename T>
-    inline vector2<T> vector2<T>::sin() const
-    {
-	return vector2(sin(x), sin(y));
-    }
-
-    template<>
-    inline vector2<float> vector2<float>::sin() const
-    {
-	return vector2<float>(sinf(x), sinf(y));
-    }
-
-    template<typename T>
-    inline vector2<T> vector2<T>::cos() const
-    {
-	return vector2<T>(cos(x), cos(y));
-    }
-
-    template<>
-    inline vector2<float> vector2<float>::cos() const
-    {
-	return vector2<float>(cosf(x), cosf(y));
-    }
-
-    template<typename T>
-    inline vector2<T> vector2<T>::tan() const
-    {
-	return vector2<T>(tan(x), tan(y));
-    }
-
-    template<>
-    inline vector2<float> vector2<float>::tan() const
-    {
-	return vector2<float>(tanf(x), tanf(y));
-    }
-
-    template<typename T>
-    inline vector2<T> vector2<T>::asin() const
-    {
-	return vector2<T>(asin(x), asin(y));
-    }
-
-    template<>
-    inline vector2<float> vector2<float>::asin() const
-    {
-	return vector2<float>(asinf(x), asinf(y));
-    }
-
-    template<typename T>
-    inline vector2<T> vector2<T>::acos() const
-    {
-	return vector2<T>(acos(x), acos(y));
-    }
-
-    template<>
-    inline vector2<float> vector2<float>::acos() const
-    {
-	return vector2<float>(acosf(x), acosf(y));
-    }
-
-    template<typename T>
-    inline vector2<T> vector2<T>::atan() const
-    {
-	return vector2<T>(atan(x), atan(y));
-    }
-
-    template<>
-    inline vector2<float> vector2<float>::atan() const
-    {
-	return vector2<float>(atanf(x), atanf(y));
-    }
-
-    template<typename T>
-    inline vector2<T> vector2<T>::atan(const vector2<T> &v) const
-    {
-	return vector2<T>(atan2(x, v.x), atan2(y, v.y));
-    }
-
-    template<>
-    inline vector2<float> vector2<float>::atan(const vector2<float> &v) const
-    {
-	return vector2<float>(atan2f(x, v.x), atan2f(y, v.y));
-    }
-
-    template<typename T>
-    inline vector2<T> vector2<T>::pow(const T p) const
-    {
-	return vector2<T>(pow(x, p), pow(y, p));
-    }
-
-    template<>
-    inline vector2<float> vector2<float>::pow(const float p) const
-    {
-	return vector2<float>(powf(x, p), powf(y, p));
-    }
-
-    template<typename T>
-    inline vector2<T> vector2<T>::exp() const
-    {
-	return vector2<T>(exp(x), exp(y));
-    }
-
-    template<>
-    inline vector2<float> vector2<float>::exp() const
-    {
-	return vector2<float>(expf(x), expf(y));
-    }
-
-    template<typename T>
-    inline vector2<T> vector2<T>::exp2() const
-    {
-	return vector2<T>(exp2(x), exp2(y));
-    }
-
-    template<>
-    inline vector2<float> vector2<float>::exp2() const
-    {
-	return vector2<float>(exp2f(x), exp2f(y));
-    }
-
-    template<typename T>
-    inline vector2<T> vector2<T>::log() const
-    {
-	return vector2<T>(log(x), log(y));
-    }
-
-    template<>
-    inline vector2<float> vector2<float>::log() const
-    {
-	return vector2<float>(logf(x), logf(y));
-    }
-
-    template<typename T>
-    inline vector2<T> vector2<T>::log2() const
-    {
-	return vector2<T>(log2(x), log2(y));
-    }
-
-    template<>
-    inline vector2<float> vector2<float>::log2() const
-    {
-	return vector2<float>(log2f(x), log2f(y));
-    }
-
-    template<typename T>
-    inline vector2<T> vector2<T>::log10() const
-    {
-	return vector2<T>(log10(x), log10(y));
-    }
-
-    template<>
-    inline vector2<float> vector2<float>::log10() const
-    {
-	return vector2<float>(log10f(x), log10f(y));
-    }
-
-    template<typename T>
-    inline vector2<T> vector2<T>::sqrt() const
-    {
-	return vector2<T>(sqrt(x), sqrt(y));
-    }
-
-    template<>
-    inline vector2<float> vector2<float>::sqrt() const
-    {
-	return vector2<float>(sqrtf(x), sqrtf(y));
-    }
-
-    template<typename T>
-    inline vector2<T> vector2<T>::abs() const
-    {
-	return vector2<T>(fabs(x), fabs(y));
-    }
-
-    template<>
-    inline vector2<float> vector2<float>::abs() const
-    {
-	return vector2<float>(fabsf(x), fabsf(y));
-    }
-
-    template<>
-    inline vector2<int> vector2<int>::abs() const
-    {
-	return vector2<int>(std::abs(x), std::abs(y));
-    }
-
-    template<typename T>
-    inline vector2<T> vector2<T>::floor() const
-    {
-	return vector2<T>(floor(x), floor(y));
-    }
-
-    template<>
-    inline vector2<float> vector2<float>::floor() const
-    {
-	return vector2<float>(floorf(x), floorf(y));
-    }
-
-    template<typename T>
-    inline vector2<T> vector2<T>::ceil() const
-    {
-	return vector2<T>(ceil(x), ceil(y));
-    }
-
-    template<>
-    inline vector2<float> vector2<float>::ceil() const
-    {
-	return vector2<float>(ceilf(x), ceilf(y));
-    }
-
-    template<typename T>
-    inline vector2<T> vector2<T>::round() const
-    {
-	return vector2<T>(round(x), round(y));
-    }
-
-    template<>
-    inline vector2<float> vector2<float>::round() const
-    {
-	return vector2<float>(roundf(x), roundf(y));
-    }
-
-    template<typename T>
-    inline T vector2<T>::length() const
-    {
-	return sqrt(x * x + y * y);
-    }
-
-    template<>
-    inline float vector2<float>::length() const
-    {
-	return sqrtf(x * x + y * y);
-    }
-
-    template<typename T>
-    inline vector2<T> vector2<T>::refract(const vector2<T> &N, T eta) const
-    {
-	const T d = N.dot(*this);
-	const T k = static_cast<T>(1) - eta * eta * (static_cast<T>(1) - d * d);
-	return k < static_cast<T>(0) ? vector2<T>(static_cast<T>(0)) : *this * eta - N * (eta * d + sqrt(k));
-    }
-
-    template<>
-    inline vector2<float> vector2<float>::refract(const vector2<float> &N, float eta) const
-    {
-	const float d = N.dot(*this);
-	const float k = 1.0f - eta * eta * (1.0f - d * d);
-	return k < 0.0f ? vector2<float>(0.0f) : *this * eta - N * (eta * d + sqrtf(k));
-    }
 
     template<typename T> class vector3
     {
@@ -1824,49 +1971,70 @@ namespace glvm
 
 	/* Trigonometric functions */
 
-	vector3 sin() const;
+	vector3 sin() const
+	{
+	    return vector3(glvm::sin(x), glvm::sin(y), glvm::sin(z));
+	}
 
 	friend vector3 sin(const vector3 &v)
 	{
     	    return v.sin();
        	}
 
-	vector3 cos() const;
+	vector3 cos() const
+	{
+	    return vector3(glvm::cos(x), glvm::cos(y), glvm::cos(z));
+	}
 
 	friend vector3 cos(const vector3 &v)
 	{
     	    return v.cos();
        	}
 
-	vector3 tan() const;
+	vector3 tan() const
+	{
+	    return vector3(glvm::tan(x), glvm::tan(y), glvm::tan(z));
+	}
 
 	friend vector3 tan(const vector3 &v)
 	{
     	    return v.tan();
        	}
 
-	vector3 asin() const;
+	vector3 asin() const
+	{
+	    return vector3(glvm::asin(x), glvm::asin(y), glvm::asin(z));
+	}
 
 	friend vector3 asin(const vector3 &v)
 	{
     	    return v.asin();
        	}
 
-	vector3 acos() const;
+	vector3 acos() const
+	{
+	    return vector3(glvm::acos(x), glvm::acos(y), glvm::acos(z));
+	}
 
 	friend vector3 acos(const vector3 &v)
 	{
     	    return v.acos();
        	}
 
-	vector3 atan() const;
+	vector3 atan() const
+	{
+	    return vector3(glvm::atan(x), glvm::atan(y), glvm::atan(z));
+	}
 
 	friend vector3 atan(const vector3 &v)
 	{
     	    return v.atan();
        	}
 
-	vector3 atan(const vector3 &v) const;
+	vector3 atan(const vector3 &v) const
+	{
+	    return vector3(glvm::atan(x, v.x), glvm::atan(y, v.y), glvm::atan(z, v.z));
+	}
 
 	friend vector3 atan(const vector3 &v, const vector3 &w)
 	{
@@ -1895,49 +2063,70 @@ namespace glvm
 
 	/* Exponential functions */
 
-	vector3 pow(const T p) const;
+	vector3 pow(const T p) const
+	{
+	    return vector3(glvm::pow(x, p), glvm::pow(y, p), glvm::pow(z, p));
+	}
 
 	friend vector3 pow(const vector3 &v, const T p)
 	{
     	    return v.pow(p);
        	}
 
-	vector3 exp() const;
+	vector3 exp() const
+	{
+	    return vector3(glvm::exp(x), glvm::exp(y), glvm::exp(z));
+	}
 
 	friend vector3 exp(const vector3 &v)
 	{
     	    return v.exp();
        	}
 
-	vector3 exp2() const;
+	vector3 exp2() const
+	{
+	    return vector3(glvm::exp2(x), glvm::exp2(y), glvm::exp2(z));
+	}
 
 	friend vector3 exp2(const vector3 &v)
 	{
     	    return v.exp2();
        	}
 
-	vector3 log() const;
+	vector3 log() const
+	{
+	    return vector3(glvm::log(x), glvm::log(y), glvm::log(z));
+	}
 
 	friend vector3 log(const vector3 &v)
 	{
     	    return v.log();
        	}
 
-	vector3 log2() const;
+	vector3 log2() const
+	{
+	    return vector3(glvm::log2(x), glvm::log2(y), glvm::log2(z));
+	}
 
 	friend vector3 log2(const vector3 &v)
 	{
     	    return v.log2();
        	}
 
-	vector3 log10() const;
+	vector3 log10() const
+	{
+	    return vector3(glvm::log10(x), glvm::log10(y), glvm::log10(z));
+	}
 
 	friend vector3 log10(const vector3 &v)
 	{
     	    return v.log10();
        	}
 
-	vector3 sqrt() const;
+	vector3 sqrt() const
+	{
+	    return vector3(glvm::sqrt(x), glvm::sqrt(y), glvm::sqrt(z));
+	}
 
 	friend vector3 sqrt(const vector3 &v)
 	{
@@ -1958,7 +2147,7 @@ namespace glvm
 
 	vector3<bool> isfinite() const
 	{
-	    return vector3<bool>(isfinite(x), isfinite(y), isfinite(z));
+	    return vector3<bool>(glvm::isfinite(x), glvm::isfinite(y), glvm::isfinite(z));
 	}
 
 	friend vector3<bool> isfinite(const vector3 &v)
@@ -1968,7 +2157,7 @@ namespace glvm
 
 	vector3<bool> isinf() const
 	{
-	    return vector3<bool>(isinf(x), isinf(y), isinf(z));
+	    return vector3<bool>(glvm::isinf(x), glvm::isinf(y), glvm::isinf(z));
 	}
 
 	friend vector3<bool> isinf(const vector3 &v)
@@ -1978,7 +2167,7 @@ namespace glvm
 
 	vector3<bool> isnan() const
 	{
-	    return vector3<bool>(isnan(x), isnan(y), isnan(z));
+	    return vector3<bool>(glvm::isnan(x), glvm::isnan(y), glvm::isnan(z));
 	}
 
 	friend vector3<bool> isnan(const vector3 &v)
@@ -1988,7 +2177,7 @@ namespace glvm
 
 	vector3<bool> isnormal() const
 	{
-	    return vector3<bool>(isnormal(x), isnormal(y), isnormal(z));
+	    return vector3<bool>(glvm::isnormal(x), glvm::isnormal(y), glvm::isnormal(z));
 	}
 
 	friend vector3<bool> isnormal(const vector3 &v)
@@ -1996,7 +2185,10 @@ namespace glvm
 	    return v.isnormal();
 	}
 
-	vector3 abs() const;
+	vector3 abs() const
+	{
+	    return vector3(glvm::abs(x), glvm::abs(y), glvm::abs(z));
+	}
 
 	friend vector3 abs(const vector3 &v)
 	{
@@ -2005,10 +2197,7 @@ namespace glvm
 
 	vector3 sign() const
 	{
-	    return vector3(
-		    x < static_cast<T>(0) ? static_cast<T>(-1) : x > static_cast<T>(0) ? static_cast<T>(+1) : static_cast<T>(0),
-		    y < static_cast<T>(0) ? static_cast<T>(-1) : y > static_cast<T>(0) ? static_cast<T>(+1) : static_cast<T>(0),
-		    z < static_cast<T>(0) ? static_cast<T>(-1) : z > static_cast<T>(0) ? static_cast<T>(+1) : static_cast<T>(0));
+	    return vector3(glvm::sign(x), glvm::sign(y), glvm::sign(z));
 	}
 
 	friend vector3 sign(const vector3 &v)
@@ -2016,21 +2205,30 @@ namespace glvm
     	    return v.sign();
        	}
 
-	vector3 floor() const;
+	vector3 floor() const
+	{
+	    return vector3(glvm::floor(x), glvm::floor(y), glvm::floor(z));
+	}
 
 	friend vector3 floor(const vector3 &v)
 	{
     	    return v.floor();
        	}
 
-	vector3 ceil() const;
+	vector3 ceil() const
+	{
+	    return vector3(glvm::ceil(x), glvm::ceil(y), glvm::ceil(z));
+	}
 
 	friend vector3 ceil(const vector3 &v)
 	{
     	    return v.ceil();
        	}
 
-	vector3 round() const;
+	vector3 round() const
+	{
+	    return vector3(glvm::round(x), glvm::round(y), glvm::round(z));
+	}
 
 	friend vector3 round(const vector3 &v)
 	{
@@ -2203,7 +2401,10 @@ namespace glvm
 
 	/* Geometric functions */
 
-	T length() const;
+	T length() const
+	{
+	    return glvm::sqrt(x * x + y * y + z * z);
+	}
 
 	friend T length(const vector3 &v)
 	{
@@ -2260,7 +2461,12 @@ namespace glvm
     	    return I.reflect(N);
        	}
 
-	vector3 refract(const vector3 &N, T eta) const;
+	vector3 refract(const vector3 &N, T eta) const
+	{
+	    const T d = N.dot(*this);
+	    const T k = static_cast<T>(1) - eta * eta * (static_cast<T>(1) - d * d);
+	    return k < static_cast<T>(0) ? vector3<T>(static_cast<T>(0)) : *this * eta - N * (eta * d + glvm::sqrt(k));
+	}
 
 	friend vector3 refract(const vector3 &I, const vector3 &N, T eta)
 	{
@@ -2355,8 +2561,6 @@ namespace glvm
 	}
     };
 
-    /* These functions use optimized code (mostly for the <float> variant). */
-
     template<typename T>
     inline std::string vector3<T>::str() const
     {
@@ -2383,255 +2587,6 @@ namespace glvm
 	return os.str();
     }
 
-    template<typename T>
-    inline vector3<T> vector3<T>::sin() const
-    {
-	return vector3(sin(x), sin(y), sin(z));
-    }
-
-    template<>
-    inline vector3<float> vector3<float>::sin() const
-    {
-	return vector3<float>(sinf(x), sinf(y), sinf(z));
-    }
-
-    template<typename T>
-    inline vector3<T> vector3<T>::cos() const
-    {
-	return vector3<T>(cos(x), cos(y), cos(z));
-    }
-
-    template<>
-    inline vector3<float> vector3<float>::cos() const
-    {
-	return vector3<float>(cosf(x), cosf(y), cosf(z));
-    }
-
-    template<typename T>
-    inline vector3<T> vector3<T>::tan() const
-    {
-	return vector3<T>(tan(x), tan(y), tan(z));
-    }
-
-    template<>
-    inline vector3<float> vector3<float>::tan() const
-    {
-	return vector3<float>(tanf(x), tanf(y), tanf(z));
-    }
-
-    template<typename T>
-    inline vector3<T> vector3<T>::asin() const
-    {
-	return vector3<T>(asin(x), asin(y), asin(z));
-    }
-
-    template<>
-    inline vector3<float> vector3<float>::asin() const
-    {
-	return vector3<float>(asinf(x), asinf(y), asinf(z));
-    }
-
-    template<typename T>
-    inline vector3<T> vector3<T>::acos() const
-    {
-	return vector3<T>(acos(x), acos(y), acos(z));
-    }
-
-    template<>
-    inline vector3<float> vector3<float>::acos() const
-    {
-	return vector3<float>(acosf(x), acosf(y), acosf(z));
-    }
-
-    template<typename T>
-    inline vector3<T> vector3<T>::atan() const
-    {
-	return vector3<T>(atan(x), atan(y), atan(z));
-    }
-
-    template<>
-    inline vector3<float> vector3<float>::atan() const
-    {
-	return vector3<float>(atanf(x), atanf(y), atanf(z));
-    }
-
-    template<typename T>
-    inline vector3<T> vector3<T>::atan(const vector3<T> &v) const
-    {
-	return vector3<T>(atan2(x, v.x), atan2(y, v.y), atan2(z, v.z));
-    }
-
-    template<>
-    inline vector3<float> vector3<float>::atan(const vector3<float> &v) const
-    {
-	return vector3<float>(atan2f(x, v.x), atan2f(y, v.y), atan2f(z, v.z));
-    }
-
-    template<typename T>
-    inline vector3<T> vector3<T>::pow(const T p) const
-    {
-	return vector3<T>(pow(x, p), pow(y, p), pow(z, p));
-    }
-
-    template<>
-    inline vector3<float> vector3<float>::pow(const float p) const
-    {
-	return vector3<float>(powf(x, p), powf(y, p), powf(z, p));
-    }
-
-    template<typename T>
-    inline vector3<T> vector3<T>::exp() const
-    {
-	return vector3<T>(exp(x), exp(y), exp(z));
-    }
-
-    template<>
-    inline vector3<float> vector3<float>::exp() const
-    {
-	return vector3<float>(expf(x), expf(y), expf(z));
-    }
-
-    template<typename T>
-    inline vector3<T> vector3<T>::exp2() const
-    {
-	return vector3<T>(exp2(x), exp2(y), exp2(z));
-    }
-
-    template<>
-    inline vector3<float> vector3<float>::exp2() const
-    {
-	return vector3<float>(exp2f(x), exp2f(y), exp2f(z));
-    }
-
-    template<typename T>
-    inline vector3<T> vector3<T>::log() const
-    {
-	return vector3<T>(log(x), log(y), log(z));
-    }
-
-    template<>
-    inline vector3<float> vector3<float>::log() const
-    {
-	return vector3<float>(logf(x), logf(y), logf(z));
-    }
-
-    template<typename T>
-    inline vector3<T> vector3<T>::log2() const
-    {
-	return vector3<T>(log2(x), log2(y), log2(z));
-    }
-
-    template<>
-    inline vector3<float> vector3<float>::log2() const
-    {
-	return vector3<float>(log2f(x), log2f(y), log2f(z));
-    }
-
-    template<typename T>
-    inline vector3<T> vector3<T>::log10() const
-    {
-	return vector3<T>(log10(x), log10(y), log10(z));
-    }
-
-    template<>
-    inline vector3<float> vector3<float>::log10() const
-    {
-	return vector3<float>(log10f(x), log10f(y), log10f(z));
-    }
-
-    template<typename T>
-    inline vector3<T> vector3<T>::sqrt() const
-    {
-	return vector3<T>(sqrt(x), sqrt(y), sqrt(z));
-    }
-
-    template<>
-    inline vector3<float> vector3<float>::sqrt() const
-    {
-	return vector3<float>(sqrtf(x), sqrtf(y), sqrtf(z));
-    }
-
-    template<typename T>
-    inline vector3<T> vector3<T>::abs() const
-    {
-	return vector3<T>(fabs(x), fabs(y), fabs(z));
-    }
-
-    template<>
-    inline vector3<float> vector3<float>::abs() const
-    {
-	return vector3<float>(fabsf(x), fabsf(y), fabsf(z));
-    }
-
-    template<>
-    inline vector3<int> vector3<int>::abs() const
-    {
-	return vector3<int>(std::abs(x), std::abs(y), std::abs(z));
-    }
-
-    template<typename T>
-    inline vector3<T> vector3<T>::floor() const
-    {
-	return vector3<T>(floor(x), floor(y), floor(z));
-    }
-
-    template<>
-    inline vector3<float> vector3<float>::floor() const
-    {
-	return vector3<float>(floorf(x), floorf(y), floorf(z));
-    }
-
-    template<typename T>
-    inline vector3<T> vector3<T>::ceil() const
-    {
-	return vector3<T>(ceil(x), ceil(y), ceil(z));
-    }
-
-    template<>
-    inline vector3<float> vector3<float>::ceil() const
-    {
-	return vector3<float>(ceilf(x), ceilf(y), ceilf(z));
-    }
-
-    template<typename T>
-    inline vector3<T> vector3<T>::round() const
-    {
-	return vector3<T>(round(x), round(y), round(z));
-    }
-
-    template<>
-    inline vector3<float> vector3<float>::round() const
-    {
-	return vector3<float>(roundf(x), roundf(y), roundf(z));
-    }
-
-    template<typename T>
-    inline T vector3<T>::length() const
-    {
-	return sqrt(x * x + y * y + z * z);
-    }
-
-    template<>
-    inline float vector3<float>::length() const
-    {
-	return sqrtf(x * x + y * y + z * z);
-    }
-
-    template<typename T>
-    inline vector3<T> vector3<T>::refract(const vector3<T> &N, T eta) const
-    {
-	const T d = N.dot(*this);
-	const T k = static_cast<T>(1) - eta * eta * (static_cast<T>(1) - d * d);
-	return k < static_cast<T>(0) ? vector3<T>(static_cast<T>(0)) : *this * eta - N * (eta * d + sqrt(k));
-    }
-
-    template<>
-    inline vector3<float> vector3<float>::refract(const vector3<float> &N, float eta) const
-    {
-	const float d = N.dot(*this);
-	const float k = 1.0f - eta * eta * (1.0f - d * d);
-	return k < 0.0f ? vector3<float>(0.0f) : *this * eta - N * (eta * d + sqrtf(k));
-    }
 
     template<typename T> class vector4
     {
@@ -7919,49 +7874,70 @@ namespace glvm
 
 	/* Trigonometric functions */
 
-	vector4 sin() const;
+	vector4 sin() const
+	{
+	    return vector4(glvm::sin(x), glvm::sin(y), glvm::sin(z), glvm::sin(w));
+	}
 
 	friend vector4 sin(const vector4 &v)
 	{
     	    return v.sin();
        	}
 
-	vector4 cos() const;
+	vector4 cos() const
+	{
+	    return vector4(glvm::cos(x), glvm::cos(y), glvm::cos(z), glvm::cos(w));
+	}
 
 	friend vector4 cos(const vector4 &v)
 	{
     	    return v.cos();
        	}
 
-	vector4 tan() const;
+	vector4 tan() const
+	{
+	    return vector4(glvm::tan(x), glvm::tan(y), glvm::tan(z), glvm::tan(w));
+	}
 
 	friend vector4 tan(const vector4 &v)
 	{
     	    return v.tan();
        	}
 
-	vector4 asin() const;
+	vector4 asin() const
+	{
+	    return vector4(glvm::asin(x), glvm::asin(y), glvm::asin(z), glvm::asin(w));
+	}
 
 	friend vector4 asin(const vector4 &v)
 	{
     	    return v.asin();
        	}
 
-	vector4 acos() const;
+	vector4 acos() const
+	{
+	    return vector4(glvm::acos(x), glvm::acos(y), glvm::acos(z), glvm::acos(w));
+	}
 
 	friend vector4 acos(const vector4 &v)
 	{
     	    return v.acos();
        	}
 
-	vector4 atan() const;
+	vector4 atan() const
+	{
+	    return vector4(glvm::atan(x), glvm::atan(y), glvm::atan(z), glvm::atan(w));
+	}
 
 	friend vector4 atan(const vector4 &v)
 	{
     	    return v.atan();
        	}
 
-	vector4 atan(const vector4 &v) const;
+	vector4 atan(const vector4 &v) const
+	{
+	    return vector4(glvm::atan(x, v.x), glvm::atan(y, v.y), glvm::atan(z, v.z), glvm::atan(w, v.w));
+	}
 
 	friend vector4 atan(const vector4 &v, const vector4 &w)
 	{
@@ -7990,49 +7966,70 @@ namespace glvm
 
 	/* Exponential functions */
 
-	vector4 pow(const T p) const;
+	vector4 pow(const T p) const
+	{
+	    return vector4(glvm::pow(x, p), glvm::pow(y, p), glvm::pow(z, p), glvm::pow(w, p));
+	}
 
 	friend vector4 pow(const vector4 &v, const T p)
 	{
     	    return v.pow(p);
        	}
 
-	vector4 exp() const;
+	vector4 exp() const
+	{
+	    return vector4(glvm::exp(x), glvm::exp(y), glvm::exp(z), glvm::exp(w));
+	}
 
 	friend vector4 exp(const vector4 &v)
 	{
     	    return v.exp();
        	}
 
-	vector4 exp2() const;
+	vector4 exp2() const
+	{
+	    return vector4(glvm::exp2(x), glvm::exp2(y), glvm::exp2(z), glvm::exp2(w));
+	}
 
 	friend vector4 exp2(const vector4 &v)
 	{
     	    return v.exp2();
        	}
 
-	vector4 log() const;
+	vector4 log() const
+	{
+	    return vector4(glvm::log(x), glvm::log(y), glvm::log(z), glvm::log(w));
+	}
 
 	friend vector4 log(const vector4 &v)
 	{
     	    return v.log();
        	}
 
-	vector4 log2() const;
+	vector4 log2() const
+	{
+	    return vector4(glvm::log2(x), glvm::log2(y), glvm::log2(z), glvm::log2(w));
+	}
 
 	friend vector4 log2(const vector4 &v)
 	{
     	    return v.log2();
        	}
 
-	vector4 log10() const;
+	vector4 log10() const
+	{
+	    return vector4(glvm::log10(x), glvm::log10(y), glvm::log10(z), glvm::log10(w));
+	}
 
 	friend vector4 log10(const vector4 &v)
 	{
     	    return v.log10();
        	}
 
-	vector4 sqrt() const;
+	vector4 sqrt() const
+	{
+	    return vector4(glvm::sqrt(x), glvm::sqrt(y), glvm::sqrt(z), glvm::sqrt(w));
+	}
 
 	friend vector4 sqrt(const vector4 &v)
 	{
@@ -8053,7 +8050,7 @@ namespace glvm
 
 	vector4<bool> isfinite() const
 	{
-	    return vector4<bool>(isfinite(x), isfinite(y), isfinite(z), isfinite(w));
+	    return vector4<bool>(glvm::isfinite(x), glvm::isfinite(y), glvm::isfinite(z), glvm::isfinite(w));
 	}
 
 	friend vector4<bool> isfinite(const vector4 &v)
@@ -8063,7 +8060,7 @@ namespace glvm
 
 	vector4<bool> isinf() const
 	{
-	    return vector4<bool>(isinf(x), isinf(y), isinf(z), isinf(w));
+	    return vector4<bool>(glvm::isinf(x), glvm::isinf(y), glvm::isinf(z), glvm::isinf(w));
 	}
 
 	friend vector4<bool> isinf(const vector4 &v)
@@ -8073,7 +8070,7 @@ namespace glvm
 
 	vector4<bool> isnan() const
 	{
-	    return vector4<bool>(isnan(x), isnan(y), isnan(z), isnan(w));
+	    return vector4<bool>(glvm::isnan(x), glvm::isnan(y), glvm::isnan(z), glvm::isnan(w));
 	}
 
 	friend vector4<bool> isnan(const vector4 &v)
@@ -8083,7 +8080,7 @@ namespace glvm
 
 	vector4<bool> isnormal() const
 	{
-	    return vector4<bool>(isnormal(x), isnormal(y), isnormal(z), isnormal(w));
+	    return vector4<bool>(glvm::isnormal(x), glvm::isnormal(y), glvm::isnormal(z), glvm::isnormal(w));
 	}
 
 	friend vector4<bool> isnormal(const vector4 &v)
@@ -8091,7 +8088,10 @@ namespace glvm
 	    return v.isnormal();
 	}
 
-	vector4 abs() const;
+	vector4 abs() const
+	{
+	    return vector4(glvm::abs(x), glvm::abs(y), glvm::abs(z), glvm::abs(w));
+	}
 
 	friend vector4 abs(const vector4 &v)
 	{
@@ -8100,11 +8100,7 @@ namespace glvm
 
 	vector4 sign() const
 	{
-	    return vector4(
-		    x < static_cast<T>(0) ? static_cast<T>(-1) : x > static_cast<T>(0) ? static_cast<T>(+1) : static_cast<T>(0),
-		    y < static_cast<T>(0) ? static_cast<T>(-1) : y > static_cast<T>(0) ? static_cast<T>(+1) : static_cast<T>(0),
-		    z < static_cast<T>(0) ? static_cast<T>(-1) : z > static_cast<T>(0) ? static_cast<T>(+1) : static_cast<T>(0),
-		    w < static_cast<T>(0) ? static_cast<T>(-1) : w > static_cast<T>(0) ? static_cast<T>(+1) : static_cast<T>(0));
+	    return vector4(glvm::sign(x), glvm::sign(y), glvm::sign(z), glvm::sign(w));
 	}
 
 	friend vector4 sign(const vector4 &v)
@@ -8112,21 +8108,30 @@ namespace glvm
     	    return v.sign();
        	}
 
-	vector4 floor() const;
+	vector4 floor() const
+	{
+	    return vector4<bool>(glvm::floor(x), glvm::floor(y), glvm::floor(z), glvm::floor(w));
+	}
 
 	friend vector4 floor(const vector4 &v)
 	{
     	    return v.floor();
        	}
 
-	vector4 ceil() const;
+	vector4 ceil() const
+	{
+	    return vector4<bool>(glvm::ceil(x), glvm::ceil(y), glvm::ceil(z), glvm::ceil(w));
+	}
 
 	friend vector4 ceil(const vector4 &v)
 	{
     	    return v.ceil();
        	}
 
-	vector4 round() const;
+	vector4 round() const
+	{
+	    return vector4<bool>(glvm::round(x), glvm::round(y), glvm::round(z), glvm::round(w));
+	}
 
 	friend vector4 round(const vector4 &v)
 	{
@@ -8301,7 +8306,10 @@ namespace glvm
 
 	/* Geometric functions */
 
-	T length() const;
+	T length() const
+	{
+	    return glvm::sqrt(x * x + y * y + z * z + w * w);
+	}
 
 	friend T length(const vector4 &v)
 	{
@@ -8358,7 +8366,12 @@ namespace glvm
     	    return I.reflect(N);
        	}
 
-	vector4 refract(const vector4 &N, T eta) const;
+	vector4 refract(const vector4 &N, T eta) const
+	{
+	    const T d = N.dot(*this);
+	    const T k = static_cast<T>(1) - eta * eta * (static_cast<T>(1) - d * d);
+	    return k < static_cast<T>(0) ? vector4<T>(static_cast<T>(0)) : *this * eta - N * (eta * d + glvm::sqrt(k));
+	}
 
 	friend vector4 refract(const vector4 &I, const vector4 &N, T eta)
 	{
@@ -8443,8 +8456,6 @@ namespace glvm
 	}
     };
 
-    /* These functions use optimized code (mostly for the <float> variant). */
-
     template<typename T>
     inline std::string vector4<T>::str() const
     {
@@ -8471,255 +8482,6 @@ namespace glvm
 	return os.str();
     }
 
-    template<typename T>
-    inline vector4<T> vector4<T>::sin() const
-    {
-	return vector4(sin(x), sin(y), sin(z), sin(w));
-    }
-
-    template<>
-    inline vector4<float> vector4<float>::sin() const
-    {
-	return vector4<float>(sinf(x), sinf(y), sinf(z), sinf(w));
-    }
-
-    template<typename T>
-    inline vector4<T> vector4<T>::cos() const
-    {
-	return vector4<T>(cos(x), cos(y), cos(z), cos(w));
-    }
-
-    template<>
-    inline vector4<float> vector4<float>::cos() const
-    {
-	return vector4<float>(cosf(x), cosf(y), cosf(z), cosf(w));
-    }
-
-    template<typename T>
-    inline vector4<T> vector4<T>::tan() const
-    {
-	return vector4<T>(tan(x), tan(y), tan(z), tan(w));
-    }
-
-    template<>
-    inline vector4<float> vector4<float>::tan() const
-    {
-	return vector4<float>(tanf(x), tanf(y), tanf(z), tanf(w));
-    }
-
-    template<typename T>
-    inline vector4<T> vector4<T>::asin() const
-    {
-	return vector4<T>(asin(x), asin(y), asin(z), asin(w));
-    }
-
-    template<>
-    inline vector4<float> vector4<float>::asin() const
-    {
-	return vector4<float>(asinf(x), asinf(y), asinf(z), asinf(w));
-    }
-
-    template<typename T>
-    inline vector4<T> vector4<T>::acos() const
-    {
-	return vector4<T>(acos(x), acos(y), acos(z), acos(w));
-    }
-
-    template<>
-    inline vector4<float> vector4<float>::acos() const
-    {
-	return vector4<float>(acosf(x), acosf(y), acosf(z), acosf(w));
-    }
-
-    template<typename T>
-    inline vector4<T> vector4<T>::atan() const
-    {
-	return vector4<T>(atan(x), atan(y), atan(z), atan(w));
-    }
-
-    template<>
-    inline vector4<float> vector4<float>::atan() const
-    {
-	return vector4<float>(atanf(x), atanf(y), atanf(z), atanf(w));
-    }
-
-    template<typename T>
-    inline vector4<T> vector4<T>::atan(const vector4<T> &v) const
-    {
-	return vector4<T>(atan2(x, v.x), atan2(y, v.y), atan2(z, v.z), atan2(w, v.w));
-    }
-
-    template<>
-    inline vector4<float> vector4<float>::atan(const vector4<float> &v) const
-    {
-	return vector4<float>(atan2f(x, v.x), atan2f(y, v.y), atan2f(z, v.z), atan2f(w, v.w));
-    }
-
-    template<typename T>
-    inline vector4<T> vector4<T>::pow(const T p) const
-    {
-	return vector4<T>(pow(x, p), pow(y, p), pow(z, p), pow(w, p));
-    }
-
-    template<>
-    inline vector4<float> vector4<float>::pow(const float p) const
-    {
-	return vector4<float>(powf(x, p), powf(y, p), powf(z, p), powf(w, p));
-    }
-
-    template<typename T>
-    inline vector4<T> vector4<T>::exp() const
-    {
-	return vector4<T>(exp(x), exp(y), exp(z), exp(w));
-    }
-
-    template<>
-    inline vector4<float> vector4<float>::exp() const
-    {
-	return vector4<float>(expf(x), expf(y), expf(z), expf(w));
-    }
-
-    template<typename T>
-    inline vector4<T> vector4<T>::exp2() const
-    {
-	return vector4<T>(exp2(x), exp2(y), exp2(z), exp2(w));
-    }
-
-    template<>
-    inline vector4<float> vector4<float>::exp2() const
-    {
-	return vector4<float>(exp2f(x), exp2f(y), exp2f(z), exp2f(w));
-    }
-
-    template<typename T>
-    inline vector4<T> vector4<T>::log() const
-    {
-	return vector4<T>(log(x), log(y), log(z), log(w));
-    }
-
-    template<>
-    inline vector4<float> vector4<float>::log() const
-    {
-	return vector4<float>(logf(x), logf(y), logf(z), logf(w));
-    }
-
-    template<typename T>
-    inline vector4<T> vector4<T>::log2() const
-    {
-	return vector4<T>(log2(x), log2(y), log2(z), log2(w));
-    }
-
-    template<>
-    inline vector4<float> vector4<float>::log2() const
-    {
-	return vector4<float>(log2f(x), log2f(y), log2f(z), log2f(w));
-    }
-
-    template<typename T>
-    inline vector4<T> vector4<T>::log10() const
-    {
-	return vector4<T>(log10(x), log10(y), log10(z), log10(w));
-    }
-
-    template<>
-    inline vector4<float> vector4<float>::log10() const
-    {
-	return vector4<float>(log10f(x), log10f(y), log10f(z), log10f(w));
-    }
-
-    template<typename T>
-    inline vector4<T> vector4<T>::sqrt() const
-    {
-	return vector4<T>(sqrt(x), sqrt(y), sqrt(z), sqrt(w));
-    }
-
-    template<>
-    inline vector4<float> vector4<float>::sqrt() const
-    {
-	return vector4<float>(sqrtf(x), sqrtf(y), sqrtf(z), sqrtf(w));
-    }
-
-    template<typename T>
-    inline vector4<T> vector4<T>::abs() const
-    {
-	return vector4<T>(fabs(x), fabs(y), fabs(z), fabs(w));
-    }
-
-    template<>
-    inline vector4<float> vector4<float>::abs() const
-    {
-	return vector4<float>(fabsf(x), fabsf(y), fabsf(z), fabsf(w));
-    }
-
-    template<>
-    inline vector4<int> vector4<int>::abs() const
-    {
-	return vector4<int>(std::abs(x), std::abs(y), std::abs(z), std::abs(w));
-    }
-
-    template<typename T>
-    inline vector4<T> vector4<T>::floor() const
-    {
-	return vector4<T>(floor(x), floor(y), floor(z), floor(w));
-    }
-
-    template<>
-    inline vector4<float> vector4<float>::floor() const
-    {
-	return vector4<float>(floorf(x), floorf(y), floorf(z), floorf(w));
-    }
-
-    template<typename T>
-    inline vector4<T> vector4<T>::ceil() const
-    {
-	return vector4<T>(ceil(x), ceil(y), ceil(z), ceil(w));
-    }
-
-    template<>
-    inline vector4<float> vector4<float>::ceil() const
-    {
-	return vector4<float>(ceilf(x), ceilf(y), ceilf(z), ceilf(w));
-    }
-
-    template<typename T>
-    inline vector4<T> vector4<T>::round() const
-    {
-	return vector4<T>(round(x), round(y), round(z), round(w));
-    }
-
-    template<>
-    inline vector4<float> vector4<float>::round() const
-    {
-	return vector4<float>(roundf(x), roundf(y), roundf(z), roundf(w));
-    }
-
-    template<typename T>
-    inline T vector4<T>::length() const
-    {
-	return sqrt(x * x + y * y + z * z + w * w);
-    }
-
-    template<>
-    inline float vector4<float>::length() const
-    {
-	return sqrtf(x * x + y * y + z * z + w * w);
-    }
-
-    template<typename T>
-    inline vector4<T> vector4<T>::refract(const vector4<T> &N, T eta) const
-    {
-	const T d = N.dot(*this);
-	const T k = static_cast<T>(1) - eta * eta * (static_cast<T>(1) - d * d);
-	return k < static_cast<T>(0) ? vector4<T>(static_cast<T>(0)) : *this * eta - N * (eta * d + sqrt(k));
-    }
-
-    template<>
-    inline vector4<float> vector4<float>::refract(const vector4<float> &N, float eta) const
-    {
-	const float d = N.dot(*this);
-	const float k = 1.0f - eta * eta * (1.0f - d * d);
-	return k < 0.0f ? vector4<float>(0.0f) : *this * eta - N * (eta * d + sqrtf(k));
-    }
 
     template<typename T>
     class matrix2
@@ -9031,6 +8793,7 @@ namespace glvm
 	return os.str();
     }
 
+
     template<typename T>
     class matrix3
     {
@@ -9105,10 +8868,8 @@ namespace glvm
 	    const T x = nv.x;
 	    const T y = nv.y;
 	    const T z = nv.z;
-	    // The following avoids distinguishing between sinf/sin and cosf/cos
-	    const vector2<T> cs = vector2<T>(angle + static_cast<T>(M_PI_2), angle).sin();
-	    const T c = cs.x;
-	    const T s = cs.y;
+	    const T c = glvm::cos(angle);
+	    const T s = glvm::sin(angle);
 	    const T mc = static_cast<T>(1) - c;
 	    v[0][0] = x * x * mc + c;
 	    v[0][1] = x * y * mc - z * s;
@@ -9442,6 +9203,7 @@ namespace glvm
 	    os << vl[i] << " ";
 	return os.str();
     }
+
 
     template<typename T>
     class matrix4
@@ -10036,6 +9798,7 @@ namespace glvm
 	return os.str();
     }
 
+
     typedef vector2<bool> bvec2;
     typedef vector2<int> ivec2;
     typedef vector2<float> vec2;
@@ -10054,6 +9817,7 @@ namespace glvm
     typedef matrix3<double> dmat3;
     typedef matrix4<float> mat4;
     typedef matrix4<double> dmat4;
+
 
     template<typename T>
     class quaternion
@@ -10228,7 +9992,10 @@ namespace glvm
 
 	/* Quaternion operations */
 
-	T magnitude() const;
+	T magnitude() const
+	{
+	    return glvm::sqrt(w * w + x * x + y * y + z * z);
+	}
 
 	friend T magnitude(const quaternion &q)
 	{
@@ -10333,13 +10100,54 @@ namespace glvm
 	    return M;
 	}
 
-	void to_axis_angle(vector3<T> &axis, T *angle) const;
+	void to_axis_angle(vector3<T> &axis, T *angle) const
+	{
+	    quaternion<T> nq = this->normalize();
+	    T cos_a = nq.w;
+	    *angle = glvm::acos(cos_a) * static_cast<T>(2);
+	    T sin_a = glvm::sqrt(static_cast<T>(1) - cos_a * cos_a);
+	    if (glvm::abs(sin_a) < static_cast<T>(0.0005))
+	    {
+		sin_a = static_cast<T>(1);
+	    }
+	    axis.x = nq.x / sin_a;
+	    axis.y = nq.y / sin_a;
+	    axis.z = nq.z / sin_a;
+	}
 
-	void from_axis_angle(const vector3<T> &axis, const T angle);
+	void from_axis_angle(const vector3<T> &axis, const T angle)
+	{
+	    vector3<T> naxis = axis.normalize();
+	    T sin_a = glvm::sin(angle / static_cast<T>(2));
+	    T cos_a = glvm::cos(angle / static_cast<T>(2));
+	    w = cos_a;
+	    x = naxis.x * sin_a;
+	    y = naxis.y * sin_a;
+	    z = naxis.z * sin_a;
+	    normalize();
+	}
 
-	void to_euler_angles(T *rx, T *ry, T *rz) const;
+	void to_euler_angles(T *rx, T *ry, T *rz) const
+	{
+	    *rx = glvm::atan(static_cast<T>(2) * (w * x + y * z) / (static_cast<T>(1) - static_cast<T>(2) * (x * x + y * y)));
+	    *ry = glvm::asin(static_cast<T>(2) * (w * y - x * z));
+	    *rz = glvm::atan(static_cast<T>(2) * (w * z + x * y) / (static_cast<T>(1) - static_cast<T>(2) * (y * y + z * z)));
+	}
 	
-	void from_euler_angles(const T rx, const T ry, const T rz);
+	void from_euler_angles(const T rx, const T ry, const T rz)
+	{
+	    // quaternion<T> qx, qy, qz;
+	    // qx.from_axis_angle(vector3<T>(1, 0, 0), rx)
+	    // qy.from_axis_angle(vector3<T>(1, 0, 0), ry)
+	    // qz.from_axis_angle(vector3<T>(1, 0, 0), rz)
+	    quaternion<T> qx(glvm::cos(rx / static_cast<T>(2)), glvm::sin(rx / static_cast<T>(2)), static_cast<T>(0), static_cast<T>(0));
+	    quaternion<T> qy(glvm::cos(ry / static_cast<T>(2)), static_cast<T>(0), glvm::sin(ry / static_cast<T>(2)), static_cast<T>(0));
+	    quaternion<T> qz(glvm::cos(rz / static_cast<T>(2)), static_cast<T>(0), static_cast<T>(0), glvm::sin(rz / static_cast<T>(2)));
+	    *this = qx * qy * qz;
+	    // TODO: Does this need to be optimized by cancelling out the
+	    // multiplications with zero? Or is the compiler smart enough to do this
+	    // for us?
+	}
     };
 
     template<typename T>
@@ -10362,117 +10170,6 @@ namespace glvm
 	return os.str();
     }
 
-    template<typename T>
-    inline T quaternion<T>::magnitude() const
-    {
-	return sqrt(w * w + x * x + y * y + z * z);
-    }
-
-    template<>
-    inline float quaternion<float>::magnitude() const
-    {
-	return sqrtf(w * w + x * x + y * y + z * z);
-    }
-
-    template<typename T>
-    inline void quaternion<T>::to_axis_angle(vector3<T> &axis, T *angle) const
-    {
-	quaternion<T> nq = this->normalize();
-	T cos_a = nq.w;
-	*angle = acos(cos_a) * static_cast<T>(2);
-	T sin_a = sqrt(static_cast<T>(1) - cos_a * cos_a);
-	if (fabs(sin_a) < 0.0005)
-	{
-	    sin_a = static_cast<T>(1);
-	}
-	axis.x = nq.x / sin_a;
-	axis.y = nq.y / sin_a;
-	axis.z = nq.z / sin_a;
-    }
-
-    template<>
-    inline void quaternion<float>::to_axis_angle(vector3<float> &axis, float *angle) const
-    {
-	quaternion<float> nq = this->normalize();
-	float cos_a = nq.w;
-	*angle = acosf(cos_a) * 2.0f;
-	float sin_a = sqrtf(1.0f - cos_a * cos_a);
-	if (fabsf(sin_a) < 0.0005f)
-	{
-	    sin_a = 1.0f;
-	}
-	axis.x = nq.x / sin_a;
-	axis.y = nq.y / sin_a;
-	axis.z = nq.z / sin_a;
-    }
-
-    template<typename T>
-    inline void quaternion<T>::from_axis_angle(const vector3<T> &axis, const T angle)
-    {
-	vector3<T> naxis = axis.normalize();
-	T sin_a = sin(angle / static_cast<T>(2));
-	T cos_a = cos(angle / static_cast<T>(2));
-	w = cos_a;
-	x = naxis.x * sin_a;
-	y = naxis.y * sin_a;
-	z = naxis.z * sin_a;
-	normalize();
-    }
-
-    template<>
-    inline void quaternion<float>::from_axis_angle(const vector3<float> &axis, const float angle)
-    {
-	vector3<float> naxis = axis.normalize();
-	float sin_a = sinf(angle / 2.0f);
-	float cos_a = cosf(angle / 2.0f);
-	w = cos_a;
-	x = naxis.x * sin_a;
-	y = naxis.y * sin_a;
-	z = naxis.z * sin_a;
-	normalize();
-    }
-
-    template<typename T>
-    inline void quaternion<T>::to_euler_angles(T *rx, T *ry, T *rz) const
-    {
-	*rx = atan(static_cast<T>(2) * (w * x + y * z) / (static_cast<T>(1) - static_cast<T>(2) * (x * x + y * y)));
-	*ry = asin(static_cast<T>(2) * (w * y - x * z));
-	*rz = atan(static_cast<T>(2) * (w * z + x * y) / (static_cast<T>(1) - static_cast<T>(2) * (y * y + z * z)));
-    }
-
-    template<>
-    inline void quaternion<float>::to_euler_angles(float *rx, float *ry, float *rz) const
-    {
-	*rx = atanf(2.0f * (w * x + y * z) / (1.0f - 2.0f * (x * x + y * y)));
-	*ry = asinf(2.0f * (w * y - x * z));
-	*rz = atanf(2.0f * (w * z + x * y) / (1.0f - 2.0f * (y * y + z * z)));
-    }
-
-    template<typename T>
-    inline void quaternion<T>::from_euler_angles(const T rx, const T ry, const T rz)
-    {
-	// quaternion<T> qx, qy, qz;
-	// qx.from_axis_angle(vector3<T>(1, 0, 0), rx)
-	// qy.from_axis_angle(vector3<T>(1, 0, 0), ry)
-	// qz.from_axis_angle(vector3<T>(1, 0, 0), rz)
-	quaternion<T> qx(cos(rx / static_cast<T>(2)), sin(rx / static_cast<T>(2)), static_cast<T>(0), static_cast<T>(0));
-	quaternion<T> qy(cos(ry / static_cast<T>(2)), static_cast<T>(0), sin(ry / static_cast<T>(2)), static_cast<T>(0));
-	quaternion<T> qz(cos(rz / static_cast<T>(2)), static_cast<T>(0), static_cast<T>(0), sin(rz / static_cast<T>(2)));
-	*this = qx * qy * qz;
-	// TODO: Does this need to be optimized by cancelling out the
-	// multiplications with zero? Or is the compiler smart enough to do this
-	// for us?
-    }
-
-    template<>
-    inline void quaternion<float>::from_euler_angles(const float rx, const float ry, const float rz)
-    {
-	// See comments to the general version above.
-	quaternion<float> qx(cosf(rx / 2.0f), sinf(rx / 2.0f), 0.0f, 0.0f);
-	quaternion<float> qy(cosf(ry / 2.0f), 0.0f, sinf(ry / 2.0f), 0.0f);
-	quaternion<float> qz(cosf(rz / 2.0f), 0.0f, 0.0f, sinf(rz / 2.0f));
-	*this = qx * qy * qz;
-    }
 
     typedef quaternion<float> quat;
     typedef quaternion<double> dquat;
