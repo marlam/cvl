@@ -317,12 +317,9 @@ void ViewArea::paintGL()
     int height_channel = _heightmap_selector->channel();
     int height_mode = _heightmap_selector->mode();
     float height_factor = (_flat_view ? 0.0f : _heightmap_selector->height_factor());
-    float channel_min = _heightmap_selector->range() == HeightmapSelector::MINMAX
-	? _channel_info->get_min(height_channel) 
-	: _range_selector->get_range_min(height_channel);
-    float channel_max = _heightmap_selector->range() == HeightmapSelector::MINMAX
-	? _channel_info->get_max(height_channel) 
-	: _range_selector->get_range_max(height_channel);
+    float height_channel_min = _range_selector->get_range_min(height_channel);
+    float height_channel_max = _range_selector->get_range_max(height_channel);
+    float height_channel_gamma = _gamma_selector->get_gamma(height_channel);
     int height_invert = (_heightmap_selector->data() == HeightmapSelector::HEIGHT ? 0 : 1);
     bool height_showcuboid = _heightmap_selector->show_cuboid();
     float height_cuboid_color[3];
@@ -528,8 +525,9 @@ void ViewArea::paintGL()
 	glUniform1i(glGetUniformLocation(_heightmap_quads_prg, "heightmap"), 1);
 	glUniform1i(glGetUniformLocation(_heightmap_quads_prg, "channel"), height_channel);
 	glUniform1f(glGetUniformLocation(_heightmap_quads_prg, "factor"), height_factor);
-	glUniform1f(glGetUniformLocation(_heightmap_quads_prg, "channel_min"), channel_min);
-	glUniform1f(glGetUniformLocation(_heightmap_quads_prg, "channel_max"), channel_max);
+	glUniform1f(glGetUniformLocation(_heightmap_quads_prg, "channel_min"), height_channel_min);
+	glUniform1f(glGetUniformLocation(_heightmap_quads_prg, "channel_max"), height_channel_max);
+	glUniform1f(glGetUniformLocation(_heightmap_quads_prg, "gamma"), height_channel_gamma);
 	glUniform1i(glGetUniformLocation(_heightmap_quads_prg, "invert"), height_invert);
 	glDrawArrays(GL_QUADS, 0, 4 * w * h);
 	glUseProgram(0);
@@ -605,8 +603,9 @@ void ViewArea::paintGL()
 	glUniform1i(glGetUniformLocation(_heightmap_strip_prg, "heightmap"), 1);
 	glUniform1i(glGetUniformLocation(_heightmap_strip_prg, "channel"), height_channel);
 	glUniform1f(glGetUniformLocation(_heightmap_strip_prg, "factor"), height_factor);
-	glUniform1f(glGetUniformLocation(_heightmap_strip_prg, "channel_min"), channel_min);
-	glUniform1f(glGetUniformLocation(_heightmap_strip_prg, "channel_max"), channel_max);
+	glUniform1f(glGetUniformLocation(_heightmap_quads_prg, "channel_min"), height_channel_min);
+	glUniform1f(glGetUniformLocation(_heightmap_quads_prg, "channel_max"), height_channel_max);
+	glUniform1f(glGetUniformLocation(_heightmap_quads_prg, "gamma"), height_channel_gamma);
 	glUniform1i(glGetUniformLocation(_heightmap_strip_prg, "invert"), height_invert);
 	for (int y = 0; y < h - 1; y++)
 	{

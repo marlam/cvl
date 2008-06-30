@@ -97,42 +97,29 @@ HeightmapSelector::HeightmapSelector(cvl_frame_t **frame, QWidget *parent) : QWi
     data_group->addButton(_distance_button);
     _height_button->setChecked(true);
 
-    QLabel *range_label = new QLabel("Range:");
-    layout->addWidget(range_label, 4, 0, 1, 2);
-    _minmax_button = new QRadioButton("Full");
-    connect(_minmax_button, SIGNAL(clicked()), this, SLOT(_button_clicked()));
-    layout->addWidget(_minmax_button, 4, 2, 1, 2);
-    _range_button = new QRadioButton("Selected");
-    connect(_range_button, SIGNAL(clicked()), this, SLOT(_button_clicked()));
-    layout->addWidget(_range_button, 4, 4, 1, 2);
-    QButtonGroup *range_group = new QButtonGroup();
-    range_group->addButton(_minmax_button);
-    range_group->addButton(_range_button);
-    _minmax_button->setChecked(true);
-
     QLabel *height_factor_label = new QLabel("Height factor:");
-    layout->addWidget(height_factor_label, 5, 0, 1, 2);
+    layout->addWidget(height_factor_label, 4, 0, 1, 2);
     _height_factor_spinbox = new QDoubleSpinBox();
     _height_factor_spinbox->setRange(0.00, 4.00);
     _height_factor_spinbox->setSingleStep(0.01);
     _height_factor_spinbox->setDecimals(2);
     _height_factor_spinbox->setValue(1.0);
     connect(_height_factor_spinbox, SIGNAL(valueChanged(double)), this, SLOT(_set_height_factor(double)));
-    layout->addWidget(_height_factor_spinbox, 5, 2, 1, 4);
+    layout->addWidget(_height_factor_spinbox, 4, 2, 1, 4);
     _height_factor_slider = new QSlider(Qt::Horizontal, this);
     _height_factor_slider->setRange(0, 2000);
     _height_factor_slider->setValue(1000);
     connect(_height_factor_slider, SIGNAL(valueChanged(int)), this, SLOT(_height_factor_slider_changed(int)));
-    layout->addWidget(_height_factor_slider, 6, 0, 1, 6);
+    layout->addWidget(_height_factor_slider, 5, 0, 1, 6);
 
     _showcuboid_box = new QCheckBox("Show Cuboid");
     _showcuboid_box->setCheckState(Qt::Checked);
     connect(_showcuboid_box, SIGNAL(stateChanged(int)), this, SLOT(_button_clicked()));
-    layout->addWidget(_showcuboid_box, 7, 0, 1, 4);
+    layout->addWidget(_showcuboid_box, 6, 0, 1, 4);
     _color_selector = new ColorSelector(1.0f, 1.0f, 1.0f, this);
-    layout->addWidget(_color_selector, 7, 4, 1, 2);
+    layout->addWidget(_color_selector, 6, 4, 1, 2);
 
-    layout->setRowStretch(8, 1);
+    layout->setRowStretch(7, 1);
     setLayout(layout);
 }
 
@@ -168,7 +155,6 @@ void HeightmapSelector::update()
     {
 	_enable_box->setCheckState(Qt::Unchecked);
 	_quads_button->setChecked(true);
-	_minmax_button->setChecked(true);
 	_height_factor_spinbox->setValue(1.0);
 	_showcuboid_box->setChecked(true);
 	_color_selector->set_color(1.0f, 1.0f, 1.0f);

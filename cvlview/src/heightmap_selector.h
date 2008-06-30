@@ -47,8 +47,6 @@ class HeightmapSelector : public QWidget
 	QRadioButton *_distance_button;
 	QRadioButton *_quads_button;
 	QRadioButton *_strip_button;
-	QRadioButton *_minmax_button;
-	QRadioButton *_range_button;
 	QDoubleSpinBox *_height_factor_spinbox;
 	QSlider *_height_factor_slider;
 	QCheckBox *_showcuboid_box;
@@ -64,7 +62,6 @@ class HeightmapSelector : public QWidget
     public:
         enum { QUADS, STRIP };
         enum { HEIGHT, DISTANCE };
-        enum { MINMAX, RANGE };
 	HeightmapSelector(cvl_frame_t **frame, QWidget *parent = NULL);	
 	~HeightmapSelector();
 
@@ -90,11 +87,6 @@ class HeightmapSelector : public QWidget
 	int data() const
 	{
 	    return _height_button->isChecked() ? HEIGHT : DISTANCE;
-	}
-
-	int range() const
-	{
-	    return _minmax_button->isChecked() ? MINMAX : RANGE;
 	}
 
 	float height_factor() const

@@ -25,6 +25,7 @@ uniform int channel;
 uniform float factor;
 uniform float channel_min;
 uniform float channel_max;
+uniform float gamma;
 uniform int invert;
 uniform sampler2D heightmap;
 
@@ -34,6 +35,7 @@ void main()
     vec4 data = texture2D(heightmap, gl_MultiTexCoord1.xy);
     float height = (channel == 0 ? data.r : channel == 1 ? data.g : channel == 2 ? data.b : data.a);
     height = clamp((height - channel_min) / (channel_max - channel_min), 0.0, 1.0);
+    height = 1.0 - clamp(pow(1.0 - height, gamma), 0.0, 1.0);
     if (invert == 1)
     {
 	height = 1.0 - height;
