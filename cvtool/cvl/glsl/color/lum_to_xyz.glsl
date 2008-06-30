@@ -30,5 +30,5 @@ void main()
     float Y = texture2D(tex, gl_TexCoord[0].xy).g;
     float X = Y * (d65_x / d65_y);
     float Z = min(1.0, Y * (1.0 - d65_x - d65_y) / d65_y);
-    gl_FragColor = vec4(X, Y, Z, 1.0);
+    gl_FragColor = vec4(X, Y, Z, 0.0);
 }

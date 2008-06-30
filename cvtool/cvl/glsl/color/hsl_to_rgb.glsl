@@ -57,5 +57,5 @@ void main()
     rgb.r = helper(tmp2, tmp1, hsl.x + (1.0 / 3.0));
     rgb.g = helper(tmp2, tmp1, hsl.x);
     rgb.b = helper(tmp2, tmp1, hsl.x - (1.0 / 3.0));
-    gl_FragColor = vec4(rgb, 1.0);
+    gl_FragColor = vec4(rgb, 0.0);
 }

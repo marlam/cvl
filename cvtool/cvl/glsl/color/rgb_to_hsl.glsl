@@ -56,5 +56,5 @@ void main()
 	    hsl.x = (60.0 / 360.0) * (rgb.r - rgb.g) / (maxval - minval) + (240.0 / 360.0);
 	}
     }
-    gl_FragColor = vec4(hsl, 1.0);
+    gl_FragColor = vec4(hsl, 0.0);
 }

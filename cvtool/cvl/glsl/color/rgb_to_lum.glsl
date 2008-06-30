@@ -29,10 +29,9 @@ void main()
     // The computation is exactly the same that is used by pfstools-1.5.
     vec3 m = vec3(0.212656, 0.715158, 0.072186);
     vec3 rgb = texture2D(tex, gl_TexCoord[0].xy).rgb;
-    if (all(lessThanEqual(rgb, vec3(0.04045, 0.04045, 0.04045))))
-	rgb /= 12.92;
-    else
-	rgb = pow((rgb + 0.055) / 1.055, vec3(2.4, 2.4, 2.4));
+    rgb.r = (rgb.r <= 0.04045 ? (rgb.r / 12.92) : (pow((rgb.r + 0.055) / 1.055, 2.4)));
+    rgb.g = (rgb.g <= 0.04045 ? (rgb.g / 12.92) : (pow((rgb.g + 0.055) / 1.055, 2.4)));
+    rgb.b = (rgb.b <= 0.04045 ? (rgb.b / 12.92) : (pow((rgb.b + 0.055) / 1.055, 2.4)));
     float lum = dot(m, rgb);
-    gl_FragColor = vec4(lum, lum, lum, lum);
+    gl_FragColor = vec4(lum, lum, lum, 0.0);
 }

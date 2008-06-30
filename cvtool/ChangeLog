@@ -1,3 +1,10 @@
+2008-06-30  Martin Lambers <marlam@marlam.de>
+
+	* cvl/glsl/color/hsl_to_rgb.glsl, cvl/glsl/color/rgb_to_hsl.glsl,
+	cvl/glsl/color/lum_to_xyz.glsl, cvl/glsl/color/lum_to_rgb.glsl,
+	cvl/glsl/color/rgb_to_lum.glsl: Fix color space conversions lum<->rgb,
+	and clean up some others.
+
 2008-06-27  Martin Lambers <marlam@marlam.de>
 
 	* cvl/cvl_io.c: Fix loading of PFS files with one channel and unknown
