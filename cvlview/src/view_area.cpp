@@ -39,6 +39,7 @@
 
 #include "glvm.h"
 #include "glvm-gl.h"
+#include "glvm-color.h"
 using namespace glvm;
 #include "arcball.h"
 
@@ -869,63 +870,6 @@ void ViewArea::wheelEvent(QWheelEvent *event)
     pixel_info();
 }
 
-float ViewArea::rgb_to_lum(float r, float g, float b)
-{
-    const float m1 = 0.212656f;
-    const float m2 = 0.715158;
-    const float m3 = 0.072186;
-    if (r <= 0.04045f && g <= 0.04045f && b <= 0.04045f)
-    {
-	r /= 12.92f;
-	g /= 12.92f;
-	b /= 12.92f;
-    }
-    else
-    {
-	r = powf((r + 0.055f) / 1.055f, 2.4f);
-	g = powf((g + 0.055f) / 1.055f, 2.4f);
-	b = powf((b + 0.055f) / 1.055f, 2.4f);
-    }
-    return m1 * r + m2 * g + m3 * b;
-}
-
-float ViewArea::hsl_to_lum_helper(float tmp2, float tmp1, float H)
-{
-    float ret;
-
-    if (H < 0.0f)
-	H += 1.0f;
-    else if (H > 1.0f)
-	H -= 1.0f;
-
-    if (H < 1.0f / 6.0f)
-	ret = (tmp2 + (tmp1 - tmp2) * (360.0f / 60.0f) * H);
-    else if (H < 1.0f / 2.0f)
-	ret = tmp1;
-    else if (H < 2.0f / 3.0f)
-	ret = (tmp2 + (tmp1 - tmp2) * ((2.0f / 3.0f) - H) * (360.0f / 60.0f));
-    else
-	ret = tmp2;
-    return ret;
-}
-
-float ViewArea::hsl_to_lum(float h, float s, float l)
-{
-    float r, g, b;
-    float tmp1, tmp2;
-
-    if (l < 0.5f)
-	tmp1 = l * (1.0f + s);
-    else
-	tmp1 = (l + s) - (l * s);
-    tmp2 = 2.0f * l - tmp1;
-    r = hsl_to_lum_helper(tmp2, tmp1, h + (1.0f / 3.0f));
-    g = hsl_to_lum_helper(tmp2, tmp1, h);
-    b = hsl_to_lum_helper(tmp2, tmp1, h - (1.0f / 3.0f));
-
-    return rgb_to_lum(r, g, b);
-}
-
 void ViewArea::pixel_info()
 {
     if (!_flat_view)
@@ -962,12 +906,12 @@ void ViewArea::pixel_info()
 	}
 	else if (cvl_frame_format(*_frame) == CVL_RGB)
 	{
-	    _pixel_lum = rgb_to_lum(_pixel_val[0], _pixel_val[1], _pixel_val[2]);
+	    _pixel_lum = glvm::rgb_to_lum(_pixel_val);
 	    emit update_pixel_info(frame_x, frame_y, cvl_frame_channels(*_frame), _pixel_val, &_pixel_lum);
 	}
 	else if (cvl_frame_format(*_frame) == CVL_HSL)
 	{
-	    _pixel_lum = hsl_to_lum(_pixel_val[0], _pixel_val[1], _pixel_val[2]);
+	    _pixel_lum = glvm::rgb_to_lum(glvm::hsl_to_rgb(_pixel_val));
 	    emit update_pixel_info(frame_x, frame_y, cvl_frame_channels(*_frame), _pixel_val, &_pixel_lum);
 	}
 	else // UNKNOWN
