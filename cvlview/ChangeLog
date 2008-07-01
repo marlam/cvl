@@ -2,6 +2,7 @@
 
 	* gllib/glvm.h: Add cbrt() functions.
 	* gllib/glvm-color.h: Add CIE L*a*b* color space.
+	* gllib/glvm.h: Small improvements and a bugfix.
 
 2008-06-30  Martin Lambers <marlam@marlam.de>
 

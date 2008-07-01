@@ -8564,7 +8564,7 @@ namespace glvm
 	{
 	    v[0][0] = x;
 	    v[0][1] = static_cast<T>(0);
-	    v[0][1] = static_cast<T>(0);
+	    v[1][0] = static_cast<T>(0);
 	    v[1][1] = x;
 	}
 
@@ -8904,9 +8904,9 @@ namespace glvm
 	    v[2][2] = col2.z;
 	}
 
-	matrix3(const T angle, const vector3<T> &v)
+	matrix3(const vector3<T> &axis, const T angle)
 	{
-	    const vector3<T> nv = normalize(v);
+	    const vector3<T> nv = normalize(axis);
 	    const T x = nv.x;
 	    const T y = nv.y;
 	    const T z = nv.z;
@@ -9344,9 +9344,9 @@ namespace glvm
 		is >> vl[i];
 	}
 
-	matrix4(const T angle, const vector3<T> &v)
+	matrix4(const vector3<T> &axis, const T angle)
 	{
-	    const matrix3<T> m(angle, v);
+	    const matrix3<T> m(angle, axis);
 	    v[0][0] = m.v[0][0];
 	    v[0][1] = m.v[0][1];
 	    v[0][2] = m.v[0][2];
