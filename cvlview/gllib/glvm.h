@@ -238,6 +238,18 @@ namespace glvm
     }
 
     template<typename T>
+    inline T cbrt(const T x)
+    {
+	return ::cbrt(x);
+    }
+
+    template<>
+    inline float cbrt(const float x)
+    {
+	return ::cbrtf(x);
+    }
+
+    template<typename T>
     inline bool isfinite(const T x)
     {
 	return static_cast<bool>(std::isfinite(x));
@@ -795,7 +807,17 @@ namespace glvm
 	friend vector2 inversesqrt(const vector2 &v)
 	{
     	    return v.inversesqrt();
-       	}    
+       	}
+
+	vector2 cbrt() const
+	{
+	    return vector2(glvm::cbrt(x), glvm::cbrt(y));
+	}
+
+	friend vector2 cbrt(const vector2 &v)
+	{
+    	    return v.cbrt();
+       	}
 
 	/* Common functions */
 
@@ -2141,6 +2163,16 @@ namespace glvm
 	friend vector3 inversesqrt(const vector3 &v)
 	{
     	    return v.inversesqrt();
+       	}
+
+	vector3 cbrt() const
+	{
+	    return vector3(glvm::cbrt(x), glvm::cbrt(y), glvm::cbrt(z));
+	}
+
+	friend vector3 cbrt(const vector3 &v)
+	{
+    	    return v.cbrt();
        	}
 
 	/* Common functions */
@@ -8044,6 +8076,16 @@ namespace glvm
 	friend vector4 inversesqrt(const vector4 &v)
 	{
     	    return v.inversesqrt();
+       	}
+
+	vector4 cbrt() const
+	{
+	    return vector4(glvm::cbrt(x), glvm::cbrt(y), glvm::cbrt(z), glvm::cbrt(w));
+	}
+
+	friend vector4 cbrt(const vector4 &v)
+	{
+    	    return v.cbrt();
        	}
 
 	/* Common functions */
