@@ -23,7 +23,8 @@
  * This file provides functions to convert between color spaces using GLVM
  * data types.
  *
- * We use the D65 reference white for the RGB values.
+ * RGB values are assumed to be sRGB.
+ * The D65 white point is used where a white point is needed.
  */
 
 #ifndef GLVM_COLOR_H
@@ -174,6 +175,36 @@ namespace glvm
 	    }
 	}
 	return hsl;
+    }
+
+    /* CIE L*a*b* */
+
+    vec3 xyz_to_lab(const vec3 &xyz)
+    {
+	const vec3 d65_xyz(0.31271f, 0.32902f, 1.0f - 0.31271f - 0.32902f);
+	vec3 tmp;
+	for (int i = 0; i < 3; i++)
+	{
+	    float t = xyz[i] / d65_xyz[i];
+	    tmp[i] = (t > 0.00885645167903563081f ? cbrt(t) : 7.78703703703703703694f * t + 0.13793103448275862068f);
+	}
+	return vec3(116.0f * tmp[1] - 16.0f, 500.0f * (tmp[0] - tmp[1]), 200.0f * (tmp[1] - tmp[2]));
+    }
+
+    vec3 lab_to_xyz(const vec3 &lab)
+    {
+	const vec3 d65_xyz(0.31271f, 0.32902f, 1.0f - 0.31271f - 0.32902f);
+	vec3 tmp, xyz;
+	tmp[1] = (lab[0] + 16.0f) / 116.0f;
+	tmp[0] = tmp[1] + lab[1] / 500.0f;
+	tmp[2] = tmp[1] - lab[2] / 200.0f;
+	for (int i = 0; i < 3; i++)
+	{
+	    xyz[i] = (tmp[i] > 0.20689655172413793103f 
+		    ? d65_xyz[i] * tmp[i] * tmp[i] * tmp[i] 
+		    : d65_xyz[i] * (tmp[i] - 16.0f / 116.0f) * 0.12841854934601664684f);
+	}
+	return xyz;
     }
 }
 
