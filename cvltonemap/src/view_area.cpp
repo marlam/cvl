@@ -98,6 +98,9 @@ void ViewArea::cvl_error_msgbox()
 
 void ViewArea::initializeGL()
 {
+    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
+
     cvl_init();
 
     if (cvl_error())
@@ -125,8 +128,17 @@ void ViewArea::resizeGL(int width, int height)
 
 void ViewArea::paintGL()
 {
-    if (_rendering_fails || !*_frame || _lock)
-	return;
+    if (_rendering_fails)
+    {
+    	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+      	glClear(GL_COLOR_BUFFER_BIT);
+      	return;
+    }
+
+    if (!*_frame || _lock)
+    {
+    	return;
+    }
 
     lock();
 
