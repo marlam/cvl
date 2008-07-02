@@ -34,11 +34,34 @@ uniform int height;	// Texture height.
 uniform float hstep;	// = 1.0 / float(w)
 uniform float vstep;	// = 1.0 / float(h)
 
+// Implementation of round(). As of 20080702 not all drivers have round()
+// builtin.
+float myround(float x)
+{
+    float y;
+    if (x >= 0.0)
+    {
+	y = floor(x);
+	if (x - y >= 0.5)
+	{
+	    y += 1.0;
+	}
+    }
+    else
+    {
+	y = ceil(x);
+	if (y - x >= 0.5)
+	{
+	    y -= 1.0;
+	}
+    }
+    return y;
+}
 
 int coord_to_index(vec2 coord)
 {
-    int x = int(round((coord.x - hstep / 2.0) * float(width)));
-    int y = int(round((coord.y - vstep / 2.0) * float(height)));
+    int x = int(myround((coord.x - hstep / 2.0) * float(width)));
+    int y = int(myround((coord.y - vstep / 2.0) * float(height)));
     return y * width + x;
 }
 
