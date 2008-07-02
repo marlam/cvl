@@ -67,11 +67,21 @@ int coord_to_index(vec2 coord)
 
 vec2 index_to_coord(int i)
 {
-    int x = i % width;
+    // avoid the modulo operator since not all drivers support it (as of
+    // 20080702).
+    //int x = i % width;
     int y = i / width;
+    int x = i - y * width;
     return vec2(
 	    float(x) / float(width) + hstep / 2.0,
 	    float(y) / float(height) + vstep / 2.0);
+}
+
+// avoid the modulo operator since not all drivers support it (as of
+// 20080702).
+int mymodulo(int x, int y)
+{
+    return x - (x / y) * y;
 }
 
 void main()
@@ -79,8 +89,8 @@ void main()
     // The current index is i, the other index is j.
     vec2 icoord = gl_TexCoord[0].xy;
     int i = coord_to_index(icoord);
-    int csign = (i % stageno < offset) ? +1 : -1;
-    int cdir = ((i / stepno) % 2 == 0) ? +1 : -1;
+    int csign = (mymodulo(i, stageno) < offset) ? +1 : -1;
+    int cdir = (mymodulo(i / stepno, 2) == 0) ? +1 : -1;
     vec2 jcoord = index_to_coord(i + csign * offset);
 
     // Get the values.

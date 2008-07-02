@@ -64,8 +64,11 @@ int coord_to_index(vec2 coord, int w, int h)
 // Transform an index to texture coordinates.
 vec2 index_to_coord(int i, int w, int h)
 {
-    int x = i % w;
+    // avoid the modulo operator since not all drivers support it (as of
+    // 20080702).
+    //int x = i % w;
     int y = i / w;
+    int x = i - y * w;
     return vec2(
 	    float(x) / float(w) + (0.5 / float(w)),
 	    float(y) / float(h) + (0.5 / float(h)));

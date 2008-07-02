@@ -3,6 +3,8 @@
 	* cvl/glsl/misc/sort.glsl, cvl/glsl/misc/resize_seq.glsl: Provide our
 	own implementation of round(), since not all driver versions have it
 	builtin.
+	* cvl/glsl/misc/sort.glsl, cvl/glsl/misc/resize_seq.glsl: Avoid the
+	integer modulo operator because not all drivers support it.
 
 2008-06-30  Martin Lambers <marlam@marlam.de>
 
