@@ -2,6 +2,7 @@
 
 	* src/view_area.cpp: Clear the color buffer on initialization and on
 	certain errors.
+	* TODO: Update.
 
 2008-07-01  Martin Lambers <marlam@marlam.de>
 

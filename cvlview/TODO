@@ -1,4 +1,3 @@
 Known bugs and missing functionality:
 
-- In 3D view, always use the selected range instead of the full range. Apply
-  gamma correction to the height channel.
+- none at the moment -
