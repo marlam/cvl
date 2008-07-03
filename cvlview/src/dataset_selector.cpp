@@ -135,12 +135,38 @@ void DatasetSelector::set_nr(int nr)
 		    }
 		    cvl_frame_free(dummy);
 		}
+		// Test for corner case: we are at EOF but don't know it yet.
+		if ((*_datafile)->total() == -1)
+		{
+		    try
+		    {
+			cvl_frame_free((*_datafile)->read());
+			(*_datafile)->prev();
+		    }
+		    catch (err e)
+		    {
+			// Ignore the error here. The application will get it when
+			// trying to read the frame.
+		    }
+		}
 	    }
 	}
 	else
 	{
-	    nr = mh_clampi(nr, 0, (*_datafile)->total() - 1);
 	    (*_datafile)->set_index(nr);
+	}
+
+	if ((*_datafile)->index() == (*_datafile)->total() - 1)
+    	{
+	    try
+	    {
+		(*_datafile)->prev();
+	    }
+	    catch (err e)
+	    {
+		// Ignore the error here. The application will get it when
+		// trying to read the frame.
+	    }
 	}
 
 	emit dataset_changed();

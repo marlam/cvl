@@ -2,6 +2,7 @@
 
 	* src/dataset_selector.h, src/dataset_selector.cpp, src/cvlview.cpp:
 	Add a SpinBox that allows to jump to specific data sets.
+	* src/dataset_selector.cpp: Fix.
 
 2008-07-02  Martin Lambers <marlam@marlam.de>
 
