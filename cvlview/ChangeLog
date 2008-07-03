@@ -10,6 +10,8 @@
 	same.
 	* src/range_selector.cpp: Improve heuristics for default upper/lower
 	bounds.
+	* src/cvlview.cpp: Use the current view by default for the Save and
+	Copy actions.
 
 2008-07-02  Martin Lambers <marlam@marlam.de>
 

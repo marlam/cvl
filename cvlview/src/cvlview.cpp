@@ -258,13 +258,13 @@ CVLView::CVLView()
     connect(open_datafile_act, SIGNAL(triggered()), this, SLOT(open_datafile()));
     file_menu->addAction(open_datafile_act);
     file_menu->addSeparator();
-    QAction *save_image_act = new QAction(tr("&Save..."), this);
-    save_image_act->setShortcut(tr("Ctrl+S"));
-    connect(save_image_act, SIGNAL(triggered()), this, SLOT(save_image()));
-    file_menu->addAction(save_image_act);
-    QAction *save_view_act = new QAction(tr("Save current view..."), this);
+    QAction *save_view_act = new QAction(tr("&Save current view..."), this);
+    save_view_act->setShortcut(tr("Ctrl+S"));
     connect(save_view_act, SIGNAL(triggered()), this, SLOT(save_view()));
     file_menu->addAction(save_view_act);
+    QAction *save_image_act = new QAction(tr("Save 1:1 2D view..."), this);
+    connect(save_image_act, SIGNAL(triggered()), this, SLOT(save_image()));
+    file_menu->addAction(save_image_act);
     file_menu->addSeparator();
     QAction *quit_act = new QAction(tr("&Quit"), this);
     quit_act->setShortcut(tr("Ctrl+Q"));
@@ -272,13 +272,13 @@ CVLView::CVLView()
     file_menu->addAction(quit_act);
     // Edit menu
     QMenu *edit_menu = menuBar()->addMenu(tr("&Edit"));
-    QAction *copy_image_act = new QAction(tr("&Copy"), this);
-    copy_image_act->setShortcut(tr("Ctrl+C"));
-    connect(copy_image_act, SIGNAL(triggered()), this, SLOT(copy_image()));
-    edit_menu->addAction(copy_image_act);
-    QAction *copy_view_act = new QAction(tr("Copy current view"), this);
+    QAction *copy_view_act = new QAction(tr("&Copy current view"), this);
+    copy_view_act->setShortcut(tr("Ctrl+C"));
     connect(copy_view_act, SIGNAL(triggered()), this, SLOT(copy_view()));
     edit_menu->addAction(copy_view_act);
+    QAction *copy_image_act = new QAction(tr("Copy 1:1 2D view"), this);
+    connect(copy_image_act, SIGNAL(triggered()), this, SLOT(copy_image()));
+    edit_menu->addAction(copy_image_act);
     // Help menu
     QMenu *help_menu = menuBar()->addMenu(tr("&Help"));
     QAction *show_aboutbox_act = new QAction(tr("&About"), this);
