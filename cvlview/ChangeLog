@@ -8,6 +8,8 @@
 	src/Makefile.am: Move data set display from frame info to data set
 	selector. Remove prev/next buttons because the SpinBox can do the
 	same.
+	* src/range_selector.cpp: Improve heuristics for default upper/lower
+	bounds.
 
 2008-07-02  Martin Lambers <marlam@marlam.de>
 

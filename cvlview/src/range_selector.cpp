@@ -593,36 +593,7 @@ void RangeSelector::update()
     /* Initialize information */
 
     // Set bounds of histogram
-    if (cvl_frame_format(*_frame) == CVL_UNKNOWN 
-	    && cvl_frame_channel_name(*_frame, 0) 
-	    && strcmp(cvl_frame_channel_name(*_frame, 0), "X-SAR-A") == 0
-	    && (cvl_frame_channels(*_frame) == 1 
-		|| (cvl_frame_channels(*_frame) == 2 
-		    && cvl_frame_channel_name(*_frame, 1)
-		    && strcmp(cvl_frame_channel_name(*_frame, 1), "X-SAR-P") == 0)))
-    {
-	// SAR Data
-	_default_lowerbound[1] = 0.0f;
-    	_default_upperbound[1] = 1.0f;
-	_log_x[1] = true;
-	_log_y[1] = true;
-	_default_lowerbound[2] = - M_PI;
-    	_default_upperbound[2] = + M_PI;
-	_log_x[2] = false;
-	_log_y[2] = false;
-    }
-    else if (cvl_frame_format(*_frame) == CVL_UNKNOWN)
-    {
-	// Unknown data.
-    	for (int c = -1; c < 4; c++)
-	{
-	    _default_lowerbound[c + 1] = _channel_info->get_min(c);
-	    _default_upperbound[c + 1] = _channel_info->get_max(c);
-	    _log_x[c + 1] = false;
-	    _log_y[c + 1] = false;
-	}
-    }
-    else if (cvl_frame_format(*_frame) == CVL_XYZ
+    if (cvl_frame_format(*_frame) == CVL_XYZ
 	    && _channel_info->get_max(1) > 1.0001)
     {
 	// Guess: HDR frame data, calibrated to SI units.
@@ -640,21 +611,81 @@ void RangeSelector::update()
     }
     else
     {
-	// Guess: LDR frame data. 
-	// Could also be HDR frame data normalized to [0,1].
-    	for (int c = 0; c < 4; c++)
+	if (cvl_frame_format(*_frame) != CVL_UNKNOWN)
 	{
-	    _default_lowerbound[c + 1] = 0.0f;
-	    _default_upperbound[c + 1] = 1.0f;
-	    _log_x[c + 1] = false;
-	    _log_y[c + 1] = false;
+	    // Guess: LDR frame data. 
+	    // Could also be HDR frame data normalized to [0,1].
+	    for (int c = 0; c < 4; c++)
+	    {
+		_default_lowerbound[c + 1] = 0.0f;
+		_default_upperbound[c + 1] = 1.0f;
+		_log_x[c + 1] = false;
+		_log_y[c + 1] = false;
+	    }
+	    _default_lowerbound[0] = 0.0f;
+	    _default_upperbound[0] = 1.0f;
+	    if (_reset_on_next_update)
+	    {
+		_log_x[0] = false;
+		_log_y[0] = false;
+	    }
 	}
-	_default_lowerbound[0] = 0.0f;
-	_default_upperbound[0] = 1.0f;
-	if (_reset_on_next_update)
+     	else
 	{
-	    _log_x[0] = false;
-	    _log_y[0] = false;
+	    bool unknown = true;
+	    if (cvl_frame_channels(*_frame) == 4)
+	    {
+		int R = -1, G = -1, B = -1;
+		for (int c = 0; c < 4; c++)
+		{
+		    if (!cvl_frame_channel_name(*_frame, c))
+			break;
+		    if (strcmp(cvl_frame_channel_name(*_frame, c), "R") == 0)
+			R = c;
+		    else if (strcmp(cvl_frame_channel_name(*_frame, c), "G") == 0)
+			G = c;
+		    else if (strcmp(cvl_frame_channel_name(*_frame, c), "B") == 0)
+			B = c;
+		}
+		if (R >= 0 && G >= 0 && B >= 0)
+		{
+		    // Guess: RGBA or RGBZ data.
+		    unknown = false;
+		    for (int c = 0; c < 4; c++)
+		    {
+			if (c == R || c == G || c == B)
+			{
+			    _default_lowerbound[c + 1] = 0.0f;
+			    _default_upperbound[c + 1] = 1.0f;
+			}
+			else
+			{
+			    _default_lowerbound[c + 1] = _channel_info->get_min(c);
+			    _default_upperbound[c + 1] = _channel_info->get_max(c);
+			}
+			_log_x[c + 1] = false;
+		    	_log_y[c + 1] = false;
+		    }
+		    _default_lowerbound[0] = 0.0f;
+		    _default_upperbound[0] = 1.0f;
+		    if (_reset_on_next_update)
+		    {
+			_log_x[0] = false;
+			_log_y[0] = false;
+		    }
+		}
+	    }
+	    if (unknown)
+	    {
+		// Unknown data.
+		for (int c = -1; c < 4; c++)
+		{
+		    _default_lowerbound[c + 1] = _channel_info->get_min(c);
+		    _default_upperbound[c + 1] = _channel_info->get_max(c);
+		    _log_x[c + 1] = false;
+		    _log_y[c + 1] = false;
+		}
+	    }
 	}
     }
     for (int c = -1; c < 4; c++)
