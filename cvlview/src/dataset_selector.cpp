@@ -24,6 +24,7 @@
 #include <QWidget>
 #include <QGridLayout>
 #include <QPushButton>
+#include <QSpinBox>
 
 #include "datafile.h"
 
@@ -34,6 +35,7 @@ DatasetSelector::DatasetSelector(DataFile **datafile, QWidget *parent)
 	: QWidget(parent)
 {
     _datafile = datafile;
+    _lock = false;
 
     QGridLayout *layout = new QGridLayout;
     
@@ -47,6 +49,15 @@ DatasetSelector::DatasetSelector(DataFile **datafile, QWidget *parent)
     _n_button->setAutoDefault(false);
     connect(_n_button, SIGNAL(clicked()), this, SLOT(n_button_clicked()));
     layout->addWidget(_n_button, 0, 1);
+    _nr_spinbox = new QSpinBox();
+    _nr_spinbox->setRange(1, 9999999);
+    _nr_spinbox->setSingleStep(1);
+    _nr_spinbox->setValue(1);
+#if QT_VERSION >= 0x040300
+    _nr_spinbox->setKeyboardTracking(false);
+#endif
+    connect(_nr_spinbox, SIGNAL(valueChanged(int)), this, SLOT(set_nr(int)));
+    layout->addWidget(_nr_spinbox, 0, 2);
 
     layout->setRowStretch(1, 1);
     setLayout(layout);
@@ -66,6 +77,9 @@ void DatasetSelector::p_button_clicked()
 	(*_datafile)->prev();	// move file pointer to current data set
 	(*_datafile)->prev();	// move file pointer to previous data set
 	emit dataset_changed();
+	_lock = true;
+	_nr_spinbox->setValue((*_datafile)->index());
+	_lock = false;
     }
 }
 
@@ -78,5 +92,59 @@ void DatasetSelector::n_button_clicked()
     {
 	// filepointer already points to next data set
 	emit dataset_changed();
+	_lock = true;
+	_nr_spinbox->setValue((*_datafile)->index());
+	_lock = false;
+    }
+}
+
+void DatasetSelector::set_nr(int nr)
+{
+    if (!*_datafile)
+	return;
+
+    if (!_lock)
+    {
+	_lock = true;
+	
+	nr--;
+	if ((*_datafile)->total() == -1)
+	{
+	    if (nr < (*_datafile)->index())
+	    {
+		(*_datafile)->set_index(nr);
+	    }
+	    else
+	    {
+		emit make_gl_context_current();
+		while ((*_datafile)->index() < nr)
+    		{
+		    cvl_frame_t *dummy = NULL;
+    		    try
+    		    {
+			dummy = (*_datafile)->read();
+    		    }
+    		    catch (err e)
+    		    {
+    			// Ignore the error here. The application will get it when
+    			// trying to read the frame.
+    		    }
+		    if (!dummy)
+		    {
+			break;
+		    }
+		    cvl_frame_free(dummy);
+		}
+	    }
+	}
+	else
+	{
+	    nr = mh_clampi(nr, 0, (*_datafile)->total() - 1);
+	    (*_datafile)->set_index(nr);
+	}
+
+	emit dataset_changed();
+	_nr_spinbox->setValue((*_datafile)->index());
+	_lock = false;
     }
 }

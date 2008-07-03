@@ -179,6 +179,7 @@ CVLView::CVLView()
 	    _widget);
     connect(this, SIGNAL(new_frame()), _view_area, SLOT(recompute()));
     connect(this, SIGNAL(make_gl_context_current()), _view_area, SLOT(make_gl_context_current()));
+    connect(_dataset_selector, SIGNAL(make_gl_context_current()), _view_area, SLOT(make_gl_context_current()));
     connect(_frame_info, SIGNAL(make_gl_context_current()), _view_area, SLOT(make_gl_context_current()));
     connect(_channel_selector, SIGNAL(channel_changed()), _view_area, SLOT(recompute()));
     connect(_channel_selector, SIGNAL(make_gl_context_current()), _view_area, SLOT(make_gl_context_current()));

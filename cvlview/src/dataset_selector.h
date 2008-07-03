@@ -26,6 +26,7 @@
 
 #include <QWidget>
 #include <QPushButton>
+#include <QSpinBox>
 
 #include "datafile.h"
 
@@ -38,16 +39,20 @@ class DatasetSelector : public QWidget
 	DataFile **_datafile;
 	QPushButton *_p_button;
 	QPushButton *_n_button;
+	QSpinBox *_nr_spinbox;
+	bool _lock;
 
     private slots:
 	void p_button_clicked();
     	void n_button_clicked();
+	void set_nr(int nr);
 
     public:
 	DatasetSelector(DataFile **datafile, QWidget *parent = NULL);	
 	~DatasetSelector();
 
     signals:
+	void make_gl_context_current();
 	void dataset_changed();
 };
 
