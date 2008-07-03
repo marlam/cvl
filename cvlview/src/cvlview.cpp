@@ -23,6 +23,8 @@
 
 #include <climits>
 #include <cstdio>
+#include <cerrno>
+#include <cstring>
 
 #define GLEW_STATIC 1
 #include <GL/glew.h>
@@ -44,6 +46,7 @@
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QStatusBar>
+#include <QSpinBox>
 
 #include "glvm.h"
 using namespace glvm;
@@ -266,6 +269,10 @@ CVLView::CVLView()
     connect(save_image_act, SIGNAL(triggered()), this, SLOT(save_image()));
     file_menu->addAction(save_image_act);
     file_menu->addSeparator();
+    QAction *save_video_act = new QAction(tr("Save video..."), this);
+    connect(save_video_act, SIGNAL(triggered()), this, SLOT(save_video()));
+    file_menu->addAction(save_video_act);
+    file_menu->addSeparator();
     QAction *quit_act = new QAction(tr("&Quit"), this);
     quit_act->setShortcut(tr("Ctrl+Q"));
     connect(quit_act, SIGNAL(triggered()), this, SLOT(close()));
@@ -451,6 +458,120 @@ void CVLView::save_view()
 {
     save(false);
 }
+
+void CVLView::save_video()
+{
+    if (!_frame)
+    {
+	QMessageBox::critical(this, tr("Error"), tr("No data loaded yet."));
+	return;
+    }
+
+    // Get dataset selection
+    int dataset_start = _dataset_selector->get_current();
+    int dataset_end = _dataset_selector->get_max();
+    int dataset_step = 1;
+    QDialog *dataset_dialog = new QDialog(this);
+    dataset_dialog->setModal(true);
+    dataset_dialog->setWindowTitle("Select data sets");
+    QGridLayout *dd_layout = new QGridLayout;
+    QLabel *start_label = new QLabel("Start:");
+    dd_layout->addWidget(start_label, 0, 0);
+    QSpinBox *start_spinbox = new QSpinBox();
+    start_spinbox->setRange(1, dataset_end);
+    start_spinbox->setValue(dataset_start);
+    dd_layout->addWidget(start_spinbox, 0, 1);
+    QLabel *end_label = new QLabel("End:");
+    dd_layout->addWidget(end_label, 1, 0);
+    QSpinBox *end_spinbox = new QSpinBox();
+    end_spinbox->setRange(1, dataset_end);
+    end_spinbox->setValue(dataset_end);
+    dd_layout->addWidget(end_spinbox, 1, 1);
+    QLabel *step_label = new QLabel("Step:");
+    dd_layout->addWidget(step_label, 2, 0);
+    QSpinBox *step_spinbox = new QSpinBox();
+    step_spinbox->setRange(1, 999);
+    step_spinbox->setValue(1);
+    dd_layout->addWidget(step_spinbox, 2, 1);
+    QPushButton *dd_ok_btn = new QPushButton(tr("&OK"), dataset_dialog);
+    dd_ok_btn->setDefault(true);
+    connect(dd_ok_btn, SIGNAL(clicked()), dataset_dialog, SLOT(accept()));
+    dd_layout->addWidget(dd_ok_btn, 3, 0);
+    QPushButton *dd_cancel_btn = new QPushButton(tr("&Cancel"), dataset_dialog);
+    connect(dd_cancel_btn, SIGNAL(clicked()), dataset_dialog, SLOT(reject()));
+    dd_layout->addWidget(dd_cancel_btn, 3, 1);
+    dataset_dialog->setLayout(dd_layout);
+    if (dataset_dialog->exec() == QDialog::Rejected)
+   	return;
+    dataset_start = start_spinbox->value();
+    dataset_end = end_spinbox->value();
+    dataset_step = step_spinbox->value();
+
+    // Get video file name
+    QFileDialog *file_dialog = new QFileDialog(this);
+    file_dialog->setWindowTitle(tr("Save image"));
+    file_dialog->setDefaultSuffix("ppm");
+    file_dialog->setAcceptMode(QFileDialog::AcceptSave);
+    file_dialog->setDirectory(_last_save_dir);
+    QStringList filters;
+    filters << tr("NetPBM color files (*.ppm)") << tr("All files (*)");
+    file_dialog->setFilters(filters);
+    file_dialog->setFileMode(QFileDialog::AnyFile);
+    if (!file_dialog->exec())
+	return;
+    QString file_name = file_dialog->selectedFiles().at(0);
+    if (file_name.isEmpty())
+	return;
+
+    // Open file
+    FILE *file = fopen(qPrintable(file_name), "w");
+    if (!file)
+    {
+	QMessageBox::critical(this, tr("Error"), 
+		QString(mh_string("Saving %s failed: %s", qPrintable(file_name), strerror(errno)).c_str()));
+	return;
+    }
+    
+    // Do it
+    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+    int dataset_bak = _dataset_selector->get_current();
+    for (int d = dataset_start; d < dataset_end; d += dataset_step)
+    {
+	_dataset_selector->set_current(d);
+    	QImage img = _view_area->get_view();
+	emit make_gl_context_current();
+	cvl_frame_t *frame = cvl_frame_new(img.width(), img.height(), 3, CVL_RGB, CVL_UINT8, CVL_MEM);
+	uint8_t *p = static_cast<uint8_t *>(cvl_frame_pointer(frame));
+	for (int y = 0; y < cvl_frame_height(frame); y++)
+	{
+	    for (int x = 0; x < cvl_frame_width(frame); x++)
+	    {
+		QRgb pixel = img.pixel(x, y);
+		p[3 * (y * cvl_frame_width(frame) + x) + 0] = qRed(pixel);
+		p[3 * (y * cvl_frame_width(frame) + x) + 1] = qGreen(pixel);
+		p[3 * (y * cvl_frame_width(frame) + x) + 2] = qBlue(pixel);
+	    }
+	}
+	cvl_write_pnm(file, frame);
+	cvl_frame_free(frame);
+    }
+    QApplication::restoreOverrideCursor();
+    if (cvl_error())
+    {
+	QMessageBox::critical(this, tr("Error"), 
+		QString(mh_string("Saving %s failed: %s", qPrintable(file_name), cvl_error_msg()).c_str()));
+	cvl_error_reset();
+	return;
+    }
+    if (fclose(file) != 0)
+    {
+	QMessageBox::critical(this, tr("Error"), 
+		QString(mh_string("Saving %s failed: %s", qPrintable(file_name), strerror(errno)).c_str()));
+	return;
+    }
+    _dataset_selector->set_current(dataset_bak);
+    _last_save_dir = file_dialog->directory();
+}   
 
 void CVLView::copy(bool whole_image)
 {

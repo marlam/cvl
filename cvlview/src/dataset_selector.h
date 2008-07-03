@@ -48,6 +48,26 @@ class DatasetSelector : public QWidget
 	DatasetSelector(DataFile **datafile, QWidget *parent = NULL);	
 	~DatasetSelector();
 
+	int get_current()
+	{
+	    return _nr_spinbox->value();
+	}
+
+	int get_max()
+	{
+	    if (!*_datafile)
+		return 0;
+
+	    int i = (*_datafile)->index();
+	    int t = (*_datafile)->total();
+	    return t == -1 ? i : t - 1;
+	}
+
+	void set_current(int d)
+	{
+	    _nr_spinbox->setValue(d);
+	}
+
     public slots:
 	void reset();
     

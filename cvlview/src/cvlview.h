@@ -114,6 +114,7 @@ class CVLView : public QMainWindow
 	void open_frame();
         void save_image();
         void save_view();
+        void save_video();
 	void copy_image();
 	void copy_view();
 	void show_aboutbox();
