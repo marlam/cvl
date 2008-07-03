@@ -14,6 +14,7 @@
 	Copy actions.
 	* src/cvlview.h, src/cvlview.cpp, src/dataset_selector.h: Add the
 	capability to save videos to multi-frame PPM files.
+	* NEWS: Update.
 
 2008-07-02  Martin Lambers <marlam@marlam.de>
 
