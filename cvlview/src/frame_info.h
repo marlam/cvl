@@ -39,7 +39,6 @@ class FrameInfo : public QWidget
     private:
 	DataFile **_datafile;
 	cvl_frame_t **_frame;
-	QLabel *_line0;
 	QLabel *_line1;
 	QLabel *_line2;
 	QLabel *_ch_line[4];

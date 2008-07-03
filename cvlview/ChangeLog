@@ -3,6 +3,11 @@
 	* src/dataset_selector.h, src/dataset_selector.cpp, src/cvlview.cpp:
 	Add a SpinBox that allows to jump to specific data sets.
 	* src/dataset_selector.cpp: Fix.
+	* src/frame_info.h, src/frame_info.cpp, src/dataset_selector.h,
+	src/dataset_selector.cpp, src/cvlview.cpp, src/cvlview.qrc,
+	src/Makefile.am: Move data set display from frame info to data set
+	selector. Remove prev/next buttons because the SpinBox can do the
+	same.
 
 2008-07-02  Martin Lambers <marlam@marlam.de>
 

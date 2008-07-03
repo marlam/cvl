@@ -26,7 +26,7 @@ if W32
 cvlview_SOURCES += icons/appicon.ico
 endif
 
-RESOURCES = icons/appicon.png icons/prev.png icons/next.png
+RESOURCES = icons/appicon.png
 
 EXTRA_DIST = cvlview.qrc $(RESOURCES)	\
 	heightmap_quads_vs.glsl		\

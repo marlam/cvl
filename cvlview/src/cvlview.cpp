@@ -108,6 +108,7 @@ CVLView::CVLView()
     
     _dataset_selector = new DatasetSelector(&_datafile, _widget);
     connect(_dataset_selector, SIGNAL(dataset_changed()), this, SLOT(open_frame()));
+    connect(this, SIGNAL(new_datafile()), _dataset_selector, SLOT(reset()));
     
     _channel_selector = new ChannelSelector(&_frame, _widget);
     connect(this, SIGNAL(new_frame()), _channel_selector, SLOT(update()));
@@ -406,11 +407,6 @@ void CVLView::open_frame()
     if (frame)
     {
 	activate_frame(frame);
-    }
-    else
-    {
-	// update the data set counter
-	_frame_info->update();
     }
 }
 
