@@ -2,6 +2,8 @@
 
 	* src/cvlview.cpp, src/dataset_selector.h: Show progress bar when
 	saving a video, and allow to cancel the operation.
+	* src/dataset_selector.h, src/dataset_selector.cpp: Add scan button to
+	scan through the file and find out how many data sets it has.
 
 2008-07-03  Martin Lambers <marlam@marlam.de>
 

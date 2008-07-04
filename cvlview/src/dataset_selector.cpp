@@ -21,10 +21,16 @@
 
 #include "config.h"
 
+#include <climits>
+
 #include <QWidget>
 #include <QGridLayout>
+#include <QPushButton>
 #include <QLabel>
 #include <QSpinBox>
+#include <QApplication>
+
+#include "mh.h"
 
 #include "datafile.h"
 
@@ -50,10 +56,19 @@ DatasetSelector::DatasetSelector(DataFile **datafile, QWidget *parent)
 #endif
     connect(_nr_spinbox, SIGNAL(valueChanged(int)), this, SLOT(set_nr(int)));
     layout->addWidget(_nr_spinbox, 0, 1);
+
+    _scan_button = new QPushButton("Scan");
+    connect(_scan_button, SIGNAL(clicked()), this, SLOT(scan_button_clicked()));
+    int scan_button_width = _scan_button->sizeHint().width() / 2;
     _total_label = new QLabel("/ 0000");
+    int total_label_width = _total_label->sizeHint().width();
+    int maxwidth = mh_maxi(scan_button_width, total_label_width);
+    _scan_button->setFixedWidth(maxwidth);
+    _total_label->setFixedWidth(maxwidth);
+    layout->addWidget(_scan_button, 0, 2);
     layout->addWidget(_total_label, 0, 2);
-    _total_label->setFixedWidth(_total_label->sizeHint().width());
-    _total_label->setText("");
+    _total_label->setVisible(false);
+    _total_label_was_set = false;
 
     layout->setRowStretch(1, 1);
     setLayout(layout);
@@ -67,6 +82,9 @@ void DatasetSelector::reset()
 {
     _total_label->setText("");
     _nr_spinbox->setValue(1);
+    _scan_button->setVisible(true);
+    _total_label->setVisible(false);
+    _total_label_was_set = false;
 }
 
 void DatasetSelector::set_nr(int nr)
@@ -142,10 +160,20 @@ void DatasetSelector::set_nr(int nr)
 
 	emit dataset_changed();
 	_nr_spinbox->setValue((*_datafile)->index());
-	if ((*_datafile)->total() != -1)
+	if ((*_datafile)->total() != -1 && !_total_label_was_set)
 	{
 	    _total_label->setText(mh_string("/ %4d", (*_datafile)->total() - 1).c_str());
+	    _scan_button->setVisible(false);
+	    _total_label->setVisible(true);
+	    _total_label_was_set = true;
 	}
 	_lock = false;
     }
+}
+
+void DatasetSelector::scan_button_clicked()
+{
+    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+    set_nr(INT_MAX);
+    QApplication::restoreOverrideCursor();
 }
