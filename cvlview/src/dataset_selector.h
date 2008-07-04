@@ -55,12 +55,7 @@ class DatasetSelector : public QWidget
 
 	int get_max()
 	{
-	    if (!*_datafile)
-		return 0;
-
-	    int i = (*_datafile)->index();
-	    int t = (*_datafile)->total();
-	    return t == -1 ? i : t - 1;
+	    return (*_datafile) ? (*_datafile)->total() - 1 : -1;
 	}
 
 	void set_current(int d)

@@ -47,6 +47,8 @@
 #include <QFileInfo>
 #include <QStatusBar>
 #include <QSpinBox>
+#include <QProgressBar>
+#include <QProgressDialog>
 
 #include "glvm.h"
 using namespace glvm;
@@ -469,7 +471,7 @@ void CVLView::save_video()
 
     // Get dataset selection
     int dataset_start = _dataset_selector->get_current();
-    int dataset_end = _dataset_selector->get_max();
+    int dataset_end = _dataset_selector->get_max() > 0 ? _dataset_selector->get_max() : 9999;
     int dataset_step = 1;
     QDialog *dataset_dialog = new QDialog(this);
     dataset_dialog->setModal(true);
@@ -533,15 +535,23 @@ void CVLView::save_video()
     }
     
     // Do it
-    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+    QProgressDialog *progress_dialog = new QProgressDialog("Saving video...", "Cancel", dataset_start - 1, dataset_end, this);
+    progress_dialog->setWindowModality(Qt::WindowModal);
+    progress_dialog->setMinimumDuration(0);
+    progress_dialog->setValue(dataset_start - 1);
     int dataset_bak = _dataset_selector->get_current();
-    for (int d = dataset_start; d < dataset_end; d += dataset_step)
+    for (int d = dataset_start; d <= dataset_end; d += dataset_step)
     {
+	progress_dialog->setValue(d);
+	QCoreApplication::processEvents();
 	_dataset_selector->set_current(d);
+	QCoreApplication::processEvents();
     	QImage img = _view_area->get_view();
+	QCoreApplication::processEvents();
 	emit make_gl_context_current();
 	cvl_frame_t *frame = cvl_frame_new(img.width(), img.height(), 3, CVL_RGB, CVL_UINT8, CVL_MEM);
 	uint8_t *p = static_cast<uint8_t *>(cvl_frame_pointer(frame));
+	QCoreApplication::processEvents();
 	for (int y = 0; y < cvl_frame_height(frame); y++)
 	{
 	    for (int x = 0; x < cvl_frame_width(frame); x++)
@@ -552,10 +562,15 @@ void CVLView::save_video()
 		p[3 * (y * cvl_frame_width(frame) + x) + 2] = qBlue(pixel);
 	    }
 	}
+	QCoreApplication::processEvents();
 	cvl_write_pnm(file, frame);
 	cvl_frame_free(frame);
+	if (progress_dialog->wasCanceled())
+	{
+	    break;
+	}
     }
-    QApplication::restoreOverrideCursor();
+    delete progress_dialog;
     if (cvl_error())
     {
 	QMessageBox::critical(this, tr("Error"), 
