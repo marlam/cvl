@@ -12,6 +12,7 @@
 	configure.ac, gnulib/m4/gnulib-comp.m4, gnulib/m4/gnulib-cache.m4,
 	gnulib/Makefile.am, src/Makefile.am, gllib/Makefile.am,
 	mhlib/Makefile.am: Use libtool to get linking right.
+	* build-aux/Makefile.am: Update.
 
 2008-07-04  Martin Lambers <marlam@marlam.de>
 
