@@ -4,6 +4,7 @@
 	* configure.ac, doc/cvlview.1, doc/cvlview.texi: Bump version to
 	0.3.1.
 	* configure.ac: Require CVL >= 0.2.5.
+	* gnulib/alloca.h: Remove generated file from SVN.
 
 2008-07-04  Martin Lambers <marlam@marlam.de>
 
