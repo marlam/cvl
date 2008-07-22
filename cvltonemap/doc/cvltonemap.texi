@@ -1,10 +1,10 @@
 \input texinfo   @c -*-texinfo-*-
 @afourpaper
 @setfilename cvltonemap.info
-@set UPDATED May 17, 2008
-@set UPDATED-MONTH May 2008
-@set EDITION 0.2.1
-@set VERSION 0.2.1
+@set UPDATED July 22, 2008
+@set UPDATED-MONTH July 2008
+@set EDITION 0.2.2
+@set VERSION 0.2.2
 @settitle CVLTonemap @value{VERSION}
 
 @c Define new index for commands
@@ -15,7 +15,7 @@
 This manual was last updated @value{UPDATED} for version
 @value{VERSION} of CVLTonemap.
 
-Copyright @copyright{} 2007 Martin Lambers
+Copyright @copyright{} 2007, 2008 Martin Lambers
 
 @quotation
 Permission is granted to copy, distribute and/or modify this document

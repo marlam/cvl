@@ -1,6 +1,8 @@
 2008-07-22  Martin Lambers <marlam@marlam.de>
 
 	* gnulib/*: Gnulib update.
+	* configure.ac, doc/cvltonemap.1, doc/cvltonemap.texi: Bump version to
+	0.2.2.
 
 2008-07-02  Martin Lambers <marlam@marlam.de>
 
