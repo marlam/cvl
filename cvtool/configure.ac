@@ -65,28 +65,8 @@ AC_SEARCH_LIBS([clock_gettime], [rt])
 dnl Math library
 AC_SEARCH_LIBS([sqrtf], [m])
 
-dnl GLEW, OpenGL (used only by CVL)
-GL_LIBS=""
-if test "$w32" = "yes"; then
-	AC_DEFINE([GLEW_STATIC], [1], [Use static GLEW on W32.])
-	AC_LIB_HAVE_LINKFLAGS([glew32s], [gdi32 glu32 opengl32], 
-	  [#define GLEW_STATIC 1
-	   #include <GL/glew.h>],
-	  [GLEW_VERSION_2_1])
-	if test "$HAVE_LIBGLEW32S" != "yes"; then
-		AC_MSG_ERROR([could not find GLEW >= 1.3.5])
-	else
-		GL_LIBS="$LIBGLEW32S"
-	fi
-else
-	AC_LIB_HAVE_LINKFLAGS([GLEW], [GLU GL], [#include <GL/glew.h>], [GLEW_VERSION_2_1])
-	if test "$HAVE_LIBGLEW" != "yes"; then
-		AC_MSG_ERROR([could not find GLEW >= 1.3.5])
-	else
-		GL_LIBS="$LIBGLEW"
-	fi
-fi
-AC_SUBST([GL_LIBS])
+dnl GLEW (used only by CVL)
+AM_GLEW()
 
 dnl CAIRO (used only by the optional cvtool draw command)
 AC_LIB_HAVE_LINKFLAGS([cairo], [], 
@@ -96,14 +76,11 @@ AC_LIB_HAVE_LINKFLAGS([cairo], [],
    #endif],
   [char *s = CAIRO_VERSION_STRING;])
 if test "$HAVE_LIBCAIRO" = "yes"; then
-	CAIRO_LIBS="$LIBCAIRO"
 	gl_ABSOLUTE_HEADER([cairo/cairo-features.h])
 	CAIRO_INCLUDE_DIR=`echo $gl_cv_absolute_cairo_cairo_features_h \
 	| sed -e 's/\/cairo-features.h$//' -e 's/"//g' -e 's/^\/\/\//\//'`
-	CAIRO_CPPFLAGS="-I$CAIRO_INCLUDE_DIR"
+	CPPFLAGS="$CPPFLAGS -I$CAIRO_INCLUDE_DIR"
 fi
-AC_SUBST([CAIRO_LIBS])
-AC_SUBST([CAIRO_CPPFLAGS])
 
 dnl Global #defines for all source files
 AH_VERBATIM([UNUSED],

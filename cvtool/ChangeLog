@@ -8,6 +8,9 @@
 	absolute-header.
 	* cvtool/cmd_foreach.c: Update the use of wait_subprocess() to reflect
 	changes in the gnulib module.
+	* build-aux/glew.m4, build-aux/Makefile.am, configure.ac,
+	cvl/Makefile.am, cvtool/Makefile.am: Improve detection and usage of
+	external libraries.
 
 2008-07-02  Martin Lambers <marlam@marlam.de>
 
