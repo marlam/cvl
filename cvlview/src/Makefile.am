@@ -61,9 +61,9 @@ BUILT_SOURCES = $(nodist_cvlview_SOURCES)
 CLEANFILES = $(BUILT_SOURCES)
 
 cvlview_LDADD = \
-	$(top_builddir)/gllib/libgl.a	\
-	$(top_builddir)/mhlib/libmh.a	\
-	$(top_builddir)/gnulib/libgnu.a	\
+	$(top_builddir)/gllib/libgl.la		\
+	$(top_builddir)/mhlib/libmh.la		\
+	$(top_builddir)/gnulib/libgnu.la	\
 	$(QT4_LIBS) $(LTLIBCVL) $(LTLIBGLEW)
 
 cvlview_CPPFLAGS = \

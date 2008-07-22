@@ -9,7 +9,9 @@
 	Improve detection and usage of external libraries.
 	* build-aux/depcomp, build-aux/Makefile.am, build-aux/config.guess, 
 	build-aux/config.sub, build-aux/ltmain.sh, build-aux/install-sh,
-	configure.ac: Use libtool to get linking right.
+	configure.ac, gnulib/m4/gnulib-comp.m4, gnulib/m4/gnulib-cache.m4,
+	gnulib/Makefile.am, src/Makefile.am, gllib/Makefile.am,
+	mhlib/Makefile.am: Use libtool to get linking right.
 
 2008-07-04  Martin Lambers <marlam@marlam.de>
 
