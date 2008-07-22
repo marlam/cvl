@@ -7,6 +7,9 @@
 	* gnulib/alloca.h: Remove generated file from SVN.
 	* build-aux/glew.m4, build-aux/cvl.m4, configure.ac, src/Makefile.am:
 	Improve detection and usage of external libraries.
+	* build-aux/depcomp, build-aux/Makefile.am, build-aux/config.guess, 
+	build-aux/config.sub, build-aux/ltmain.sh, build-aux/install-sh,
+	configure.ac: Use libtool to get linking right.
 
 2008-07-04  Martin Lambers <marlam@marlam.de>
 
