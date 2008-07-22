@@ -1,6 +1,8 @@
 2008-07-22  Martin Lambers <marlam@marlam.de>
 
 	* gnulib/*: Gnulib update.
+	* configure.ac, doc/cvlview.1, doc/cvlview.texi: Bump version to
+	0.3.1.
 
 2008-07-04  Martin Lambers <marlam@marlam.de>
 
