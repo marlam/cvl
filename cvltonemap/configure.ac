@@ -61,12 +61,12 @@ dnl CVL
 CVL_LIBS=""
 AC_LIB_HAVE_LINKFLAGS([cvl], [GLEW], 
 	[#include <cvl/cvl.h>
-	 #if CVL_VERSION_MAJOR < 0 || CVL_VERSION_MINOR < 2 || CVL_VERSION_PATCH < 4
+	 #if CVL_VERSION_MAJOR < 0 || CVL_VERSION_MINOR < 2 || CVL_VERSION_PATCH < 5
 	 CVL version too old
 	 #endif], 
 	[cvl_init();])
 if test "$HAVE_LIBCVL" != "yes"; then
-	AC_MSG_ERROR([could not find CVL >= 0.2.4])
+	AC_MSG_ERROR([could not find CVL >= 0.2.5])
 else
 	CVL_LIBS="$LIBCVL"
 fi
