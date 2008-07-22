@@ -64,7 +64,7 @@ cvlview_LDADD = \
 	$(top_builddir)/gllib/libgl.a	\
 	$(top_builddir)/mhlib/libmh.a	\
 	$(top_builddir)/gnulib/libgnu.a	\
-	$(QT4_LIBS) $(CVL_LIBS)
+	$(QT4_LIBS) $(LTLIBCVL) $(LTLIBGLEW)
 
 cvlview_CPPFLAGS = \
 	-I$(top_builddir)/gnulib -I$(top_srcdir)/gnulib	\
