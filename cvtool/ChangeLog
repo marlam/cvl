@@ -11,6 +11,7 @@
 	* build-aux/glew.m4, build-aux/Makefile.am, configure.ac,
 	cvl/Makefile.am, cvtool/Makefile.am: Improve detection and usage of
 	external libraries.
+	* cvl/cvl_misc.c: Reduce memory usage of cvl_reduce().
 
 2008-07-02  Martin Lambers <marlam@marlam.de>
 

@@ -166,20 +166,121 @@ void cvl_reduce(cvl_frame_t *frame, cvl_reduce_mode_t mode, int channel, float *
     int src_h = mh_next_power_of_two(cvl_frame_height(frame));
     if (src_w != cvl_frame_width(frame) || src_h != cvl_frame_height(frame))
     {
-	const float neutral_min[4] = {  FLT_MAX,  FLT_MAX,  FLT_MAX,  FLT_MAX };
-	const float neutral_max[4] = { -FLT_MAX, -FLT_MAX, -FLT_MAX, -FLT_MAX };
-	const float neutral_sum[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
-	const float *neutral_element;
-	if (mode == CVL_REDUCE_MIN || mode == CVL_REDUCE_MIN_GREATER_ZERO 
-		|| mode == CVL_REDUCE_ABSMIN || mode == CVL_REDUCE_ABSMIN_GREATER_ZERO)
-	    neutral_element = neutral_min;
-	else if (mode == CVL_REDUCE_MAX || mode == CVL_REDUCE_ABSMAX)
-	    neutral_element = neutral_max;
+	if (src_w > 32 && src_h > 32)
+	{
+	    // Divide the frame into up to four rectangles: upper left, upper
+	    // right, lower left, lower right. Then apply reduction recursively
+	    // and combine the results. This is much more memory efficient than
+	    // just creating a new frame of size src_w x src_h.
+	    int rectangles;
+	    cvl_frame_t *rect;
+	    float rect_result[4][4];
+	    if (src_w != cvl_frame_width(frame) && src_h != cvl_frame_height(frame))
+	    {
+		// Case 1: four rectangles
+		rectangles = 4;
+		rect = cvl_frame_new(src_w / 2, src_h / 2,
+			cvl_frame_channels(frame), cvl_frame_format(frame), cvl_frame_type(frame), CVL_TEXTURE);
+		cvl_copy_rect(rect, 0, 0, frame, 0, 0, src_w / 2, src_h / 2);
+		cvl_reduce(rect, mode, channel, rect_result[0]);
+		cvl_frame_free(rect);
+		rect = cvl_frame_new(cvl_frame_width(frame) - src_w / 2, src_h / 2,
+			cvl_frame_channels(frame), cvl_frame_format(frame), cvl_frame_type(frame), CVL_TEXTURE);
+		cvl_copy_rect(rect, 0, 0, frame, src_w / 2, 0, cvl_frame_width(frame) - src_w / 2, src_h / 2);
+		cvl_reduce(rect, mode, channel, rect_result[1]);
+      		cvl_frame_free(rect);
+		rect = cvl_frame_new(src_w / 2, cvl_frame_height(frame) - src_h / 2,
+			cvl_frame_channels(frame), cvl_frame_format(frame), cvl_frame_type(frame), CVL_TEXTURE);
+		cvl_copy_rect(rect, 0, 0, frame, 0, src_h / 2, src_w / 2, cvl_frame_height(frame) - src_h / 2);
+		cvl_reduce(rect, mode, channel, rect_result[2]);
+  		cvl_frame_free(rect);
+		rect = cvl_frame_new(cvl_frame_width(frame) - src_w / 2, cvl_frame_height(frame) - src_h / 2,
+			cvl_frame_channels(frame), cvl_frame_format(frame), cvl_frame_type(frame), CVL_TEXTURE);
+		cvl_copy_rect(rect, 0, 0, frame, src_w / 2, src_h / 2, 
+			cvl_frame_width(frame) - src_w / 2, cvl_frame_height(frame) - src_h / 2);
+		cvl_reduce(rect, mode, channel, rect_result[3]);
+   		cvl_frame_free(rect);
+	    }
+	    else if (src_w != cvl_frame_width(frame))
+	    {
+		// Case 2: two rectangles, left/right
+		rectangles = 2;
+		rect = cvl_frame_new(src_w / 2, src_h, 
+			cvl_frame_channels(frame), cvl_frame_format(frame), cvl_frame_type(frame), CVL_TEXTURE);
+		cvl_copy_rect(rect, 0, 0, frame, 0, 0, src_w / 2, src_h);
+		cvl_reduce(rect, mode, channel, rect_result[0]);
+		cvl_frame_free(rect);
+		rect = cvl_frame_new(cvl_frame_width(frame) - src_w / 2, src_h, 
+			cvl_frame_channels(frame), cvl_frame_format(frame), cvl_frame_type(frame), CVL_TEXTURE);
+		cvl_copy_rect(rect, 0, 0, frame, src_w / 2, 0, cvl_frame_width(frame) - src_w / 2, src_h);
+		cvl_reduce(rect, mode, channel, rect_result[1]);
+		cvl_frame_free(rect);
+	    }
+	    else
+	    {
+		// Case 3: two rectangles, top/bottom
+		rectangles = 2;
+		rect = cvl_frame_new(src_w, src_h / 2, 
+			cvl_frame_channels(frame), cvl_frame_format(frame), cvl_frame_type(frame), CVL_TEXTURE);
+		cvl_copy_rect(rect, 0, 0, frame, 0, 0, src_w, src_h / 2);
+		cvl_reduce(rect, mode, channel, rect_result[0]);
+		cvl_frame_free(rect);
+		rect = cvl_frame_new(src_w, cvl_frame_height(frame) - src_h / 2, 
+			cvl_frame_channels(frame), cvl_frame_format(frame), cvl_frame_type(frame), CVL_TEXTURE);
+		cvl_copy_rect(rect, 0, 0, frame, 0, src_h / 2, src_w, cvl_frame_height(frame) - src_h / 2);
+		cvl_reduce(rect, mode, channel, rect_result[1]);
+		cvl_frame_free(rect);
+	    }
+	    // Combine the results
+	    for (int c = 0; c < (channel == -1 ? 4 : 1); c++)
+	    {
+		if (mode == CVL_REDUCE_MIN
+			|| mode == CVL_REDUCE_MIN_GREATER_ZERO
+			|| mode == CVL_REDUCE_ABSMIN
+			|| mode == CVL_REDUCE_ABSMIN_GREATER_ZERO)
+		{
+		    if (rectangles == 2)
+			result[c] = mh_minf(rect_result[0][c], rect_result[1][c]);
+		    else
+			result[c] = mh_min4f(rect_result[0][c], rect_result[1][c],
+				rect_result[2][c], rect_result[3][c]);
+		}
+		else if (mode == CVL_REDUCE_MAX || mode == CVL_REDUCE_ABSMAX)
+		{
+		    if (rectangles == 2)
+			result[c] = mh_maxf(rect_result[0][c], rect_result[1][c]);
+		    else
+			result[c] = mh_max4f(rect_result[0][c], rect_result[1][c],
+				rect_result[2][c], rect_result[3][c]);
+		}
+		else // mode == CVL_REDUCE_SUM
+		{
+		    if (rectangles == 2)
+			result[c] = rect_result[0][c] + rect_result[1][c];
+		    else
+			result[c] = rect_result[0][c] + rect_result[1][c]
+			    + rect_result[2][c] + rect_result[3][c];
+		}
+	    }
+	    return;
+	}
 	else
-	    neutral_element = neutral_sum;
-	input_frame = cvl_frame_new(src_w, src_h, cvl_frame_channels(frame), 
-		cvl_frame_format(frame), cvl_frame_type(frame), CVL_TEXTURE);
-	cvl_resize_seq(input_frame, frame, neutral_element);
+	{
+	    const float neutral_min[4] = {  FLT_MAX,  FLT_MAX,  FLT_MAX,  FLT_MAX };
+	    const float neutral_max[4] = { -FLT_MAX, -FLT_MAX, -FLT_MAX, -FLT_MAX };
+	    const float neutral_sum[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+	    const float *neutral_element;
+	    if (mode == CVL_REDUCE_MIN || mode == CVL_REDUCE_MIN_GREATER_ZERO 
+		    || mode == CVL_REDUCE_ABSMIN || mode == CVL_REDUCE_ABSMIN_GREATER_ZERO)
+		neutral_element = neutral_min;
+	    else if (mode == CVL_REDUCE_MAX || mode == CVL_REDUCE_ABSMAX)
+		neutral_element = neutral_max;
+	    else
+		neutral_element = neutral_sum;
+	    input_frame = cvl_frame_new(src_w, src_h, cvl_frame_channels(frame), 
+		    cvl_frame_format(frame), cvl_frame_type(frame), CVL_TEXTURE);
+	    cvl_resize_seq(input_frame, frame, neutral_element);
+	}
     }
     else
     {
