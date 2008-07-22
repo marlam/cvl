@@ -1,3 +1,7 @@
+2008-07-22  Martin Lambers <marlam@marlam.de>
+
+	* gnulib/*: Gnulib update.
+
 2008-07-04  Martin Lambers <marlam@marlam.de>
 
 	* src/cvlview.cpp, src/dataset_selector.h: Show progress bar when
