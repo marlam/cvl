@@ -55,7 +55,7 @@ typedef struct
     int error;
     char *error_msg;
     /* Texture formats. */
-    GLuint cvl_gl_texture_formats[2][4];
+    GLuint cvl_gl_texture_formats[3][4];
     /* The FBO. */
     GLuint cvl_gl_fbo;
     bool cvl_gl_fbo_initialized;

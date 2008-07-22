@@ -38,7 +38,8 @@ typedef enum
 typedef enum
 {
     CVL_UINT8 = 0,
-    CVL_FLOAT = 1
+    CVL_FLOAT = 1,
+    CVL_FLOAT16 = 2
 } cvl_type_t;
 
 typedef enum

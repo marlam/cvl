@@ -493,9 +493,9 @@ void cvl_read_pnm(FILE *f, cvl_frame_t **frame)
  * \param frame		The frame.
  *
  * Writes the frame \a frame to the stream \a f in PNM format. The PNM subformat
- * is PGM for frames with a single channel and PPM for all other frames.
- * Information loss will occur when saving #CVL_FLOAT frames or frames with more than
- * 3 channels.
+ * is PGM for frames with a single channel, PPM for frames with two channels,
+ * and PAM for all other frames.
+ * Information loss will occur when saving #CVL_FLOAT or #CVL_FLOAT16 frames.
  */
 void cvl_write_pnm(FILE *f, cvl_frame_t *frame)
 {

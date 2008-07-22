@@ -65,6 +65,10 @@
  * 8bit unsigned integer. */
 /** \var CVL_FLOAT
  * 32bit IEEE floats. */
+/** \var CVL_FLOAT16
+ * A 16bit floating point format used by the graphics hardware.
+ * This can only be used for frame data in textures. It will be handled as
+ * normal floats in main memory. */
 
 /**
  * \typedef cvl_storage_t

@@ -159,6 +159,8 @@ void cvl_reduce(cvl_frame_t *frame, cvl_reduce_mode_t mode, int channel, float *
     GLint internalformat;
     if (mode == CVL_REDUCE_SUM || cvl_frame_type(frame) == CVL_FLOAT)
 	internalformat = GL_RGBA32F_ARB;
+    else if (cvl_frame_type(frame) == CVL_FLOAT16)
+	internalformat = GL_RGBA16F_ARB;
     else
 	internalformat = GL_RGBA;
     
@@ -361,8 +363,9 @@ void cvl_reduce(cvl_frame_t *frame, cvl_reduce_mode_t mode, int channel, float *
  * values, and the bottom right pixel will contain the largest values.\n
  * The given \a channel (0-3) sets the sorting key. For \a channel -1, all 
  * channels are sorted separately.\n
- * Source frames with format #CVL_FLOAT must only contain finite floats
- * that are smaller than FLT_MAX.
+ * Source frames with format #CVL_FLOAT or #CVL_FLOAT16 must only contain 
+ * finite floats that are smaller than the maximum representable float 
+ * value.
  */
 void cvl_sort(cvl_frame_t *dst, cvl_frame_t *src, int channel)
 {

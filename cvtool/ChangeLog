@@ -12,6 +12,9 @@
 	cvl/Makefile.am, cvtool/Makefile.am: Improve detection and usage of
 	external libraries.
 	* cvl/cvl_misc.c: Reduce memory usage of cvl_reduce().
+	* cvl/cvl/cvl_frame.h, cvl/cvl_frame.c, cvl/cvl_intern.h,
+	cvl/cvl_init.c, cvl/cvl_misc.c, cvl/cvl_io.c, cvl/cvl_hdr.c: Add
+	support for the CVL_FLOAT16 type (only for texture memory).
 
 2008-07-02  Martin Lambers <marlam@marlam.de>
 

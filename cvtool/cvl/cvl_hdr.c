@@ -73,15 +73,12 @@
  *
  * Computes the log average luminance of the given frame, with respect to the
  * given maximum absolute luminance.\n
- * The frame \a tmp must have and least one channel and the type #CVL_FLOAT.
  */
 float cvl_log_avg_lum(cvl_frame_t *frame, cvl_frame_t *tmp, float max_abs_lum)
 {
     cvl_assert(frame != NULL);
     cvl_assert(cvl_frame_format(frame) == CVL_XYZ);
     cvl_assert(tmp != NULL);
-    cvl_assert(cvl_frame_channels(tmp) >= 1);
-    cvl_assert(cvl_frame_type(tmp) == CVL_FLOAT);
     cvl_assert(max_abs_lum > 0.0f);
     if (cvl_error())
 	return 0.0f;
@@ -338,7 +335,8 @@ void cvl_tonemap_reinhard05(cvl_frame_t *dst, cvl_frame_t *src,
  *
  * Applies tone mapping to the high dynamic range frame \a src and writes the
  * result to \a dst. Input and output must be in #CVL_XYZ format.\n
- * The temporary frame \a tmp must have four channels of type #CVL_FLOAT.
+ * The temporary frame \a tmp must have four channels of type #CVL_FLOAT or
+ * #CVL_FLOAT16.
  * The \a threshold parameter must be from [0,10].\n
  * See also:
  * M. Ashikhmin. 
@@ -359,7 +357,7 @@ void cvl_tonemap_ashikhmin02(cvl_frame_t *dst, cvl_frame_t *src,
     cvl_assert(max_abs_lum >= min_abs_lum);
     cvl_assert(tmp != NULL);
     cvl_assert(cvl_frame_channels(tmp) == 4);
-    cvl_assert(cvl_frame_type(tmp) == CVL_FLOAT);
+    cvl_assert(cvl_frame_type(tmp) == CVL_FLOAT || cvl_frame_type(tmp) == CVL_FLOAT16);
     cvl_assert(threshold >= 0.0f && threshold <= 10.0f);
     if (cvl_error())
 	return;
@@ -441,7 +439,8 @@ void cvl_tonemap_ashikhmin02(cvl_frame_t *dst, cvl_frame_t *src,
  *
  * Applies tone mapping to the high dynamic range frame \a src and writes the
  * result to \a dst. Input and output must be in #CVL_XYZ format.\n
- * The temporary frame \a tmp must have four channels of type #CVL_FLOAT.
+ * The temporary frame \a tmp must have four channels of type #CVL_FLOAT or
+ * #CVL_FLOAT16.
  * The sigma values must be greater than zero, and the \a base_contrast
  * parameter must be grater than 1.\n
  * See also:
@@ -458,7 +457,7 @@ void cvl_tonemap_durand02(cvl_frame_t *dst, cvl_frame_t *src, float max_abs_lum,
     cvl_assert(cvl_frame_format(src) == CVL_XYZ);
     cvl_assert(tmp != NULL);
     cvl_assert(cvl_frame_channels(tmp) == 4);
-    cvl_assert(cvl_frame_type(tmp) == CVL_FLOAT);
+    cvl_assert(cvl_frame_type(tmp) == CVL_FLOAT || cvl_frame_type(tmp) == CVL_FLOAT16);
     cvl_assert(max_abs_lum > 0.0f);
     cvl_assert(k >= 0 && k <= 32);
     cvl_assert(sigma_spatial > 0.0f);
@@ -539,7 +538,8 @@ void cvl_tonemap_durand02(cvl_frame_t *dst, cvl_frame_t *src, float max_abs_lum,
  *
  * Applies tone mapping to the high dynamic range frame \a src and writes the
  * result to \a dst. Input and output must be in #CVL_XYZ format.\n
- * The temporary frame \a tmp must have four channels of type #CVL_FLOAT.
+ * The temporary frame \a tmp must have four channels of type #CVL_FLOAT or
+ * #CVL_FLOAT16.
  * The \a log_avg_lum parameter must be the log-average luminance of \a src
  * (unscaled).
  * The \a brightness parameter must be from [0,1].
@@ -562,7 +562,7 @@ void cvl_tonemap_reinhard02(cvl_frame_t *dst, cvl_frame_t *src,
     cvl_assert(cvl_frame_format(src) == CVL_XYZ);
     cvl_assert(tmp != NULL);
     cvl_assert(cvl_frame_channels(tmp) == 4);
-    cvl_assert(cvl_frame_type(tmp) == CVL_FLOAT);
+    cvl_assert(cvl_frame_type(tmp) == CVL_FLOAT || cvl_frame_type(tmp) == CVL_FLOAT16);
     cvl_assert(brightness >= 0.0f && brightness <= 1.0f);
     cvl_assert(white >= 0.0f && white < 100.0f);
     cvl_assert(sharpness >= 0.0f && sharpness < 100.0f);

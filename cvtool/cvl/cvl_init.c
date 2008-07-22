@@ -116,7 +116,7 @@ void cvl_init(void)
     }
 
     /* Initialize table of texture formats. */
-    // type 0 is for integer, type 1 is for float
+    // type 0 is for 8bit integer, type 1 is for float, type 2 is for half.
     ctx->cvl_gl_texture_formats[0][0] = GL_RGB;		// cannot render to GL_LUMINANCE
     ctx->cvl_gl_texture_formats[0][1] = GL_RGB;		// cannot render to GL_LUMINANCE_ALPHA
     ctx->cvl_gl_texture_formats[0][2] = GL_RGB;
@@ -125,6 +125,10 @@ void cvl_init(void)
     ctx->cvl_gl_texture_formats[1][1] = GL_RGB32F_ARB;	// cannot render to GL_LUMINANCE_ALPHA32F_ARB
     ctx->cvl_gl_texture_formats[1][2] = GL_RGB32F_ARB;
     ctx->cvl_gl_texture_formats[1][3] = GL_RGBA32F_ARB;
+    ctx->cvl_gl_texture_formats[2][0] = GL_RGB16F_ARB;	// cannot render to GL_LUMINANCE16F_ARB
+    ctx->cvl_gl_texture_formats[2][1] = GL_RGB16F_ARB;	// cannot render to GL_LUMINANCE_ALPHA16F_ARB
+    ctx->cvl_gl_texture_formats[2][2] = GL_RGB16F_ARB;
+    ctx->cvl_gl_texture_formats[2][3] = GL_RGBA16F_ARB;
 
     /* Create framebuffer object */
     glGenFramebuffersEXT(1, &(ctx->cvl_gl_fbo));
