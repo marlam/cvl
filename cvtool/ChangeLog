@@ -3,6 +3,9 @@
 	* configure.ac, doc/cvl.texi, doc/cvtool.texi, doc/cvtool.1: Bump
 	version to 0.2.5.
 	* gnulib/*: Gnulib update.
+	* gnulib/m4/absolute-header.m4, gnulib/Makefile.am, 
+	gnulib/m4/gnulib-cache.m4, gnulib/m4/gnulib-comp.m4: Add gnulib module
+	absolute-header.
 
 2008-07-02  Martin Lambers <marlam@marlam.de>
 

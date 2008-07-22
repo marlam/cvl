@@ -325,6 +325,7 @@ AC_DEFUN([gl_FILE_LIST], [
   lib/xalloc.h
   lib/xmalloc.c
   lib/xsize.h
+  m4/absolute-header.m4
   m4/alloca.m4
   m4/codeset.m4
   m4/environ.m4
