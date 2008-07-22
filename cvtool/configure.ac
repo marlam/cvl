@@ -51,7 +51,7 @@ dnl Library code modified:		REVISION++
 dnl Interfaces changed/added/removed:   CURRENT++	REVISION=0
 dnl Interfaces added: 			AGE++
 dnl Interfaces removed:			AGE=0
-AC_SUBST([LT_CURRENT], [7])
+AC_SUBST([LT_CURRENT], [8])
 AC_SUBST([LT_REVISION], [0])
 AC_SUBST([LT_AGE], [0])
 
