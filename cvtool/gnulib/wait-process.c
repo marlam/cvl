@@ -1,5 +1,5 @@
 /* Waiting for a subprocess to finish.
-   Copyright (C) 2001-2003, 2005-2007 Free Software Foundation, Inc.
+   Copyright (C) 2001-2003, 2005-2008 Free Software Foundation, Inc.
    Written by Bruno Haible <haible@clisp.cons.org>, 2001.
 
    This program is free software: you can redistribute it and/or modify
@@ -250,12 +250,13 @@ unregister_slave_subprocess (pid_t child)
 int
 wait_subprocess (pid_t child, const char *progname,
 		 bool ignore_sigpipe, bool null_stderr,
-		 bool slave_process, bool exit_on_error)
+		 bool slave_process, bool exit_on_error,
+		 int *termsigp)
 {
 #if HAVE_WAITID && defined WNOWAIT && 0
-  /* Commented out because waitid() with WNOWAIT doesn't work: On Solaris 7
-     and OSF/1 4.0, it returns -1 and sets errno = ECHILD, and on HP-UX 10.20
-     it just hangs.  */
+  /* Commented out because waitid() without WEXITED and with WNOWAIT doesn't
+     work: On Solaris 7 and OSF/1 4.0, it returns -1 and sets errno = ECHILD,
+     and on HP-UX 10.20 it just hangs.  */
   /* Use of waitid() with WNOWAIT avoids a race condition: If slave_process is
      true, and this process sleeps a very long time between the return from
      waitpid() and the execution of unregister_slave_subprocess(), and
@@ -263,9 +264,13 @@ wait_subprocess (pid_t child, const char *progname,
      before unregister_slave_subprocess() - this process gets a fatal signal,
      it would kill the other totally unrelated process.  */
   siginfo_t info;
+
+  if (termsigp != NULL)
+    *termsigp = 0;
   for (;;)
     {
-      if (waitid (P_PID, child, &info, slave_process ? WNOWAIT : 0) < 0)
+      if (waitid (P_PID, child, &info, WEXITED | (slave_process ? WNOWAIT : 0))
+	  < 0)
 	{
 # ifdef EINTR
 	  if (errno == EINTR)
@@ -297,7 +302,7 @@ wait_subprocess (pid_t child, const char *progname,
       /* Now remove the zombie from the process list.  */
       for (;;)
 	{
-	  if (waitid (P_PID, child, &info, 0) < 0)
+	  if (waitid (P_PID, child, &info, WEXITED) < 0)
 	    {
 # ifdef EINTR
 	      if (errno == EINTR)
@@ -316,6 +321,8 @@ wait_subprocess (pid_t child, const char *progname,
     {
     case CLD_KILLED:
     case CLD_DUMPED:
+      if (termsigp != NULL)
+	*termsigp = info.si_status; /* TODO: or info.si_signo? */
 # ifdef SIGPIPE
       if (info.si_status == SIGPIPE && ignore_sigpipe)
 	return 0;
@@ -341,6 +348,8 @@ wait_subprocess (pid_t child, const char *progname,
   /* waitpid() is just as portable as wait() nowadays.  */
   WAIT_T status;
 
+  if (termsigp != NULL)
+    *termsigp = 0;
   *(int *) &status = 0;
   for (;;)
     {
@@ -368,7 +377,8 @@ wait_subprocess (pid_t child, const char *progname,
 	}
 
       /* One of WIFSIGNALED (status), WIFEXITED (status), WIFSTOPPED (status)
-	 must always be true.  Loop until the program terminates.  */
+	 must always be true, since we did not specify WCONTINUED in the
+	 waitpid() call.  Loop until the program terminates.  */
       if (!WIFSTOPPED (status))
 	break;
     }
@@ -383,6 +393,8 @@ wait_subprocess (pid_t child, const char *progname,
 
   if (WIFSIGNALED (status))
     {
+      if (termsigp != NULL)
+	*termsigp = WTERMSIG (status);
 # ifdef SIGPIPE
       if (WTERMSIG (status) == SIGPIPE && ignore_sigpipe)
 	return 0;
@@ -393,6 +405,8 @@ wait_subprocess (pid_t child, const char *progname,
 	       progname, (int) WTERMSIG (status));
       return 127;
     }
+  if (!WIFEXITED (status))
+    abort ();
   if (WEXITSTATUS (status) == 127)
     {
       if (exit_on_error || !null_stderr)
