@@ -30,9 +30,9 @@ EXTRA_DIST = appicon.ico appicon.png cvltonemap.qrc
 CLEANFILES = $(BUILT_SOURCES)
 
 cvltonemap_LDADD = \
-	$(top_builddir)/mhlib/libmh.a	\
-	$(top_builddir)/gnulib/libgnu.a	\
-	$(QT4_LIBS) $(CVL_LIBS)
+	$(top_builddir)/mhlib/libmh.la	\
+	$(top_builddir)/gnulib/libgnu.la	\
+	$(QT4_LIBS) $(LTLIBCVL) $(LTLIBGLEW)
 
 cvltonemap_CPPFLAGS = \
 	-I$(top_builddir)/gnulib -I$(top_srcdir)/gnulib	\

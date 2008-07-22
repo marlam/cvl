@@ -4,6 +4,11 @@
 	* configure.ac, doc/cvltonemap.1, doc/cvltonemap.texi: Bump version to
 	0.2.2.
 	* configure.ac: Require CVL >= 0.2.5.
+	* gnulib/m4/gnulib-comp.m4, gnulib/m4/gnulib-cache.m4,
+	gnulib/Makefile.am, configure.ac, src/Makefile.am, build-aux/cvl.m4, 
+	build-aux/glew.m4, build-aux/ltmain.sh, build-aux/Makefile.am, 
+	mhlib/Makefile.am: Improve detection and usage of external libraries.
+	Use libtool to get linking right.
 
 2008-07-02  Martin Lambers <marlam@marlam.de>
 
