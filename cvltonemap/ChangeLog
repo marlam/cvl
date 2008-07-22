@@ -9,6 +9,8 @@
 	build-aux/glew.m4, build-aux/ltmain.sh, build-aux/Makefile.am, 
 	mhlib/Makefile.am: Improve detection and usage of external libraries.
 	Use libtool to get linking right.
+	* src/cvltonemap.cpp, src/view_area.cpp: Reduce usage of graphics
+	memory by using float16 textures where appropriate.
 
 2008-07-02  Martin Lambers <marlam@marlam.de>
 

@@ -222,15 +222,17 @@ void CVLTonemap::load_image(const char *filename)
 	    if (channel_x >= 0 && channel_y >= 0 && channel_z >= 0)
 	    {
 		cvl_frame_t *X = cvl_frame_new(cvl_frame_width(frame), cvl_frame_height(frame), 
-			1, CVL_LUM, CVL_FLOAT, CVL_TEXTURE);
+			1, CVL_LUM, CVL_FLOAT16, CVL_TEXTURE);
 		cvl_frame_t *Y = cvl_frame_new(cvl_frame_width(frame), cvl_frame_height(frame), 
-			1, CVL_LUM, CVL_FLOAT, CVL_TEXTURE);
+			1, CVL_LUM, CVL_FLOAT16, CVL_TEXTURE);
 		cvl_frame_t *Z = cvl_frame_new(cvl_frame_width(frame), cvl_frame_height(frame), 
-			1, CVL_LUM, CVL_FLOAT, CVL_TEXTURE);
+			1, CVL_LUM, CVL_FLOAT16, CVL_TEXTURE);
 		cvl_channel_extract(X, frame, channel_x);
 		cvl_channel_extract(Y, frame, channel_y);
 		cvl_channel_extract(Z, frame, channel_z);
-		cvl_frame_set_format(frame, CVL_XYZ);
+		cvl_frame_free(frame);
+		frame = cvl_frame_new(cvl_frame_width(X), cvl_frame_height(X),
+			3, CVL_XYZ, CVL_FLOAT16, CVL_TEXTURE);
 		cvl_channel_combine(frame, X, Y, Z, NULL);
 		cvl_frame_free(X);
 		cvl_frame_free(Y);
@@ -239,10 +241,11 @@ void CVLTonemap::load_image(const char *filename)
 	    else if (channel_y >= 0)
 	    {
 		cvl_frame_t *Y = cvl_frame_new(cvl_frame_width(frame), cvl_frame_height(frame), 
-			1, CVL_LUM, CVL_FLOAT, CVL_TEXTURE);
+			1, CVL_LUM, CVL_FLOAT16, CVL_TEXTURE);
 		cvl_channel_extract(Y, frame, channel_y);
 		cvl_frame_free(frame);
 		frame = Y;
+		cvl_convert_format_inplace(frame, CVL_XYZ);
 	    }
 	    else
 	    {
@@ -251,7 +254,14 @@ void CVLTonemap::load_image(const char *filename)
 		return;
 	    }
 	}
-	cvl_convert_format_inplace(frame, CVL_XYZ);
+	else
+	{
+	    cvl_frame_t *tmpframe = cvl_frame_new(cvl_frame_width(frame), cvl_frame_height(frame),
+		    3, CVL_XYZ, CVL_FLOAT16, CVL_TEXTURE);
+	    cvl_convert_format(tmpframe, frame);
+	    cvl_frame_free(frame);
+	    frame = tmpframe;
+	}
 	// Make sure that the Y range is [0,1]. Keep info about absolute
 	// luminances in a tag.
 	float max_luminance;

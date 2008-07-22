@@ -150,9 +150,9 @@ void ViewArea::paintGL()
 	    cvl_frame_free(_frame2);
 	    cvl_frame_free(_render_frame);
 	    _frame1 = cvl_frame_new(cvl_frame_width(*_frame), cvl_frame_height(*_frame),
-    		    3, CVL_XYZ, CVL_FLOAT, CVL_TEXTURE);
+    		    3, CVL_XYZ, CVL_FLOAT16, CVL_TEXTURE);
    	    _frame2 = cvl_frame_new(cvl_frame_width(*_frame), cvl_frame_height(*_frame),
-  		    3, CVL_XYZ, CVL_FLOAT, CVL_TEXTURE);
+  		    3, CVL_XYZ, CVL_FLOAT16, CVL_TEXTURE);
 	    _render_frame = cvl_frame_new(cvl_frame_width(*_frame), cvl_frame_height(*_frame),
 		    3, CVL_RGB, CVL_UINT8, CVL_TEXTURE);
 	}
@@ -188,7 +188,7 @@ void ViewArea::paintGL()
 	    {
 		_tmpframe = cvl_frame_new(
 			cvl_frame_width(*_frame), cvl_frame_height(*_frame), 
-			1, CVL_UNKNOWN, CVL_FLOAT, CVL_TEXTURE);
+			1, CVL_UNKNOWN, CVL_FLOAT16, CVL_TEXTURE);
 	    }
 	    TonemapTumblin99ParameterSelector *parameter_selector
 		= reinterpret_cast<TonemapTumblin99ParameterSelector *>(
@@ -219,7 +219,7 @@ void ViewArea::paintGL()
 	    {
 		_tmpframe = cvl_frame_new(
 			cvl_frame_width(*_frame), cvl_frame_height(*_frame),
-			3, CVL_RGB, CVL_FLOAT, CVL_TEXTURE);
+			3, CVL_RGB, CVL_FLOAT16, CVL_TEXTURE);
 		cvl_reduce(*_frame, CVL_REDUCE_MIN, 1, &min_lum);
 		cvl_reduce(*_frame, CVL_REDUCE_SUM, 1, &avg_lum);
 		avg_lum /= static_cast<float>(cvl_frame_size(*_frame));
@@ -246,7 +246,7 @@ void ViewArea::paintGL()
 	    {
 		_tmpframe = cvl_frame_new(
 			cvl_frame_width(*_frame), cvl_frame_height(*_frame), 
-			4, CVL_UNKNOWN, CVL_FLOAT, CVL_TEXTURE);
+			4, CVL_UNKNOWN, CVL_FLOAT16, CVL_TEXTURE);
 	    }
 	    TonemapAshikhmin02ParameterSelector *parameter_selector
 		= reinterpret_cast<TonemapAshikhmin02ParameterSelector *>(
@@ -265,7 +265,7 @@ void ViewArea::paintGL()
 	    if (!_tmpframe)
 	    {
 		_tmpframe = cvl_frame_new(cvl_frame_width(*_frame), cvl_frame_height(*_frame),
-     			4, CVL_UNKNOWN, CVL_FLOAT, CVL_TEXTURE);
+     			4, CVL_UNKNOWN, CVL_FLOAT16, CVL_TEXTURE);
 	    }
 	    TonemapDurand02ParameterSelector *parameter_selector
 		= reinterpret_cast<TonemapDurand02ParameterSelector *>(
@@ -285,7 +285,7 @@ void ViewArea::paintGL()
 	    {
 		_tmpframe = cvl_frame_new(
 			cvl_frame_width(*_frame), cvl_frame_height(*_frame), 
-			4, CVL_UNKNOWN, CVL_FLOAT, CVL_TEXTURE);
+			4, CVL_UNKNOWN, CVL_FLOAT16, CVL_TEXTURE);
 		log_avg_lum = cvl_log_avg_lum(*_frame, _tmpframe, 1.0f);
 	    }
 	    TonemapReinhard02ParameterSelector *parameter_selector
