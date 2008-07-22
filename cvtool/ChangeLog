@@ -1,3 +1,8 @@
+2008-07-22  Martin Lambers <marlam@marlam.de>
+
+	* configure.ac, doc/cvl.texi, doc/cvtool.texi, doc/cvtool.1: Bump
+	version to 0.2.5.
+
 2008-07-02  Martin Lambers <marlam@marlam.de>
 
 	* cvl/glsl/misc/sort.glsl, cvl/glsl/misc/resize_seq.glsl: Provide our
