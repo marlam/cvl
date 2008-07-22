@@ -232,7 +232,7 @@ int cmd_foreach(int argc, char *argv[])
 	pipe_input_name = NULL;
 
 	/* Close the pipe */
-	pipe_status = wait_subprocess(pipe_pid, command, false, true, true, false);
+	pipe_status = wait_subprocess(pipe_pid, command, false, true, true, false, NULL);
 	if (pipe_status == 127)
 	{
 	    mh_msg_err("Command '%s' failed to execute", command);

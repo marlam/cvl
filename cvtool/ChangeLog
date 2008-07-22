@@ -6,6 +6,8 @@
 	* gnulib/m4/absolute-header.m4, gnulib/Makefile.am, 
 	gnulib/m4/gnulib-cache.m4, gnulib/m4/gnulib-comp.m4: Add gnulib module
 	absolute-header.
+	* cvtool/cmd_foreach.c: Update the use of wait_subprocess() to reflect
+	changes in the gnulib module.
 
 2008-07-02  Martin Lambers <marlam@marlam.de>
 
