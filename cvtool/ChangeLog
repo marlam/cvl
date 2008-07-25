@@ -1,3 +1,7 @@
+2008-07-25  Martin Lambers <marlam@marlam.de>
+
+	* NEWS: Update for version 0.2.5.
+
 2008-07-22  Martin Lambers <marlam@marlam.de>
 
 	* configure.ac, doc/cvl.texi, doc/cvtool.texi, doc/cvtool.1: Bump
