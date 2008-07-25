@@ -1,3 +1,12 @@
+Version 0.2.5:
+- Fixed build problems.
+- CVL:
+  - New data type CVL_FLOAT16 (16 bit floating point; used only on graphics
+    hardware).
+  - Improved compatibility with different OpenGL/GLSL and GLX implementations.
+  - Reduced memory usage in cvl_read_pfs() and cvl_reduce().
+  - Fixed some color space conversions.
+
 Version 0.2.4:
 - The license was updated to GPLv3 or later.
 - Fixed build problems.
