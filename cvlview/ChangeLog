@@ -1,3 +1,7 @@
+2008-07-25  Martin Lambers <marlam@marlam.de>
+
+	* NEWS: Update for version 0.3.1.
+
 2008-07-22  Martin Lambers <marlam@marlam.de>
 
 	* gnulib/*: Gnulib update.

@@ -2,6 +2,7 @@ Version 0.3.1:
 - Capability to save videos in multi-image PPM files.
 - Better rotation handling in 3D view mode.
 - Capability to show a data pixel grid in 2D view mode.
+- Fixed build problems.
 
 Version 0.3.0:
 - Updated license to GPLv3 or later.
