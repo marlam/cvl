@@ -5,6 +5,7 @@
 	src/cvltonemap.cpp, src/Makefile.am: Add a selector to select 16 or 32
 	bit floating point precision. 16 bit halves graphcis memory usage and is
 	usually	sufficient.
+	* NEWS: Update for 0.2.2.
 
 2008-07-22  Martin Lambers <marlam@marlam.de>
 
