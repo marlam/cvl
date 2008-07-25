@@ -38,6 +38,7 @@
 #include "mh.h"
 
 #include "viewpoint_selector.h"
+#include "precision_selector.h"
 #include "tonemap_selector.h"
 #include "postproc_selector.h"
 #include "view_area.h"
@@ -45,6 +46,7 @@
 
 ViewArea::ViewArea(cvl_frame_t **frame, 
 	ViewpointSelector *viewpoint_selector,
+	PrecisionSelector *precision_selector,
 	TonemapSelector *tonemap_selector,
 	int min_size,
 	QWidget *parent)
@@ -52,6 +54,7 @@ ViewArea::ViewArea(cvl_frame_t **frame,
 {
     _frame = frame;
     _viewpoint_selector = viewpoint_selector;
+    _precision_selector = precision_selector;
     _tonemap_selector = tonemap_selector;
     _lock = false;
     _mouse_pos = QPoint(0, 0);
@@ -144,15 +147,18 @@ void ViewArea::paintGL()
 
     if (_recompute)
     {
+	cvl_type_t type = (_precision_selector->get_precision() 
+		== PrecisionSelector::FLOAT16 ? CVL_FLOAT16 : CVL_FLOAT);
+
 	if (_processed_frame != *_frame)
 	{
 	    cvl_frame_free(_frame1);
 	    cvl_frame_free(_frame2);
 	    cvl_frame_free(_render_frame);
 	    _frame1 = cvl_frame_new(cvl_frame_width(*_frame), cvl_frame_height(*_frame),
-    		    3, CVL_XYZ, CVL_FLOAT16, CVL_TEXTURE);
+    		    3, CVL_XYZ, type, CVL_TEXTURE);
    	    _frame2 = cvl_frame_new(cvl_frame_width(*_frame), cvl_frame_height(*_frame),
-  		    3, CVL_XYZ, CVL_FLOAT16, CVL_TEXTURE);
+  		    3, CVL_XYZ, type, CVL_TEXTURE);
 	    _render_frame = cvl_frame_new(cvl_frame_width(*_frame), cvl_frame_height(*_frame),
 		    3, CVL_RGB, CVL_UINT8, CVL_TEXTURE);
 	}
@@ -188,7 +194,7 @@ void ViewArea::paintGL()
 	    {
 		_tmpframe = cvl_frame_new(
 			cvl_frame_width(*_frame), cvl_frame_height(*_frame), 
-			1, CVL_UNKNOWN, CVL_FLOAT16, CVL_TEXTURE);
+			1, CVL_UNKNOWN, type, CVL_TEXTURE);
 	    }
 	    TonemapTumblin99ParameterSelector *parameter_selector
 		= reinterpret_cast<TonemapTumblin99ParameterSelector *>(
@@ -219,7 +225,7 @@ void ViewArea::paintGL()
 	    {
 		_tmpframe = cvl_frame_new(
 			cvl_frame_width(*_frame), cvl_frame_height(*_frame),
-			3, CVL_RGB, CVL_FLOAT16, CVL_TEXTURE);
+			3, CVL_RGB, type, CVL_TEXTURE);
 		cvl_reduce(*_frame, CVL_REDUCE_MIN, 1, &min_lum);
 		cvl_reduce(*_frame, CVL_REDUCE_SUM, 1, &avg_lum);
 		avg_lum /= static_cast<float>(cvl_frame_size(*_frame));
@@ -246,7 +252,7 @@ void ViewArea::paintGL()
 	    {
 		_tmpframe = cvl_frame_new(
 			cvl_frame_width(*_frame), cvl_frame_height(*_frame), 
-			4, CVL_UNKNOWN, CVL_FLOAT16, CVL_TEXTURE);
+			4, CVL_UNKNOWN, type, CVL_TEXTURE);
 	    }
 	    TonemapAshikhmin02ParameterSelector *parameter_selector
 		= reinterpret_cast<TonemapAshikhmin02ParameterSelector *>(
@@ -265,7 +271,7 @@ void ViewArea::paintGL()
 	    if (!_tmpframe)
 	    {
 		_tmpframe = cvl_frame_new(cvl_frame_width(*_frame), cvl_frame_height(*_frame),
-     			4, CVL_UNKNOWN, CVL_FLOAT16, CVL_TEXTURE);
+     			4, CVL_UNKNOWN, type, CVL_TEXTURE);
 	    }
 	    TonemapDurand02ParameterSelector *parameter_selector
 		= reinterpret_cast<TonemapDurand02ParameterSelector *>(
@@ -285,7 +291,7 @@ void ViewArea::paintGL()
 	    {
 		_tmpframe = cvl_frame_new(
 			cvl_frame_width(*_frame), cvl_frame_height(*_frame), 
-			4, CVL_UNKNOWN, CVL_FLOAT16, CVL_TEXTURE);
+			4, CVL_UNKNOWN, type, CVL_TEXTURE);
 		log_avg_lum = cvl_log_avg_lum(*_frame, _tmpframe, 1.0f);
 	    }
 	    TonemapReinhard02ParameterSelector *parameter_selector

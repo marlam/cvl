@@ -32,6 +32,7 @@
 #include <cvl/cvl.h>
 
 #include "viewpoint_selector.h"
+#include "precision_selector.h"
 #include "tonemap_selector.h"
 
 
@@ -48,6 +49,7 @@ class ViewArea : public QGLWidget
 	bool _lock;
 	// Parameter selectors
 	ViewpointSelector *_viewpoint_selector;
+	PrecisionSelector *_precision_selector;
 	TonemapSelector *_tonemap_selector;
 	// Processed frame
 	cvl_frame_t *_processed_frame;
@@ -83,6 +85,7 @@ class ViewArea : public QGLWidget
     public:
 	ViewArea(cvl_frame_t **frame, 
 		ViewpointSelector *viewpoint_selector,
+		PrecisionSelector *precision_selector,
 		TonemapSelector *tonemap_selector,
 		int min_size,
 		QWidget *parent = NULL);

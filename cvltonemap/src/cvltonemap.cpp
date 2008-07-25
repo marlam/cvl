@@ -68,6 +68,7 @@ CVLTonemap::CVLTonemap()
     _parameters = new Conf();
     _parameters_file_name = NULL;
     _frame = NULL;
+    _frame_filename = new string("");
 
     /* Restore window geometry */
 
@@ -90,6 +91,9 @@ CVLTonemap::CVLTonemap()
 
     _viewpoint_selector = new ViewpointSelector(&_frame, _widget);
     _viewpoint_selector->setFixedWidth(tools_width + tools_width / 2 + tools_width / 4);
+    _viewpoint_selector->setEnabled(false);
+
+    _precision_selector = new PrecisionSelector(_widget);
 
     _tonemap_selector = new TonemapSelector(&_frame, this);
     _tonemap_selector->setFixedWidth(tools_width);
@@ -98,6 +102,7 @@ CVLTonemap::CVLTonemap()
     
     _view_area = new ViewArea(&_frame,
 	    _viewpoint_selector,
+	    _precision_selector,
 	    _tonemap_selector,
 	    2 * tools_width, _widget);
     connect(this, SIGNAL(new_image()), _view_area, SLOT(recompute()));
@@ -106,13 +111,15 @@ CVLTonemap::CVLTonemap()
     connect(_tonemap_selector, SIGNAL(make_gl_context_current()), _view_area, SLOT(make_gl_context_current()));
     connect(_viewpoint_selector, SIGNAL(viewpoint_changed()), _view_area, SLOT(update()));
     connect(_viewpoint_selector, SIGNAL(make_gl_context_current()), _view_area, SLOT(make_gl_context_current()));
+    connect(_precision_selector, SIGNAL(precision_changed()), this, SLOT(change_precision()));
     connect(_view_area, SIGNAL(update_size(int, int)), _viewpoint_selector, SLOT(update_view_area_size(int, int)));
     
     _toolbar = new QToolBar();
-    _toolbar->setEnabled(false);
     _toolbar->setMovable(false);
     addToolBar(_toolbar);
     _toolbar->addWidget(_viewpoint_selector);
+    _toolbar->addSeparator();
+    _toolbar->addWidget(_precision_selector);
     
     QGridLayout *layout = new QGridLayout;
     layout->addWidget(_tonemap_selector, 0, 0);
@@ -120,6 +127,10 @@ CVLTonemap::CVLTonemap()
     layout->setRowStretch(1, 10000);
     layout->setColumnStretch(1, 10000);
     _widget->setLayout(layout);
+
+    /* Restore preferences */
+
+    _precision_selector->set_precision(_conf->get("preferences-precision", 0, 1, 0));
 
     /* Create menus */
 
@@ -175,6 +186,7 @@ CVLTonemap::~CVLTonemap()
     cvl_frame_t *tmp_ptr = _frame;
     _frame = NULL;
     cvl_frame_free(tmp_ptr);
+    delete _frame_filename;
 
     free(const_cast<char *>(_conf_file_name));
     delete _conf;
@@ -204,8 +216,13 @@ void CVLTonemap::load_image(const char *filename)
     }
     else
     {
-	// Make sure that the image is in CVL_XYZ format.
-	if (cvl_frame_format(frame) == CVL_UNKNOWN)
+	// Make sure that the image is in CVL_XYZ format and has the reuested type.
+	cvl_type_t type = (_precision_selector->get_precision() == PrecisionSelector::FLOAT16 ? CVL_FLOAT16 : CVL_FLOAT);
+	if (cvl_frame_format(frame) == CVL_XYZ)
+	{
+	    cvl_frame_set_type(frame, type);
+	}
+	else if (cvl_frame_format(frame) == CVL_UNKNOWN)
 	{
 	    int channel_x = -1;
 	    int channel_y = -1;
@@ -221,31 +238,34 @@ void CVLTonemap::load_image(const char *filename)
 	    }
 	    if (channel_x >= 0 && channel_y >= 0 && channel_z >= 0)
 	    {
-		cvl_frame_t *X = cvl_frame_new(cvl_frame_width(frame), cvl_frame_height(frame), 
-			1, CVL_LUM, CVL_FLOAT16, CVL_TEXTURE);
-		cvl_frame_t *Y = cvl_frame_new(cvl_frame_width(frame), cvl_frame_height(frame), 
-			1, CVL_LUM, CVL_FLOAT16, CVL_TEXTURE);
-		cvl_frame_t *Z = cvl_frame_new(cvl_frame_width(frame), cvl_frame_height(frame), 
-			1, CVL_LUM, CVL_FLOAT16, CVL_TEXTURE);
-		cvl_channel_extract(X, frame, channel_x);
-		cvl_channel_extract(Y, frame, channel_y);
-		cvl_channel_extract(Z, frame, channel_z);
+		cvl_frame_t *tmpframe = cvl_frame_new(cvl_frame_width(frame), cvl_frame_height(frame),
+			3, CVL_XYZ, type, CVL_MEM);
+		float *dstptr = static_cast<float *>(cvl_frame_pointer(tmpframe));
+		float *srcptr = static_cast<float *>(cvl_frame_pointer(frame));
+		for (int i = 0; i < cvl_frame_width(frame) * cvl_frame_height(frame); i++)
+		{
+		    dstptr[3 * i + 0] = srcptr[4 * i + channel_x];
+		    dstptr[3 * i + 1] = srcptr[4 * i + channel_y];
+		    dstptr[3 * i + 2] = srcptr[4 * i + channel_z];
+		}
 		cvl_frame_free(frame);
-		frame = cvl_frame_new(cvl_frame_width(X), cvl_frame_height(X),
-			3, CVL_XYZ, CVL_FLOAT16, CVL_TEXTURE);
-		cvl_channel_combine(frame, X, Y, Z, NULL);
-		cvl_frame_free(X);
-		cvl_frame_free(Y);
-		cvl_frame_free(Z);
+		frame = tmpframe;
 	    }
 	    else if (channel_y >= 0)
 	    {
-		cvl_frame_t *Y = cvl_frame_new(cvl_frame_width(frame), cvl_frame_height(frame), 
-			1, CVL_LUM, CVL_FLOAT16, CVL_TEXTURE);
-		cvl_channel_extract(Y, frame, channel_y);
+		cvl_frame_t *tmpframe = cvl_frame_new(cvl_frame_width(frame), cvl_frame_height(frame),
+			1, CVL_LUM, type, CVL_MEM);
+		float *dstptr = static_cast<float *>(cvl_frame_pointer(tmpframe));
+		float *srcptr = static_cast<float *>(cvl_frame_pointer(frame));
+		for (int i = 0; i < cvl_frame_width(frame) * cvl_frame_height(frame); i++)
+		{
+		    dstptr[i] = srcptr[4 * i + channel_y];
+		}
 		cvl_frame_free(frame);
-		frame = Y;
-		cvl_convert_format_inplace(frame, CVL_XYZ);
+		frame = cvl_frame_new(cvl_frame_width(tmpframe), cvl_frame_height(tmpframe),
+			3, CVL_XYZ, type, CVL_TEXTURE);
+		cvl_convert_format(frame, tmpframe);
+		cvl_frame_free(tmpframe);
 	    }
 	    else
 	    {
@@ -257,7 +277,7 @@ void CVLTonemap::load_image(const char *filename)
 	else
 	{
 	    cvl_frame_t *tmpframe = cvl_frame_new(cvl_frame_width(frame), cvl_frame_height(frame),
-		    3, CVL_XYZ, CVL_FLOAT16, CVL_TEXTURE);
+		    3, CVL_XYZ, type, CVL_TEXTURE);
 	    cvl_convert_format(tmpframe, frame);
 	    cvl_frame_free(frame);
 	    frame = tmpframe;
@@ -286,11 +306,12 @@ void CVLTonemap::load_image(const char *filename)
 	// Now replace the old frame, if any.
 	cvl_frame_free(_frame);
 	_frame = frame;
+	*_frame_filename = filename;
 	setWindowTitle(mh_string("%s.%s (%s)",
      		    qPrintable(QFileInfo(filename).baseName()),
 	  	    qPrintable(QFileInfo(filename).completeSuffix()),
 	     	    PACKAGE_NAME).c_str());
-	_toolbar->setEnabled(true);
+	_viewpoint_selector->setEnabled(true);
 	_tonemap_selector->setEnabled(true);
 	emit new_image();
 	_view_area->unlock();
@@ -307,6 +328,7 @@ void CVLTonemap::closeEvent(QCloseEvent *event)
     _conf->put("session-mainwindow-maximized", isMaximized());
     _conf->put("session-last-open-dir", qPrintable(_last_open_dir.absolutePath()));
     _conf->put("session-last-save-dir", qPrintable(_last_save_dir.absolutePath()));
+    _conf->put("preferences-precision", _precision_selector->get_precision());
     _conf->remove_cruft();
     try
     {
@@ -491,6 +513,22 @@ void CVLTonemap::copy_image()
 void CVLTonemap::copy_view()
 {
     copy(false);
+}
+
+void CVLTonemap::change_precision()
+{
+    if ((*_frame_filename)[0] != '\0')
+    {
+	cvl_frame_t *framebak = _frame;
+	load_image(_frame_filename->c_str());
+	if (framebak == _frame)
+	{
+	    // could not reload image: revert precision change
+	    _precision_selector->set_precision(
+		    _precision_selector->get_precision() == PrecisionSelector::FLOAT16 
+		    ? PrecisionSelector::FLOAT32 : PrecisionSelector::FLOAT16);
+	}
+    }
 }
 
 void CVLTonemap::show_aboutbox()

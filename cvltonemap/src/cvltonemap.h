@@ -39,6 +39,7 @@
 
 #include "tonemap_selector.h"
 #include "viewpoint_selector.h"
+#include "precision_selector.h"
 #include "view_area.h"
 
 class CVLTonemap : public QMainWindow
@@ -54,11 +55,13 @@ class CVLTonemap : public QMainWindow
 	string *_parameters_file_name;
 
 	cvl_frame_t *_frame;
+	string *_frame_filename;
 
 	QWidget *_widget;
 	QToolBar *_toolbar;
 	TonemapSelector *_tonemap_selector;
 	ViewpointSelector *_viewpoint_selector;
+	PrecisionSelector *_precision_selector;
 	ViewArea *_view_area;
 
 	void save(bool whole_image);
@@ -87,6 +90,7 @@ class CVLTonemap : public QMainWindow
 	void save_parameters_as();
 	void copy_image();
 	void copy_view();
+	void change_precision();
 	void show_aboutbox();
 };
 

@@ -8,6 +8,7 @@ cvltonemap_SOURCES = main.cpp				\
 	postproc_selector.h postproc_selector.cpp	\
 	maxabslum_selector.h maxabslum_selector.cpp	\
 	viewpoint_selector.h viewpoint_selector.cpp	\
+	precision_selector.h precision_selector.cpp	\
 	view_area.h view_area.cpp
 
 if W32
@@ -20,6 +21,7 @@ nodist_cvltonemap_SOURCES = \
 	moc_postproc_selector.cpp	\
 	moc_maxabslum_selector.cpp	\
 	moc_viewpoint_selector.cpp	\
+	moc_precision_selector.cpp	\
 	moc_view_area.cpp		\
 	rcc_cvltonemap.cpp
 
