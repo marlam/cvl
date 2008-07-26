@@ -183,8 +183,9 @@ void import(const char *filename, cvl_frame_t **frame)
     	free(tempfilename);
 	if (import_status == -1 || !WIFEXITED(import_status) || WEXITSTATUS(import_status) != 0)
 	{
-	    cvl_error_set(CVL_ERROR_IO, "Cannot execute the command %s. Make sure that the pfstools "
-		    "package is installed and that the programs are in your PATH.", import_cmd);
+	    cvl_error_set(CVL_ERROR_IO, "Cannot execute %s. "
+		    "Make sure that the pfstools package is installed and in your PATH.", 
+		    import_cmd);
 	    remove(intermfilename);
 	    free(intermfilename);
 	    return;
@@ -208,8 +209,9 @@ void import(const char *filename, cvl_frame_t **frame)
     	free(intermfilename);
 	if (clamp_status == -1 || !WIFEXITED(clamp_status) || WEXITSTATUS(clamp_status) != 0)
 	{
-	    cvl_error_set(CVL_ERROR_IO, "Cannot execute the command %s. Make sure that the pfstools "
-		    "package is installed and that the programs are in your PATH.", clamp_cmd);
+	    cvl_error_set(CVL_ERROR_IO, "Cannot execute %s. "
+		    "Make sure that the pfstools package is installed and your PATH.", 
+		    clamp_cmd);
 	    remove(resultfilename);
 	    free(resultfilename);
 	    return;

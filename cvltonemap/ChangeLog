@@ -5,6 +5,7 @@
 	input filters for HDR file formats that are supported by the pfstools.
 	* NEWS: Update for 0.2.2.
 	* src/tonemap_selector.cpp: Make Schlick94 the default method.
+	* src/import.c: Improve error messages.
 
 2008-07-25  Martin Lambers <marlam@marlam.de>
 
