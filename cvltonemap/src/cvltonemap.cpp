@@ -367,7 +367,6 @@ void CVLTonemap::save(bool whole_image)
 
     QFileDialog *file_dialog = new QFileDialog(this);
     file_dialog->setWindowTitle(tr("Save image"));
-    file_dialog->setDefaultSuffix("jpg");
     file_dialog->setAcceptMode(QFileDialog::AcceptSave);
     file_dialog->setDirectory(_last_save_dir);
     QStringList filters;

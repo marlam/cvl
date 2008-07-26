@@ -9,6 +9,8 @@
 	* src/import.h, src/import.c, src/cvltonemap.h, src/cvltonemap.cpp:
 	Detect the presence of pfstools automatically, and offer more
 	informative messages to the user in case they are missing.
+	* src/cvltonemap.cpp: Do not use a default file name extension in the
+	Save dialog.
 
 2008-07-25  Martin Lambers <marlam@marlam.de>
 
