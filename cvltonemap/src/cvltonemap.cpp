@@ -179,6 +179,21 @@ CVLTonemap::CVLTonemap()
     show_aboutbox_act->setShortcut(tr("Ctrl+A"));
     connect(show_aboutbox_act, SIGNAL(triggered()), this, SLOT(show_aboutbox()));
     help_menu->addAction(show_aboutbox_act);
+
+    // Inform about import of file types other than PFS
+    _pfstools_installed = check_pfstools();
+    _show_pfstools_import_message = _conf->get("preferences-show-pfstools-import-message", true);
+    if (!_pfstools_installed && _show_pfstools_import_message)
+    {
+	QMessageBox::information(this, tr("Information"), tr(
+		    "<p>The <a href=\"http://www.mpi-inf.mpg.de/resources/pfstools/\">pfstools</a> "
+		    "package does not seem to be installed: its programs cannot be found in the "
+		    "current PATH.</p>"
+		    "<p>Installing <a href=\"http://www.mpi-inf.mpg.de/resources/pfstools/\">pfstools</a> "
+		    "enables " PACKAGE_NAME " to import common HDR file formats such as RGBE, EXR, TIFF, "
+		    "PFM, and DCRAW.</p>"));
+	_show_pfstools_import_message = false;
+    }
 }
 
 CVLTonemap::~CVLTonemap()
@@ -203,15 +218,16 @@ void CVLTonemap::load_image(const char *filename)
 
     _view_area->lock();
     cvl_frame_t *frame;
-    import(filename, &frame);		// This function has the same interface as cvl_read_pfs()
-    if (!frame)
+    // The import() function has the same interface as cvl_read_pfs().
+    import(filename, &frame);
+    if (!cvl_error() && !frame)
     {
 	cvl_error_set(CVL_ERROR_IO, "%s: No data.", filename);
     }
     if (cvl_error())
     {
-	QMessageBox::critical(this, tr("Error"), 
-		tr("<p>Cannot load image:<pre>%1</pre></p>").arg(cvl_error_msg()));
+    	QMessageBox::critical(this, tr("Error"), 
+		tr("<p>Cannot load image:</p><p>%1</p>").arg(cvl_error_msg()));
 	cvl_error_reset();
 	_view_area->unlock();
 	return;
@@ -331,6 +347,7 @@ void CVLTonemap::closeEvent(QCloseEvent *event)
     _conf->put("session-last-open-dir", qPrintable(_last_open_dir.absolutePath()));
     _conf->put("session-last-save-dir", qPrintable(_last_save_dir.absolutePath()));
     _conf->put("preferences-precision", _precision_selector->get_precision());
+    _conf->put("preferences-show-pfstools-import-message", _show_pfstools_import_message);
     _conf->remove_cruft();
     try
     {
@@ -432,8 +449,11 @@ void CVLTonemap::open_image()
     file_dialog->setAcceptMode(QFileDialog::AcceptOpen);
     file_dialog->setDirectory(_last_open_dir);
     QStringList filters;
-    filters << tr("All supported files (*.pfs *.hdr *.pic *.tif *.tiff *.exr *.pfm *.cr2)") 
-	<< tr("Portable Floating-point Streams (*.pfs)") 
+    if (_pfstools_installed)
+    {
+	filters << tr("All supported files (*.pfs *.hdr *.pic *.tif *.tiff *.exr *.pfm *.cr2)");
+    }
+    filters << tr("Portable Floating-point Streams (*.pfs)") 
 	<< tr("All files (*)");
     file_dialog->setFilters(filters);
     file_dialog->setFileMode(QFileDialog::ExistingFile);

@@ -6,6 +6,9 @@
 	* NEWS: Update for 0.2.2.
 	* src/tonemap_selector.cpp: Make Schlick94 the default method.
 	* src/import.c: Improve error messages.
+	* src/import.h, src/import.c, src/cvltonemap.h, src/cvltonemap.cpp:
+	Detect the presence of pfstools automatically, and offer more
+	informative messages to the user in case they are missing.
 
 2008-07-25  Martin Lambers <marlam@marlam.de>
 

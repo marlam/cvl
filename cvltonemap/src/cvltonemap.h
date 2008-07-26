@@ -64,6 +64,9 @@ class CVLTonemap : public QMainWindow
 	PrecisionSelector *_precision_selector;
 	ViewArea *_view_area;
 
+	bool _pfstools_installed;
+	bool _show_pfstools_import_message;
+
 	void save(bool whole_image);
 	void copy(bool whole_image);
 	void save_parameters(const char *file_name);

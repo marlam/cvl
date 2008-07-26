@@ -27,6 +27,7 @@
 extern "C" 
 {
     void import(const char *filename, cvl_frame_t **frame);
+    bool check_pfstools(void);
 }
 
 #endif

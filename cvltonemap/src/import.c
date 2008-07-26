@@ -183,8 +183,10 @@ void import(const char *filename, cvl_frame_t **frame)
     	free(tempfilename);
 	if (import_status == -1 || !WIFEXITED(import_status) || WEXITSTATUS(import_status) != 0)
 	{
-	    cvl_error_set(CVL_ERROR_IO, "Cannot execute %s. "
-		    "Make sure that the pfstools package is installed and in your PATH.", 
+	    cvl_error_set(CVL_ERROR_SYS, "Cannot execute %s. "
+		    "To read files in formats other than PFS, make sure that the "
+		    "<a href=\"http://www.mpi-inf.mpg.de/resources/pfstools/\">pfstools</a> "
+		    "package is installed and in your PATH.", 
 		    import_cmd);
 	    remove(intermfilename);
 	    free(intermfilename);
@@ -209,8 +211,10 @@ void import(const char *filename, cvl_frame_t **frame)
     	free(intermfilename);
 	if (clamp_status == -1 || !WIFEXITED(clamp_status) || WEXITSTATUS(clamp_status) != 0)
 	{
-	    cvl_error_set(CVL_ERROR_IO, "Cannot execute %s. "
-		    "Make sure that the pfstools package is installed and your PATH.", 
+	    cvl_error_set(CVL_ERROR_SYS, "Cannot execute %s. "
+		    "To read files in formats other than PFS, make sure that the "
+		    "<a href=\"http://www.mpi-inf.mpg.de/resources/pfstools/\">pfstools</a> "
+		    "package is installed and in your PATH.", 
 		    clamp_cmd);
 	    remove(resultfilename);
 	    free(resultfilename);
@@ -226,4 +230,10 @@ void import(const char *filename, cvl_frame_t **frame)
 	remove(pfs_filename);
     }
     free(pfs_filename);
+}
+
+bool check_pfstools(void)
+{
+    int status = system("pfsinrgbe" EXEEXT);
+    return !(status == -1 || !WIFEXITED(status) || WEXITSTATUS(status) != 0);
 }
