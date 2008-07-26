@@ -99,6 +99,7 @@ AC_DEFUN([gl_INIT],
   gl_WCHAR_H
   gl_XALLOC
   gl_XSIZE
+  gl_XSTRNDUP
   gl_XVASPRINTF
   m4_ifdef([AM_XGETTEXT_OPTION],
     [AM_XGETTEXT_OPTION([--flag=xasprintf:1:c-format])])
@@ -288,6 +289,8 @@ AC_DEFUN([gl_FILE_LIST], [
   lib/xasprintf.c
   lib/xmalloc.c
   lib/xsize.h
+  lib/xstrndup.c
+  lib/xstrndup.h
   lib/xvasprintf.c
   lib/xvasprintf.h
   m4/alloca.m4
@@ -336,5 +339,6 @@ AC_DEFUN([gl_FILE_LIST], [
   m4/wint_t.m4
   m4/xalloc.m4
   m4/xsize.m4
+  m4/xstrndup.m4
   m4/xvasprintf.m4
 ])
