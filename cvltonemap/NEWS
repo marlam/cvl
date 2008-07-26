@@ -4,6 +4,8 @@ Version 0.2.2:
   In addition, it is now possible to select 16 bit or 32 bit precision for 
   tonemapping. 16 bit is the new default: it requires half as much graphics
   memory and is usually sufficient.
+- Common HDR image formats such as RGBE, EXR, TIFF, PFM, DCRAW can now be
+  opened directly in CVLTonemap if the pfstools package is installed.
 - Fixed build problems.
 
 Version 0.2.1:

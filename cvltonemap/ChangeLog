@@ -3,6 +3,7 @@
 	* configure.ac, build-aux/compile: Add AM_PROG_CC_C_O macro.
 	* src/cvltonemap.cpp, src/import.h, src/import.c, src/Makefile.am: Add
 	input filters for HDR file formats that are supported by the pfstools.
+	* NEWS: Update for 0.2.2.
 
 2008-07-25  Martin Lambers <marlam@marlam.de>
 
