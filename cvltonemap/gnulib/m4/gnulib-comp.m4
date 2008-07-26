@@ -27,11 +27,6 @@ AC_DEFUN([gl_EARLY],
   AC_REQUIRE([AC_PROG_RANLIB])
   AC_REQUIRE([AC_GNU_SOURCE])
   AC_REQUIRE([gl_USE_SYSTEM_EXTENSIONS])
-  dnl Some compilers (e.g., AIX 5.3 cc) need to be in c99 mode
-  dnl for the builtin va_copy to work.  With Autoconf 2.60 or later,
-  dnl AC_PROG_CC_STDC arranges for this.  With older Autoconf AC_PROG_CC_STDC
-  dnl shouldn't hurt, though installers are on their own to set c99 mode.
-  AC_REQUIRE([AC_PROG_CC_STDC])
 ])
 
 # This macro should be invoked from ./configure.ac, in the section
@@ -73,7 +68,6 @@ AC_DEFUN([gl_INIT],
   gl_SIGNALBLOCKING
   gl_SIGNAL_MODULE_INDICATOR([sigprocmask])
   gl_SIZE_MAX
-  gl_STDARG_H
   AM_STDBOOL_H
   gl_STDINT_H
   gl_STDIO_H
@@ -99,10 +93,6 @@ AC_DEFUN([gl_INIT],
   gl_WCHAR_H
   gl_XALLOC
   gl_XSIZE
-  gl_XSTRNDUP
-  gl_XVASPRINTF
-  m4_ifdef([AM_XGETTEXT_OPTION],
-    [AM_XGETTEXT_OPTION([--flag=xasprintf:1:c-format])])
   m4_ifval(gl_LIBSOURCES_LIST, [
     m4_syscmd([test ! -d ]m4_defn([gl_LIBSOURCES_DIR])[ ||
       for gl_file in ]gl_LIBSOURCES_LIST[ ; do
@@ -265,7 +255,6 @@ AC_DEFUN([gl_FILE_LIST], [
   lib/signal.in.h
   lib/sigprocmask.c
   lib/size_max.h
-  lib/stdarg.in.h
   lib/stdbool.in.h
   lib/stdint.in.h
   lib/stdio.in.h
@@ -286,13 +275,8 @@ AC_DEFUN([gl_FILE_LIST], [
   lib/wait-process.h
   lib/wchar.in.h
   lib/xalloc.h
-  lib/xasprintf.c
   lib/xmalloc.c
   lib/xsize.h
-  lib/xstrndup.c
-  lib/xstrndup.h
-  lib/xvasprintf.c
-  lib/xvasprintf.h
   m4/alloca.m4
   m4/environ.m4
   m4/eoverflow.m4
@@ -318,7 +302,6 @@ AC_DEFUN([gl_FILE_LIST], [
   m4/signal_h.m4
   m4/signalblocking.m4
   m4/size_max.m4
-  m4/stdarg.m4
   m4/stdbool.m4
   m4/stdint.m4
   m4/stdint_h.m4
@@ -339,6 +322,4 @@ AC_DEFUN([gl_FILE_LIST], [
   m4/wint_t.m4
   m4/xalloc.m4
   m4/xsize.m4
-  m4/xstrndup.m4
-  m4/xvasprintf.m4
 ])
