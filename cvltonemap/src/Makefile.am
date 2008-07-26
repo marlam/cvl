@@ -9,7 +9,8 @@ cvltonemap_SOURCES = main.cpp				\
 	maxabslum_selector.h maxabslum_selector.cpp	\
 	viewpoint_selector.h viewpoint_selector.cpp	\
 	precision_selector.h precision_selector.cpp	\
-	view_area.h view_area.cpp
+	view_area.h view_area.cpp			\
+	import.h import.c
 
 if W32
 cvltonemap_SOURCES += appicon.ico

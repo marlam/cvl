@@ -51,6 +51,8 @@
 #include "view_area.h"
 #include "cvltonemap.h"
 
+#include "import.h"
+
 
 CVLTonemap::CVLTonemap()
 {
@@ -201,7 +203,7 @@ void CVLTonemap::load_image(const char *filename)
 
     _view_area->lock();
     cvl_frame_t *frame;
-    cvl_load_pfs(filename, &frame);
+    import(filename, &frame);		// This function has the same interface as cvl_read_pfs()
     if (!frame)
     {
 	cvl_error_set(CVL_ERROR_IO, "%s: No data.", filename);
@@ -430,7 +432,8 @@ void CVLTonemap::open_image()
     file_dialog->setAcceptMode(QFileDialog::AcceptOpen);
     file_dialog->setDirectory(_last_open_dir);
     QStringList filters;
-    filters << tr("Portable Floating-point Streams (*.pfs)") 
+    filters << tr("All supported files (*.pfs *.hdr *.pic *.tif *.tiff *.exr *.pfm *.cr2)") 
+	<< tr("Portable Floating-point Streams (*.pfs)") 
 	<< tr("All files (*)");
     file_dialog->setFilters(filters);
     file_dialog->setFileMode(QFileDialog::ExistingFile);
