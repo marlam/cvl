@@ -1,3 +1,7 @@
+2008-07-26  Martin Lambers <marlam@marlam.de>
+
+	* gnulib/*: Add gnulib modules xvasprintf and pipe.
+
 2008-07-25  Martin Lambers <marlam@marlam.de>
 
 	* src/precision_selector.h, src/precision_selector.cpp,
