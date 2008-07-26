@@ -1,6 +1,7 @@
 2008-07-26  Martin Lambers <marlam@marlam.de>
 
 	* gnulib/*: Add gnulib modules xvasprintf and pipe.
+	* configure.ac, build-aux/compile: Add AM_PROG_CC_C_O macro.
 
 2008-07-25  Martin Lambers <marlam@marlam.de>
 
