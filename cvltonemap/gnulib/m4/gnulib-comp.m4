@@ -27,6 +27,11 @@ AC_DEFUN([gl_EARLY],
   AC_REQUIRE([AC_PROG_RANLIB])
   AC_REQUIRE([AC_GNU_SOURCE])
   AC_REQUIRE([gl_USE_SYSTEM_EXTENSIONS])
+  dnl Some compilers (e.g., AIX 5.3 cc) need to be in c99 mode
+  dnl for the builtin va_copy to work.  With Autoconf 2.60 or later,
+  dnl AC_PROG_CC_STDC arranges for this.  With older Autoconf AC_PROG_CC_STDC
+  dnl shouldn't hurt, though installers are on their own to set c99 mode.
+  AC_REQUIRE([AC_PROG_CC_STDC])
 ])
 
 # This macro should be invoked from ./configure.ac, in the section
@@ -44,27 +49,59 @@ AC_DEFUN([gl_INIT],
   gl_source_base='gnulib'
   gl_EOVERFLOW
   gl_FUNC_ALLOCA
+  gl_ENVIRON
+  gl_UNISTD_MODULE_INDICATOR([environ])
+  gl_ERROR
+  m4_ifdef([AM_XGETTEXT_OPTION],
+    [AM_XGETTEXT_OPTION([--flag=error:3:c-format])
+     AM_XGETTEXT_OPTION([--flag=error_at_line:5:c-format])])
+  gl_FATAL_SIGNAL
+  gl_FCNTL_H
   gl_FLOAT_H
   gl_GETOPT
   AC_SUBST([LIBINTL])
   AC_SUBST([LTLIBINTL])
+  gl_INLINE
+  gl_FUNC_OPEN
+  gl_MODULE_INDICATOR([open])
+  gl_FCNTL_MODULE_INDICATOR([open])
+  gl_PIPE
+  AC_REPLACE_FUNCS(raise)
+  gl_SIGACTION
+  gl_SIGNAL_MODULE_INDICATOR([sigaction])
+  gl_SIGNAL_H
+  gl_SIGNALBLOCKING
+  gl_SIGNAL_MODULE_INDICATOR([sigprocmask])
   gl_SIZE_MAX
+  gl_STDARG_H
+  AM_STDBOOL_H
   gl_STDINT_H
   gl_STDIO_H
+  gl_STDLIB_H
+  gl_FUNC_STRERROR
+  gl_STRING_MODULE_INDICATOR([strerror])
   gl_HEADER_STRING_H
   gl_FUNC_STRNDUP
   gl_STRING_MODULE_INDICATOR([strndup])
   gl_FUNC_STRNLEN
   gl_STRING_MODULE_INDICATOR([strnlen])
+  gl_FUNC_STRPBRK
+  gl_STRING_MODULE_INDICATOR([strpbrk])
   gl_UNISTD_H
+  gl_UNISTD_SAFER
   gl_FUNC_VASNPRINTF
   gl_FUNC_VASPRINTF
   gl_STDIO_MODULE_INDICATOR([vasprintf])
   m4_ifdef([AM_XGETTEXT_OPTION],
     [AM_XGETTEXT_OPTION([--flag=asprintf:2:c-format])
      AM_XGETTEXT_OPTION([--flag=vasprintf:2:c-format])])
+  gl_WAIT_PROCESS
   gl_WCHAR_H
+  gl_XALLOC
   gl_XSIZE
+  gl_XVASPRINTF
+  m4_ifdef([AM_XGETTEXT_OPTION],
+    [AM_XGETTEXT_OPTION([--flag=xasprintf:1:c-format])])
   m4_ifval(gl_LIBSOURCES_LIST, [
     m4_syscmd([test ! -d ]m4_defn([gl_LIBSOURCES_DIR])[ ||
       for gl_file in ]gl_LIBSOURCES_LIST[ ; do
@@ -198,7 +235,13 @@ AC_DEFUN([gl_FILE_LIST], [
   lib/alloca.in.h
   lib/asnprintf.c
   lib/asprintf.c
-  lib/dummy.c
+  lib/dup-safer.c
+  lib/error.c
+  lib/error.h
+  lib/fatal-signal.c
+  lib/fatal-signal.h
+  lib/fcntl.in.h
+  lib/fd-safer.c
   lib/float+.h
   lib/float.in.h
   lib/getopt.c
@@ -206,47 +249,92 @@ AC_DEFUN([gl_FILE_LIST], [
   lib/getopt1.c
   lib/getopt_int.h
   lib/gettext.h
+  lib/intprops.h
+  lib/open.c
+  lib/pipe-safer.c
+  lib/pipe.c
+  lib/pipe.h
   lib/printf-args.c
   lib/printf-args.h
   lib/printf-parse.c
   lib/printf-parse.h
+  lib/raise.c
+  lib/sig-handler.h
+  lib/sigaction.c
+  lib/signal.in.h
+  lib/sigprocmask.c
   lib/size_max.h
+  lib/stdarg.in.h
+  lib/stdbool.in.h
   lib/stdint.in.h
   lib/stdio.in.h
+  lib/stdlib.in.h
+  lib/strerror.c
   lib/string.in.h
   lib/strndup.c
   lib/strnlen.c
+  lib/strpbrk.c
+  lib/unistd--.h
+  lib/unistd-safer.h
   lib/unistd.in.h
   lib/vasnprintf.c
   lib/vasnprintf.h
   lib/vasprintf.c
+  lib/w32spawn.h
+  lib/wait-process.c
+  lib/wait-process.h
   lib/wchar.in.h
+  lib/xalloc.h
+  lib/xasprintf.c
+  lib/xmalloc.c
   lib/xsize.h
+  lib/xvasprintf.c
+  lib/xvasprintf.h
   m4/alloca.m4
+  m4/environ.m4
   m4/eoverflow.m4
+  m4/error.m4
   m4/extensions.m4
+  m4/fatal-signal.m4
+  m4/fcntl_h.m4
   m4/float_h.m4
   m4/getopt.m4
   m4/gnulib-common.m4
   m4/include_next.m4
+  m4/inline.m4
   m4/intmax_t.m4
   m4/inttypes_h.m4
   m4/lib-ld.m4
   m4/lib-link.m4
   m4/lib-prefix.m4
   m4/longlong.m4
+  m4/open.m4
+  m4/pipe.m4
+  m4/sig_atomic_t.m4
+  m4/sigaction.m4
+  m4/signal_h.m4
+  m4/signalblocking.m4
   m4/size_max.m4
+  m4/stdarg.m4
+  m4/stdbool.m4
   m4/stdint.m4
   m4/stdint_h.m4
   m4/stdio_h.m4
+  m4/stdlib_h.m4
+  m4/strerror.m4
   m4/string_h.m4
   m4/strndup.m4
   m4/strnlen.m4
+  m4/strpbrk.m4
+  m4/unistd-safer.m4
   m4/unistd_h.m4
   m4/vasnprintf.m4
   m4/vasprintf.m4
+  m4/wait-process.m4
   m4/wchar.m4
   m4/wchar_t.m4
   m4/wint_t.m4
+  m4/xalloc.m4
   m4/xsize.m4
+  m4/xvasprintf.m4
 ])

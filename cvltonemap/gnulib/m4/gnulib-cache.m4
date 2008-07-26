@@ -15,17 +15,19 @@
 
 
 # Specification in the form of a command-line invocation:
-#   gnulib-tool --import --dir=. --lib=libgnu --source-base=gnulib --m4-base=gnulib/m4 --doc-base=doc --aux-dir=build-aux --libtool --macro-prefix=gl getopt havelib strndup vasprintf
+#   gnulib-tool --import --dir=. --lib=libgnu --source-base=gnulib --m4-base=gnulib/m4 --doc-base=doc --aux-dir=build-aux --avoid=xalloc-die --libtool --macro-prefix=gl getopt havelib pipe strndup vasprintf xvasprintf
 
 # Specification in the form of a few gnulib-tool.m4 macro invocations:
 gl_LOCAL_DIR([])
 gl_MODULES([
   getopt
   havelib
+  pipe
   strndup
   vasprintf
+  xvasprintf
 ])
-gl_AVOID([])
+gl_AVOID([xalloc-die])
 gl_SOURCE_BASE([gnulib])
 gl_M4_BASE([gnulib/m4])
 gl_PO_BASE([])
