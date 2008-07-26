@@ -98,7 +98,7 @@ TonemapSelector::TonemapSelector(cvl_frame_t **frame, QWidget *parent)
     layout->setRowStretch(3, 1);
     setLayout(layout);
 
-    tonemap_activator(0);
+    tonemap_activator(1);
 }
 
 TonemapSelector::~TonemapSelector()

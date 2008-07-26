@@ -4,6 +4,7 @@
 	* src/cvltonemap.cpp, src/import.h, src/import.c, src/Makefile.am: Add
 	input filters for HDR file formats that are supported by the pfstools.
 	* NEWS: Update for 0.2.2.
+	* src/tonemap_selector.cpp: Make Schlick94 the default method.
 
 2008-07-25  Martin Lambers <marlam@marlam.de>
 
