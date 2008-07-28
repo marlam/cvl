@@ -261,6 +261,10 @@ void ViewArea::paintGL()
 	    float min_abs_lum;
     	    cvl_reduce(*_frame, CVL_REDUCE_MIN, 1, &min_abs_lum);
 	    min_abs_lum *= max_abs_lum;
+	    // With 16 bit floating point, we might get min_abs_lum == 0.0 even 
+	    // if the image was run through pfsclamp(1).
+	    min_abs_lum = mh_maxf(0.00001f, min_abs_lum);	
+	    max_abs_lum = mh_maxf(min_abs_lum, max_abs_lum);
 	    float threshold = parameter_selector->get_threshold();
 	    cvl_tonemap_ashikhmin02(_frame1, *_frame, 
 		    min_abs_lum, max_abs_lum,

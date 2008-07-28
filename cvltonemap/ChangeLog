@@ -1,3 +1,9 @@
+2008-07-28  Martin Lambers <marlam@marlam.de>
+
+	* src/view_area.cpp: Make sure that min_abs_lum is greater than zero
+	when calling cvl_tonemap_ashikhmin02(), to avoid getting a
+	cvl_error(). Reported by Olaf Cramer. Thanks!
+
 2008-07-26  Martin Lambers <marlam@marlam.de>
 
 	* configure.ac, build-aux/compile: Add AM_PROG_CC_C_O macro.
