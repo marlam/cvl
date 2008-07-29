@@ -1033,6 +1033,16 @@ void cvl_read_pfs(FILE *f, cvl_frame_t **frame)
 	    Z = (strcmp(channel_name[0], "Z") == 0 ? channel[0] :
 		    strcmp(channel_name[1], "Z") == 0 ? channel[1] :
 		    strcmp(channel_name[2], "Z") == 0 ? channel[2] : NULL);
+	    float *R, *G, *B;
+	    R = (strcmp(channel_name[0], "R") == 0 ? channel[0] :
+		    strcmp(channel_name[1], "R") == 0 ? channel[1] :
+		    strcmp(channel_name[2], "R") == 0 ? channel[2] : NULL);
+	    G = (strcmp(channel_name[0], "G") == 0 ? channel[0] :
+		    strcmp(channel_name[1], "G") == 0 ? channel[1] :
+		    strcmp(channel_name[2], "G") == 0 ? channel[2] : NULL);
+	    B = (strcmp(channel_name[0], "B") == 0 ? channel[0] :
+		    strcmp(channel_name[1], "B") == 0 ? channel[1] :
+		    strcmp(channel_name[2], "B") == 0 ? channel[2] : NULL);
 	    if (X && Y && Z)
 	    {
 		*frame = cvl_frame_new(width, height, 3, CVL_XYZ, CVL_FLOAT, CVL_MEM);
@@ -1044,9 +1054,25 @@ void cvl_read_pfs(FILE *f, cvl_frame_t **frame)
 		}
 		for (size_t i = 0; i < size; i++)
 		{
-		    p[3 * i + 0] = channel[0][i];
-		    p[3 * i + 1] = channel[1][i];
-		    p[3 * i + 2] = channel[2][i];
+		    p[3 * i + 0] = X[i];
+		    p[3 * i + 1] = Y[i];
+		    p[3 * i + 2] = Z[i];
+		}
+	    }
+	    else if (R && G && B)
+	    {
+		*frame = cvl_frame_new(width, height, 3, CVL_RGB, CVL_FLOAT, CVL_MEM);
+		float *p = cvl_frame_pointer(*frame);
+		if (!p)
+		{
+		    errtype = CVL_PFS_ENOMEM;
+		    goto error_exit;
+		}
+		for (size_t i = 0; i < size; i++)
+		{
+		    p[3 * i + 0] = R[i];
+		    p[3 * i + 1] = G[i];
+		    p[3 * i + 2] = B[i];
 		}
 	    }
 	    else

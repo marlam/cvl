@@ -1,3 +1,9 @@
+2008-07-29  Martin Lambers <marlam@marlam.de>
+
+	* cvl/cvl_io.c: Read PFS frames with channels R, G, B into CVL_RGB
+	frames. Also fix reading of X, Y, Z frames where the channels do not
+	appear in this order.
+
 2008-07-25  Martin Lambers <marlam@marlam.de>
 
 	* NEWS: Update for version 0.2.5.
