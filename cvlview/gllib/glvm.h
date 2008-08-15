@@ -46,6 +46,7 @@
 #include <cstring>
 
 #include <string>
+#include <limits>
 #include <iostream>
 #include <sstream>
 

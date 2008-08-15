@@ -1,3 +1,7 @@
+2008-08-15  Martin Lambers <marlam@marlam.de>
+
+	* glvm/glvm.h: Include <limits>. Fixes compilation with g++-4.3.
+
 2008-07-25  Martin Lambers <marlam@marlam.de>
 
 	* NEWS: Update for version 0.3.1.
