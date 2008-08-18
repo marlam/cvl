@@ -1,3 +1,8 @@
+2008-08-18  Martin Lambers <marlam@marlam.de>
+
+	* src/cvlview.cpp: Enable all toolbar widgets manually, as a
+	workaround for a regression in Qt 4.4.
+
 2008-08-15  Martin Lambers <marlam@marlam.de>
 
 	* glvm/glvm.h: Include <limits>. Fixes compilation with g++-4.3.

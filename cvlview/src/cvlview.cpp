@@ -347,10 +347,23 @@ void CVLView::load_datafile(const char *filename)
 		qPrintable(QFileInfo(filename).baseName()),
 		qPrintable(QFileInfo(filename).completeSuffix()), 
 		PACKAGE_NAME).c_str());
-    _frame_info->setEnabled(true);
+    
+    // With Qt 4.2, it was sufficient to just enable a toolbar; all its
+    // widgets were then enabled automatically. This does not seem to work
+    // with Qt 4.4 anymore, so we enable all toolbar widgets manually here.
     _toolbar1->setEnabled(true);
+    _dataset_selector->setEnabled(true);
+    _channel_selector->setEnabled(true);
+    _interpolation_selector->setEnabled(true);
+    _color_selector->setEnabled(true);
+    _grid_selector->setEnabled(true);    
     _toolbar2->setEnabled(true);
+    _scale_selector->setEnabled(true);
+    _translation_selector->setEnabled(true);
+    _rotation_selector->setEnabled(true);
+    _frame_info->setEnabled(true);
     _toolbox->setEnabled(true);
+    
     _view_area->lock();
     emit new_datafile();
     _view_area->unlock();
