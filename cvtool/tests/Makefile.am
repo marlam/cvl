@@ -15,6 +15,7 @@ testscripts = \
 	cmd_cut.sh		\
 	cmd_diff.sh		\
 	cmd_draw.sh		\
+	cmd_dwt.sh		\
 	cmd_edge.sh		\
 	cmd_flip.sh		\
 	cmd_flop.sh		\

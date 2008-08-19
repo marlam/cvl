@@ -13,6 +13,7 @@ cvtool_SOURCES = cvtool.c 	\
 	cmd_cut.c		\
 	cmd_diff.c		\
 	cmd_draw.c		\
+	cmd_dwt.c		\
 	cmd_edge.c		\
 	cmd_flip.c		\
 	cmd_flop.c		\
@@ -41,7 +42,7 @@ cvtool_SOURCES = cvtool.c 	\
 	cmd_visualize.c
 
 cvtool_LDADD = $(top_builddir)/cvl/libcvl.la		\
-	$(LTLIBGLEW) $(LTLIBCAIRO) $(LTLIBICONV)		\
+	$(LTLIBGLEW) $(LTLIBCAIRO) $(LTLIBICONV)	\
 	$(top_builddir)/mhlib/libmh.la			\
 	$(top_builddir)/gnulib/libgnu.la
 

@@ -71,6 +71,7 @@ COMMAND_DECL(create)
 COMMAND_DECL(cut)
 COMMAND_DECL(diff)
 COMMAND_DECL(draw)
+COMMAND_DECL(dwt)
 COMMAND_DECL(edge)
 COMMAND_DECL(flip)
 COMMAND_DECL(flop)
@@ -114,6 +115,7 @@ cvtool_command_t commands[] =
     COMMAND(cut),
     COMMAND(diff),
     COMMAND(draw),
+    COMMAND(dwt),
     COMMAND(edge),
     COMMAND(flip),
     COMMAND(flop),

@@ -1,3 +1,14 @@
+2008-08-19  Martin Lambers <marlam@marlam.de>
+
+	* cvl/cvl_dwt.c, cvl/cvl/cvl_dwt.h, cvl/cvl/cvl.h, cvl/glsl/dwt, 
+	cvl/glsl/dwt/dwt_step1.glsl, cvl/glsl/dwt/dwt_step2.glsl, 
+	cvl/glsl/dwt/idwt_step1.glsl, cvl/glsl/dwt/idwt_step2.glsl, 
+	cvl/glsl/dwt/soft_thresholding.glsl, cvl/Makefile.am, cvtool/cmd_dwt.c,
+	cvtool/cvtool.c, cvtool/Makefile.am, tests/cmd_dwt.sh, 
+	tests/Makefile.am, doc/cvtool.texi: Add Discrete Wavelet Transform,
+	Inverse Discrete Wavelet Transform, and Soft Thresholding
+	functionality. This preliminary version only works for level 1.
+
 2008-07-29  Martin Lambers <marlam@marlam.de>
 
 	* cvl/cvl_io.c: Read PFS frames with channels R, G, B into CVL_RGB

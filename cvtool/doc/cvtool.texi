@@ -245,6 +245,7 @@ Cvtool returns @code{0} on success and @code{1} on error.
 * Color Manipulation::
 * Drawing::
 * Filtering Frames::
+* Frequency Domain::
 * Detecting Image Features::
 * Comparing Frames::
 * High Dynamic Range (HDR) Images::
@@ -1164,6 +1165,36 @@ It can be produced using e.g. a 3x3 Gauss filter. The sharpness parameter
 Example:
 @example
 $ cvtool unsharpmask -u smoothsmooth.pnm -c 0.7 < smooth.pnm > sharp.pnm
+@end example
+
+
+@node Frequency Domain
+@section Frequency Domain
+
+@menu
+* dwt::
+@end menu
+
+@node dwt
+@subsection dwt
+@cmindex dwt
+@code{dwt -t|--task=dwt -D|--daubechies=@var{D}-l|--level=@var{l}}@*
+@code{dwt -t|--task=idwt -D|--daubechies=@var{D} -l|--level=@var{l}}@*
+@code{dwt -t|--task=soft-thresholding -D|--daubechies=@var{D} -l|--level=@var{l} -T|--threshold=@var{T}}
+
+Perform Discrete Wavelet Transform (DWT), Inverse Discrete Wavelet transform
+(IDWT), or manipulations on transformed data.
+
+The parameter @var{D} chooses the Daubechies wavelet (D2, @dots{}, D20; only even numbers).
+The level @var{l} must be at least 1. The thresold parameter for soft thresholding must be from 
+[0,1]. It is applied to all input channels. The output of this command is always of type float;
+it has to be manually converted if necessary.
+
+Example:
+@example
+$ cvtool dwt -t dwt -D 2 -l 1 < in.pfs > dwt.pfs
+$ cvtool dwt -t soft-thresholding -D 2 -l 1 -T 0.5 < dwt.pfs > st.pfs
+$ cvtool dwt -t idwt -D 2 -l 1 < st.pfs > out.pfs
 @end example
 
 
