@@ -15,7 +15,6 @@ testscripts = \
 	cmd_cut.sh		\
 	cmd_diff.sh		\
 	cmd_draw.sh		\
-	cmd_dwt.sh		\
 	cmd_edge.sh		\
 	cmd_flip.sh		\
 	cmd_flop.sh		\
@@ -43,7 +42,8 @@ testscripts = \
 	cmd_tonemap.sh		\
 	cmd_unsharpmask.sh	\
 	cmd_version.sh		\
-	cmd_visualize.sh
+	cmd_visualize.sh	\
+	cmd_wavelets.sh
 
 EXTRA_DIST = cmd_tests_common.sh $(testscripts)
 TESTS = $(testscripts)
