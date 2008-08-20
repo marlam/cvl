@@ -100,19 +100,19 @@ int cmd_wavelets(int argc, char *argv[])
 	if (task.value == TASK_DWT)
 	{
 	    tmpframe = cvl_frame_new_tpl(outframe);
-	    cvl_dwt(outframe, inframe, tmpframe, D.value, level.value);
+	    cvl_wavelets_dwt(outframe, inframe, tmpframe, D.value, level.value);
 	    cvl_frame_free(tmpframe);
 	}
 	else if (task.value == TASK_IDWT)
 	{
 	    tmpframe = cvl_frame_new_tpl(outframe);
-	    cvl_idwt(outframe, inframe, tmpframe, D.value, level.value);
+	    cvl_wavelets_idwt(outframe, inframe, tmpframe, D.value, level.value);
 	    cvl_frame_free(tmpframe);
 	}
 	else if (task.value == TASK_ST)
 	{
 	    float T[4] = { threshold.value, threshold.value, threshold.value, threshold.value };
-	    cvl_soft_thresholding(outframe, inframe, D.value, level.value, T);
+	    cvl_wavelets_soft_thresholding(outframe, inframe, D.value, level.value, T);
 	}
 
 	cvl_frame_free(inframe);

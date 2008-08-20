@@ -51,7 +51,7 @@ extern "C"
 #include "cvl_misc.h"
 #include "cvl_features.h"
 #include "cvl_hdr.h"
-#include "cvl_dwt.h"
+#include "cvl_wavelets.h"
 #include "cvl_visualization.h"
 
 #ifdef __cplusplus

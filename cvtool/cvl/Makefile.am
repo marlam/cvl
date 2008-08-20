@@ -30,7 +30,7 @@ nobase_include_HEADERS = \
 	cvl/cvl_misc.h		\
 	cvl/cvl_features.h	\
 	cvl/cvl_hdr.h		\
-	cvl/cvl_dwt.h		\
+	cvl/cvl_wavelets.h	\
 	cvl/cvl_visualization.h	\
 	cvl/cvl.h
 
@@ -51,7 +51,7 @@ libcvl_la_SOURCES = cvl_intern.h \
 	cvl_misc.c		\
 	cvl_features.c		\
 	cvl_hdr.c		\
-	cvl_dwt.c		\
+	cvl_wavelets.c		\
 	cvl_visualization.c
 
 nodist_libcvl_la_SOURCES = \
@@ -115,11 +115,11 @@ nodist_libcvl_la_SOURCES = \
 	glsl/hdr/tonemap_durand02_step2.glsl.h		\
 	glsl/hdr/tonemap_reinhard02_step1.glsl.h	\
 	glsl/hdr/tonemap_reinhard02_step2.glsl.h	\
-	glsl/dwt/dwt_step1.glsl.h			\
-	glsl/dwt/dwt_step2.glsl.h			\
-	glsl/dwt/idwt_step1.glsl.h			\
-	glsl/dwt/idwt_step2.glsl.h			\
-	glsl/dwt/soft_thresholding.glsl.h		\
+	glsl/wavelets/dwt_step1.glsl.h			\
+	glsl/wavelets/dwt_step2.glsl.h			\
+	glsl/wavelets/idwt_step1.glsl.h			\
+	glsl/wavelets/idwt_step2.glsl.h			\
+	glsl/wavelets/soft_thresholding.glsl.h		\
 	glsl/visualization/vector2_color.glsl.h
 
 EXTRA_DIST = cvl/cvl_version.h.in \
@@ -183,11 +183,11 @@ EXTRA_DIST = cvl/cvl_version.h.in \
 	glsl/hdr/tonemap_durand02_step2.glsl		\
 	glsl/hdr/tonemap_reinhard02_step1.glsl		\
 	glsl/hdr/tonemap_reinhard02_step2.glsl		\
-	glsl/dwt/dwt_step1.glsl				\
-	glsl/dwt/dwt_step2.glsl				\
-	glsl/dwt/idwt_step1.glsl			\
-	glsl/dwt/idwt_step2.glsl			\
-	glsl/dwt/soft_thresholding.glsl			\
+	glsl/wavelets/dwt_step1.glsl			\
+	glsl/wavelets/dwt_step2.glsl			\
+	glsl/wavelets/idwt_step1.glsl			\
+	glsl/wavelets/idwt_step2.glsl			\
+	glsl/wavelets/soft_thresholding.glsl		\
 	glsl/visualization/vector2_color.glsl
 
 BUILT_SOURCES = $(nodist_libcvl_la_SOURCES)

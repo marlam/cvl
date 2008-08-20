@@ -1,5 +1,5 @@
 /*
- * cvl_dwt.h
+ * cvl_wavelets.h
  * 
  * This file is part of CVL, a computer vision library.
  *
@@ -19,13 +19,13 @@
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CVL_DWT_H
-#define CVL_DWT_H
+#ifndef CVL_WAVELETS_H
+#define CVL_WAVELETS_H
 
 #include "cvl_frame.h"
 
-void cvl_dwt(cvl_frame_t *dst, cvl_frame_t *src, cvl_frame_t *tmp, int D, int level);
-void cvl_idwt(cvl_frame_t *dst, cvl_frame_t *src, cvl_frame_t *tmp, int D, int level);
-void cvl_soft_thresholding(cvl_frame_t *dst, cvl_frame_t *src, int D, int level, const float *T);
+void cvl_wavelets_dwt(cvl_frame_t *dst, cvl_frame_t *src, cvl_frame_t *tmp, int D, int level);
+void cvl_wavelets_idwt(cvl_frame_t *dst, cvl_frame_t *src, cvl_frame_t *tmp, int D, int level);
+void cvl_wavelets_soft_thresholding(cvl_frame_t *dst, cvl_frame_t *src, int D, int level, const float *T);
 
 #endif

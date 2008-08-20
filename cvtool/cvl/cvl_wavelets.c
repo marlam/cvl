@@ -1,5 +1,5 @@
 /*
- * cvl_dwt.c
+ * cvl_wavelets.c
  * 
  * This file is part of CVL, a computer vision library.
  *
@@ -20,10 +20,10 @@
  */
 
 /** 
- * \file cvl_dwt.h
- * \brief Discrete Wavelet Transform (DWT).
+ * \file cvl_wavelets.h
+ * \brief Functions to work with Wavelets.
  *
- * Discrete Wavelet Transform (DWT).
+ * Functions to work with Wavelets.
  */
 
 #include "config.h"
@@ -36,13 +36,13 @@
 #include "cvl/cvl_error.h"
 #include "cvl/cvl_gl.h"
 #include "cvl/cvl_frame.h"
-#include "cvl/cvl_dwt.h"
+#include "cvl/cvl_wavelets.h"
 
-#include "glsl/dwt/dwt_step1.glsl.h"
-#include "glsl/dwt/dwt_step2.glsl.h"
-#include "glsl/dwt/idwt_step1.glsl.h"
-#include "glsl/dwt/idwt_step2.glsl.h"
-#include "glsl/dwt/soft_thresholding.glsl.h"
+#include "glsl/wavelets/dwt_step1.glsl.h"
+#include "glsl/wavelets/dwt_step2.glsl.h"
+#include "glsl/wavelets/idwt_step1.glsl.h"
+#include "glsl/wavelets/idwt_step2.glsl.h"
+#include "glsl/wavelets/soft_thresholding.glsl.h"
 
 
 /**
@@ -59,7 +59,7 @@
  * should always be of type #CVL_FLOAT or #CVL_FLOAT16. The frame \a tmp
  * should have the same dimensions, type, and channels as \a dst.
  */
-void cvl_dwt(cvl_frame_t *dst, cvl_frame_t *src, cvl_frame_t *tmp, int D, int level)
+void cvl_wavelets_dwt(cvl_frame_t *dst, cvl_frame_t *src, cvl_frame_t *tmp, int D, int level)
 {
     cvl_assert(dst != NULL);
     cvl_assert(src != NULL);
@@ -83,7 +83,7 @@ void cvl_dwt(cvl_frame_t *dst, cvl_frame_t *src, cvl_frame_t *tmp, int D, int le
 	float tex_coord_bound = 1.0f / (float)mh_powi(2, l);
 	float vertex_bound = (tex_coord_bound * 2.0f) - 1.0f;
 
-	prgname = cvl_asprintf("cvl_dwt_step1_D=%d", D);
+	prgname = cvl_asprintf("cvl_wavelets_dwt_step1_D=%d", D);
 	if ((prg = cvl_gl_program_cache_get(prgname)) == 0)
 	{
 	    char *src = cvl_gl_srcprep(cvl_strdup(CVL_DWT_STEP1_GLSL_STR), "$D=%d", D);
@@ -116,7 +116,7 @@ void cvl_dwt(cvl_frame_t *dst, cvl_frame_t *src, cvl_frame_t *tmp, int D, int le
 	glVertex2f(-1.0f, vertex_bound);
 	glEnd();
 
-	prgname = cvl_asprintf("cvl_dwt_step2_D=%d", D);
+	prgname = cvl_asprintf("cvl_wavelets_dwt_step2_D=%d", D);
 	if ((prg = cvl_gl_program_cache_get(prgname)) == 0)
 	{
 	    char *src = cvl_gl_srcprep(cvl_strdup(CVL_DWT_STEP2_GLSL_STR), "$D=%d", D);
@@ -160,9 +160,9 @@ void cvl_dwt(cvl_frame_t *dst, cvl_frame_t *src, cvl_frame_t *tmp, int D, int le
  *
  * Performs an Inverse Discrete Wavelet Transform (IDWT) on \a src and stores the
  * result in \a dst. The parameters \a D and \a level must be the same that were
- * given to cvl_dwt(). See also cvl_dwt().
+ * given to cvl_wavelets_dwt(). See also cvl_wavelets_dwt().
  */
-void cvl_idwt(cvl_frame_t *dst, cvl_frame_t *src, cvl_frame_t *tmp, int D, int level)
+void cvl_wavelets_idwt(cvl_frame_t *dst, cvl_frame_t *src, cvl_frame_t *tmp, int D, int level)
 {
     cvl_assert(dst != NULL);
     cvl_assert(src != NULL);
@@ -185,7 +185,7 @@ void cvl_idwt(cvl_frame_t *dst, cvl_frame_t *src, cvl_frame_t *tmp, int D, int l
 	float tex_coord_bound = 1.0f / (float)mh_powi(2, l);
 	float vertex_bound = (tex_coord_bound * 2.0f) - 1.0f;
 
-	prgname = cvl_asprintf("cvl_idwt_step1_D=%d", D);
+	prgname = cvl_asprintf("cvl_wavelets_idwt_step1_D=%d", D);
 	if ((prg = cvl_gl_program_cache_get(prgname)) == 0)
 	{
 	    char *src = cvl_gl_srcprep(cvl_strdup(CVL_IDWT_STEP1_GLSL_STR), "$D=%d", D);
@@ -217,7 +217,7 @@ void cvl_idwt(cvl_frame_t *dst, cvl_frame_t *src, cvl_frame_t *tmp, int D, int l
 	glVertex2f(-1.0f, vertex_bound);
 	glEnd();
 
-	prgname = cvl_asprintf("cvl_idwt_step2_D=%d", D);
+	prgname = cvl_asprintf("cvl_wavelets_idwt_step2_D=%d", D);
 	if ((prg = cvl_gl_program_cache_get(prgname)) == 0)
 	{
 	    char *src = cvl_gl_srcprep(cvl_strdup(CVL_IDWT_STEP2_GLSL_STR), "$D=%d", D);
@@ -260,10 +260,10 @@ void cvl_idwt(cvl_frame_t *dst, cvl_frame_t *src, cvl_frame_t *tmp, int D, int l
  * \param T		The threshold (one value for each channel).
  *
  * Performs Soft Thresholding on \a src and stores the result in \a dst. The
- * source frame \a src must be the result of a previous call to cvl_dwt() with
- * the same parameters \a D and \a level. See also cvl_dwt().
+ * source frame \a src must be the result of a previous call to cvl_wavelets_dwt() with
+ * the same parameters \a D and \a level. See also cvl_wavelets_dwt().
  */
-void cvl_soft_thresholding(cvl_frame_t *dst, cvl_frame_t *src, int D, int level, const float *T)
+void cvl_wavelets_soft_thresholding(cvl_frame_t *dst, cvl_frame_t *src, int D, int level, const float *T)
 {
     cvl_assert(dst != NULL);
     cvl_assert(src != NULL);
@@ -279,10 +279,10 @@ void cvl_soft_thresholding(cvl_frame_t *dst, cvl_frame_t *src, int D, int level,
 	threshold[t] = T[t];
     }
     GLuint prg;
-    if ((prg = cvl_gl_program_cache_get("cvl_soft_thresholding")) == 0)
+    if ((prg = cvl_gl_program_cache_get("cvl_wavelets_soft_thresholding")) == 0)
     {
-	prg = cvl_gl_program_new_src("cvl_soft_thresholding", NULL, CVL_SOFT_THRESHOLDING_GLSL_STR);
-    	cvl_gl_program_cache_put("cvl_soft_thresholding", prg);
+	prg = cvl_gl_program_new_src("cvl_wavelets_soft_thresholding", NULL, CVL_SOFT_THRESHOLDING_GLSL_STR);
+    	cvl_gl_program_cache_put("cvl_wavelets_soft_thresholding", prg);
     }
     glUseProgram(prg);
     glUniform4fv(glGetUniformLocation(prg, "T"), 1, threshold);
