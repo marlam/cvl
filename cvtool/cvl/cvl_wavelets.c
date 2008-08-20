@@ -42,6 +42,7 @@
 #include "glsl/wavelets/dwt_step2.glsl.h"
 #include "glsl/wavelets/idwt_step1.glsl.h"
 #include "glsl/wavelets/idwt_step2.glsl.h"
+#include "glsl/wavelets/hard_thresholding.glsl.h"
 #include "glsl/wavelets/soft_thresholding.glsl.h"
 
 
@@ -249,6 +250,44 @@ void cvl_wavelets_idwt(cvl_frame_t *dst, cvl_frame_t *src, cvl_frame_t *tmp, int
 	glVertex2f(-1.0f, vertex_bound);
 	glEnd();
     }
+    cvl_check_errors();
+}
+
+/**
+ * \param dst		The destination frame.
+ * \param src		The source frame.
+ * \param D		The Daubechies wavelet to use.
+ * \param level		The level.
+ * \param T		The threshold (one value for each channel).
+ *
+ * Performs Hard Thresholding on \a src and stores the result in \a dst. The
+ * source frame \a src must be the result of a previous call to cvl_wavelets_dwt() with
+ * the same parameters \a D and \a level. See also cvl_wavelets_dwt().
+ */
+void cvl_wavelets_hard_thresholding(cvl_frame_t *dst, cvl_frame_t *src, int D, int level, const float *T)
+{
+    cvl_assert(dst != NULL);
+    cvl_assert(src != NULL);
+    cvl_assert(dst != src);
+    cvl_assert(D >= 2 && D <= 20 && D % 2 == 0);
+    cvl_assert(level >= 1);
+    if (cvl_error())
+	return;
+    
+    float threshold[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+    for (int t = 0; t < cvl_frame_channels(src); t++)
+    {
+	threshold[t] = T[t];
+    }
+    GLuint prg;
+    if ((prg = cvl_gl_program_cache_get("cvl_wavelets_hard_thresholding")) == 0)
+    {
+	prg = cvl_gl_program_new_src("cvl_wavelets_hard_thresholding", NULL, CVL_HARD_THRESHOLDING_GLSL_STR);
+    	cvl_gl_program_cache_put("cvl_wavelets_hard_thresholding", prg);
+    }
+    glUseProgram(prg);
+    glUniform4fv(glGetUniformLocation(prg, "T"), 1, threshold);
+    cvl_transform(dst, src);
     cvl_check_errors();
 }
 

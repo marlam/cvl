@@ -25,6 +25,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <limits.h>
+#include <float.h>
 
 #include <cvl/cvl.h>
 
@@ -36,12 +37,13 @@ void cmd_wavelets_print_help(void)
     mh_msg_fmt_req(
 	    "wavelets -t|--task=dwt -D|--daubechies=<D> -l|--level=<l>\n"
 	    "wavelets -t|--task=idwt -D|--daubechies=<D> -l|--level=<l>\n"
+	    "wavelets -t|--task=hard-thresholding -D|--daubechies=<D> -l|--level=<l> -T|--threshold=<t>\n"
 	    "wavelets -t|--task=soft-thresholding -D|--daubechies=<D> -l|--level=<l> -T|--threshold=<t>\n"
 	    "\n"
 	    "Perform Discrete Wavelet Transform (DWT), Inverse Discrete Wavelet transform (IDWT), or manipulations on "
 	    "transformed data.\n"
 	    "The parameter D chooses the Daubechies wavelet (D2, ..., D20; only even numbers). The level l must be at least 1. "
-	    "The thresold parameter for soft thresholding must be from [0,1]. It is applied to all input channels. "
+	    "The threshold parameter for hard and soft thresholding is applied to all input channels. "
 	    "The output of this command is always of type float; it has to be manually converted if necessary.");
 }
 
@@ -50,16 +52,16 @@ int cmd_wavelets(int argc, char *argv[])
 {
     typedef enum 
     { 
-	TASK_DWT, TASK_IDWT, TASK_ST
+	TASK_DWT, TASK_IDWT, TASK_HT, TASK_ST
     } task_t;
     const char *task_names[] = 
     { 
-	"dwt", "idwt", "soft-thresholding", NULL
+	"dwt", "idwt", "hard-thresholding", "soft-thresholding", NULL
     };
     mh_option_name_t task = { -1, task_names };
     mh_option_int_t D = { -1, 2, 20 };
     mh_option_int_t level = { -1, 1, INT_MAX };
-    mh_option_float_t threshold = { -1.0f, 0.0f, true, 1.0f, true };
+    mh_option_float_t threshold = { -FLT_MAX, -FLT_MAX, false, FLT_MAX, true };
     mh_option_t options[] = 
     {
 	{ "task",       't', MH_OPTION_NAME,  &task,      true  },
@@ -76,12 +78,12 @@ int cmd_wavelets(int argc, char *argv[])
 	return 1;
     }
 
-    if (task.value != TASK_ST && threshold.value >= 0.0f)
+    if (task.value != TASK_HT && task.value != TASK_ST && threshold.value > -FLT_MAX)
     {
 	mh_msg_err("Invalid parameter 'threshold' for task %s", task_names[task.value]);
 	return 1;
     }
-    if (task.value == TASK_ST && threshold.value < 0.0f)
+    if ((task.value == TASK_HT || task.value == TASK_ST) && threshold.value <= -FLT_MAX)
     {
 	mh_msg_err("Task %s requires parameter 'threshold'", task_names[task.value]);
 	return 1;
@@ -108,6 +110,11 @@ int cmd_wavelets(int argc, char *argv[])
 	    tmpframe = cvl_frame_new_tpl(outframe);
 	    cvl_wavelets_idwt(outframe, inframe, tmpframe, D.value, level.value);
 	    cvl_frame_free(tmpframe);
+	}
+	else if (task.value == TASK_HT)
+	{
+	    float T[4] = { threshold.value, threshold.value, threshold.value, threshold.value };
+	    cvl_wavelets_hard_thresholding(outframe, inframe, D.value, level.value, T);
 	}
 	else if (task.value == TASK_ST)
 	{

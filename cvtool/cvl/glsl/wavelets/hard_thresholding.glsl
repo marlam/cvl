@@ -1,5 +1,5 @@
 /*
- * cvl_wavelets.h
+ * hard_thresholding.glsl
  * 
  * This file is part of CVL, a computer vision library.
  *
@@ -19,14 +19,35 @@
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CVL_WAVELETS_H
-#define CVL_WAVELETS_H
+#version 110
 
-#include "cvl_frame.h"
+uniform vec4 T;
+uniform sampler2D tex;
 
-void cvl_wavelets_dwt(cvl_frame_t *dst, cvl_frame_t *src, cvl_frame_t *tmp, int D, int level);
-void cvl_wavelets_idwt(cvl_frame_t *dst, cvl_frame_t *src, cvl_frame_t *tmp, int D, int level);
-void cvl_wavelets_hard_thresholding(cvl_frame_t *dst, cvl_frame_t *src, int D, int level, const float *T);
-void cvl_wavelets_soft_thresholding(cvl_frame_t *dst, cvl_frame_t *src, int D, int level, const float *T);
+float mysign(float x)
+{
+    return (x >= 0.0 ? +1.0 : -1.0);
+}
 
-#endif
+void main()
+{
+    float x = gl_TexCoord[0].x;
+    float y = gl_TexCoord[0].y;
+    vec4 oldval = texture2D(tex, vec2(x, y));
+    vec4 newval;
+
+    if (x >= 0.5 || y >= 0.5)	// Details
+    {
+	// Soft Thresholding
+	newval.r = (abs(oldval.r) >= T.r ? oldval.r : 0.0);
+	newval.g = (abs(oldval.g) >= T.g ? oldval.g : 0.0);
+	newval.b = (abs(oldval.b) >= T.b ? oldval.b : 0.0);
+	newval.a = (abs(oldval.a) >= T.a ? oldval.a : 0.0);
+    }
+    else 			// Approach
+    {
+	newval = oldval;
+    }
+
+    gl_FragColor = newval;
+}

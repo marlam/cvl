@@ -9,8 +9,10 @@
 	* cvl/cvl_wavelets.c, cvl/cvl/cvl_wavelets.h, cvl/cvl/cvl.h,
 	cvl/glsl/wavelets, cvl/Makefile.am, cvtool/cmd_wavelets.c: Improve
 	naming of wavelet functions.
-
-
+	* cvl/cvl_wavelets.c, cvl/cvl/cvl_wavelets.h,
+	cvl/glsl/wavelets/hard_thresholding.glsl, cvl/Makefile.am,
+	cvtool/cmd_wavelets.c, doc/cvtool.texi: Add Hard Thresholding to the
+	wavelets module.
 
 2008-08-19  Martin Lambers <marlam@marlam.de>
 

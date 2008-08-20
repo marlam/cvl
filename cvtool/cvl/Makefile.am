@@ -119,6 +119,7 @@ nodist_libcvl_la_SOURCES = \
 	glsl/wavelets/dwt_step2.glsl.h			\
 	glsl/wavelets/idwt_step1.glsl.h			\
 	glsl/wavelets/idwt_step2.glsl.h			\
+	glsl/wavelets/hard_thresholding.glsl.h		\
 	glsl/wavelets/soft_thresholding.glsl.h		\
 	glsl/visualization/vector2_color.glsl.h
 
@@ -187,6 +188,7 @@ EXTRA_DIST = cvl/cvl_version.h.in \
 	glsl/wavelets/dwt_step2.glsl			\
 	glsl/wavelets/idwt_step1.glsl			\
 	glsl/wavelets/idwt_step2.glsl			\
+	glsl/wavelets/hard_thresholding.glsl		\
 	glsl/wavelets/soft_thresholding.glsl		\
 	glsl/visualization/vector2_color.glsl
 
