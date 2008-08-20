@@ -565,7 +565,7 @@ int cmd_draw(int argc, char *argv[])
     cairo_t *fill_pattern_cr = NULL;			// initialize to shut up compiler warning
     cairo_pattern_t *fill_gradient;
     cairo_matrix_t font_size_matrix;
-    char *font_family_utf8;
+    char *font_family_utf8 = NULL;			// initialize to shut up compiler warning
     cvl_stream_type_t stream_type;
     cvl_format_t format;
     bool error;
