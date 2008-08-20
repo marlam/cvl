@@ -4,6 +4,8 @@
 	* cvtool/cmd_wavelets.c, cvtool/cvtool.c, cvtool/Makefile.am,
 	tests/cmd_wavelets.sh, doc/cvtool.texi: Rename the 'dwt' command to
 	'wavelets'.
+	* configure.ac, doc/cvtool.texi, doc/cvtool.1, doc/cvl.texi: Bump
+	version number and shared library number.
 
 
 2008-08-19  Martin Lambers <marlam@marlam.de>
