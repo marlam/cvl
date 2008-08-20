@@ -347,8 +347,9 @@ float wrap(float z, float bound)
 
 void main()
 {
-    float x = gl_TexCoord[0].x;
-    float y = gl_TexCoord[0].y;
+    // XXX: Why is this offset necessary??
+    float x = gl_TexCoord[0].x - 1.0 / texwidth;
+    float y = gl_TexCoord[0].y - 1.0 / texheight;
     vec4 oldval = texture2D(tex, vec2(x, y));
     vec4 newval = vec4(0.0, 0.0, 0.0, 0.0);
     int ix = int(myround((x - 0.5 / texwidth) * texwidth));

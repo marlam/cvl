@@ -83,7 +83,8 @@ static void cvl_wavelets_dwt_helper(cvl_frame_t *pong, cvl_frame_t *ping, float 
  * to D20 (the parameter \a D must be even). Level 0 is the original image,
  * therefore the \a level parameter must be 1 or greater. The frame \a dst
  * should always be of type #CVL_FLOAT or #CVL_FLOAT16. The frame \a tmp
- * should have the same dimensions, type, and channels as \a dst.
+ * should have the same dimensions, type, and channels as \a dst. 
+ * The dimensions of all frames must be divisible by two to the power of \a level.
  */
 void cvl_wavelets_dwt(cvl_frame_t *dst, cvl_frame_t *src, cvl_frame_t *tmp, int D, int level)
 {
@@ -96,8 +97,14 @@ void cvl_wavelets_dwt(cvl_frame_t *dst, cvl_frame_t *src, cvl_frame_t *tmp, int 
     cvl_assert(cvl_frame_type(dst) != CVL_UINT8);
     cvl_assert(cvl_frame_type(tmp) != CVL_UINT8);
     cvl_assert(cvl_frame_channels(tmp) == cvl_frame_channels(dst));
+    cvl_assert(cvl_frame_width(src) == cvl_frame_width(tmp));
+    cvl_assert(cvl_frame_width(tmp) == cvl_frame_width(dst));
+    cvl_assert(cvl_frame_height(src) == cvl_frame_height(tmp));
+    cvl_assert(cvl_frame_height(tmp) == cvl_frame_height(dst));
     cvl_assert(D >= 2 && D <= 20 && D % 2 == 0);
     cvl_assert(level >= 1);
+    cvl_assert(cvl_frame_width(src) % mh_powi(2, level) == 0);
+    cvl_assert(cvl_frame_height(src) % mh_powi(2, level) == 0);
     if (cvl_error())
 	return;
     
@@ -162,6 +169,7 @@ void cvl_wavelets_dwt(cvl_frame_t *dst, cvl_frame_t *src, cvl_frame_t *tmp, int 
  * Performs an Inverse Discrete Wavelet Transform (IDWT) on \a src and stores the
  * result in \a dst. The parameters \a D and \a level must be the same that were
  * given to cvl_wavelets_dwt(). See also cvl_wavelets_dwt().
+ * The dimensions of all frames must be divisible by two to the power of \a level.
  */
 void cvl_wavelets_idwt(cvl_frame_t *dst, cvl_frame_t *src, cvl_frame_t *tmp, int D, int level)
 {
@@ -173,8 +181,14 @@ void cvl_wavelets_idwt(cvl_frame_t *dst, cvl_frame_t *src, cvl_frame_t *tmp, int
     cvl_assert(src != tmp);
     cvl_assert(cvl_frame_type(tmp) != CVL_UINT8);
     cvl_assert(cvl_frame_channels(tmp) == cvl_frame_channels(dst));
+    cvl_assert(cvl_frame_width(src) == cvl_frame_width(tmp));
+    cvl_assert(cvl_frame_width(tmp) == cvl_frame_width(dst));
+    cvl_assert(cvl_frame_height(src) == cvl_frame_height(tmp));
+    cvl_assert(cvl_frame_height(tmp) == cvl_frame_height(dst));
     cvl_assert(D >= 2 && D <= 20 && D % 2 == 0);
     cvl_assert(level >= 1);
+    cvl_assert(cvl_frame_width(src) % mh_powi(2, level) == 0);
+    cvl_assert(cvl_frame_height(src) % mh_powi(2, level) == 0);
     if (cvl_error())
 	return;
     
