@@ -16,6 +16,8 @@
 	* cvl/cvl_wavelets.c, cvl/glsl/wavelets/dwt_step1.glsl,
 	cvl/glsl/wavelets/dwt_step2.glsl, cvl/glsl/wavelets/idwt_step1.glsl,
 	cvl/glsl/wavelets/idwt_step2.glsl: Improve wavelets code.
+	* cvl/cvl_wavelets.c: Fix a bug in cvl_wavelets_idwt() for levels
+	greater than 1. There are still more bugs.
 
 2008-08-19  Martin Lambers <marlam@marlam.de>
 
