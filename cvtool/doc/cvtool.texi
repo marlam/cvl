@@ -1172,15 +1172,15 @@ $ cvtool unsharpmask -u smoothsmooth.pnm -c 0.7 < smooth.pnm > sharp.pnm
 @section Frequency Domain
 
 @menu
-* dwt::
+* wavelets::
 @end menu
 
-@node dwt
-@subsection dwt
-@cmindex dwt
-@code{dwt -t|--task=dwt -D|--daubechies=@var{D}-l|--level=@var{l}}@*
-@code{dwt -t|--task=idwt -D|--daubechies=@var{D} -l|--level=@var{l}}@*
-@code{dwt -t|--task=soft-thresholding -D|--daubechies=@var{D} -l|--level=@var{l} -T|--threshold=@var{T}}
+@node wavelets
+@subsection wavelets
+@cmindex wavelets
+@code{wavelets -t|--task=dwt -D|--daubechies=@var{D}-l|--level=@var{l}}@*
+@code{wavelets -t|--task=idwt -D|--daubechies=@var{D} -l|--level=@var{l}}@*
+@code{wavelets -t|--task=soft-thresholding -D|--daubechies=@var{D} -l|--level=@var{l} -T|--threshold=@var{T}}
 
 Perform Discrete Wavelet Transform (DWT), Inverse Discrete Wavelet transform
 (IDWT), or manipulations on transformed data.
@@ -1192,9 +1192,9 @@ it has to be manually converted if necessary.
 
 Example:
 @example
-$ cvtool dwt -t dwt -D 2 -l 1 < in.pfs > dwt.pfs
-$ cvtool dwt -t soft-thresholding -D 2 -l 1 -T 0.5 < dwt.pfs > st.pfs
-$ cvtool dwt -t idwt -D 2 -l 1 < st.pfs > out.pfs
+$ cvtool wavelets -t dwt -D 2 -l 1 < in.pfs > dwt.pfs
+$ cvtool wavelets -t soft-thresholding -D 2 -l 1 -T 0.5 < dwt.pfs > st.pfs
+$ cvtool wavelets -t idwt -D 2 -l 1 < st.pfs > out.pfs
 @end example
 
 

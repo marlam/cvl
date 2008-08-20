@@ -13,7 +13,6 @@ cvtool_SOURCES = cvtool.c 	\
 	cmd_cut.c		\
 	cmd_diff.c		\
 	cmd_draw.c		\
-	cmd_dwt.c		\
 	cmd_edge.c		\
 	cmd_flip.c		\
 	cmd_flop.c		\
@@ -39,7 +38,8 @@ cvtool_SOURCES = cvtool.c 	\
 	cmd_split.c		\
 	cmd_tonemap.c		\
 	cmd_unsharpmask.c	\
-	cmd_visualize.c
+	cmd_visualize.c		\
+	cmd_wavelets.c
 
 cvtool_LDADD = $(top_builddir)/cvl/libcvl.la		\
 	$(LTLIBGLEW) $(LTLIBCAIRO) $(LTLIBICONV)	\

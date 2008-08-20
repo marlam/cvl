@@ -1,5 +1,5 @@
 /*
- * cmd_dwt.c
+ * cmd_wavelets.c
  * 
  * This file is part of cvtool, a computer vision tool.
  *
@@ -31,12 +31,12 @@
 #include "mh.h"
 
 
-void cmd_dwt_print_help(void)
+void cmd_wavelets_print_help(void)
 {
     mh_msg_fmt_req(
-	    "dwt -t|--task=dwt -D|--daubechies=<D> -l|--level=<l>\n"
-	    "dwt -t|--task=idwt -D|--daubechies=<D> -l|--level=<l>\n"
-	    "dwt -t|--task=soft-thresholding -D|--daubechies=<D> -l|--level=<l> -T|--threshold=<t>\n"
+	    "wavelets -t|--task=dwt -D|--daubechies=<D> -l|--level=<l>\n"
+	    "wavelets -t|--task=idwt -D|--daubechies=<D> -l|--level=<l>\n"
+	    "wavelets -t|--task=soft-thresholding -D|--daubechies=<D> -l|--level=<l> -T|--threshold=<t>\n"
 	    "\n"
 	    "Perform Discrete Wavelet Transform (DWT), Inverse Discrete Wavelet transform (IDWT), or manipulations on "
 	    "transformed data.\n"
@@ -46,7 +46,7 @@ void cmd_dwt_print_help(void)
 }
 
 
-int cmd_dwt(int argc, char *argv[])
+int cmd_wavelets(int argc, char *argv[])
 {
     typedef enum 
     { 

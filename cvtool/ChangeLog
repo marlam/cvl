@@ -1,6 +1,10 @@
 2008-08-20  Martin Lambers <marlam@marlam.de>
 
 	* cvtool/cmd_draw.c: Avoid gcc-4.3 compiler warning.
+	* cvtool/cmd_wavelets.c, cvtool/cvtool.c, cvtool/Makefile.am,
+	tests/cmd_wavelets.sh, doc/cvtool.texi: Rename the 'dwt' command to
+	'wavelets'.
+
 
 2008-08-19  Martin Lambers <marlam@marlam.de>
 
