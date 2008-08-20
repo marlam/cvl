@@ -21,6 +21,7 @@
 	* cvl/cvl_wavelets.c, cvl/glsl/wavelets/idwt_step2.glsl: Finally fix
 	cvl_wavelets_idwt() for levels greater than one.
 	* tests/Makefile.am: Fix test for wavelet command.
+	* cvl/cvl_wavelets.c: Remove unused dbeugging code.
 
 2008-08-19  Martin Lambers <marlam@marlam.de>
 

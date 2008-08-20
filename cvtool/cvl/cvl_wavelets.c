@@ -237,16 +237,12 @@ void cvl_wavelets_idwt(cvl_frame_t *dst, cvl_frame_t *src, cvl_frame_t *tmp, int
 
 	ping = pong;
 	pong = (ping == tmp ? dst : tmp);
-
-	//mh_msg_wrn("IDWT: Level %d, lb = %g, pong == dst: %d", l, level_boundary, (int)(pong == dst));
 	
 	glUseProgram(step2_prg);
 	glUniform1f(glGetUniformLocation(step2_prg, "texwidth"), texwidth);
 	glUniform1f(glGetUniformLocation(step2_prg, "texheight"), texheight);
 	glUniform1f(glGetUniformLocation(step2_prg, "level_boundary"), level_boundary);
 	cvl_wavelets_dwt_helper(pong, ping, level_boundary);
-
-	//cvl_save_pfs(mh_asprintf("idwt-l%d.pfs", l), pong);
 
 	ping = pong;
 	pong = (ping == tmp ? dst : tmp);
