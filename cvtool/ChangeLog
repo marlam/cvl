@@ -13,6 +13,9 @@
 	cvl/glsl/wavelets/hard_thresholding.glsl, cvl/Makefile.am,
 	cvtool/cmd_wavelets.c, doc/cvtool.texi: Add Hard Thresholding to the
 	wavelets module.
+	* cvl/cvl_wavelets.c, cvl/glsl/wavelets/dwt_step1.glsl,
+	cvl/glsl/wavelets/dwt_step2.glsl, cvl/glsl/wavelets/idwt_step1.glsl,
+	cvl/glsl/wavelets/idwt_step2.glsl: Improve wavelets code.
 
 2008-08-19  Martin Lambers <marlam@marlam.de>
 

@@ -297,7 +297,7 @@ float detail_coeff[D] = float[] (
 
 uniform float texwidth;
 uniform float texheight;
-uniform float tex_coord_half;
+uniform float level_boundary;
 uniform sampler2D tex;
 
 // Implementation of round(). As of 20080702 not all drivers have round()
@@ -360,9 +360,9 @@ void main()
     {
 	for (int r = 0; r < D; r += 2)
 	{
-	    index = wrap((float(iy / 2 - r / 2) + 0.5) / texheight, tex_coord_half);
+	    index = wrap((float(iy / 2 - r / 2) + 0.5) / texheight, level_boundary / 2.0);
 	    a = texture2D(tex, vec2(x, index));
-	    d = texture2D(tex, vec2(x, index + tex_coord_half)); 
+	    d = texture2D(tex, vec2(x, index + level_boundary / 2.0)); 
 	    newval += approach_coeff[r] * a + detail_coeff[r] * d;
 	}
     }
@@ -370,9 +370,9 @@ void main()
     {
 	for (int r = 1; r < D; r += 2)
 	{
-	    index = wrap((float(iy / 2 - r / 2) + 0.5) / texheight, tex_coord_half);
+	    index = wrap((float(iy / 2 - r / 2) + 0.5) / texheight, level_boundary / 2.0);
 	    a = texture2D(tex, vec2(x, index));
-	    d = texture2D(tex, vec2(x, index + tex_coord_half)); 
+	    d = texture2D(tex, vec2(x, index + level_boundary / 2.0)); 
 	    newval += approach_coeff[r] * a + detail_coeff[r] * d;
 	}
     }

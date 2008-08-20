@@ -296,8 +296,7 @@ float detail_coeff[D] = float[] (
 #endif
 
 uniform float xstep;
-uniform float pow2lp1;
-uniform float tex_coord_half;
+uniform float level_boundary;
 uniform sampler2D tex;
 
 float wrap(float z, float bound)
@@ -320,20 +319,20 @@ void main()
     float y = gl_TexCoord[0].y;
     vec4 oldval = texture2D(tex, vec2(x, y));
     vec4 newval = vec4(0.0, 0.0, 0.0, 0.0);
-    if (x < tex_coord_half)	// Approach
+    if (x < level_boundary / 2.0)	// Approach
     {
 	for (int c = 0; c < D; c++)
 	{
 	    newval += approach_coeff[c] * texture2D(tex, 
-		    vec2(wrap(2.0 * x + float(c) * xstep, tex_coord_half * 2.0), y));
+		    vec2(wrap(2.0 * x + float(c) * xstep, level_boundary), y));
 	}
     }
-    else			// Details 
+    else				// Details 
     {
 	for (int c = 0; c < D; c++)
 	{
 	    newval += detail_coeff[c] * texture2D(tex, 
-		    vec2(wrap(2.0 * (x - tex_coord_half) + float(c) * xstep, tex_coord_half * 2.0), y));
+		    vec2(wrap(2.0 * (x - level_boundary / 2.0) + float(c) * xstep, level_boundary), y));
 	}
     }
     gl_FragColor = newval;

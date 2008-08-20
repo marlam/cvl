@@ -46,6 +46,30 @@
 #include "glsl/wavelets/soft_thresholding.glsl.h"
 
 
+static void cvl_wavelets_dwt_helper(cvl_frame_t *pong, cvl_frame_t *ping, float level_boundary)
+{
+    /* This function works just like cvl_transform(pong, ping) except that it
+     * covers only a subset of the ping and pong frames, defined by
+     * level_boundary. */
+    glBindTexture(GL_TEXTURE_2D, cvl_frame_texture(pong));
+    cvl_gl_set_texture_state();
+    glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, 
+	    GL_TEXTURE_2D, cvl_frame_texture(pong), 0);
+    glViewport(0, 0, cvl_frame_width(pong), cvl_frame_height(pong));
+    glBindTexture(GL_TEXTURE_2D, cvl_frame_texture(ping));
+    cvl_gl_set_texture_state();
+    glBegin(GL_QUADS);
+    glTexCoord2f(0.0f, 0.0f);
+    glVertex2f(-1.0f, -1.0f);
+    glTexCoord2f(level_boundary, 0.0f);
+    glVertex2f(2.0f * level_boundary - 1.0f, -1.0f);
+    glTexCoord2f(level_boundary, level_boundary);
+    glVertex2f(2.0f * level_boundary - 1.0f, 2.0f * level_boundary - 1.0f);
+    glTexCoord2f(0.0f, level_boundary);
+    glVertex2f(-1.0f, 2.0f * level_boundary - 1.0f);
+    glEnd();
+}
+
 /**
  * \param dst		The destination frame.
  * \param src		The source frame.
@@ -76,79 +100,54 @@ void cvl_wavelets_dwt(cvl_frame_t *dst, cvl_frame_t *src, cvl_frame_t *tmp, int 
     if (cvl_error())
 	return;
     
-    GLuint prg;
-    char *prgname;
+    GLuint step1_prg;
+    char *step1_prgname = cvl_asprintf("cvl_wavelets_dwt_step1_D=%d", D);
+    if ((step1_prg = cvl_gl_program_cache_get(step1_prgname)) == 0)
+    {
+	char *src = cvl_gl_srcprep(cvl_strdup(CVL_DWT_STEP1_GLSL_STR), "$D=%d", D);
+	step1_prg = cvl_gl_program_new_src(step1_prgname, NULL, src);
+	cvl_gl_program_cache_put(step1_prgname, step1_prg);
+	free(src);
+    }
+    free(step1_prgname);
+    GLuint step2_prg;
+    char *step2_prgname = cvl_asprintf("cvl_wavelets_dwt_step2_D=%d", D);
+    if ((step2_prg = cvl_gl_program_cache_get(step2_prgname)) == 0)
+    {
+	char *src = cvl_gl_srcprep(cvl_strdup(CVL_DWT_STEP2_GLSL_STR), "$D=%d", D);
+	step2_prg = cvl_gl_program_new_src(step2_prgname, NULL, src);
+	cvl_gl_program_cache_put(step2_prgname, step2_prg);
+	free(src);
+    }
+    free(step2_prgname);
     
+    float xstep = 1.0f / (float)cvl_frame_width(src);
+    float ystep = 1.0f / (float)cvl_frame_height(src);
+
+    cvl_frame_t *ping = src;
+    cvl_frame_t *pong = tmp;
+
     for (int l = 0; l < level; l++)
     {
-	float tex_coord_bound = 1.0f / (float)mh_powi(2, l);
-	float vertex_bound = (tex_coord_bound * 2.0f) - 1.0f;
+	float level_boundary = 1.0f / (float)mh_powi(2, l);
 
-	prgname = cvl_asprintf("cvl_wavelets_dwt_step1_D=%d", D);
-	if ((prg = cvl_gl_program_cache_get(prgname)) == 0)
-	{
-	    char *src = cvl_gl_srcprep(cvl_strdup(CVL_DWT_STEP1_GLSL_STR), "$D=%d", D);
-	    prg = cvl_gl_program_new_src(prgname, NULL, src);
-	    cvl_gl_program_cache_put(prgname, prg);
-	    free(src);
-	}
-	free(prgname);
-	glUseProgram(prg);
-	glUniform1f(glGetUniformLocation(prg, "xstep"), 1.0f / (float)cvl_frame_width(src));
-	glUniform1f(glGetUniformLocation(prg, "pow2lp1"), (float)mh_powi(2, l + 1)); //XXX
-	glUniform1f(glGetUniformLocation(prg, "tex_coord_half"), 0.5f); // XXX tex_coord_bound / 2.0f);
-	// cvl_transform(tmp, src) with smaller quad size:
-	glBindTexture(GL_TEXTURE_2D, cvl_frame_texture(tmp));
-	cvl_gl_set_texture_state();
-	glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, 
-		GL_TEXTURE_2D, cvl_frame_texture(tmp), 0);
-	glViewport(0, 0, cvl_frame_width(tmp), cvl_frame_height(tmp));
-	glBindTexture(GL_TEXTURE_2D, cvl_frame_texture(src));
-	cvl_gl_set_texture_state();
-	tex_coord_bound = 1.0f; //XXX
-	glBegin(GL_QUADS);
-	glTexCoord2f(0.0f, 0.0f);
-	glVertex2f(-1.0f, -1.0f);
-	glTexCoord2f(tex_coord_bound, 0.0f);
-	glVertex2f(vertex_bound, -1.0f);
-	glTexCoord2f(tex_coord_bound, tex_coord_bound);
-	glVertex2f(vertex_bound, vertex_bound);
-	glTexCoord2f(0.0f, tex_coord_bound);
-	glVertex2f(-1.0f, vertex_bound);
-	glEnd();
+	glUseProgram(step1_prg);
+	glUniform1f(glGetUniformLocation(step1_prg, "xstep"), xstep);
+	glUniform1f(glGetUniformLocation(step1_prg, "level_boundary"), level_boundary);
+	cvl_wavelets_dwt_helper(pong, ping, level_boundary);
 
-	prgname = cvl_asprintf("cvl_wavelets_dwt_step2_D=%d", D);
-	if ((prg = cvl_gl_program_cache_get(prgname)) == 0)
-	{
-	    char *src = cvl_gl_srcprep(cvl_strdup(CVL_DWT_STEP2_GLSL_STR), "$D=%d", D);
-	    prg = cvl_gl_program_new_src(prgname, NULL, src);
-	    cvl_gl_program_cache_put(prgname, prg);
-	    free(src);
-	}
-	free(prgname);
-	glUseProgram(prg);
-	glUniform1f(glGetUniformLocation(prg, "ystep"), 1.0f / (float)cvl_frame_height(tmp));
-	glUniform1f(glGetUniformLocation(prg, "pow2lp1"), (float)mh_powi(2, l + 1)); //XXX
-	glUniform1f(glGetUniformLocation(prg, "tex_coord_half"), 0.5f); // XXX tex_coord_bound / 2.0f);
-	// cvl_transform(dst, tmp) with smaller quad size:
-	glBindTexture(GL_TEXTURE_2D, cvl_frame_texture(dst));
-	cvl_gl_set_texture_state();
-	glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, 
-		GL_TEXTURE_2D, cvl_frame_texture(dst), 0);
-	glViewport(0, 0, cvl_frame_width(dst), cvl_frame_height(dst));
-	glBindTexture(GL_TEXTURE_2D, cvl_frame_texture(tmp));
-	cvl_gl_set_texture_state();
-	glBegin(GL_QUADS);
-	glTexCoord2f(0.0f, 0.0f);
-	glVertex2f(-1.0f, -1.0f);
-	glTexCoord2f(tex_coord_bound, 0.0f);
-	glVertex2f(vertex_bound, -1.0f);
-	glTexCoord2f(tex_coord_bound, tex_coord_bound);
-	glVertex2f(vertex_bound, vertex_bound);
-	glTexCoord2f(0.0f, tex_coord_bound);
-	glVertex2f(-1.0f, vertex_bound);
-	glEnd();
+	ping = pong;
+	pong = (ping == tmp ? dst : tmp);
+
+	glUseProgram(step2_prg);
+	glUniform1f(glGetUniformLocation(step2_prg, "ystep"), ystep);
+	glUniform1f(glGetUniformLocation(step2_prg, "level_boundary"), level_boundary);
+	cvl_wavelets_dwt_helper(pong, ping, level_boundary);
+
+	ping = pong;
+	pong = (ping == tmp ? dst : tmp);
     }
+
     cvl_check_errors();
 }
 
@@ -178,77 +177,54 @@ void cvl_wavelets_idwt(cvl_frame_t *dst, cvl_frame_t *src, cvl_frame_t *tmp, int
     if (cvl_error())
 	return;
     
-    GLuint prg;
-    char *prgname;
+    GLuint step1_prg;
+    char *step1_prgname = cvl_asprintf("cvl_wavelets_idwt_step1_D=%d", D);
+    if ((step1_prg = cvl_gl_program_cache_get(step1_prgname)) == 0)
+    {
+	char *src = cvl_gl_srcprep(cvl_strdup(CVL_IDWT_STEP1_GLSL_STR), "$D=%d", D);
+	step1_prg = cvl_gl_program_new_src(step1_prgname, NULL, src);
+	cvl_gl_program_cache_put(step1_prgname, step1_prg);
+	free(src);
+    }
+    free(step1_prgname);
+    GLuint step2_prg;
+    char *step2_prgname = cvl_asprintf("cvl_wavelets_idwt_step2_D=%d", D);
+    if ((step2_prg = cvl_gl_program_cache_get(step2_prgname)) == 0)
+    {
+	char *src = cvl_gl_srcprep(cvl_strdup(CVL_IDWT_STEP2_GLSL_STR), "$D=%d", D);
+	step2_prg = cvl_gl_program_new_src(step2_prgname, NULL, src);
+	cvl_gl_program_cache_put(step2_prgname, step2_prg);
+	free(src);
+    }
+    free(step2_prgname);
+    
+    float texwidth = (float)cvl_frame_width(src);
+    float texheight = (float)cvl_frame_height(src);
+
+    cvl_frame_t *ping = src;
+    cvl_frame_t *pong = tmp;
     
     for (int l = level - 1; l >= 0; l--)
     {
-	float tex_coord_bound = 1.0f / (float)mh_powi(2, l);
-	float vertex_bound = (tex_coord_bound * 2.0f) - 1.0f;
+	float level_boundary = 1.0f / (float)mh_powi(2, l);
 
-	prgname = cvl_asprintf("cvl_wavelets_idwt_step1_D=%d", D);
-	if ((prg = cvl_gl_program_cache_get(prgname)) == 0)
-	{
-	    char *src = cvl_gl_srcprep(cvl_strdup(CVL_IDWT_STEP1_GLSL_STR), "$D=%d", D);
-	    prg = cvl_gl_program_new_src(prgname, NULL, src);
-	    cvl_gl_program_cache_put(prgname, prg);
-	    free(src);
-	}
-	free(prgname);
-	glUseProgram(prg);
-	glUniform1f(glGetUniformLocation(prg, "texwidth"), (float)cvl_frame_width(src));
-	glUniform1f(glGetUniformLocation(prg, "texheight"), (float)cvl_frame_height(src));
-	glUniform1f(glGetUniformLocation(prg, "tex_coord_half"), tex_coord_bound / 2.0f);
-	// cvl_transform(tmp, src) with smaller quad size:
-	glBindTexture(GL_TEXTURE_2D, cvl_frame_texture(tmp));
-	cvl_gl_set_texture_state();
-	glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, 
-		GL_TEXTURE_2D, cvl_frame_texture(tmp), 0);
-	glViewport(0, 0, cvl_frame_width(tmp), cvl_frame_height(tmp));
-	glBindTexture(GL_TEXTURE_2D, cvl_frame_texture(src));
-	cvl_gl_set_texture_state();
-	glBegin(GL_QUADS);
-	glTexCoord2f(0.0f, 0.0f);
-	glVertex2f(-1.0f, -1.0f);
-	glTexCoord2f(tex_coord_bound, 0.0f);
-	glVertex2f(vertex_bound, -1.0f);
-	glTexCoord2f(tex_coord_bound, tex_coord_bound);
-	glVertex2f(vertex_bound, vertex_bound);
-	glTexCoord2f(0.0f, tex_coord_bound);
-	glVertex2f(-1.0f, vertex_bound);
-	glEnd();
+	glUseProgram(step1_prg);
+	glUniform1f(glGetUniformLocation(step1_prg, "texwidth"), texwidth);
+	glUniform1f(glGetUniformLocation(step1_prg, "texheight"), texheight);
+	glUniform1f(glGetUniformLocation(step1_prg, "level_boundary"), level_boundary);
+	cvl_wavelets_dwt_helper(pong, ping, level_boundary);
 
-	prgname = cvl_asprintf("cvl_wavelets_idwt_step2_D=%d", D);
-	if ((prg = cvl_gl_program_cache_get(prgname)) == 0)
-	{
-	    char *src = cvl_gl_srcprep(cvl_strdup(CVL_IDWT_STEP2_GLSL_STR), "$D=%d", D);
-	    prg = cvl_gl_program_new_src(prgname, NULL, src);
-	    cvl_gl_program_cache_put(prgname, prg);
-	    free(src);
-	}
-	free(prgname);
-	glUseProgram(prg);
-	glUniform1f(glGetUniformLocation(prg, "texwidth"), (float)cvl_frame_width(tmp));
-	glUniform1f(glGetUniformLocation(prg, "texheight"), (float)cvl_frame_height(tmp));
-	glUniform1f(glGetUniformLocation(prg, "tex_coord_half"), tex_coord_bound / 2.0f);
-	// cvl_transform(dst, tmp) with smaller quad size:
-	glBindTexture(GL_TEXTURE_2D, cvl_frame_texture(dst));
-	cvl_gl_set_texture_state();
-	glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, 
-		GL_TEXTURE_2D, cvl_frame_texture(dst), 0);
-	glViewport(0, 0, cvl_frame_width(dst), cvl_frame_height(dst));
-	glBindTexture(GL_TEXTURE_2D, cvl_frame_texture(tmp));
-	cvl_gl_set_texture_state();
-	glBegin(GL_QUADS);
-	glTexCoord2f(0.0f, 0.0f);
-	glVertex2f(-1.0f, -1.0f);
-	glTexCoord2f(tex_coord_bound, 0.0f);
-	glVertex2f(vertex_bound, -1.0f);
-	glTexCoord2f(tex_coord_bound, tex_coord_bound);
-	glVertex2f(vertex_bound, vertex_bound);
-	glTexCoord2f(0.0f, tex_coord_bound);
-	glVertex2f(-1.0f, vertex_bound);
-	glEnd();
+	ping = pong;
+	pong = (ping == tmp ? dst : tmp);
+	
+	glUseProgram(step2_prg);
+	glUniform1f(glGetUniformLocation(step2_prg, "texwidth"), texwidth);
+	glUniform1f(glGetUniformLocation(step2_prg, "texheight"), texheight);
+	glUniform1f(glGetUniformLocation(step2_prg, "level_boundary"), level_boundary);
+	cvl_wavelets_dwt_helper(pong, ping, level_boundary);
+
+	ping = pong;
+	pong = (ping == tmp ? dst : tmp);
     }
     cvl_check_errors();
 }
