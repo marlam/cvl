@@ -37,8 +37,8 @@ void cmd_wavelets_print_help(void)
     mh_msg_fmt_req(
 	    "wavelets -t|--task=dwt -D|--daubechies=<D> -l|--level=<l>\n"
 	    "wavelets -t|--task=idwt -D|--daubechies=<D> -l|--level=<l>\n"
-	    "wavelets -t|--task=hard-thresholding -D|--daubechies=<D> -l|--level=<l> -T|--threshold=<t>\n"
-	    "wavelets -t|--task=soft-thresholding -D|--daubechies=<D> -l|--level=<l> -T|--threshold=<t>\n"
+	    "wavelets -t|--task=hard-thresholding -l|--level=<l> -T|--threshold=<t>\n"
+	    "wavelets -t|--task=soft-thresholding -l|--level=<l> -T|--threshold=<t>\n"
 	    "\n"
 	    "Perform Discrete Wavelet Transform (DWT), Inverse Discrete Wavelet transform (IDWT), or manipulations on "
 	    "transformed data.\n"
@@ -65,8 +65,8 @@ int cmd_wavelets(int argc, char *argv[])
     mh_option_t options[] = 
     {
 	{ "task",       't', MH_OPTION_NAME,  &task,      true  },
-	{ "daubechies", 'D', MH_OPTION_INT,   &D,         true },
-	{ "level",      'l', MH_OPTION_INT,   &level,     true },
+	{ "daubechies", 'D', MH_OPTION_INT,   &D,         false },
+	{ "level",      'l', MH_OPTION_INT,   &level,     true  },
 	{ "threshold",  'T', MH_OPTION_FLOAT, &threshold, false },
 	mh_option_null
     };
@@ -78,6 +78,16 @@ int cmd_wavelets(int argc, char *argv[])
 	return 1;
     }
 
+    if (task.value != TASK_HT && task.value != TASK_ST && D.value < 0)
+    {
+	mh_msg_err("Task %s requires parameter 'daubechies'", task_names[task.value]);
+	return 1;
+    }
+    if ((task.value == TASK_HT || task.value == TASK_ST) && D.value > 0)
+    {
+	mh_msg_err("Invalid parameter 'daubechies' for task %s", task_names[task.value]);
+	return 1;
+    }
     if (task.value != TASK_HT && task.value != TASK_ST && threshold.value > -FLT_MAX)
     {
 	mh_msg_err("Invalid parameter 'threshold' for task %s", task_names[task.value]);
@@ -114,12 +124,12 @@ int cmd_wavelets(int argc, char *argv[])
 	else if (task.value == TASK_HT)
 	{
 	    float T[4] = { threshold.value, threshold.value, threshold.value, threshold.value };
-	    cvl_wavelets_hard_thresholding(outframe, inframe, D.value, level.value, T);
+	    cvl_wavelets_hard_thresholding(outframe, inframe, level.value, T);
 	}
 	else if (task.value == TASK_ST)
 	{
 	    float T[4] = { threshold.value, threshold.value, threshold.value, threshold.value };
-	    cvl_wavelets_soft_thresholding(outframe, inframe, D.value, level.value, T);
+	    cvl_wavelets_soft_thresholding(outframe, inframe, level.value, T);
 	}
 
 	cvl_frame_free(inframe);

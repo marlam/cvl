@@ -26,7 +26,7 @@
 
 void cvl_wavelets_dwt(cvl_frame_t *dst, cvl_frame_t *src, cvl_frame_t *tmp, int D, int level);
 void cvl_wavelets_idwt(cvl_frame_t *dst, cvl_frame_t *src, cvl_frame_t *tmp, int D, int level);
-void cvl_wavelets_hard_thresholding(cvl_frame_t *dst, cvl_frame_t *src, int D, int level, const float *T);
-void cvl_wavelets_soft_thresholding(cvl_frame_t *dst, cvl_frame_t *src, int D, int level, const float *T);
+void cvl_wavelets_hard_thresholding(cvl_frame_t *dst, cvl_frame_t *src, int level, const float *T);
+void cvl_wavelets_soft_thresholding(cvl_frame_t *dst, cvl_frame_t *src, int level, const float *T);
 
 #endif

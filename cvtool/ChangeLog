@@ -22,6 +22,11 @@
 	cvl_wavelets_idwt() for levels greater than one.
 	* tests/Makefile.am: Fix test for wavelet command.
 	* cvl/cvl_wavelets.c: Remove unused dbeugging code.
+	* cvl/cvl_wavelets.c, cvl/cvl/cvl_wavelets.h,
+	cvl/glsl/wavelets/soft_thresholding.glsl,
+	cvl/glsl/wavelets/hard_thresholding.glsl, tests/cmd_wavelets.sh,
+	doc/cvtool.texi, cvtool/cmd_wavelets.c: Fix wavelet soft and hard
+	thresholding and make it work for levels higher than 1.
 
 2008-08-19  Martin Lambers <marlam@marlam.de>
 

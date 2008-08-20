@@ -21,6 +21,8 @@
 
 #version 110
 
+uniform float upper_bound;
+uniform float lower_bound;
 uniform vec4 T;
 uniform sampler2D tex;
 
@@ -36,7 +38,9 @@ void main()
     vec4 oldval = texture2D(tex, vec2(x, y));
     vec4 newval;
 
-    if (x >= 0.5 || y >= 0.5)	// Details
+    // Only process the Details of the right level.
+    if (x < upper_bound && y < upper_bound
+	    && (x >= lower_bound || y >= lower_bound))
     {
 	// Soft Thresholding
 	newval.r = (abs(oldval.r) >= T.r ? mysign(oldval.r) * (abs(oldval.r) - T.r) : 0.0);
@@ -44,7 +48,7 @@ void main()
 	newval.b = (abs(oldval.b) >= T.b ? mysign(oldval.b) * (abs(oldval.b) - T.b) : 0.0);
 	newval.a = (abs(oldval.a) >= T.a ? mysign(oldval.a) * (abs(oldval.a) - T.a) : 0.0);
     }
-    else 			// Approach
+    else
     {
 	newval = oldval;
     }

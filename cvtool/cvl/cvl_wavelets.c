@@ -253,7 +253,6 @@ void cvl_wavelets_idwt(cvl_frame_t *dst, cvl_frame_t *src, cvl_frame_t *tmp, int
 /**
  * \param dst		The destination frame.
  * \param src		The source frame.
- * \param D		The Daubechies wavelet to use.
  * \param level		The level.
  * \param T		The threshold (one value for each channel).
  *
@@ -261,12 +260,11 @@ void cvl_wavelets_idwt(cvl_frame_t *dst, cvl_frame_t *src, cvl_frame_t *tmp, int
  * source frame \a src must be the result of a previous call to cvl_wavelets_dwt() with
  * the same parameters \a D and \a level. See also cvl_wavelets_dwt().
  */
-void cvl_wavelets_hard_thresholding(cvl_frame_t *dst, cvl_frame_t *src, int D, int level, const float *T)
+void cvl_wavelets_hard_thresholding(cvl_frame_t *dst, cvl_frame_t *src, int level, const float *T)
 {
     cvl_assert(dst != NULL);
     cvl_assert(src != NULL);
     cvl_assert(dst != src);
-    cvl_assert(D >= 2 && D <= 20 && D % 2 == 0);
     cvl_assert(level >= 1);
     if (cvl_error())
 	return;
@@ -276,6 +274,8 @@ void cvl_wavelets_hard_thresholding(cvl_frame_t *dst, cvl_frame_t *src, int D, i
     {
 	threshold[t] = T[t];
     }
+    float upper_bound = 1.0f / (float)mh_powi(2, level - 1);
+    float lower_bound = upper_bound / 2.0f;
     GLuint prg;
     if ((prg = cvl_gl_program_cache_get("cvl_wavelets_hard_thresholding")) == 0)
     {
@@ -283,6 +283,8 @@ void cvl_wavelets_hard_thresholding(cvl_frame_t *dst, cvl_frame_t *src, int D, i
     	cvl_gl_program_cache_put("cvl_wavelets_hard_thresholding", prg);
     }
     glUseProgram(prg);
+    glUniform1f(glGetUniformLocation(prg, "upper_bound"), upper_bound);
+    glUniform1f(glGetUniformLocation(prg, "lower_bound"), lower_bound);
     glUniform4fv(glGetUniformLocation(prg, "T"), 1, threshold);
     cvl_transform(dst, src);
     cvl_check_errors();
@@ -291,7 +293,6 @@ void cvl_wavelets_hard_thresholding(cvl_frame_t *dst, cvl_frame_t *src, int D, i
 /**
  * \param dst		The destination frame.
  * \param src		The source frame.
- * \param D		The Daubechies wavelet to use.
  * \param level		The level.
  * \param T		The threshold (one value for each channel).
  *
@@ -299,12 +300,11 @@ void cvl_wavelets_hard_thresholding(cvl_frame_t *dst, cvl_frame_t *src, int D, i
  * source frame \a src must be the result of a previous call to cvl_wavelets_dwt() with
  * the same parameters \a D and \a level. See also cvl_wavelets_dwt().
  */
-void cvl_wavelets_soft_thresholding(cvl_frame_t *dst, cvl_frame_t *src, int D, int level, const float *T)
+void cvl_wavelets_soft_thresholding(cvl_frame_t *dst, cvl_frame_t *src, int level, const float *T)
 {
     cvl_assert(dst != NULL);
     cvl_assert(src != NULL);
     cvl_assert(dst != src);
-    cvl_assert(D >= 2 && D <= 20 && D % 2 == 0);
     cvl_assert(level >= 1);
     if (cvl_error())
 	return;
@@ -314,6 +314,8 @@ void cvl_wavelets_soft_thresholding(cvl_frame_t *dst, cvl_frame_t *src, int D, i
     {
 	threshold[t] = T[t];
     }
+    float upper_bound = 1.0f / (float)mh_powi(2, level - 1);
+    float lower_bound = upper_bound / 2.0f;
     GLuint prg;
     if ((prg = cvl_gl_program_cache_get("cvl_wavelets_soft_thresholding")) == 0)
     {
@@ -321,6 +323,8 @@ void cvl_wavelets_soft_thresholding(cvl_frame_t *dst, cvl_frame_t *src, int D, i
     	cvl_gl_program_cache_put("cvl_wavelets_soft_thresholding", prg);
     }
     glUseProgram(prg);
+    glUniform1f(glGetUniformLocation(prg, "upper_bound"), upper_bound);
+    glUniform1f(glGetUniformLocation(prg, "lower_bound"), lower_bound);
     glUniform4fv(glGetUniformLocation(prg, "T"), 1, threshold);
     cvl_transform(dst, src);
     cvl_check_errors();
