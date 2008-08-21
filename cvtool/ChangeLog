@@ -1,3 +1,7 @@
+2008-08-21  Martin Lambers <marlam@marlam.de>
+
+	* tests/cmd_wavelets.sh: Fix test.
+
 2008-08-20  Martin Lambers <marlam@marlam.de>
 
 	* cvtool/cmd_draw.c: Avoid gcc-4.3 compiler warning.
