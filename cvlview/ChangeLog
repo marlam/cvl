@@ -1,3 +1,8 @@
+2008-08-25  Martin Lambers <marlam@marlam.de>
+
+	* gllib/glvm.h, gllib/glvm-gl.h, gllib/glvm-color.h: Update glvm (many
+	improvements).
+
 2008-08-18  Martin Lambers <marlam@marlam.de>
 
 	* src/cvlview.cpp: Enable all toolbar widgets manually, as a

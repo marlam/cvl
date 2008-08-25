@@ -152,32 +152,32 @@ namespace glvm
 
     void glTranslate(const vec3 &v)
     {
-	glTranslatef(v.x, v.y, v.z);
+	glTranslatef(v.x(), v.y(), v.z());
     }
 
     void glTranslate(const dvec3 &v)
     {
-	glTranslated(v.x, v.y, v.z);
+	glTranslated(v.x(), v.y(), v.z());
     }
 
     void glScale(const vec3 &s)
     {
-	glScalef(s.x, s.y, s.z);
+	glScalef(s.x(), s.y(), s.z());
     }
 
     void glScale(const dvec3 &s)
     {
-	glScaled(s.x, s.y, s.z);
+	glScaled(s.x(), s.y(), s.z());
     }
 
     void glRotate(const float angle, const vec3 &xyz)
     {
-	glRotatef(angle, xyz.x, xyz.y, xyz.z);
+	glRotatef(angle, xyz.x(), xyz.y(), xyz.z());
     }
 
     void glRotate(const double angle, const dvec3 &xyz)
     {
-	glRotated(angle, xyz.x, xyz.y, xyz.z);
+	glRotated(angle, xyz.x(), xyz.y(), xyz.z());
     }
 
     void glMultMatrix(const mat4 &M)
@@ -194,22 +194,22 @@ namespace glvm
 
     void glColor(const vec3 &c)
     {
-	glColor3f(c.r, c.g, c.b);
+	glColor3f(c.r(), c.g(), c.b());
     }
 
     void glColor(const dvec3 &c)
     {
-	glColor3d(c.r, c.g, c.b);
+	glColor3d(c.r(), c.g(), c.b());
     }
 
     void glColor(const vec4 &c)
     {
-	glColor4f(c.r, c.g, c.b, c.a);
+	glColor4f(c.r(), c.g(), c.b(), c.a());
     }
 
     void glColor(const dvec4 &c)
     {
-	glColor4d(c.r, c.g, c.b, c.a);
+	glColor4d(c.r(), c.g(), c.b(), c.a());
     }
 }
 

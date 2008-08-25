@@ -41,15 +41,15 @@ namespace glvm
 	const float d65_x = 0.31271f;
 	const float d65_y = 0.32902f;
 	vec3 xyz;
-	xyz.y = lum;
-	xyz.x = xyz.y * (d65_x / d65_y);
-	xyz.z = min(1.0f, xyz.y * (1.0f - d65_x - d65_y) / d65_y);
+	xyz.y() = lum;
+	xyz.x() = xyz.y() * (d65_x / d65_y);
+	xyz.z() = min(1.0f, xyz.y() * (1.0f - d65_x - d65_y) / d65_y);
 	return xyz;
     }
 
     inline float xyz_to_lum(const vec3 &xyz)
     {
-	return xyz.y;
+	return xyz.y();
     }
 
     inline vec3 lum_to_rgb(const float &lum)
@@ -137,41 +137,41 @@ namespace glvm
 	else
 	    tmp1 = (hsl[2] + hsl[1]) - (hsl[2] * hsl[1]);
 	tmp2 = 2.0f * hsl[2] - tmp1;
-	rgb.r = _hsl_to_rgb_helper(tmp2, tmp1, hsl[0] + (1.0f / 3.0f));
-	rgb.g = _hsl_to_rgb_helper(tmp2, tmp1, hsl[0]);
-	rgb.b = _hsl_to_rgb_helper(tmp2, tmp1, hsl[0] - (1.0f / 3.0f));
+	rgb.r() = _hsl_to_rgb_helper(tmp2, tmp1, hsl[0] + (1.0f / 3.0f));
+	rgb.g() = _hsl_to_rgb_helper(tmp2, tmp1, hsl[0]);
+	rgb.b() = _hsl_to_rgb_helper(tmp2, tmp1, hsl[0] - (1.0f / 3.0f));
 	return rgb;
     }
 
     inline vec3 rgb_to_hsl(const vec3 &rgb)
     {
 	vec3 hsl;
-	const float minval = min(min(rgb.r, rgb.g), rgb.b);
-	const float maxval = max(max(rgb.r, rgb.g), rgb.b);
+	const float minval = min(min(rgb.r(), rgb.g()), rgb.b());
+	const float maxval = max(max(rgb.r(), rgb.g()), rgb.b());
 	const float delta = maxval - minval;
 
-	hsl.z = (maxval + minval) / 2.0f;
-	if (abs(maxval - minval) < FLT_EPSILON)
+	hsl.z() = (maxval + minval) / 2.0f;
+	if (abs(maxval - minval) < std::numeric_limits<float>::epsilon())
 	{
-	    hsl.x = 0.0f;
-	    hsl.y = 0.0f;
+	    hsl.x() = 0.0f;
+	    hsl.y() = 0.0f;
 	}
 	else
 	{
-	    hsl.y = delta / ((hsl.z <= 0.5f) ? (maxval + minval) : (2.0f - maxval - minval));
-	    if (abs(maxval - rgb.r) < FLT_EPSILON)
+	    hsl.y() = delta / ((hsl.z() <= 0.5f) ? (maxval + minval) : (2.0f - maxval - minval));
+	    if (abs(maxval - rgb.r()) < std::numeric_limits<float>::epsilon())
 	    {
-		hsl.x = (60.0f / 360.0f) * (rgb.g - rgb.b) / (maxval - minval);
-		if (rgb.g < rgb.b)
-		    hsl.x += 360.0f / 360.0f;
+		hsl.x() = (60.0f / 360.0f) * (rgb.g() - rgb.b()) / (maxval - minval);
+		if (rgb.g() < rgb.b())
+		    hsl.x() += 360.0f / 360.0f;
 	    }
-	    else if (abs(maxval - rgb.g) < FLT_EPSILON)
+	    else if (abs(maxval - rgb.g()) < std::numeric_limits<float>::epsilon())
 	    {
-		hsl.x = (60.0f / 360.0f) * (rgb.b - rgb.r) / (maxval - minval) + (120.0f / 360.0f);
+		hsl.x() = (60.0f / 360.0f) * (rgb.b() - rgb.r()) / (maxval - minval) + (120.0f / 360.0f);
 	    }
 	    else
 	    {
-		hsl.x = (60.0f / 360.0f) * (rgb.r - rgb.g) / (maxval - minval) + (240.0f / 360.0f);
+		hsl.x() = (60.0f / 360.0f) * (rgb.r() - rgb.g()) / (maxval - minval) + (240.0f / 360.0f);
 	    }
 	}
 	return hsl;
