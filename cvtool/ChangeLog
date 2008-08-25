@@ -1,3 +1,9 @@
+2008-08-25  Martin Lambers <marlam@marlam.de>
+
+	* cvl/cvl_misc.c, cvl/glsl/wavelets/idwt_step1.glsl,
+	cvl/glsl/wavelets/idwt_step2.glsl, cvl/glsl/misc/sort.glsl,
+	cvl/glsl/misc/resize_seq.glsl: Simplify shader code.
+
 2008-08-21  Martin Lambers <marlam@marlam.de>
 
 	* tests/cmd_wavelets.sh: Fix test.

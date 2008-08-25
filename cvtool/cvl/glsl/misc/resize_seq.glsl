@@ -29,49 +29,20 @@ uniform int src_height;
 uniform int dst_width;
 uniform int dst_height;
 
-// Implementation of round(). As of 20080702 not all drivers have round()
-// builtin.
-float myround(float x)
-{
-    float y;
-    if (x >= 0.0)
-    {
-	y = floor(x);
-	if (x - y >= 0.5)
-	{
-	    y += 1.0;
-	}
-    }
-    else
-    {
-	y = ceil(x);
-	if (y - x >= 0.5)
-	{
-	    y -= 1.0;
-	}
-    }
-    return y;
-}
-
 // Transform texture coordinates to an index.
 int coord_to_index(vec2 coord, int w, int h)
 {
-    int x = int(myround((coord.x - (0.5 / float(w))) * float(w)));
-    int y = int(myround((coord.y - (0.5 / float(h))) * float(h)));
+    int x = int(coord.x * float(w));
+    int y = int(coord.y * float(h));
     return y * w + x;
 }
 
 // Transform an index to texture coordinates.
 vec2 index_to_coord(int i, int w, int h)
 {
-    // avoid the modulo operator since not all drivers support it (as of
-    // 20080702).
-    //int x = i % w;
     int y = i / w;
     int x = i - y * w;
-    return vec2(
-	    float(x) / float(w) + (0.5 / float(w)),
-	    float(y) / float(h) + (0.5 / float(h)));
+    return vec2((float(x) + 0.5) / float(w), (float(y) + 0.5) / float(h));
 }
 
 void main()

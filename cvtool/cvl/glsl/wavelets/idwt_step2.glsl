@@ -300,30 +300,6 @@ uniform float texheight;
 uniform float level_boundary;
 uniform sampler2D tex;
 
-// Implementation of round(). As of 20080702 not all drivers have round()
-// builtin.
-float myround(float x)
-{
-    float y;
-    if (x >= 0.0)
-    {
-	y = floor(x);
-	if (x - y >= 0.5)
-	{
-	    y += 1.0;
-	}
-    }
-    else
-    {
-	y = ceil(x);
-	if (y - x >= 0.5)
-	{
-	    y -= 1.0;
-	}
-    }
-    return y;
-}
-
 // avoid the modulo operator since not all drivers support it (as of
 // 20080702).
 int mymodulo(int x, int y)
@@ -339,7 +315,7 @@ float wrap(float z, float bound)
     }
     else if (z >= bound)
     {
-	z -= bound;
+  	z -= bound;
     }
 
     return z;
@@ -347,12 +323,11 @@ float wrap(float z, float bound)
 
 void main()
 {
-    // XXX: Why is this offset necessary??
-    float x = gl_TexCoord[0].x - 1.0 / texwidth;
-    float y = gl_TexCoord[0].y - 1.0 / texheight;
+    float x = gl_TexCoord[0].x;
+    float y = gl_TexCoord[0].y;
     vec4 oldval = texture2D(tex, vec2(x, y));
     vec4 newval = vec4(0.0, 0.0, 0.0, 0.0);
-    int ix = int(myround((x - 0.5 / texwidth) * texwidth));
+    int ix = int(x * texwidth);
     float index;
     vec4 a, d;
     // The awkward loop organization is necessary because we must access

@@ -31,50 +31,19 @@ uniform int stepno;	// = 2 ^ step
 uniform int offset;	// = 2 ^ (stage - 1)
 uniform int width;	// Texture width.
 uniform int height;	// Texture height.
-uniform float hstep;	// = 1.0 / float(w)
-uniform float vstep;	// = 1.0 / float(h)
-
-// Implementation of round(). As of 20080702 not all drivers have round()
-// builtin.
-float myround(float x)
-{
-    float y;
-    if (x >= 0.0)
-    {
-	y = floor(x);
-	if (x - y >= 0.5)
-	{
-	    y += 1.0;
-	}
-    }
-    else
-    {
-	y = ceil(x);
-	if (y - x >= 0.5)
-	{
-	    y -= 1.0;
-	}
-    }
-    return y;
-}
 
 int coord_to_index(vec2 coord)
 {
-    int x = int(myround((coord.x - hstep / 2.0) * float(width)));
-    int y = int(myround((coord.y - vstep / 2.0) * float(height)));
+    int x = int(coord.x * float(width));
+    int y = int(coord.y * float(height));
     return y * width + x;
 }
 
 vec2 index_to_coord(int i)
 {
-    // avoid the modulo operator since not all drivers support it (as of
-    // 20080702).
-    //int x = i % width;
     int y = i / width;
     int x = i - y * width;
-    return vec2(
-	    float(x) / float(width) + hstep / 2.0,
-	    float(y) / float(height) + vstep / 2.0);
+    return vec2((float(x) + 0.5) / float(width), (float(y) + 0.5) / float(height));
 }
 
 // avoid the modulo operator since not all drivers support it (as of

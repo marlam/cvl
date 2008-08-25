@@ -416,8 +416,6 @@ void cvl_sort(cvl_frame_t *dst, cvl_frame_t *src, int channel)
     glUseProgram(prg);
     glUniform1i(glGetUniformLocation(prg, "width"), width);
     glUniform1i(glGetUniformLocation(prg, "height"), height);
-    glUniform1f(glGetUniformLocation(prg, "hstep"), 1.0f / (float)width);
-    glUniform1f(glGetUniformLocation(prg, "vstep"), 1.0f / (float)height);
     glViewport(0, 0, width, height);
 
     int log2_n = mh_log2(width * height);
