@@ -70,15 +70,15 @@ AM_GLEW()
 
 dnl CAIRO (used only by the optional cvtool draw command)
 AC_LIB_HAVE_LINKFLAGS([cairo], [], 
-  [#include <cairo/cairo-features.h>
+  [#include <cairo/cairo.h>
    #if CAIRO_VERSION_MAJOR < 1 || CAIRO_VERSION_MINOR < 2
-   CAIRO version too old
+   #error CAIRO version too old
    #endif],
   [char *s = CAIRO_VERSION_STRING;])
 if test "$HAVE_LIBCAIRO" = "yes"; then
-	gl_ABSOLUTE_HEADER([cairo/cairo-features.h])
-	CAIRO_INCLUDE_DIR=`echo $gl_cv_absolute_cairo_cairo_features_h \
-	| sed -e 's/\/cairo-features.h$//' -e 's/"//g' -e 's/^\/\/\//\//'`
+	gl_ABSOLUTE_HEADER([cairo/cairo.h])
+	CAIRO_INCLUDE_DIR=`echo $gl_cv_absolute_cairo_cairo_h \
+	| sed -e 's/\/cairo.h$//' -e 's/"//g' -e 's/^\/\/\//\//'`
 	CPPFLAGS="$CPPFLAGS -I$CAIRO_INCLUDE_DIR"
 fi
 
