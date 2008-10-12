@@ -69,17 +69,28 @@ dnl GLEW (used only by CVL)
 AM_GLEW()
 
 dnl CAIRO (used only by the optional cvtool draw command)
-AC_LIB_HAVE_LINKFLAGS([cairo], [], 
-  [#include <cairo/cairo.h>
-   #if CAIRO_VERSION_MAJOR < 1 || CAIRO_VERSION_MINOR < 2
-   #error CAIRO version too old
-   #endif],
-  [char *s = CAIRO_VERSION_STRING;])
-if test "$HAVE_LIBCAIRO" = "yes"; then
-	gl_ABSOLUTE_HEADER([cairo/cairo.h])
-	CAIRO_INCLUDE_DIR=`echo $gl_cv_absolute_cairo_cairo_h \
-	| sed -e 's/\/cairo.h$//' -e 's/"//g' -e 's/^\/\/\//\//'`
-	CPPFLAGS="$CPPFLAGS -I$CAIRO_INCLUDE_DIR"
+dnl Determine include directory. Cairo >= 1.8.0 has <cairo/cairo-version.h>,
+dnl earlier versions have <cairo/cairo-features.h> instead.
+AC_CHECK_HEADER([cairo/cairo-version.h], 
+	[ gl_ABSOLUTE_HEADER([cairo/cairo-version.h])
+	  CAIRO_INCLUDE_DIR=`echo $gl_cv_absolute_cairo_cairo_version_h \
+	  | sed -e 's/\/cairo-version.h$//' -e 's/"//g' -e 's/^\/\/\//\//'`
+	],
+	[ AC_CHECK_HEADER([cairo/cairo-features.h],
+		[ gl_ABSOLUTE_HEADER([cairo/cairo-features.h])
+		  CAIRO_INCLUDE_DIR=`echo $gl_cv_absolute_cairo_cairo_features_h \
+		  | sed -e 's/\/cairo-features.h$//' -e 's/"//g' -e 's/^\/\/\//\//'`
+		],
+		[ CAIRO_INCLUDE_DIR="no" ])
+	])
+if test "$CAIRO_INCLUDE_DIR" != "no"; then
+	AC_LIB_APPENDTOVAR([CPPFLAGS], [-I$CAIRO_INCLUDE_DIR])
+	AC_LIB_HAVE_LINKFLAGS([cairo], [], 
+	  [#include <cairo.h>
+	   #if CAIRO_VERSION_MAJOR < 1 || (CAIRO_VERSION_MAJOR == 1 && CAIRO_VERSION_MINOR < 2)
+	   #error CAIRO version too old
+	   #endif],
+	  [char *s = CAIRO_VERSION_STRING;])
 fi
 
 dnl Global #defines for all source files
