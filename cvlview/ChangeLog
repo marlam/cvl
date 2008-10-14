@@ -1,6 +1,7 @@
 2008-10-14  Martin Lambers <marlam@marlam.de>
 
 	* gnulib/*: Gnulib update.
+	* Get rid of libtool, and improve library detection.
 
 2008-08-25  Martin Lambers <marlam@marlam.de>
 
