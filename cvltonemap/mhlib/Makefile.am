@@ -1,5 +1,5 @@
-noinst_LTLIBRARIES = libmh.la
-libmh_la_SOURCES = \
+noinst_LIBRARIES = libmh.a
+libmh_a_SOURCES = \
 	mh_msg.c mh_msg.h \
 	mh_assert.h \
 	mh_crash.c mh_crash.h \
