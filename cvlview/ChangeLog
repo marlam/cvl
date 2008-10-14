@@ -1,3 +1,7 @@
+2008-10-14  Martin Lambers <marlam@marlam.de>
+
+	* gnulib/*: Gnulib update.
+
 2008-08-25  Martin Lambers <marlam@marlam.de>
 
 	* gllib/glvm.h, gllib/glvm-gl.h, gllib/glvm-color.h: Update glvm (many

@@ -35,8 +35,10 @@ AC_DEFUN([gl_EARLY],
 # "Check for header files, types and library functions".
 AC_DEFUN([gl_INIT],
 [
-  AM_CONDITIONAL([GL_COND_LIBTOOL], [true])
-  gl_cond_libtool=true
+  AM_CONDITIONAL([GL_COND_LIBTOOL], [false])
+  gl_cond_libtool=false
+  gl_libdeps=
+  gl_ltlibdeps=
   m4_pushdef([AC_LIBOBJ], m4_defn([gl_LIBOBJ]))
   m4_pushdef([AC_REPLACE_FUNCS], m4_defn([gl_REPLACE_FUNCS]))
   m4_pushdef([AC_LIBSOURCES], m4_defn([gl_LIBSOURCES]))
@@ -44,8 +46,8 @@ AC_DEFUN([gl_INIT],
   m4_pushdef([gl_LIBSOURCES_DIR], [])
   gl_COMMON
   gl_source_base='gnulib'
-  gl_EOVERFLOW
   gl_FUNC_ALLOCA
+  gl_HEADER_ERRNO_H
   gl_FLOAT_H
   gl_FUNC_FSEEKO
   gl_STDIO_MODULE_INDICATOR([fseeko])
@@ -142,6 +144,10 @@ AC_DEFUN([gl_INIT],
     AC_SUBST([gltests_LIBOBJS], [$gltests_libobjs])
     AC_SUBST([gltests_LTLIBOBJS], [$gltests_ltlibobjs])
   ])
+  LIBGNU_LIBDEPS="$gl_libdeps"
+  AC_SUBST([LIBGNU_LIBDEPS])
+  LIBGNU_LTLIBDEPS="$gl_ltlibdeps"
+  AC_SUBST([LIBGNU_LTLIBDEPS])
 ])
 
 # Like AC_LIBOBJ, except that the module name goes
@@ -207,6 +213,7 @@ AC_DEFUN([gl_FILE_LIST], [
   lib/asnprintf.c
   lib/asprintf.c
   lib/dummy.c
+  lib/errno.in.h
   lib/float+.h
   lib/float.in.h
   lib/fseeko.c
@@ -224,6 +231,7 @@ AC_DEFUN([gl_FILE_LIST], [
   lib/size_max.h
   lib/stdint.in.h
   lib/stdio-impl.h
+  lib/stdio-write.c
   lib/stdio.in.h
   lib/string.in.h
   lib/strndup.c
@@ -235,7 +243,7 @@ AC_DEFUN([gl_FILE_LIST], [
   lib/wchar.in.h
   lib/xsize.h
   m4/alloca.m4
-  m4/eoverflow.m4
+  m4/errno_h.m4
   m4/extensions.m4
   m4/float_h.m4
   m4/fseeko.m4
