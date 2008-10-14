@@ -1,3 +1,3 @@
-EXTRA_DIST = config.guess config.sub config.rpath ltmain.sh depcomp install-sh \
+EXTRA_DIST = config.guess config.sub config.rpath depcomp install-sh \
 	link-warning.h texinfo.tex	\
 	glew.m4 cvl.m4 qt4.m4

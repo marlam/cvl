@@ -33,7 +33,6 @@ AC_GNU_SOURCE
 AC_PROG_CC
 gl_EARLY
 AC_PROG_CC_C99
-AC_PROG_LIBTOOL
 AC_PROG_CXX
 AC_PROG_INSTALL
 AC_SYS_LARGEFILE
@@ -60,9 +59,16 @@ AC_SEARCH_LIBS([sqrtf], [m])
 
 dnl GLEW
 AM_GLEW()
+if test "$HAVE_LIBGLEW" != "yes"; then
+	AC_MSG_ERROR([libglew not found])
+fi
 
 dnl CVL
 AM_CVL([0], [2], [5])
+if test "$HAVE_LIBCVL" != "yes"; then
+	AC_MSG_ERROR([libcvl >= 0.2.5 not found])
+fi
+
 
 dnl Qt4
 AM_QT4()
