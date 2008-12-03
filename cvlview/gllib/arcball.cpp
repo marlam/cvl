@@ -25,11 +25,13 @@ using namespace glvm;
 
 #include "arcball.h"
 
+#include "../mhlib/mh.h"
+
 
 vec3 ArcBall::map(const int x, const int y)
 {
     // bring v=(x,y) to [-1..1]^2
-    vec2 v(x, _height - 1 - y);
+    vec2 v = vec2(x, _height - 1 - y);
     v /= vec2(_width - 1, _height - 1);
     v -= vec2(0.5f, 0.5f);
     v *= 2.0f;
@@ -83,8 +85,8 @@ quat ArcBall::rotation(const int x, const int y, const quat &last_rot)
 	vec3 normal = cross(_last_sphere_point, sphere_point);
 	if (length(normal) > 0.001f)
 	{
-	    const float half_angle = acos(dot(_last_sphere_point, sphere_point)) / 2.0f;
-	    rot *= quat(cosf(half_angle), sinf(half_angle) * normalize(normal));
+	    const float angle = acos(dot(_last_sphere_point, sphere_point));
+	    rot *= quat(angle, normal);
 	}
 	_last_sphere_point = sphere_point;
     }

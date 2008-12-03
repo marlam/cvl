@@ -84,7 +84,7 @@ ViewArea::ViewArea(cvl_frame_t **frame,
     _mouse_pos = QPoint(0, 0);
     _dragging = false;
     _arcball = new ArcBall(min_size, min_size);
-    _rotation = quat(1.0f);
+    _rotation = quat(0.0f, vec3(1.0f));
     _rendering_fails = false;
     _processed_frame = NULL;
     _render_frame = NULL;
@@ -379,7 +379,7 @@ void ViewArea::paintGL()
 	    scale * 2.0f * static_cast<float>(mh_maxi(w, h)), 1.0f);
     if (!_flat_view)
     {
-	glMultMatrix(_rotation.to_matrix4());
+	glMultMatrix(toMat4(_rotation));
     }
     float frame_width = static_cast<float>(w);
     float frame_height = static_cast<float>(h);
@@ -751,10 +751,10 @@ void ViewArea::update()
 
 void ViewArea::rotation_changed()
 {
-    _rotation.from_euler_angles(
-	    mh_deg_to_rad(_rotation_selector->get_x_rotation()),
-	    mh_deg_to_rad(_rotation_selector->get_y_rotation()),
-	    mh_deg_to_rad(_rotation_selector->get_z_rotation()));
+    _rotation = quat(radians(vec3(
+		    _rotation_selector->get_x_rotation(),
+		    _rotation_selector->get_y_rotation(),
+		    _rotation_selector->get_z_rotation())));
     update();
 }
 
@@ -859,12 +859,9 @@ void ViewArea::mouseMoveEvent(QMouseEvent *event)
 	update();
     }
     quat new_rotation = _arcball->rotation(event->pos().x(), event->pos().y(), _rotation);
-    if ((new_rotation - _rotation).magnitude() >= 0.00001f)
-    {
-	_rotation = normalize(new_rotation);
-	emit update_rotation(_rotation);
-	update();
-    }
+    _rotation = normalize(new_rotation);
+    emit update_rotation(_rotation);
+    update();
 
     pixel_info();
 }

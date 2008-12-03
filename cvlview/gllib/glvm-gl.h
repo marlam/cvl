@@ -38,7 +38,7 @@ namespace glvm
     {
 	mat4 M;
 	glGetFloatv(matrixMode, M.vl);
-   	return M.transpose();
+   	return transpose(M);
     }
 
     mat4 glGetProjectionMatrix()
@@ -65,7 +65,7 @@ namespace glvm
     {
 	dmat4 M;
 	glGetDoublev(matrixMode, M.vl);
-   	return M.transpose();
+   	return transpose(M);
     }
 
     dmat4 glGetProjectionMatrixd()

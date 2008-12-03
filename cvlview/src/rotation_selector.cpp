@@ -148,11 +148,10 @@ void RotationSelector::set_z_rotation(float rz)
 
 void RotationSelector::update_rotation(const quat &rotation)
 {
-    float rx, ry, rz;
-    rotation.to_euler_angles(&rx, &ry, &rz);
+    vec3 euler_angles_deg = degrees(toEuler(rotation));
     _lock = true;
-    _xrot_spinbox->setValue(mh_rad_to_deg(rx));
-    _yrot_spinbox->setValue(mh_rad_to_deg(ry));
-    _zrot_spinbox->setValue(mh_rad_to_deg(rz));
+    _xrot_spinbox->setValue(euler_angles_deg.x());
+    _yrot_spinbox->setValue(euler_angles_deg.y());
+    _zrot_spinbox->setValue(euler_angles_deg.z());
     _lock = false;
 }
