@@ -1,3 +1,7 @@
+2008-02-03  Martin Lambers <marlam@marlam.de>
+
+	* Gnulib update.
+
 2008-12-03  Martin Lambers <marlam@marlam.de>
 
 	* gllib/*, src/view_area.cpp, src/rotation_selector.cpp: Update glvm 

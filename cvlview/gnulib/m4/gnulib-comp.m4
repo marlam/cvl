@@ -1,5 +1,5 @@
 # DO NOT EDIT! GENERATED AUTOMATICALLY!
-# Copyright (C) 2002-2008 Free Software Foundation, Inc.
+# Copyright (C) 2002-2009 Free Software Foundation, Inc.
 #
 # This file is free software, distributed under the terms of the GNU
 # General Public License.  As a special exception to the GNU General
@@ -25,7 +25,6 @@ AC_DEFUN([gl_EARLY],
   m4_pattern_allow([^gl_LIBOBJS$])dnl a variable
   m4_pattern_allow([^gl_LTLIBOBJS$])dnl a variable
   AC_REQUIRE([AC_PROG_RANLIB])
-  AC_REQUIRE([AC_GNU_SOURCE])
   AC_REQUIRE([gl_USE_SYSTEM_EXTENSIONS])
   AC_REQUIRE([AC_FUNC_FSEEKO])
   AC_REQUIRE([AC_FUNC_FSEEKO])
@@ -47,7 +46,7 @@ AC_DEFUN([gl_INIT],
   gl_COMMON
   gl_source_base='gnulib'
   gl_FUNC_ALLOCA
-  gl_HEADER_ERRNO_H
+  AC_REQUIRE([gl_HEADER_ERRNO_H])
   gl_FLOAT_H
   gl_FUNC_FSEEKO
   gl_STDIO_MODULE_INDICATOR([fseeko])
@@ -58,6 +57,7 @@ AC_DEFUN([gl_INIT],
   AC_SUBST([LTLIBINTL])
   gl_FUNC_LSEEK
   gl_UNISTD_MODULE_INDICATOR([lseek])
+  AC_REQUIRE([gl_MULTIARCH])
   gl_SIZE_MAX
   gl_STDINT_H
   gl_STDIO_H
@@ -242,6 +242,7 @@ AC_DEFUN([gl_FILE_LIST], [
   lib/vasprintf.c
   lib/wchar.in.h
   lib/xsize.h
+  m4/00gnulib.m4
   m4/alloca.m4
   m4/errno_h.m4
   m4/extensions.m4
@@ -258,6 +259,7 @@ AC_DEFUN([gl_FILE_LIST], [
   m4/lib-prefix.m4
   m4/longlong.m4
   m4/lseek.m4
+  m4/multiarch.m4
   m4/size_max.m4
   m4/stdint.m4
   m4/stdint_h.m4
