@@ -35,13 +35,11 @@ CLEANFILES = $(BUILT_SOURCES)
 cvltonemap_LDADD = \
 	$(top_builddir)/mhlib/libmh.a	\
 	$(top_builddir)/gnulib/libgnu.a	\
-	$(QT4_LIBS) $(LTLIBCVL) $(LTLIBGLEW)
+	$(LIBQTOPENGL) $(LIBCVL) $(LIBGLEW)
 
 cvltonemap_CPPFLAGS = \
 	-I$(top_builddir)/gnulib -I$(top_srcdir)/gnulib	\
 	-I$(top_srcdir)/mhlib
-
-cvltonemap_CXXFLAGS = $(QT4_CXXFLAGS)
 
 .ico.o:
 	echo "IDI_ICON1 ICON DISCARDABLE \"$<\"" | $(WINDRES) -o $@

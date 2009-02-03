@@ -71,7 +71,10 @@ if test "$HAVE_LIBCVL" != "yes"; then
 fi
 
 dnl Qt4
-AM_QT4()
+AM_QTOPENGL([4], [4], [0])
+if test "$HAVE_LIBQTOPENGL" != "yes"; then
+	AC_MSG_ERROR([Qt >= 4.4.0 not found])
+fi
 
 dnl Global #defines for all source files
 AH_VERBATIM([UNUSED],
