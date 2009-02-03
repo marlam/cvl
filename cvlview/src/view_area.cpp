@@ -84,7 +84,7 @@ ViewArea::ViewArea(cvl_frame_t **frame,
     _mouse_pos = QPoint(0, 0);
     _dragging = false;
     _arcball = new ArcBall(min_size, min_size);
-    _rotation = quat(0.0f, vec3(1.0f));
+    _rotation = toQuat(0.0f, vec3(1.0f));
     _rendering_fails = false;
     _processed_frame = NULL;
     _render_frame = NULL;

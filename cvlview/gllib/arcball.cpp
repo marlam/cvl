@@ -86,7 +86,7 @@ quat ArcBall::rotation(const int x, const int y, const quat &last_rot)
 	if (length(normal) > 0.001f)
 	{
 	    const float angle = acos(dot(_last_sphere_point, sphere_point));
-	    rot *= quat(angle, normal);
+	    rot *= toQuat(angle, normal);
 	}
 	_last_sphere_point = sphere_point;
     }

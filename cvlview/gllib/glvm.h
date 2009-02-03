@@ -3,7 +3,7 @@
  * 
  * C++ vector and matrix classes that resemble GLSL style.
  *
- * Copyright (C) 2008  Martin Lambers <marlam@marlam.de>
+ * Copyright (C) 2008, 2009  Martin Lambers <marlam@marlam.de>
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -41,10 +41,17 @@
  * impossible to implement in C++.
  */
 
+
 #ifndef GLVM_H
 #define GLVM_H
 
+/* Define to 1 if you have C++0x math functions in the std namespace */
+#define GLVM_HAVE_CXX0X_MATH 0
+
 #include <cmath>
+#include <cassert>
+#include <cstdlib>
+#include <stdint.h>
 
 #include <limits>
 #include <string>
@@ -52,133 +59,70 @@
 #include <sstream>
 
 
-/* XXX
- * Some C99 math functions are not in the C++98 std namespace, but will be in
- * the C++0x std namespace.
- * They are put into an extra namespace here. If you have a C++0x compiler, you
- * can use the functions from the std namespace instead. */
-
-namespace glvm_c99_but_not_cxx98_mathfunc_namespace
-{
-    inline float exp2(const float x)
-    {
-	return ::exp2f(x);
-    }
-
-    inline double exp2(const double x)
-    {
-	return ::exp2(x);
-    }
-
-    inline float log2(const float x)
-    {
-	return ::log2f(x);
-    }
-
-    inline double log2(const double x)
-    {
-	return ::log2(x);
-    }
-
-    inline float cbrt(const float x)
-    {
-	return ::cbrtf(x);
-    }
-
-    inline double cbrt(const double x)
-    {
-	return ::cbrt(x);
-    }
-
-    inline float round(const float x)
-    {
-	return ::roundf(x);
-    }
-
-    inline double round(const double x)
-    {
-	return ::round(x);
-    }
-}
-
-#define GLVM_C99_BUT_NOT_CXX98_MATHFUNC_NAMESPACE glvm_c99_but_not_cxx98_mathfunc_namespace
-/* If you have a C++0x compiler that has exp2, log2, cbrt, round in the
- * namespace std, then use the following instead:
-#define GLVM_C99_BUT_NOT_CXX98_MATHFUNC_NAMESPACE std
- */
-
-
 namespace glvm
 {
     /* Define the GLSL functions for the subset of the base data types 
-     * (bool, int, float, double) for which the function makes sense. */
+     * for which the function makes sense. The base data types are:
+     *
+     * bool
+     * signed char, unsigned char
+     * short, unsigned short
+     * int, unsigned int
+     * long, unsigned long
+     * long long, unsigned long long
+     * float, double, long double
+     *
+     * We cannot use templates here because then the compiler would try to apply
+     * these functions to vec and mat. We use templates to define a different
+     * behaviour for vec and mat below.
+     */
 
-    inline float radians(const float x)
+    inline signed char min(const signed char x, const signed char y)
     {
-	return x * static_cast<float>(M_PI / 180.0);
+	return (x < y ? x : y);
     }
 
-    inline double radians(const double x)
+    inline unsigned char min(const unsigned char x, const unsigned char y)
     {
-	return x * (M_PI / 180.0);
+	return (x < y ? x : y);
     }
 
-    inline float degrees(const float x)
+    inline short min(const short x, const short y)
     {
-	return x * static_cast<float>(180.0 / M_PI);
+	return (x < y ? x : y);
     }
 
-    inline double degrees(const double x)
+    inline unsigned short min(const unsigned short x, const unsigned short y)
     {
-	return x * (180.0 / M_PI);
-    }
-
-    inline float inversesqrt(const float x)
-    {
-	return 1.0f / std::sqrt(x);
-    }
-
-    inline double inversesqrt(const double x)
-    {
-	return 1.0f / std::sqrt(x);
-    }
-
-    inline float atan(const float x, const float y)
-    {
-	return std::atan2(x, y);
-    }
-
-    inline double atan(const double x, const double y)
-    {
-	return std::atan2(x, y);
-    }
-
-    inline int sign(const int x)
-    {
-	return (x < 0 ? -1 : x > 0 ? +1 : 0);
-    }
-
-    inline float sign(const float x)
-    {
-	return (x < 0.0f ? -1.0f : x > 0.0f ? +1.0f : 0.0f);
-    }
-
-    inline double sign(const double x)
-    {
-	return (x < 0.0 ? -1.0 : x > 0.0 ? +1.0 : 0.0);
-    }
-
-    inline float fract(const float x)
-    {
-	return x - std::floor(x);
-    }
-
-    inline double fract(const double x)
-    {
-	return x - std::floor(x);
+	return (x < y ? x : y);
     }
 
     inline int min(const int x, const int y)
+    {
+	return (x < y ? x : y);
+    }
+
+    inline unsigned int min(const unsigned int x, const unsigned int y)
+    {
+	return (x < y ? x : y);
+    }
+
+    inline long min(const long x, const long y)
+    {
+	return (x < y ? x : y);
+    }
+
+    inline unsigned long min(const unsigned long x, const unsigned long y)
+    {
+	return (x < y ? x : y);
+    }
+
+    inline long long min(const long long x, const long long y)
+    {
+	return (x < y ? x : y);
+    }
+
+    inline unsigned long long min(const unsigned long long x, const unsigned long long y)
     {
 	return (x < y ? x : y);
     }
@@ -193,7 +137,57 @@ namespace glvm
 	return (x < y ? x : y);
     }
 
+    inline long double min(const long double x, const long double y)
+    {
+	return (x < y ? x : y);
+    }
+
+    inline signed char max(const signed char x, const signed char y)
+    {
+	return (x > y ? x : y);
+    }
+
+    inline unsigned char max(const unsigned char x, const unsigned char y)
+    {
+	return (x > y ? x : y);
+    }
+
+    inline short max(const short x, const short y)
+    {
+	return (x > y ? x : y);
+    }
+
+    inline unsigned short max(const unsigned short x, const unsigned short y)
+    {
+	return (x > y ? x : y);
+    }
+
     inline int max(const int x, const int y)
+    {
+	return (x > y ? x : y);
+    }
+
+    inline unsigned int max(const unsigned int x, const unsigned int y)
+    {
+	return (x > y ? x : y);
+    }
+
+    inline long max(const long x, const long y)
+    {
+	return (x > y ? x : y);
+    }
+
+    inline unsigned long max(const unsigned long x, const unsigned long y)
+    {
+	return (x > y ? x : y);
+    }
+
+    inline long long max(const long long x, const long long y)
+    {
+	return (x > y ? x : y);
+    }
+
+    inline unsigned long long max(const unsigned long long x, const unsigned long long y)
     {
 	return (x > y ? x : y);
     }
@@ -208,7 +202,57 @@ namespace glvm
 	return (x > y ? x : y);
     }
 
+    inline long double max(const long double x, const long double y)
+    {
+	return (x > y ? x : y);
+    }
+
+    inline signed char clamp(const signed char x, const signed char minval, const signed char maxval)
+    {
+	return glvm::min(maxval, glvm::max(minval, x));
+    }
+
+    inline unsigned char clamp(const unsigned char x, const unsigned char minval, const unsigned char maxval)
+    {
+	return glvm::min(maxval, glvm::max(minval, x));
+    }
+
+    inline short clamp(const short x, const short minval, const short maxval)
+    {
+	return glvm::min(maxval, glvm::max(minval, x));
+    }
+
+    inline unsigned short clamp(const unsigned short x, const unsigned short minval, const unsigned short maxval)
+    {
+	return glvm::min(maxval, glvm::max(minval, x));
+    }
+
     inline int clamp(const int x, const int minval, const int maxval)
+    {
+	return glvm::min(maxval, glvm::max(minval, x));
+    }
+
+    inline unsigned int clamp(const unsigned int x, const unsigned int minval, const unsigned int maxval)
+    {
+	return glvm::min(maxval, glvm::max(minval, x));
+    }
+
+    inline long clamp(const long x, const long minval, const long maxval)
+    {
+	return glvm::min(maxval, glvm::max(minval, x));
+    }
+
+    inline unsigned long clamp(const unsigned long x, const unsigned long minval, const unsigned long maxval)
+    {
+	return glvm::min(maxval, glvm::max(minval, x));
+    }
+
+    inline long long clamp(const long long x, const long long minval, const long long maxval)
+    {
+	return glvm::min(maxval, glvm::max(minval, x));
+    }
+
+    inline unsigned long long clamp(const unsigned long long x, const unsigned long long minval, const unsigned long long maxval)
     {
 	return glvm::min(maxval, glvm::max(minval, x));
     }
@@ -223,17 +267,57 @@ namespace glvm
 	return glvm::min(maxval, glvm::max(minval, x));
     }
 
-    inline float mix(const float x, const float y, const float alpha)
+    inline long double clamp(const long double x, const long double minval, const long double maxval)
     {
-	return x * (1.0f - alpha) + y * alpha;
+	return glvm::min(maxval, glvm::max(minval, x));
     }
 
-    inline double mix(const double x, const double y, const double alpha)
+    inline signed char step(const signed char x, const signed char edge)
     {
-	return x * (1.0 - alpha) + y * alpha;
+	return (x < edge ? 0 : 1);
+    }
+
+    inline unsigned char step(const unsigned char x, const unsigned char edge)
+    {
+	return (x < edge ? 0 : 1);
+    }
+
+    inline short step(const short x, const short edge)
+    {
+	return (x < edge ? 0 : 1);
+    }
+
+    inline unsigned short step(const unsigned short x, const unsigned short edge)
+    {
+	return (x < edge ? 0 : 1);
     }
 
     inline int step(const int x, const int edge)
+    {
+	return (x < edge ? 0 : 1);
+    }
+
+    inline unsigned int step(const unsigned int x, const unsigned int edge)
+    {
+	return (x < edge ? 0 : 1);
+    }
+
+    inline long step(const long x, const long edge)
+    {
+	return (x < edge ? 0 : 1);
+    }
+
+    inline unsigned long step(const unsigned long x, const unsigned long edge)
+    {
+	return (x < edge ? 0 : 1);
+    }
+
+    inline long long step(const long long x, const long long edge)
+    {
+	return (x < edge ? 0 : 1);
+    }
+
+    inline unsigned long long step(const unsigned long long x, const unsigned long long edge)
     {
 	return (x < edge ? 0 : 1);
     }
@@ -248,19 +332,57 @@ namespace glvm
 	return (x < edge ? 0.0 : 1.0);
     }
 
-    inline float smoothstep(const float x, const float edge0, const float edge1)
+    inline long double step(const long double x, const long double edge)
     {
-	const float t = glvm::clamp((x - edge0) / (edge1 - edge0), 0.0f, 1.0f);
-	return t * t * (3.0f - t * 2.0f);
+	return (x < edge ? 0.0L : 1.0L);
     }
 
-    inline double smoothstep(const double x, const double edge0, const double edge1)
+    inline signed char mod(const signed char x, const signed char y)
     {
-	const double t = glvm::clamp((x - edge0) / (edge1 - edge0), 0.0, 1.0);
-	return t * t * (3.0 - t * 2.0);
+	return x - (x / y) * y;
+    }
+
+    inline unsigned char mod(const unsigned char x, const unsigned char y)
+    {
+	return x - (x / y) * y;
+    }
+
+    inline short mod(const short x, const short y)
+    {
+	return x - (x / y) * y;
+    }
+
+    inline unsigned short mod(const unsigned short x, const unsigned short y)
+    {
+	return x - (x / y) * y;
     }
 
     inline int mod(const int x, const int y)
+    {
+	return x - (x / y) * y;
+    }
+
+    inline unsigned int mod(const unsigned int x, const unsigned int y)
+    {
+	return x - (x / y) * y;
+    }
+
+    inline long mod(const long x, const long y)
+    {
+	return x - (x / y) * y;
+    }
+
+    inline unsigned long mod(const unsigned long x, const unsigned long y)
+    {
+	return x - (x / y) * y;
+    }
+
+    inline long long mod(const long long x, const long long y)
+    {
+	return x - (x / y) * y;
+    }
+
+    inline unsigned long long mod(const unsigned long long x, const unsigned long long y)
     {
 	return x - (x / y) * y;
     }
@@ -273,6 +395,818 @@ namespace glvm
     inline double mod(const double x, const double y)
     {
 	return x - std::floor(x / y) * y;
+    }
+
+    inline long double mod(const long double x, const long double y)
+    {
+	return x - std::floor(x / y) * y;
+    }
+
+    inline signed char sign(const signed char x)
+    {
+	return (x < 0 ? -1 : x > 0 ? +1 : 0);
+    }
+
+    inline unsigned char sign(const unsigned char x)
+    {
+	return (x > 0 ? +1 : 0);
+    }
+
+    inline short sign(const short x)
+    {
+	return (x < 0 ? -1 : x > 0 ? +1 : 0);
+    }
+
+    inline unsigned short sign(const unsigned short x)
+    {
+	return (x > 0 ? +1 : 0);
+    }
+
+    inline int sign(const int x)
+    {
+	return (x < 0 ? -1 : x > 0 ? +1 : 0);
+    }
+
+    inline unsigned int sign(const unsigned int x)
+    {
+	return (x > 0 ? +1 : 0);
+    }
+
+    inline long sign(const long x)
+    {
+	return (x < 0 ? -1 : x > 0 ? +1 : 0);
+    }
+
+    inline unsigned long sign(const unsigned long x)
+    {
+	return (x > 0 ? +1 : 0);
+    }
+
+    inline long long sign(const long long x)
+    {
+	return (x < 0 ? -1 : x > 0 ? +1 : 0);
+    }
+
+    inline unsigned long long sign(const unsigned long long x)
+    {
+	return (x > 0 ? +1 : 0);
+    }
+
+    inline float sign(const float x)
+    {
+	return (x < 0.0f ? -1.0f : x > 0.0f ? +1.0f : 0.0f);
+    }
+
+    inline double sign(const double x)
+    {
+	return (x < 0.0 ? -1.0 : x > 0.0 ? +1.0 : 0.0);
+    }
+
+    inline long double sign(const long double x)
+    {
+	return (x < 0.0L ? -1.0L : x > 0.0L ? +1.0L : 0.0L);
+    }
+
+    using std::abs;
+
+    inline bool abs(const bool x)
+    {
+	return x;
+    }
+
+    inline signed char abs(const signed char x)
+    {
+	return (x < 0 ? -x : x);
+    }
+
+    inline unsigned char abs(const unsigned char x)
+    {
+	return x;
+    }
+
+    inline short abs(const short x)
+    {
+	return (x < 0 ? -x : x);
+    }
+
+    inline unsigned short abs(const unsigned short x)
+    {
+	return x;
+    }
+
+    inline unsigned int abs(const unsigned int x)
+    {
+	return x;
+    }
+
+    inline unsigned long abs(const unsigned long x)
+    {
+	return x;
+    }
+
+    inline unsigned long long abs(const unsigned long long x)
+    {
+	return x;
+    }
+
+    inline float radians(const float x)
+    {
+	return x * static_cast<float>(M_PI / 180.0);
+    }
+
+    inline double radians(const double x)
+    {
+	return x * (M_PI / 180.0);
+    }
+
+    inline long double radians(const long double x)
+    {
+	return x * (M_PIl / 180.0L);
+    }
+
+    inline float degrees(const float x)
+    {
+	return x * static_cast<float>(180.0 / M_PI);
+    }
+
+    inline double degrees(const double x)
+    {
+	return x * (180.0 / M_PI);
+    }
+
+    inline long double degrees(const long double x)
+    {
+	return x * (180.0L / M_PIl);
+    }
+
+    using std::sin;
+
+    using std::cos;
+
+    using std::tan;
+
+    using std::asin;
+
+    using std::acos;
+
+    using std::atan;
+
+    inline float atan(const float x, const float y)
+    {
+	return std::atan2(x, y);
+    }
+
+    inline double atan(const double x, const double y)
+    {
+	return std::atan2(x, y);
+    }
+
+    inline long double atan(const long double x, const long double y)
+    {
+	return std::atan2(x, y);
+    }
+
+    using std::pow;
+
+    using std::exp;
+
+#if GLVM_HAVE_CXX0X_MATH
+    using std::exp2;
+#else
+    using ::exp2;
+
+    inline float exp2(const float x)
+    {
+	return ::exp2f(x);
+    }
+
+    inline long double exp2(const long double x)
+    {
+	return ::exp2l(x);
+    }
+#endif
+
+    using std::log;
+
+#if GLVM_HAVE_CXX0X_MATH
+    using std::log2;
+#else
+    using ::log2;
+
+    inline float log2(const float x)
+    {
+	return ::log2f(x);
+    }
+
+    inline long double log2(const long double x)
+    {
+	return ::log2l(x);
+    }
+#endif
+
+    using std::log10;
+
+    using std::sqrt;
+
+    inline float inversesqrt(const float x)
+    {
+	return 1.0f / std::sqrt(x);
+    }
+
+    inline double inversesqrt(const double x)
+    {
+	return 1.0 / std::sqrt(x);
+    }
+
+    inline long double inversesqrt(const long double x)
+    {
+	return 1.0L / std::sqrt(x);
+    }
+
+#if GLVM_HAVE_CXX0X_MATH
+    using std::cbrt;
+#else
+    using ::cbrt;
+
+    inline float cbrt(const float x)
+    {
+	return ::cbrtf(x);
+    }
+
+    inline long double cbrt(const long double x)
+    {
+	return ::cbrtl(x);
+    }
+#endif
+
+#if GLVM_HAVE_CXX0X_MATH
+    using std::round;
+#else
+    inline float round(const float x)
+    {
+	return ::roundf(x);
+    }
+
+    inline long double round(const long double x)
+    {
+	return ::roundl(x);
+    }
+#endif
+
+    using std::floor;
+
+    using std::ceil;
+
+    inline float fract(const float x)
+    {
+	return x - std::floor(x);
+    }
+
+    inline double fract(const double x)
+    {
+	return x - std::floor(x);
+    }
+
+    inline long double fract(const long double x)
+    {
+	return x - std::floor(x);
+    }
+
+    using std::isfinite;
+
+    using std::isinf;
+
+    using std::isnan;
+
+    using std::isnormal;
+
+    inline float mix(const float x, const float y, const float alpha)
+    {
+	return x * (1.0f - alpha) + y * alpha;
+    }
+
+    inline double mix(const double x, const double y, const double alpha)
+    {
+	return x * (1.0 - alpha) + y * alpha;
+    }
+
+    inline long double mix(const long double x, const long double y, const long double alpha)
+    {
+	return x * (1.0L - alpha) + y * alpha;
+    }
+
+    inline float smoothstep(const float x, const float edge0, const float edge1)
+    {
+	const float t = glvm::clamp((x - edge0) / (edge1 - edge0), 0.0f, 1.0f);
+	return t * t * (3.0f - t * 2.0f);
+    }
+
+    inline double smoothstep(const double x, const double edge0, const double edge1)
+    {
+	const double t = glvm::clamp((x - edge0) / (edge1 - edge0), 0.0, 1.0);
+	return t * t * (3.0 - t * 2.0);
+    }
+
+    inline long double smoothstep(const long double x, const long double edge0, const long double edge1)
+    {
+	const long double t = glvm::clamp((x - edge0) / (edge1 - edge0), 0.0L, 1.0L);
+	return t * t * (3.0L - t * 2.0L);
+    }
+
+    inline bool greaterThan(const bool a, const bool b)
+    {
+	return a > b;
+    }
+
+    inline bool greaterThan(const signed char a, const signed char b)
+    {
+	return a > b;
+    }
+
+    inline bool greaterThan(const unsigned char a, const unsigned char b)
+    {
+	return a > b;
+    }
+
+    inline bool greaterThan(const short a, const short b)
+    {
+	return a > b;
+    }
+
+    inline bool greaterThan(const unsigned short a, const unsigned short b)
+    {
+	return a > b;
+    }
+
+    inline bool greaterThan(const int a, const int b)
+    {
+	return a > b;
+    }
+
+    inline bool greaterThan(const unsigned int a, const unsigned int b)
+    {
+	return a > b;
+    }
+
+    inline bool greaterThan(const long a, const long b)
+    {
+	return a > b;
+    }
+
+    inline bool greaterThan(const unsigned long a, const unsigned long b)
+    {
+	return a > b;
+    }
+
+    inline bool greaterThan(const long long a, const long long b)
+    {
+	return a > b;
+    }
+
+    inline bool greaterThan(const unsigned long long a, const unsigned long long b)
+    {
+	return a > b;
+    }
+
+    inline bool greaterThan(const float a, const float b)
+    {
+	return a > b;
+    }
+
+    inline bool greaterThan(const double a, const double b)
+    {
+	return a > b;
+    }
+
+    inline bool greaterThan(const long double a, const long double b)
+    {
+	return a > b;
+    }
+
+    inline bool greaterThanEqual(const bool a, const bool b)
+    {
+	return a >= b;
+    }
+
+    inline bool greaterThanEqual(const signed char a, const signed char b)
+    {
+	return a >= b;
+    }
+
+    inline bool greaterThanEqual(const unsigned char a, const unsigned char b)
+    {
+	return a >= b;
+    }
+
+    inline bool greaterThanEqual(const short a, const short b)
+    {
+	return a >= b;
+    }
+
+    inline bool greaterThanEqual(const unsigned short a, const unsigned short b)
+    {
+	return a >= b;
+    }
+
+    inline bool greaterThanEqual(const int a, const int b)
+    {
+	return a >= b;
+    }
+
+    inline bool greaterThanEqual(const unsigned int a, const unsigned int b)
+    {
+	return a >= b;
+    }
+
+    inline bool greaterThanEqual(const long a, const long b)
+    {
+	return a >= b;
+    }
+
+    inline bool greaterThanEqual(const unsigned long a, const unsigned long b)
+    {
+	return a >= b;
+    }
+
+    inline bool greaterThanEqual(const long long a, const long long b)
+    {
+	return a >= b;
+    }
+
+    inline bool greaterThanEqual(const unsigned long long a, const unsigned long long b)
+    {
+	return a >= b;
+    }
+
+    inline bool greaterThanEqual(const float a, const float b)
+    {
+	return a >= b;
+    }
+
+    inline bool greaterThanEqual(const double a, const double b)
+    {
+	return a >= b;
+    }
+
+    inline bool greaterThanEqual(const long double a, const long double b)
+    {
+	return a >= b;
+    }
+
+    inline bool lessThan(const bool a, const bool b)
+    {
+	return a < b;
+    }
+
+    inline bool lessThan(const signed char a, const signed char b)
+    {
+	return a < b;
+    }
+
+    inline bool lessThan(const unsigned char a, const unsigned char b)
+    {
+	return a < b;
+    }
+
+    inline bool lessThan(const short a, const short b)
+    {
+	return a < b;
+    }
+
+    inline bool lessThan(const unsigned short a, const unsigned short b)
+    {
+	return a < b;
+    }
+
+    inline bool lessThan(const int a, const int b)
+    {
+	return a < b;
+    }
+
+    inline bool lessThan(const unsigned int a, const unsigned int b)
+    {
+	return a < b;
+    }
+
+    inline bool lessThan(const long a, const long b)
+    {
+	return a < b;
+    }
+
+    inline bool lessThan(const unsigned long a, const unsigned long b)
+    {
+	return a < b;
+    }
+
+    inline bool lessThan(const long long a, const long long b)
+    {
+	return a < b;
+    }
+
+    inline bool lessThan(const unsigned long long a, const unsigned long long b)
+    {
+	return a < b;
+    }
+
+    inline bool lessThan(const float a, const float b)
+    {
+	return a < b;
+    }
+
+    inline bool lessThan(const double a, const double b)
+    {
+	return a < b;
+    }
+
+    inline bool lessThan(const long double a, const long double b)
+    {
+	return a < b;
+    }
+
+    inline bool lessThanEqual(const bool a, const bool b)
+    {
+	return a <= b;
+    }
+
+    inline bool lessThanEqual(const signed char a, const signed char b)
+    {
+	return a <= b;
+    }
+
+    inline bool lessThanEqual(const unsigned char a, const unsigned char b)
+    {
+	return a <= b;
+    }
+
+    inline bool lessThanEqual(const short a, const short b)
+    {
+	return a <= b;
+    }
+
+    inline bool lessThanEqual(const unsigned short a, const unsigned short b)
+    {
+	return a <= b;
+    }
+
+    inline bool lessThanEqual(const int a, const int b)
+    {
+	return a <= b;
+    }
+
+    inline bool lessThanEqual(const unsigned int a, const unsigned int b)
+    {
+	return a <= b;
+    }
+
+    inline bool lessThanEqual(const long a, const long b)
+    {
+	return a <= b;
+    }
+
+    inline bool lessThanEqual(const unsigned long a, const unsigned long b)
+    {
+	return a <= b;
+    }
+
+    inline bool lessThanEqual(const long long a, const long long b)
+    {
+	return a <= b;
+    }
+
+    inline bool lessThanEqual(const unsigned long long a, const unsigned long long b)
+    {
+	return a <= b;
+    }
+
+    inline bool lessThanEqual(const float a, const float b)
+    {
+	return a <= b;
+    }
+
+    inline bool lessThanEqual(const double a, const double b)
+    {
+	return a <= b;
+    }
+
+    inline bool lessThanEqual(const long double a, const long double b)
+    {
+	return a <= b;
+    }
+
+    inline bool equal(const bool a, const bool b)
+    {
+	return a == b;
+    }
+
+    inline bool equal(const signed char a, const signed char b)
+    {
+	return a == b;
+    }
+
+    inline bool equal(const unsigned char a, const unsigned char b)
+    {
+	return a == b;
+    }
+
+    inline bool equal(const short a, const short b)
+    {
+	return a == b;
+    }
+
+    inline bool equal(const unsigned short a, const unsigned short b)
+    {
+	return a == b;
+    }
+
+    inline bool equal(const int a, const int b)
+    {
+	return a == b;
+    }
+
+    inline bool equal(const unsigned int a, const unsigned int b)
+    {
+	return a == b;
+    }
+
+    inline bool equal(const long a, const long b)
+    {
+	return a == b;
+    }
+
+    inline bool equal(const unsigned long a, const unsigned long b)
+    {
+	return a == b;
+    }
+
+    inline bool equal(const long long a, const long long b)
+    {
+	return a == b;
+    }
+
+    inline bool equal(const unsigned long long a, const unsigned long long b)
+    {
+	return a == b;
+    }
+
+    /* The 'equal' function for floating point numbers is adapted from
+     * http://www.cygnus-software.com/papers/comparingfloats/comparingfloats.htm
+     *
+     * The max_ulps parameter measures the maximum number of floating point
+     * numbers that lie inbetween a and b.
+     *
+     * These functions relies on IEEE 754 floating point numbers and
+     * two-complement integers of the same size. The second requirement is the
+     * reason why there is no version for long doubles.
+     */
+
+    inline bool equal(const float a, const float b, const int max_ulps = 1)
+    {
+	bool result;
+
+	if (isinf(a) || isinf(b))
+	{
+	    result = (std::isinf(a) && std::isinf(b)
+		    && static_cast<int>(glvm::sign(a)) == static_cast<int>(glvm::sign(b)));
+	}
+	else if (std::isnan(a) || std::isnan(b))
+	{
+	    result = false;
+	}
+	else
+	{
+	    assert(sizeof(float) == sizeof(int32_t));
+	    assert(max_ulps > 0);
+	    union { float f; int32_t i; } x;
+	    union { float f; int32_t i; } y;
+	    x.f = a;
+	    y.f = b;
+	    if (x.i < 0)
+	    {
+		x.i = 0x80000000 - x.i;
+	    }
+	    if (y.i < 0)
+	    {
+		y.i = 0x80000000 - y.i;
+	    }
+	    int32_t intdiff = glvm::abs(x.i - y.i);
+	    result = (intdiff <= max_ulps);
+	}
+	return result;
+    }
+
+    inline bool equal(const double a, const double b, const int max_ulps = 1)
+    {
+	bool result;
+
+	if (std::isinf(a) || std::isinf(b))
+	{
+	    result = (std::isinf(a) && std::isinf(b)
+		    && static_cast<int>(glvm::sign(a)) == static_cast<int>(glvm::sign(b)));
+	}
+	else if (std::isnan(a) || std::isnan(b))
+	{
+	    result = false;
+	}
+	else
+	{
+	    assert(sizeof(double) == sizeof(int64_t));
+	    assert(max_ulps > 0);
+	    union { double d; int64_t i; } x;
+	    union { double d; int64_t i; } y;
+	    x.d = a;
+	    y.d = b;
+	    if (x.i < 0)
+	    {
+		x.i = 0x8000000000000000L - x.i;
+	    }
+	    if (y.i < 0)
+	    {
+		y.i = 0x8000000000000000L - y.i;
+	    }
+	    int64_t intdiff = glvm::abs(x.i - y.i);
+	    result = (intdiff <= max_ulps);
+	}
+	return result;
+    }
+
+    inline bool notEqual(const bool a, const bool b)
+    {
+	return a != b;
+    }
+
+    inline bool notEqual(const signed char a, const signed char b)
+    {
+	return a != b;
+    }
+
+    inline bool notEqual(const unsigned char a, const unsigned char b)
+    {
+	return a != b;
+    }
+
+    inline bool notEqual(const short a, const short b)
+    {
+	return a != b;
+    }
+
+    inline bool notEqual(const unsigned short a, const unsigned short b)
+    {
+	return a != b;
+    }
+
+    inline bool notEqual(const int a, const int b)
+    {
+	return a != b;
+    }
+
+    inline bool notEqual(const unsigned int a, const unsigned int b)
+    {
+	return a != b;
+    }
+
+    inline bool notEqual(const long a, const long b)
+    {
+	return a != b;
+    }
+
+    inline bool notEqual(const unsigned long a, const unsigned long b)
+    {
+	return a != b;
+    }
+
+    inline bool notEqual(const long long a, const long long b)
+    {
+	return a != b;
+    }
+
+    inline bool notEqual(const unsigned long long a, const unsigned long long b)
+    {
+	return a != b;
+    }
+
+    inline bool notEqual(const float a, const float b, const uint32_t max_ulps = 1)
+    {
+	return !glvm::equal(a, b, max_ulps);
+    }
+
+    inline bool notEqual(const double a, const double b, const uint64_t max_ulps = 1)
+    {
+	return !glvm::equal(a, b, max_ulps);
+    }
+
+    inline bool any(const bool a)
+    {
+	return a;
+    }
+
+    inline bool all(const bool a)
+    {
+	return a;
+    }
+
+    inline bool negate(const bool a)
+    {
+	return !a;
     }
 
 
@@ -470,8 +1404,10 @@ namespace glvm
 
 	friend std::istream &operator>>(std::istream &is, array &a)
 	{
+	    char blank;
 	    for (int i = 0; i < rows * cols; i++)
 		is >> a.vl[i];
+	    is >> blank;
 	    return is;
 	}
 
@@ -642,7 +1578,7 @@ namespace glvm
 	{
 	    array r;
 	    for (int i = 0; i < rows * cols; i++)
-		r.vl[i] = std::sin(vl[i]);
+		r.vl[i] = glvm::sin(vl[i]);
 	    return r;
 	}
 
@@ -650,7 +1586,7 @@ namespace glvm
 	{
 	    array r;
 	    for (int i = 0; i < rows * cols; i++)
-		r.vl[i] = std::cos(vl[i]);
+		r.vl[i] = glvm::cos(vl[i]);
 	    return r;
 	}
 
@@ -658,7 +1594,7 @@ namespace glvm
 	{
 	    array r;
 	    for (int i = 0; i < rows * cols; i++)
-		r.vl[i] = std::tan(vl[i]);
+		r.vl[i] = glvm::tan(vl[i]);
 	    return r;
 	}
 
@@ -666,7 +1602,7 @@ namespace glvm
 	{
 	    array r;
 	    for (int i = 0; i < rows * cols; i++)
-		r.vl[i] = std::asin(vl[i]);
+		r.vl[i] = glvm::asin(vl[i]);
 	    return r;
 	}
 
@@ -674,7 +1610,7 @@ namespace glvm
 	{
 	    array r;
 	    for (int i = 0; i < rows * cols; i++)
-		r.vl[i] = std::acos(vl[i]);
+		r.vl[i] = glvm::acos(vl[i]);
 	    return r;
 	}
 
@@ -682,7 +1618,7 @@ namespace glvm
 	{
 	    array r;
 	    for (int i = 0; i < rows * cols; i++)
-		r.vl[i] = std::atan(vl[i]);
+		r.vl[i] = glvm::atan(vl[i]);
 	    return r;
 	}
 
@@ -690,7 +1626,7 @@ namespace glvm
 	{
 	    array r;
 	    for (int i = 0; i < rows * cols; i++)
-		r.vl[i] = std::atan(vl[i], a.vl[i]);
+		r.vl[i] = glvm::atan(vl[i], a.vl[i]);
 	    return r;
 	}
 
@@ -716,7 +1652,7 @@ namespace glvm
 	{
 	    array r;
 	    for (int i = 0; i < rows * cols; i++)
-		r.vl[i] = std::pow(vl[i], p);
+		r.vl[i] = glvm::pow(vl[i], p);
 	    return r;
 	}
 
@@ -724,7 +1660,7 @@ namespace glvm
 	{
 	    array r;
 	    for (int i = 0; i < rows * cols; i++)
-		r.vl[i] = std::exp(vl[i]);
+		r.vl[i] = glvm::exp(vl[i]);
 	    return r;
 	}
 
@@ -732,7 +1668,7 @@ namespace glvm
 	{
 	    array r;
 	    for (int i = 0; i < rows * cols; i++)
-		r.vl[i] = GLVM_C99_BUT_NOT_CXX98_MATHFUNC_NAMESPACE::exp2(vl[i]);
+		r.vl[i] = glvm::exp2(vl[i]);
 	    return r;
 	}
 
@@ -740,7 +1676,7 @@ namespace glvm
 	{
 	    array r;
 	    for (int i = 0; i < rows * cols; i++)
-		r.vl[i] = std::log(vl[i]);
+		r.vl[i] = glvm::log(vl[i]);
 	    return r;
 	}
 
@@ -748,7 +1684,7 @@ namespace glvm
 	{
 	    array r;
 	    for (int i = 0; i < rows * cols; i++)
-		r.vl[i] = GLVM_C99_BUT_NOT_CXX98_MATHFUNC_NAMESPACE::log2(vl[i]);
+		r.vl[i] = glvm::log2(vl[i]);
 	    return r;
 	}
 
@@ -756,7 +1692,7 @@ namespace glvm
 	{
 	    array r;
 	    for (int i = 0; i < rows * cols; i++)
-		r.vl[i] = std::log10(vl[i]);
+		r.vl[i] = glvm::log10(vl[i]);
 	    return r;
 	}
 
@@ -764,7 +1700,7 @@ namespace glvm
 	{
 	    array r;
 	    for (int i = 0; i < rows * cols; i++)
-		r.vl[i] = std::sqrt(vl[i]);
+		r.vl[i] = glvm::sqrt(vl[i]);
 	    return r;
 	}
 
@@ -780,7 +1716,7 @@ namespace glvm
 	{
 	    array r;
 	    for (int i = 0; i < rows * cols; i++)
-		r.vl[i] = GLVM_C99_BUT_NOT_CXX98_MATHFUNC_NAMESPACE::cbrt(vl[i]);
+		r.vl[i] = glvm::cbrt(vl[i]);
 	    return r;
 	}
 
@@ -790,7 +1726,7 @@ namespace glvm
 	{
 	    array<bool, rows, cols> r;
 	    for (int i = 0; i < rows * cols; i++)
-		r.vl[i] = std::isfinite(vl[i]);
+		r.vl[i] = glvm::isfinite(vl[i]);
 	    return r;
 	}
 
@@ -798,7 +1734,7 @@ namespace glvm
 	{
 	    array<bool, rows, cols> r;
 	    for (int i = 0; i < rows * cols; i++)
-		r.vl[i] = std::isinf(vl[i]);
+		r.vl[i] = glvm::isinf(vl[i]);
 	    return r;
 	}
 
@@ -806,7 +1742,7 @@ namespace glvm
 	{
 	    array<bool, rows, cols> r;
 	    for (int i = 0; i < rows * cols; i++)
-		r.vl[i] = std::isnan(vl[i]);
+		r.vl[i] = glvm::isnan(vl[i]);
 	    return r;
 	}
 
@@ -814,15 +1750,7 @@ namespace glvm
 	{
 	    array<bool, rows, cols> r;
 	    for (int i = 0; i < rows * cols; i++)
-		r.vl[i] = std::isnormal(vl[i]);
-	    return r;
-	}
-
-	array _abs() const
-	{
-	    array r;
-	    for (int i = 0; i < rows * cols; i++)
-		r.vl[i] = std::abs(vl[i]);
+		r.vl[i] = glvm::isnormal(vl[i]);
 	    return r;
 	}
 
@@ -834,11 +1762,19 @@ namespace glvm
 	    return r;
 	}
 
+	array _abs() const
+	{
+	    array r;
+	    for (int i = 0; i < rows * cols; i++)
+		r.vl[i] = glvm::abs(vl[i]);
+	    return r;
+	}
+
 	array _floor() const
 	{
 	    array r;
 	    for (int i = 0; i < rows * cols; i++)
-		r.vl[i] = std::floor(vl[i]);
+		r.vl[i] = glvm::floor(vl[i]);
 	    return r;
 	}
 
@@ -846,7 +1782,7 @@ namespace glvm
 	{
 	    array r;
 	    for (int i = 0; i < rows * cols; i++)
-		r.vl[i] = std::ceil(vl[i]);
+		r.vl[i] = glvm::ceil(vl[i]);
 	    return r;
 	}
 
@@ -854,7 +1790,7 @@ namespace glvm
 	{
 	    array r;
 	    for (int i = 0; i < rows * cols; i++)
-		r.vl[i] = GLVM_C99_BUT_NOT_CXX98_MATHFUNC_NAMESPACE::round(vl[i]);
+		r.vl[i] = glvm::round(vl[i]);
 	    return r;
 	}
 
@@ -984,7 +1920,7 @@ namespace glvm
 	{
 	    array<bool, rows, cols> r;
 	    for (int i = 0; i < rows * cols; i++)
-		r.vl[i] = vl[i] > a.vl[i];
+		r.vl[i] = glvm::greaterThan(vl[i], a.vl[i]);
 	    return r;
 	}
 
@@ -992,7 +1928,7 @@ namespace glvm
 	{
 	    array<bool, rows, cols> r;
 	    for (int i = 0; i < rows * cols; i++)
-		r.vl[i] = vl[i] >= a.vl[i];
+		r.vl[i] = glvm::greaterThanEqual(vl[i], a.vl[i]);
 	    return r;
 	}
 
@@ -1000,7 +1936,7 @@ namespace glvm
 	{
 	    array<bool, rows, cols> r;
 	    for (int i = 0; i < rows * cols; i++)
-		r.vl[i] = vl[i] < a.vl[i];
+		r.vl[i] = glvm::lessThan(vl[i], a.vl[i]);
 	    return r;
 	}
 
@@ -1008,23 +1944,39 @@ namespace glvm
 	{
 	    array<bool, rows, cols> r;
 	    for (int i = 0; i < rows * cols; i++)
-		r.vl[i] = vl[i] <= a.vl[i];
+		r.vl[i] = glvm::lessThanEqual(vl[i], a.vl[i]);
 	    return r;
 	}
 
-	array<bool, rows, cols> _equal(const array &a, const T epsilon = std::numeric_limits<T>::epsilon()) const
+	array<bool, rows, cols> _equal(const array &a) const
 	{
 	    array<bool, rows, cols> r;
 	    for (int i = 0; i < rows * cols; i++)
-		r.vl[i] = std::abs(vl[i] - a.vl[i]) <= epsilon;
+		r.vl[i] = glvm::equal(vl[i], a.vl[i]);
 	    return r;
 	}
 
-	array<bool, rows, cols> _notEqual(const array &a, const T epsilon = std::numeric_limits<T>::epsilon()) const
+	array<bool, rows, cols> _equal(const array &a, const int max_ulps) const
 	{
 	    array<bool, rows, cols> r;
 	    for (int i = 0; i < rows * cols; i++)
-		r.vl[i] = std::abs(vl[i] - a.vl[i]) > epsilon;
+		r.vl[i] = glvm::equal(vl[i], a.vl[i], max_ulps);
+	    return r;
+	}
+
+	array<bool, rows, cols> _notEqual(const array &a) const
+	{
+	    array<bool, rows, cols> r;
+	    for (int i = 0; i < rows * cols; i++)
+		r.vl[i] = glvm::notEqual(vl[i], a.vl[i]);
+	    return r;
+	}
+
+	array<bool, rows, cols> _notEqual(const array &a, const int max_ulps) const
+	{
+	    array<bool, rows, cols> r;
+	    for (int i = 0; i < rows * cols; i++)
+		r.vl[i] = glvm::notEqual(vl[i], a.vl[i], max_ulps);
 	    return r;
 	}
 
@@ -1071,7 +2023,7 @@ namespace glvm
 	    T l = static_cast<T>(0);
 	    for (int i = 0; i < rows * cols; i++)
 		l += vl[i] * vl[i];
-	    return std::sqrt(l);
+	    return glvm::sqrt(l);
 	}
 
 	T _distance(const array &a) const
@@ -1106,7 +2058,7 @@ namespace glvm
 	{
 	    const T d = N.dot(*this);
 	    const T k = static_cast<T>(1) - eta * eta * (static_cast<T>(1) - d * d);
-	    return k < static_cast<T>(0) ? array<T, rows, 1>(static_cast<T>(0)) : *this * eta - N * (eta * d + std::sqrt(k));
+	    return k < static_cast<T>(0) ? array<T, rows, 1>(static_cast<T>(0)) : *this * eta - N * (eta * d + glvm::sqrt(k));
 	}
 
 	array<T, cols, rows> _transpose() const
@@ -1280,30 +2232,28 @@ namespace glvm
 	    return array<T, rows, 1>::vl[i];
 	}
 
-	const vec &operator=(const vec &a)  { array<T, rows, 1>::_op_assign(a); return *this; }
-	vec operator+(const vec &a) const   { return array<T, rows, 1>::_op_plus(a); }
-	const vec &operator+=(const vec &a) { array<T, rows, 1>::_op_plus_assign(a); return *this; }
-	vec operator+() const               { return array<T, rows, 1>::_op_unary_plus(); }
-	vec operator-(const vec &a) const   { return array<T, rows, 1>::_op_minus(a); }
-	const vec &operator-=(const vec &a) { array<T, rows, 1>::_op_minus_assign(a); return *this; }
-	vec operator-() const               { return array<T, rows, 1>::_op_unary_minus(); }
-	vec operator*(const T s) const      { return array<T, rows, 1>::_op_scal_mult(s); }
-	friend vec operator*(const T s, const vec &a) { return a._op_scal_mult(s); }
-	const vec &operator*=(const T s)    { array<T, rows, 1>::_op_scal_mult_assign(s); return *this; }
-	vec operator*(const vec &a) const   { return array<T, rows, 1>::_op_comp_mult(a); }
-	const vec &operator*=(const vec &a) { array<T, rows, 1>::_op_comp_mult_assign(a); return *this; }
-	vec operator/(const T s) const      { return array<T, rows, 1>::_op_scal_div(s); }
-	const vec &operator/=(const T s)    { array<T, rows, 1>::_op_scal_div_assign(s); return *this; }
-	vec operator/(const vec &a) const   { return array<T, rows, 1>::_op_comp_div(a); }
-	const vec &operator/=(const vec &a) { array<T, rows, 1>::_op_comp_div_assign(a); return *this; }
-	vec operator%(const T s) const      { return array<T, rows, 1>::_op_scal_mod(a); }
-	const vec &operator%=(const T s)    { array<T, rows, 1>::_op_scal_mod_assign(a); return *this; }
-	vec operator%(const vec &a) const   { return array<T, rows, 1>::_op_comp_mod(a); }
-	const vec &operator%=(const vec &a) { array<T, rows, 1>::_op_comp_mod_assign(a); return *this; }
-	bool operator==(const vec &a) const { return array<T, rows, 1>::_op_equal(a); }
-	bool operator!=(const vec &a) const { return array<T, rows, 1>::_op_notequal(a); }
-
-
+	const vec &operator=(const vec &a)                { array<T, rows, 1>::_op_assign(a); return *this; }
+	vec operator+(const array<T, rows, 1> &a) const   { return array<T, rows, 1>::_op_plus(a); }
+	const vec &operator+=(const array<T, rows, 1> &a) { array<T, rows, 1>::_op_plus_assign(a); return *this; }
+	vec operator+() const                             { return array<T, rows, 1>::_op_unary_plus(); }
+	vec operator-(const array<T, rows, 1> &a) const   { return array<T, rows, 1>::_op_minus(a); }
+	const vec &operator-=(const array<T, rows, 1> &a) { array<T, rows, 1>::_op_minus_assign(a); return *this; }
+	vec operator-() const                             { return array<T, rows, 1>::_op_unary_minus(); }
+	vec operator*(const T s) const                    { return array<T, rows, 1>::_op_scal_mult(s); }
+	friend vec operator*(const T s, const array<T, rows, 1> &a) { return a._op_scal_mult(s); }
+	const vec &operator*=(const T s)                  { array<T, rows, 1>::_op_scal_mult_assign(s); return *this; }
+	vec operator*(const array<T, rows, 1> &a) const   { return array<T, rows, 1>::_op_comp_mult(a); }
+	const vec &operator*=(const array<T, rows, 1> &a) { array<T, rows, 1>::_op_comp_mult_assign(a); return *this; }
+	vec operator/(const T s) const                    { return array<T, rows, 1>::_op_scal_div(s); }
+	const vec &operator/=(const T s)                  { array<T, rows, 1>::_op_scal_div_assign(s); return *this; }
+	vec operator/(const array<T, rows, 1> &a) const   { return array<T, rows, 1>::_op_comp_div(a); }
+	const vec &operator/=(const array<T, rows, 1> &a) { array<T, rows, 1>::_op_comp_div_assign(a); return *this; }
+	vec operator%(const T s) const                    { return array<T, rows, 1>::_op_scal_mod(s); }
+	const vec &operator%=(const T s)                  { array<T, rows, 1>::_op_scal_mod_assign(s); return *this; }
+	vec operator%(const array<T, rows, 1> &a) const   { return array<T, rows, 1>::_op_comp_mod(a); }
+	const vec &operator%=(const array<T, rows, 1> &a) { array<T, rows, 1>::_op_comp_mod_assign(a); return *this; }
+	bool operator==(const array<T, rows, 1> &a) const { return array<T, rows, 1>::_op_equal(a); }
+	bool operator!=(const array<T, rows, 1> &a) const { return array<T, rows, 1>::_op_notequal(a); }
 
 	/* Swizzling */
 
@@ -2521,79 +3471,81 @@ namespace glvm
 	swizzler4<T> qpts() { return swizzler4<T>(q(), p(), t(), s()); }
     };
 
-    template<typename T, int r> vec<T, r> sin(const vec<T, r> &v) { return v._sin(); }
-    template<typename T, int r> vec<T, r> cos(const vec<T, r> &v) { return v._cos(); }
-    template<typename T, int r> vec<T, r> tan(const vec<T, r> &v) { return v._tan(); }
-    template<typename T, int r> vec<T, r> asin(const vec<T, r> &v) { return v._asin(); }
-    template<typename T, int r> vec<T, r> acos(const vec<T, r> &v) { return v._acos(); }
-    template<typename T, int r> vec<T, r> atan(const vec<T, r> &v) { return v._atan(); }
-    template<typename T, int r> vec<T, r> atan(const vec<T, r> &v, const vec<T, r> &w) { return v._atan(w); }
-    template<typename T, int r> vec<T, r> radians(const vec<T, r> &v) { return v._radians(); }
-    template<typename T, int r> vec<T, r> degrees(const vec<T, r> &v) { return v._degrees(); }
+    template<typename T, int r> vec<T, r> sin(const array<T, r, 1> &v) { return v._sin(); }
+    template<typename T, int r> vec<T, r> cos(const array<T, r, 1> &v) { return v._cos(); }
+    template<typename T, int r> vec<T, r> tan(const array<T, r, 1> &v) { return v._tan(); }
+    template<typename T, int r> vec<T, r> asin(const array<T, r, 1> &v) { return v._asin(); }
+    template<typename T, int r> vec<T, r> acos(const array<T, r, 1> &v) { return v._acos(); }
+    template<typename T, int r> vec<T, r> atan(const array<T, r, 1> &v) { return v._atan(); }
+    template<typename T, int r> vec<T, r> atan(const array<T, r, 1> &v, const array<T, r, 1> &w) { return v._atan(w); }
+    template<typename T, int r> vec<T, r> radians(const array<T, r, 1> &v) { return v._radians(); }
+    template<typename T, int r> vec<T, r> degrees(const array<T, r, 1> &v) { return v._degrees(); }
 
-    template<typename T, int r> vec<T, r> pow(const vec<T, r> &v, const T p) { return v._pow(p); }
-    template<typename T, int r> vec<T, r> exp(const vec<T, r> &v) { return v._exp(); }
-    template<typename T, int r> vec<T, r> exp2(const vec<T, r> &v) { return v._exp2(); }
-    template<typename T, int r> vec<T, r> log(const vec<T, r> &v) { return v._log(); }
-    template<typename T, int r> vec<T, r> log2(const vec<T, r> &v) { return v._log2(); }
-    template<typename T, int r> vec<T, r> log10(const vec<T, r> &v) { return v._log10(); }
-    template<typename T, int r> vec<T, r> sqrt(const vec<T, r> &v) { return v._sqrt(); }
-    template<typename T, int r> vec<T, r> inversesqrt(const vec<T, r> &v) { return v._inversesqrt(); }
-    template<typename T, int r> vec<T, r> cbrt(const vec<T, r> &v) { return v._cbrt(); }
+    template<typename T, int r> vec<T, r> pow(const array<T, r, 1> &v, const T p) { return v._pow(p); }
+    template<typename T, int r> vec<T, r> exp(const array<T, r, 1> &v) { return v._exp(); }
+    template<typename T, int r> vec<T, r> exp2(const array<T, r, 1> &v) { return v._exp2(); }
+    template<typename T, int r> vec<T, r> log(const array<T, r, 1> &v) { return v._log(); }
+    template<typename T, int r> vec<T, r> log2(const array<T, r, 1> &v) { return v._log2(); }
+    template<typename T, int r> vec<T, r> log10(const array<T, r, 1> &v) { return v._log10(); }
+    template<typename T, int r> vec<T, r> sqrt(const array<T, r, 1> &v) { return v._sqrt(); }
+    template<typename T, int r> vec<T, r> inversesqrt(const array<T, r, 1> &v) { return v._inversesqrt(); }
+    template<typename T, int r> vec<T, r> cbrt(const array<T, r, 1> &v) { return v._cbrt(); }
 
-    template<typename T, int r> vec<bool, r> isfinite(const vec<T, r> &v) { return v._isfinite(); }
-    template<typename T, int r> vec<bool, r> isinf(const vec<T, r> &v) { return v._isinf(); }
-    template<typename T, int r> vec<bool, r> isnan(const vec<T, r> &v) { return v._isnan(); }
-    template<typename T, int r> vec<bool, r> isnormal(const vec<T, r> &v) { return v._isnormal(); }
+    template<typename T, int r> vec<bool, r> isfinite(const array<T, r, 1> &v) { return v._isfinite(); }
+    template<typename T, int r> vec<bool, r> isinf(const array<T, r, 1> &v) { return v._isinf(); }
+    template<typename T, int r> vec<bool, r> isnan(const array<T, r, 1> &v) { return v._isnan(); }
+    template<typename T, int r> vec<bool, r> isnormal(const array<T, r, 1> &v) { return v._isnormal(); }
 
-    template<typename T, int r> vec<T, r> abs(const vec<T, r> &v) { return v._abs(); }
-    template<typename T, int r> vec<T, r> sign(const vec<T, r> &v) { return v._sign(); }
-    template<typename T, int r> vec<T, r> floor(const vec<T, r> &v) { return v._floor(); }
-    template<typename T, int r> vec<T, r> ceil(const vec<T, r> &v) { return v._ceil(); }
-    template<typename T, int r> vec<T, r> round(const vec<T, r> &v) { return v._round(); }
-    template<typename T, int r> vec<T, r> fract(const vec<T, r> &v) { return v._fract(); }
+    template<typename T, int r> vec<T, r> abs(const array<T, r, 1> &v) { return v._abs(); }
+    template<typename T, int r> vec<T, r> sign(const array<T, r, 1> &v) { return v._sign(); }
+    template<typename T, int r> vec<T, r> floor(const array<T, r, 1> &v) { return v._floor(); }
+    template<typename T, int r> vec<T, r> ceil(const array<T, r, 1> &v) { return v._ceil(); }
+    template<typename T, int r> vec<T, r> round(const array<T, r, 1> &v) { return v._round(); }
+    template<typename T, int r> vec<T, r> fract(const array<T, r, 1> &v) { return v._fract(); }
 
-    template<typename T, int r> vec<T, r> min(const vec<T, r> &v, const T x) { return v._min(x); }
-    template<typename T, int r> vec<T, r> min(const vec<T, r> &v, const vec<T, r> &w) { return v._min(w); }
-    template<typename T, int r> vec<T, r> max(const vec<T, r> &v, const T x) { return v._max(x); }
-    template<typename T, int r> vec<T, r> max(const vec<T, r> &v, const vec<T, r> &w) { return v._max(w); }
+    template<typename T, int r> vec<T, r> min(const array<T, r, 1> &v, const T x) { return v._min(x); }
+    template<typename T, int r> vec<T, r> min(const array<T, r, 1> &v, const array<T, r, 1> &w) { return v._min(w); }
+    template<typename T, int r> vec<T, r> max(const array<T, r, 1> &v, const T x) { return v._max(x); }
+    template<typename T, int r> vec<T, r> max(const array<T, r, 1> &v, const array<T, r, 1> &w) { return v._max(w); }
 
-    template<typename T, int r> vec<T, r> clamp(const vec<T, r> &v, const T a, const T b) { return v._clamp(a, b); }
-    template<typename T, int r> vec<T, r> clamp(const vec<T, r> &v, const vec<T, r> &a, const vec<T, r> &b) { return v._clamp(a, b); }
-    template<typename T, int r> vec<T, r> mix(const vec<T, r> &v, const vec<T, r> &w, const T a) { return v._mix(w, a); }
-    template<typename T, int r> vec<T, r> mix(const vec<T, r> &v, const vec<T, r> &w, const vec<T, r> &a) { return v._mix(w, a); }
-    template<typename T, int r> vec<T, r> step(const vec<T, r> &v, const T a) { return v._step(a); }
-    template<typename T, int r> vec<T, r> step(const vec<T, r> &v, const vec<T, r> &a) { return v._step(a); }
-    template<typename T, int r> vec<T, r> smoothstep(const vec<T, r> &v, const T e0, const T e1) { return v._smoothstep(e0, e1); }
-    template<typename T, int r> vec<T, r> smoothstep(const vec<T, r> &v, const vec<T, 1> &e0, const vec<T, 1> &e1) { return v._smoothstep(e0, e1); }
-    template<typename T, int r> vec<T, r> mod(const vec<T, r> &v, const T x) { return v._mod(x); }
-    template<typename T, int r> vec<T, r> mod(const vec<T, r> &v, const vec<T, r> &w) { return v._mod(w); }
+    template<typename T, int r> vec<T, r> clamp(const array<T, r, 1> &v, const T a, const T b) { return v._clamp(a, b); }
+    template<typename T, int r> vec<T, r> clamp(const array<T, r, 1> &v, const array<T, r, 1> &a, const array<T, r, 1> &b) { return v._clamp(a, b); }
+    template<typename T, int r> vec<T, r> mix(const array<T, r, 1> &v, const array<T, r, 1> &w, const T a) { return v._mix(w, a); }
+    template<typename T, int r> vec<T, r> mix(const array<T, r, 1> &v, const array<T, r, 1> &w, const array<T, r, 1> &a) { return v._mix(w, a); }
+    template<typename T, int r> vec<T, r> step(const array<T, r, 1> &v, const T a) { return v._step(a); }
+    template<typename T, int r> vec<T, r> step(const array<T, r, 1> &v, const array<T, r, 1> &a) { return v._step(a); }
+    template<typename T, int r> vec<T, r> smoothstep(const array<T, r, 1> &v, const T e0, const T e1) { return v._smoothstep(e0, e1); }
+    template<typename T, int r> vec<T, r> smoothstep(const array<T, r, 1> &v, const array<T, r, 1> &e0, const array<T, r, 1> &e1) { return v._smoothstep(e0, e1); }
+    template<typename T, int r> vec<T, r> mod(const array<T, r, 1> &v, const T x) { return v._mod(x); }
+    template<typename T, int r> vec<T, r> mod(const array<T, r, 1> &v, const array<T, r, 1> &w) { return v._mod(w); }
 
-    template<typename T, int r> vec<bool, r> greaterThan(const vec<T, r> &v, const vec<T, r> &w) { return v._greaterThan(w); }
-    template<typename T, int r> vec<bool, r> greaterThanEqual(const vec<T, r> &v, const vec<T, r> &w) { return v._greaterThanEqual(w); }
-    template<typename T, int r> vec<bool, r> lessThan(const vec<T, r> &v, const vec<T, r> &w) { return v._lessThan(w); }
-    template<typename T, int r> vec<bool, r> lessThanEqual(const vec<T, r> &v, const vec<T, r> &w) { return v._lessThanEqual(w); }
-    template<typename T, int r> vec<bool, r> equal(const vec<T, r> &v, const vec<T, r> &w, const T epsilon = std::numeric_limits<T>::epsilon()) { return v._equal(w, epsilon); }
-    template<typename T, int r> vec<bool, r> notEqual(const vec<T, r> &v, const vec<T, r> &w, const T epsilon = std::numeric_limits<T>::epsilon()) { return v._notEqual(w, epsilon); }
-    template<int r> bool any(const vec<bool, r> &v) { return v._any(); }
-    template<int r> bool all(const vec<bool, r> &v) { return v._all(); }
-    template<int r> bool negate(const vec<bool, r> &v) { return v._negate(); }
+    template<typename T, int r> vec<bool, r> greaterThan(const array<T, r, 1> &v, const array<T, r, 1> &w) { return v._greaterThan(w); }
+    template<typename T, int r> vec<bool, r> greaterThanEqual(const array<T, r, 1> &v, const array<T, r, 1> &w) { return v._greaterThanEqual(w); }
+    template<typename T, int r> vec<bool, r> lessThan(const array<T, r, 1> &v, const array<T, r, 1> &w) { return v._lessThan(w); }
+    template<typename T, int r> vec<bool, r> lessThanEqual(const array<T, r, 1> &v, const array<T, r, 1> &w) { return v._lessThanEqual(w); }
+    template<typename T, int r> vec<bool, r> equal(const array<T, r, 1> &v, const array<T, r, 1> &w) { return v._equal(w); }
+    template<typename T, int r> vec<bool, r> equal(const array<T, r, 1> &v, const array<T, r, 1> &w, const int max_ulps) { return v._equal(w, max_ulps); }
+    template<typename T, int r> vec<bool, r> notEqual(const array<T, r, 1> &v, const array<T, r, 1> &w) { return v._notEqual(w); }
+    template<typename T, int r> vec<bool, r> notEqual(const array<T, r, 1> &v, const array<T, r, 1> &w, const int max_ulps) { return v._notEqual(w, max_ulps); }
+    template<int r> bool any(const array<bool, r, 1> &v) { return v._any(); }
+    template<int r> bool all(const array<bool, r, 1> &v) { return v._all(); }
+    template<int r> bool negate(const array<bool, r, 1> &v) { return v._negate(); }
 
-    template<typename T, int r> T length(const vec<T, r> &v) { return v._length(); }
-    template<typename T, int r> T distance(const vec<T, r> &v, const vec<T, r> &w) { return v._distance(w); }
-    template<typename T, int r> T dot(const vec<T, r> &v, const vec<T, r> &w) { return v._dot(w); }
-    template<typename T, int r> vec<T, r> normalize(const vec<T, r> &v) { return v._normalize(); }
+    template<typename T, int r> T length(const array<T, r, 1> &v) { return v._length(); }
+    template<typename T, int r> T distance(const array<T, r, 1> &v, const array<T, r, 1> &w) { return v._distance(w); }
+    template<typename T, int r> T dot(const array<T, r, 1> &v, const array<T, r, 1> &w) { return v._dot(w); }
+    template<typename T, int r> vec<T, r> normalize(const array<T, r, 1> &v) { return v._normalize(); }
 
-    template<typename T, int r> vec<T, r> faceforward(const vec<T, r> &v, const vec<T, r> &I, const vec<T, r> &Nref) { return v._faceforward(I, Nref); } 
-    template<typename T, int r> vec<T, r> reflect(const vec<T, r> &I, const vec<T, r> &N) { return I._reflect(N); }
-    template<typename T, int r> vec<T, r> refract(const vec<T, r> &I, const vec<T, r> &N, T eta) { return I._refract(N, eta); }
+    template<typename T, int r> vec<T, r> faceforward(const array<T, r, 1> &v, const array<T, r, 1> &I, const array<T, r, 1> &Nref) { return v._faceforward(I, Nref); } 
+    template<typename T, int r> vec<T, r> reflect(const array<T, r, 1> &I, const array<T, r, 1> &N) { return I._reflect(N); }
+    template<typename T, int r> vec<T, r> refract(const array<T, r, 1> &I, const array<T, r, 1> &N, T eta) { return I._refract(N, eta); }
 
-    template<typename T> vec<T, 3> cross(const vec<T, 3> &v, const vec<T, 3> &w)
+    template<typename T> vec<T, 3> cross(const array<T, 3, 1> &v, const array<T, 3, 1> &w)
     {
 	return vec<T, 3>(
-		v.y() * w.z() - v.z() * w.y(), 
-		v.z() * w.x() - v.x() * w.z(), 
-		v.x() * w.y() - v.y() * w.x());
+		v.vl[1] * w.vl[2] - v.vl[2] * w.vl[1], 
+		v.vl[2] * w.vl[0] - v.vl[0] * w.vl[2], 
+		v.vl[0] * w.vl[1] - v.vl[1] * w.vl[0]);
     }
 
     typedef vec<bool, 2> bvec2;
@@ -2834,8 +3786,10 @@ namespace glvm
     template<typename T, int r, int c> mat<bool, r, c> greaterThanEqual(const mat<T, r, c> &v, const mat<T, r, c> &w) { return v._greaterThanEqual(w); }
     template<typename T, int r, int c> mat<bool, r, c> lessThan(const mat<T, r, c> &v, const mat<T, r, c> &w) { return v._lessThan(w); }
     template<typename T, int r, int c> mat<bool, r, c> lessThanEqual(const mat<T, r, c> &v, const mat<T, r, c> &w) { return v._lessThanEqual(w); }
-    template<typename T, int r, int c> mat<bool, r, c> equal(const mat<T, r, c> &v, const mat<T, r, c> &w, const T epsilon = std::numeric_limits<T>::epsilon()) { return v._equal(w, epsilon); }
-    template<typename T, int r, int c> mat<bool, r, c> notEqual(const mat<T, r, c> &v, const mat<T, r, c> &w, const T epsilon = std::numeric_limits<T>::epsilon()) { return v._notEqual(w, epsilon); }
+    template<typename T, int r, int c> mat<bool, r, c> equal(const mat<T, r, c> &v, const mat<T, r, c> &w) { return v._equal(w); }
+    template<typename T, int r, int c> mat<bool, r, c> equal(const mat<T, r, c> &v, const mat<T, r, c> &w, const int max_ulps) { return v._equal(w, max_ulps); }
+    template<typename T, int r, int c> mat<bool, r, c> notEqual(const mat<T, r, c> &v, const mat<T, r, c> &w) { return v._notEqual(w); }
+    template<typename T, int r, int c> mat<bool, r, c> notEqual(const mat<T, r, c> &v, const mat<T, r, c> &w, const int max_ulps) { return v._notEqual(w, max_ulps); }
     template<int r, int c> bool any(const mat<bool, r, c> &v) { return v._any(); }
     template<int r, int c> bool all(const mat<bool, r, c> &v) { return v._all(); }
     template<int r, int c> bool negate(const mat<bool, r, c> &v) { return v._negate(); }
@@ -2850,39 +3804,6 @@ namespace glvm
 	for (int i = 0; i < r; i++)
 	    for (int j = 0; j < c; j++)
 		m[i][j] = v[i] * w[j];
-	return m;
-    }
-
-    template<typename T> mat<T, 3, 3> mat3FromAngleAxis(const T angle, const vec<T, 3> &axis)
-    {
-	const vec<T, 3> n = normalize(axis);
-	const T c = std::cos(angle);
-	const T s = std::sin(angle);
-	const T mc = static_cast<T>(1) - c;
-	mat<T, 3, 3> m;
-	m[0][0] = n.x() * n.x() * mc + c;
-	m[0][1] = n.x() * n.y() * mc - n.z() * s;
-	m[0][2] = n.x() * n.z() * mc + n.y() * s;
-	m[1][0] = n.y() * n.x() * mc + n.z() * s;
-	m[1][1] = n.y() * n.y() * mc + c;
-	m[1][2] = n.y() * n.z() * mc - n.x() * s;
-	m[2][0] = n.x() * n.z() * mc - n.y() * s;
-	m[2][1] = n.y() * n.z() * mc + n.x() * s;
-	m[2][2] = n.z() * n.z() * mc + c;
-	return m;
-    }
-
-    template<typename T> mat<T, 4, 4> mat4FromAngleAxis(const T angle, const vec<T, 3> &axis)
-    {
-	mat<T, 4, 4> m;
-	m._setSubArray(mat3FromAngleAxis(angle, axis));
-	m[0][3] = static_cast<T>(0);
-	m[1][3] = static_cast<T>(0);
-	m[2][3] = static_cast<T>(0);
-	m[3][0] = static_cast<T>(0);
-	m[3][1] = static_cast<T>(0);
-	m[3][2] = static_cast<T>(0);
-	m[3][3] = static_cast<T>(1);
 	return m;
     }
 
@@ -3078,16 +3999,6 @@ namespace glvm
 	return r;
     }
 
-    template<typename T> mat<T, 3, 3> rotate(const mat<T, 3, 3> &m, const T angle, const vec<T, 3> &axis)
-    {
-	return m * mat3FromAngleAxis(angle, axis);
-    }
-
-    template<typename T> mat<T, 4, 4> rotate(const mat<T, 4, 4> &m, const T angle, const vec<T, 3> &axis)
-    {
-	return m * mat4FromAngleAxis(angle, axis);
-    }
-
     typedef mat<float, 2, 2> mat2;
     typedef mat<double, 2, 2> dmat2;
     typedef mat<float, 3, 3> mat3;
@@ -3122,73 +4033,6 @@ namespace glvm
 	template<typename U>
 	quaternion(const quaternion<U> &q) : array<T, 4, 1>(q) {}
 	quaternion(const T w, const T x, const T y, const T z) : array<T, 4, 1>(w, x, y, z) {}
-
-	quaternion(const T angle, const vec<T, 3> &axis)
-	{
-	    vec<T, 3> naxis = normalize(axis);
-	    T sin_a = std::sin(angle / static_cast<T>(2));
-	    T cos_a = std::cos(angle / static_cast<T>(2));
-	    w() = cos_a;
-	    x() = naxis.x() * sin_a;
-	    y() = naxis.y() * sin_a;
-	    z() = naxis.z() * sin_a;
-	}
-
-	quaternion(const vec<T, 3> &euler_rot)
-	{
-	    // quaternion<T> qx, qy, qz;
-	    // qx.from_axis_angle(vec<T, 3>(1, 0, 0), rx)
-	    // qy.from_axis_angle(vec<T, 3>(1, 0, 0), ry)
-	    // qz.from_axis_angle(vec<T, 3>(1, 0, 0), rz)
-	    quaternion<T> qx(std::cos(euler_rot.x() / static_cast<T>(2)), std::sin(euler_rot.x() / static_cast<T>(2)), static_cast<T>(0), static_cast<T>(0));
-	    quaternion<T> qy(std::cos(euler_rot.y() / static_cast<T>(2)), static_cast<T>(0), std::sin(euler_rot.y() / static_cast<T>(2)), static_cast<T>(0));
-	    quaternion<T> qz(std::cos(euler_rot.z() / static_cast<T>(2)), static_cast<T>(0), static_cast<T>(0), std::sin(euler_rot.z() / static_cast<T>(2)));
-	    *this = qx * qy * qz;
-	    // TODO: Does this need to be optimized by cancelling out the
-	    // multiplications with zero? Or is the compiler smart enough to do this
-	    // for us?
-	}
-
-	quaternion(const mat<T, 3, 3> &rot_mat)
-	{
-	    // From "Matrix and Quaternion FAQ", Q55
-	    T t = static_cast<T>(1) + rot_mat[0][0] + rot_mat[1][1] + rot_mat[2][2];
-	    if (t > static_cast<T>(1e-8))
-	    {
-		const T s = sqrt(t) * static_cast<T>(2);
-		x() = (rot_mat[2][1] - rot_mat[1][2]) / s;
-		y() = (rot_mat[0][2] - rot_mat[2][0]) / s;
-		z() = (rot_mat[1][0] - rot_mat[0][1]) / s;
-		w() = s / static_cast<T>(4);
-	    }
-	    else if (rot_mat[0][0] > rot_mat[1][1] && rot_mat[0][0] > rot_mat[2][2])
-	    {
-		t = static_cast<T>(1) + rot_mat[0][0] - rot_mat[1][1] - rot_mat[2][2];
-		const T s = sqrt(t) * static_cast<T>(2);
-		x() = s / static_cast<T>(4);
-		y() = (rot_mat[1][0] + rot_mat[0][1]) / s;
-		z() = (rot_mat[0][2] + rot_mat[2][0]) / s;
-		w() = (rot_mat[2][1] - rot_mat[1][2]) / s;
-	    } 
-	    else if (rot_mat[1][1] > rot_mat[2][2])
-	    {
-		t = static_cast<T>(1) + rot_mat[1][1] - rot_mat[0][0] - rot_mat[2][2];
-		const T s = sqrt(t) * static_cast<T>(2);
-		x() = (rot_mat[1][0] + rot_mat[0][1]) / s;
-		y() = s / static_cast<T>(4);
-		z() = (rot_mat[2][1] + rot_mat[1][2]) / s;
-		w() = (rot_mat[0][2] - rot_mat[2][0]) / s;
-	    }
-	    else
-	    {
-		t = static_cast<T>(1) + rot_mat[2][2] - rot_mat[0][0] - rot_mat[1][1];
-		const T s = sqrt(t) * static_cast<T>(2);
-		x() = (rot_mat[0][2] + rot_mat[2][0]) / s;
-		y() = (rot_mat[2][1] + rot_mat[1][2]) / s;
-		z() = s / static_cast<T>(4);
-		w() = (rot_mat[1][0] - rot_mat[0][1]) / s;
-	    }
-	}
 
 	~quaternion() {}
 
@@ -3237,8 +4081,8 @@ namespace glvm
 	vec<T, 3> axis() const
 	{
 	    T cos_a = this->w();
-	    T sin_a = std::sqrt(static_cast<T>(1) - cos_a * cos_a);
-	    if (std::abs(sin_a) < static_cast<T>(0.0005))
+	    T sin_a = glvm::sqrt(static_cast<T>(1) - cos_a * cos_a);
+	    if (glvm::abs(sin_a) < static_cast<T>(0.0005))
 	    {
 		sin_a = static_cast<T>(1);
 	    }
@@ -3247,7 +4091,7 @@ namespace glvm
 
 	T angle() const
 	{
-	    return std::acos(this->w()) * static_cast<T>(2);
+	    return glvm::acos(this->w()) * static_cast<T>(2);
 	}
 
 	quaternion operator+() const
@@ -3292,64 +4136,6 @@ namespace glvm
     template<typename T> quaternion<T> conjugate(const quaternion<T> &q) { return quaternion<T>(q.w(), -q.x(), -q.y(), -q.z()); }
     template<typename T> quaternion<T> inverse(const quaternion<T> &q) { return conjugate(q)._op_scal_div(magnitude(q)); }
     template<typename T> quaternion<T> normalize(const quaternion<T> &q) { return q._op_scal_div(magnitude(q)); }
-
-    template<typename T> mat<T, 3, 3> toMat3(const quaternion<T> &q)
-    {
-	mat<T, 3, 3> m;
-	const T xx = q.x() * q.x();
-    	const T xy = q.x() * q.y();
-	const T xz = q.x() * q.z();
-	const T xw = q.x() * q.w();
-	const T yy = q.y() * q.y();
-	const T yz = q.y() * q.z();
-	const T yw = q.y() * q.w();
-	const T zz = q.z() * q.z();
-	const T zw = q.z() * q.w();
-	m[0][0] = static_cast<T>(1) - static_cast<T>(2) * (yy + zz);
-	m[0][1] = static_cast<T>(2) * (xy - zw);
-	m[0][2] = static_cast<T>(2) * (xz + yw);
-	m[1][0] = static_cast<T>(2) * (xy + zw);
-	m[1][1] = static_cast<T>(1) - static_cast<T>(2) * (xx + zz);
-	m[1][2] = static_cast<T>(2) * (yz - xw);
-	m[2][0] = static_cast<T>(2) * (xz - yw);
-	m[2][1] = static_cast<T>(2) * (yz + xw);
-	m[2][2] = static_cast<T>(1) - static_cast<T>(2) * (xx + yy);
-	return m;
-    }
-
-    template<typename T> mat<T, 3, 3> toMat3(const vec<T, 3> &euler_rot)
-    {
-	return mat3(quaternion<T>(euler_rot));
-    }
-
-    template<typename T> mat<T, 4, 4> toMat4(const quaternion<T> &q)
-    {
-	mat<T, 4, 4> m;
-	m._setSubArray(toMat3(q));
-	m[0][3] = static_cast<T>(0);
-    	m[1][3] = static_cast<T>(0);
-	m[2][3] = static_cast<T>(0);
-	m[3][0] = static_cast<T>(0);
-	m[3][1] = static_cast<T>(0);
-	m[3][2] = static_cast<T>(0);
-	m[3][3] = static_cast<T>(1);
-	return m;
-    }
-
-    template<typename T> mat<T, 4, 4> toMat4(const vec<T, 3> &euler_rot)
-    {
-	return mat4(quaternion<T>(euler_rot));
-    }
-    
-    template<typename T> vec<T, 3> toEuler(const quaternion<T> &q)
-    {
-	return vec<T, 3>(
-		std::atan(static_cast<T>(2) * (q.w() * q.x() + q.y() * q.z()) 
-		    / (static_cast<T>(1) - static_cast<T>(2) * (q.x() * q.x() + q.y() * q.y()))),
-		std::asin(static_cast<T>(2) * (q.w() * q.y() - q.x() * q.z())),
-		std::atan(static_cast<T>(2) * (q.w() * q.z() + q.x() * q.y()) 
-		    / (static_cast<T>(1) - static_cast<T>(2) * (q.y() * q.y() + q.z() * q.z()))));
-    }
 
     typedef quaternion<float> quat;
     typedef quaternion<double> dquat;
@@ -3425,6 +4211,181 @@ namespace glvm
 
     typedef frustum<float> frust;
     typedef frustum<double> dfrust;
+
+
+    /* Conversions between different representations of rotations:
+     * from angle/axis, euler angles, mat3 to quat
+     * from angle/axis, euler angles, quat to mat3
+     * from angle/axis, euler angles, quat to mat4
+     * from angle/axis, mat3, quat to euler angles
+     * TODO: Conversions from euler angles, mat3, quat to angle/axis.
+     */
+
+    template<typename T> quaternion<T> toQuat(const T angle, const vec<T, 3> &axis)
+    {
+	vec<T, 3> naxis = normalize(axis);
+	T sin_a = glvm::sin(angle / static_cast<T>(2));
+	T cos_a = glvm::cos(angle / static_cast<T>(2));
+	return quaternion<T>(cos_a, naxis.x() * sin_a, naxis.y() * sin_a, naxis.z() * sin_a);
+    }
+
+    template<typename T> quaternion<T> toQuat(const vec<T, 3> &euler_rot)
+    {
+	// quaternion<T> qx, qy, qz;
+	// qx.from_axis_angle(vec<T, 3>(1, 0, 0), rx)
+	// qy.from_axis_angle(vec<T, 3>(1, 0, 0), ry)
+	// qz.from_axis_angle(vec<T, 3>(1, 0, 0), rz)
+	quaternion<T> qx(glvm::cos(euler_rot.x() / static_cast<T>(2)), glvm::sin(euler_rot.x() / static_cast<T>(2)), static_cast<T>(0), static_cast<T>(0));
+	quaternion<T> qy(glvm::cos(euler_rot.y() / static_cast<T>(2)), static_cast<T>(0), glvm::sin(euler_rot.y() / static_cast<T>(2)), static_cast<T>(0));
+	quaternion<T> qz(glvm::cos(euler_rot.z() / static_cast<T>(2)), static_cast<T>(0), static_cast<T>(0), glvm::sin(euler_rot.z() / static_cast<T>(2)));
+	return qx * qy * qz;
+	// TODO: Does this need to be optimized by cancelling out the
+	// multiplications with zero? Or is the compiler smart enough to do this
+	// for us?
+    }
+
+    template<typename T> quaternion<T> toQuat(const mat<T, 3, 3> &rot_mat)
+    {
+	quaternion<T> q;
+	// From "Matrix and Quaternion FAQ", Q55
+	T t = static_cast<T>(1) + rot_mat[0][0] + rot_mat[1][1] + rot_mat[2][2];
+	if (t > static_cast<T>(1e-8))
+	{
+	    const T s = sqrt(t) * static_cast<T>(2);
+	    q.x() = (rot_mat[2][1] - rot_mat[1][2]) / s;
+	    q.y() = (rot_mat[0][2] - rot_mat[2][0]) / s;
+	    q.z() = (rot_mat[1][0] - rot_mat[0][1]) / s;
+	    q.w() = s / static_cast<T>(4);
+	}
+	else if (rot_mat[0][0] > rot_mat[1][1] && rot_mat[0][0] > rot_mat[2][2])
+	{
+	    t = static_cast<T>(1) + rot_mat[0][0] - rot_mat[1][1] - rot_mat[2][2];
+	    const T s = sqrt(t) * static_cast<T>(2);
+	    q.x() = s / static_cast<T>(4);
+	    q.y() = (rot_mat[1][0] + rot_mat[0][1]) / s;
+	    q.z() = (rot_mat[0][2] + rot_mat[2][0]) / s;
+	    q.w() = (rot_mat[2][1] - rot_mat[1][2]) / s;
+	} 
+	else if (rot_mat[1][1] > rot_mat[2][2])
+	{
+	    t = static_cast<T>(1) + rot_mat[1][1] - rot_mat[0][0] - rot_mat[2][2];
+	    const T s = sqrt(t) * static_cast<T>(2);
+	    q.x() = (rot_mat[1][0] + rot_mat[0][1]) / s;
+	    q.y() = s / static_cast<T>(4);
+	    q.z() = (rot_mat[2][1] + rot_mat[1][2]) / s;
+	    q.w() = (rot_mat[0][2] - rot_mat[2][0]) / s;
+	}
+	else
+	{
+	    t = static_cast<T>(1) + rot_mat[2][2] - rot_mat[0][0] - rot_mat[1][1];
+	    const T s = sqrt(t) * static_cast<T>(2);
+	    q.x() = (rot_mat[0][2] + rot_mat[2][0]) / s;
+	    q.y() = (rot_mat[2][1] + rot_mat[1][2]) / s;
+	    q.z() = s / static_cast<T>(4);
+	    q.w() = (rot_mat[1][0] - rot_mat[0][1]) / s;
+	}
+    }
+
+    template<typename T> mat<T, 3, 3> toMat3(const T angle, const vec<T, 3> &axis)
+    {
+	const vec<T, 3> n = normalize(axis);
+	const T c = glvm::cos(angle);
+	const T s = glvm::sin(angle);
+	const T mc = static_cast<T>(1) - c;
+	mat<T, 3, 3> m;
+	m[0][0] = n.x() * n.x() * mc + c;
+	m[0][1] = n.x() * n.y() * mc - n.z() * s;
+	m[0][2] = n.x() * n.z() * mc + n.y() * s;
+	m[1][0] = n.y() * n.x() * mc + n.z() * s;
+	m[1][1] = n.y() * n.y() * mc + c;
+	m[1][2] = n.y() * n.z() * mc - n.x() * s;
+	m[2][0] = n.x() * n.z() * mc - n.y() * s;
+	m[2][1] = n.y() * n.z() * mc + n.x() * s;
+	m[2][2] = n.z() * n.z() * mc + c;
+	return m;
+    }
+
+    template<typename T> mat<T, 3, 3> toMat3(const vec<T, 3> &euler_rot)
+    {
+	return toMat3(toQuat(euler_rot));
+    }
+
+    template<typename T> mat<T, 3, 3> toMat3(const quaternion<T> &q)
+    {
+	mat<T, 3, 3> m;
+	const T xx = q.x() * q.x();
+    	const T xy = q.x() * q.y();
+	const T xz = q.x() * q.z();
+	const T xw = q.x() * q.w();
+	const T yy = q.y() * q.y();
+	const T yz = q.y() * q.z();
+	const T yw = q.y() * q.w();
+	const T zz = q.z() * q.z();
+	const T zw = q.z() * q.w();
+	m[0][0] = static_cast<T>(1) - static_cast<T>(2) * (yy + zz);
+	m[0][1] = static_cast<T>(2) * (xy - zw);
+	m[0][2] = static_cast<T>(2) * (xz + yw);
+	m[1][0] = static_cast<T>(2) * (xy + zw);
+	m[1][1] = static_cast<T>(1) - static_cast<T>(2) * (xx + zz);
+	m[1][2] = static_cast<T>(2) * (yz - xw);
+	m[2][0] = static_cast<T>(2) * (xz - yw);
+	m[2][1] = static_cast<T>(2) * (yz + xw);
+	m[2][2] = static_cast<T>(1) - static_cast<T>(2) * (xx + yy);
+	return m;
+    }
+
+    template<typename T> mat<T, 4, 4> toMat4(const T angle, const vec<T, 3> &axis)
+    {
+	mat<T, 4, 4> m;
+	m._setSubArray(mat3(angle, axis));
+	m[0][3] = static_cast<T>(0);
+	m[1][3] = static_cast<T>(0);
+	m[2][3] = static_cast<T>(0);
+	m[3][0] = static_cast<T>(0);
+	m[3][1] = static_cast<T>(0);
+	m[3][2] = static_cast<T>(0);
+	m[3][3] = static_cast<T>(1);
+	return m;
+    }
+
+    template<typename T> mat<T, 4, 4> toMat4(const vec<T, 3> &euler_rot)
+    {
+	return toMat4(toQuat(euler_rot));
+    }
+
+    template<typename T> mat<T, 4, 4> toMat4(const quaternion<T> &q)
+    {
+	mat<T, 4, 4> m;
+	m._setSubArray(toMat3(q));
+	m[0][3] = static_cast<T>(0);
+    	m[1][3] = static_cast<T>(0);
+	m[2][3] = static_cast<T>(0);
+	m[3][0] = static_cast<T>(0);
+	m[3][1] = static_cast<T>(0);
+	m[3][2] = static_cast<T>(0);
+	m[3][3] = static_cast<T>(1);
+	return m;
+    }
+    
+    template<typename T> vec<T, 3> toEuler(const T angle, const vec<T, 3> &axis)
+    {
+	return toEuler(toQuat(angle, axis));
+    }
+
+    template<typename T> mat<T, 3, 3> toEuler(const mat<T, 3, 3> &rot_mat)
+    {
+	return toEuler(toQuat(rot_mat));
+    }
+
+    template<typename T> vec<T, 3> toEuler(const quaternion<T> &q)
+    {
+	return vec<T, 3>(
+		glvm::atan(static_cast<T>(2) * (q.w() * q.x() + q.y() * q.z()) 
+		    / (static_cast<T>(1) - static_cast<T>(2) * (q.x() * q.x() + q.y() * q.y()))),
+		glvm::asin(static_cast<T>(2) * (q.w() * q.y() - q.x() * q.z())),
+		glvm::atan(static_cast<T>(2) * (q.w() * q.z() + q.x() * q.y()) 
+		    / (static_cast<T>(1) - static_cast<T>(2) * (q.y() * q.y() + q.z() * q.z()))));
+    }
 }
 
 #endif

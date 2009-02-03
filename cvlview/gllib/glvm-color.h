@@ -3,7 +3,7 @@
  * 
  * C++ vector and matrix classes that resemble GLSL style.
  *
- * Copyright (C) 2008  Martin Lambers <marlam@marlam.de>
+ * Copyright (C) 2008, 2009  Martin Lambers <marlam@marlam.de>
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -151,7 +151,7 @@ namespace glvm
 	const float delta = maxval - minval;
 
 	hsl.z() = (maxval + minval) / 2.0f;
-	if (std::abs(maxval - minval) < std::numeric_limits<float>::epsilon())
+	if (abs(maxval - minval) < std::numeric_limits<float>::epsilon())
 	{
 	    hsl.x() = 0.0f;
 	    hsl.y() = 0.0f;
@@ -159,13 +159,13 @@ namespace glvm
 	else
 	{
 	    hsl.y() = delta / ((hsl.z() <= 0.5f) ? (maxval + minval) : (2.0f - maxval - minval));
-	    if (std::abs(maxval - rgb.r()) < std::numeric_limits<float>::epsilon())
+	    if (abs(maxval - rgb.r()) < std::numeric_limits<float>::epsilon())
 	    {
 		hsl.x() = (60.0f / 360.0f) * (rgb.g() - rgb.b()) / (maxval - minval);
 		if (rgb.g() < rgb.b())
 		    hsl.x() += 360.0f / 360.0f;
 	    }
-	    else if (std::abs(maxval - rgb.g()) < std::numeric_limits<float>::epsilon())
+	    else if (abs(maxval - rgb.g()) < std::numeric_limits<float>::epsilon())
 	    {
 		hsl.x() = (60.0f / 360.0f) * (rgb.b() - rgb.r()) / (maxval - minval) + (120.0f / 360.0f);
 	    }
@@ -186,7 +186,7 @@ namespace glvm
 	for (int i = 0; i < 3; i++)
 	{
 	    float t = xyz[i] / d65_xyz[i];
-	    tmp[i] = (t > 0.00885645167903563081f ? GLVM_C99_BUT_NOT_CXX98_MATHFUNC_NAMESPACE::cbrt(t) : 7.78703703703703703694f * t + 0.13793103448275862068f);
+	    tmp[i] = (t > 0.00885645167903563081f ? cbrt(t) : 7.78703703703703703694f * t + 0.13793103448275862068f);
 	}
 	return vec3(116.0f * tmp[1] - 16.0f, 500.0f * (tmp[0] - tmp[1]), 200.0f * (tmp[1] - tmp[2]));
     }
