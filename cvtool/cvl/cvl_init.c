@@ -101,11 +101,6 @@ void cvl_init(void)
 	cvl_error_set(CVL_ERROR_GL, "Cannot initialize GLEW: %s", glewGetErrorString(err));
 	return;
     }
-    if (!glewIsSupported("GL_VERSION_2_1"))
-    {
-	cvl_error_set(CVL_ERROR_GL, "OpenGL version 2.1 is not available");
-    	return;
-    }
     for (size_t i = 0; i < gl_extension_list_len; i++)
     {
 	if (!glewIsSupported(gl_extension_list[i]))
