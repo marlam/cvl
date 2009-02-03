@@ -64,23 +64,21 @@ cvlview_LDADD = \
 	$(top_builddir)/gllib/libgl.a		\
 	$(top_builddir)/mhlib/libmh.a		\
 	$(top_builddir)/gnulib/libgnu.a		\
-	$(QT4_LIBS) $(LTLIBCVL) $(LTLIBGLEW)
+	$(LIBQTOPENGL) $(LIBCVL) $(LIBGLEW)
 
 cvlview_CPPFLAGS = \
 	-I$(top_builddir)/gnulib -I$(top_srcdir)/gnulib	\
 	-I$(top_srcdir)/mhlib				\
 	-I$(top_srcdir)/gllib
 
-cvlview_CXXFLAGS = $(QT4_CXXFLAGS)
-
 .ico.o:
 	echo "IDI_ICON1 ICON DISCARDABLE \"$<\"" | $(WINDRES) -o $@
 
 moc_%.cpp: %.h
-	$(QT4_MOC) -o $@ $<
+	$(MOC) -o $@ $<
 
 rcc_%.cpp: %.qrc $(RESOURCES)
-	$(QT4_RCC) -o $@ $<
+	$(RCC) -o $@ $<
 
 %.glsl.h: %.glsl
 	DIRNAME="`echo $@ | sed -e s/\\\.glsl\\\.h$$// -e s/[a-zA-Z0-9_-]*$$// -e s/\\\/$$//`"; \
