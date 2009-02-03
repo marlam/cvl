@@ -30,7 +30,7 @@ AC_DEFUN([AM_CVL],
 AC_LIB_HAVE_LINKFLAGS([cvl], [], 
 	[#include <cvl/cvl.h>
 	 #if (CVL_VERSION_MAJOR < $1) || (CVL_VERSION_MAJOR == $1 && CVL_VERSION_MINOR < $2) || (CVL_VERSION_MAJOR == $1 && CVL_VERSION_MINOR == $2 && CVL_VERSION_PATCH < $3)
-	 CVL version too old
+	 # error CVL version too old
 	 #endif], 
 	[cvl_init();])
 ])

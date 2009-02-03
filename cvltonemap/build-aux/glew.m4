@@ -3,7 +3,7 @@ dnl glew.m4
 dnl 
 dnl This file is part of CVL, a computer vision library.
 dnl
-dnl Copyright (C) 2007, 2008  Martin Lambers <marlam@marlam.de>
+dnl Copyright (C) 2007, 2008, 2009  Martin Lambers <marlam@marlam.de>
 dnl
 dnl   This program is free software; you can redistribute it and/or modify
 dnl   it under the terms of the GNU General Public License as published by
@@ -34,13 +34,13 @@ AC_DEFUN([AM_GLEW],
 	*-*-mingw32*)
 		AC_DEFINE([GLEW_STATIC], [1], [Use static GLEW on W32.])
 		AC_LIB_FROMPACKAGE([glew32s], [libglew])
-		AC_LIB_HAVE_LINKFLAGS([glew32s], [glu32 opengl32], 
+		AC_LIB_HAVE_LINKFLAGS([glew32s], [], 
 		  [#define GLEW_STATIC 1
 		   #include <GL/glew.h>],
 		  [GLEW_VERSION_2_1])
-		if test "$HAVE_LIBGLEW32S" = "yes"; then
-			HAVE_LIBGLEW=yes
-			AC_SUBST([HAVE_LIBGLEW])
+		HAVE_LIBGLEW="$HAVE_LIBGLEW32S"
+		AC_SUBST([HAVE_LIBGLEW])
+		if test "$HAVE_LIBGLEW" = "yes"; then
 			LIBGLEW="$LIBGLEW32S"
 			AC_SUBST([LIBGLEW])
 			LTLIBGLEW="$LTLIBGLEW32S"
@@ -48,7 +48,8 @@ AC_DEFUN([AM_GLEW],
 		fi
 		;; 
 	*) 
-		AC_LIB_HAVE_LINKFLAGS([GLEW], [GLU GL], [#include <GL/glew.h>], [GLEW_VERSION_2_1])
+		AC_LIB_FROMPACKAGE([GLEW], [libglew])
+		AC_LIB_HAVE_LINKFLAGS([GLEW], [], [#include <GL/glew.h>], [GLEW_VERSION_2_1])
 		;; 
 	esac
 ])
