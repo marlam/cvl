@@ -1,5 +1,9 @@
 2009-02-03  Martin Lambers <marlam@marlam.de>
 
+	* build-aux/glew.m4: Improve.
+
+2009-02-03  Martin Lambers <marlam@marlam.de>
+
 	* Gnulib update.
 
 2009-02-03  Martin Lambers <marlam@marlam.de>
