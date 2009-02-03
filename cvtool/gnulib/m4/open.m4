@@ -1,17 +1,15 @@
-# open.m4 serial 2
-dnl Copyright (C) 2007-2008 Free Software Foundation, Inc.
+# open.m4 serial 5
+dnl Copyright (C) 2007-2009 Free Software Foundation, Inc.
 dnl This file is free software; the Free Software Foundation
 dnl gives unlimited permission to copy and/or distribute it,
 dnl with or without modifications, as long as this notice is preserved.
 
 AC_DEFUN([gl_FUNC_OPEN],
 [
-  AC_REQUIRE([gl_FCNTL_H_DEFAULTS])
   AC_REQUIRE([AC_CANONICAL_HOST])
   case "$host_os" in
     mingw* | pw*)
-      REPLACE_OPEN=1
-      AC_LIBOBJ([open])
+      gl_REPLACE_OPEN
       ;;
     *)
       dnl open("foo/") should not create a file when the file name has a
@@ -41,12 +39,28 @@ changequote([,])dnl
         ])
       case "$gl_cv_func_open_slash" in
         *no)
-          AC_DEFINE([OPEN_TRAILING_SLASH_BUG], 1,
+          AC_DEFINE([OPEN_TRAILING_SLASH_BUG], [1],
             [Define to 1 if open() fails to recognize a trailing slash.])
-          REPLACE_OPEN=1
-          AC_LIBOBJ([open])
+          gl_REPLACE_OPEN
           ;;
       esac
       ;;
   esac
+])
+
+AC_DEFUN([gl_REPLACE_OPEN],
+[
+  AC_REQUIRE([gl_FCNTL_H_DEFAULTS])
+  if test $REPLACE_OPEN != 1; then
+    AC_LIBOBJ([open])
+    gl_PREREQ_OPEN
+  fi
+  REPLACE_OPEN=1
+])
+
+# Prerequisites of lib/open.c.
+AC_DEFUN([gl_PREREQ_OPEN],
+[
+  AC_REQUIRE([AC_C_INLINE])
+  :
 ])

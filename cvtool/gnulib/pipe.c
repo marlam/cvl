@@ -1,5 +1,5 @@
 /* Creation of subprocesses, communicating via pipes.
-   Copyright (C) 2001-2004, 2006-2008 Free Software Foundation, Inc.
+   Copyright (C) 2001-2004, 2006-2009 Free Software Foundation, Inc.
    Written by Bruno Haible <haible@clisp.cons.org>, 2001.
 
    This program is free software: you can redistribute it and/or modify
@@ -44,24 +44,8 @@
 #else
 
 /* Unix API.  */
-# if HAVE_POSIX_SPAWN
-#  include <spawn.h>
-# else
-#  if HAVE_VFORK_H
-#   include <vfork.h>
-#  endif
-# endif
+# include <spawn.h>
 
-#endif
-
-#ifndef STDIN_FILENO
-# define STDIN_FILENO 0
-#endif
-#ifndef STDOUT_FILENO
-# define STDOUT_FILENO 1
-#endif
-#ifndef STDERR_FILENO
-# define STDERR_FILENO 2
 #endif
 
 /* The results of open() in this file are not used with fchdir,
@@ -145,6 +129,7 @@ create_pipe (const char *progname,
   int stdinfd;
   int stdoutfd;
 
+  /* FIXME: Need to free memory allocated by prepare_spawn.  */
   prog_argv = prepare_spawn (prog_argv);
 
   if (pipe_stdout)
@@ -201,7 +186,25 @@ create_pipe (const char *progname,
        we want in the case of STD*_FILENO) and also orig_stdin,
        orig_stdout, orig_stderr (which is not explicitly wanted but
        harmless).  */
-    child = spawnvp (P_NOWAIT, prog_path, prog_argv);
+    /* Use spawnvpe and pass the environment explicitly.  This is needed if
+       the program has modified the environment using putenv() or [un]setenv().
+       On Windows, programs have two environments, one in the "environment
+       block" of the process and managed through SetEnvironmentVariable(), and
+       one inside the process, in the location retrieved by the 'environ'
+       macro.  When using spawnvp() without 'e', the child process inherits a
+       copy of the environment block - ignoring the effects of putenv() and
+       [un]setenv().  */
+    {
+      child = spawnvpe (P_NOWAIT, prog_path, prog_argv, environ);
+      if (child < 0 && errno == ENOEXEC)
+	{
+	  /* prog is not an native executable.  Try to execute it as a
+	     shell script.  Note that prepare_spawn() has already prepended
+	     a hidden element "sh.exe" to prog_argv.  */
+	  --prog_argv;
+	  child = spawnvpe (P_NOWAIT, prog_argv[0], prog_argv, environ);
+	}
+    }
   if (stdinfd >= 0)
     close (stdinfd);
   if (stdoutfd >= 0)
@@ -244,7 +247,6 @@ create_pipe (const char *progname,
   /* Unix API.  */
   int ifd[2];
   int ofd[2];
-# if HAVE_POSIX_SPAWN
   sigset_t blocked_signals;
   posix_spawn_file_actions_t actions;
   bool actions_allocated;
@@ -252,9 +254,6 @@ create_pipe (const char *progname,
   bool attrs_allocated;
   int err;
   pid_t child;
-# else
-  int child;
-# endif
 
   if (pipe_stdout)
     if (pipe (ifd) < 0
@@ -273,7 +272,6 @@ create_pipe (const char *progname,
  *
  */
 
-# if HAVE_POSIX_SPAWN
   if (slave_process)
     {
       sigprocmask (SIG_SETMASK, NULL, &blocked_signals);
@@ -361,64 +359,6 @@ create_pipe (const char *progname,
   posix_spawn_file_actions_destroy (&actions);
   if (attrs_allocated)
     posix_spawnattr_destroy (&attrs);
-# else
-  if (slave_process)
-    block_fatal_signals ();
-  /* Use vfork() instead of fork() for efficiency.  */
-  if ((child = vfork ()) == 0)
-    {
-      /* Child process code.  */
-      int nulloutfd;
-      int stdinfd;
-      int stdoutfd;
-
-      if ((!pipe_stdin || dup2 (ofd[0], STDIN_FILENO) >= 0)
-	  && (!pipe_stdout || dup2 (ifd[1], STDOUT_FILENO) >= 0)
-	  && (!pipe_stdin || close (ofd[0]) >= 0)
-	  && (!pipe_stdout || close (ifd[1]) >= 0)
-	  && (!pipe_stdin || close (ofd[1]) >= 0)
-	  && (!pipe_stdout || close (ifd[0]) >= 0)
-	  && (!null_stderr
-	      || ((nulloutfd = open ("/dev/null", O_RDWR, 0)) >= 0
-		  && (nulloutfd == STDERR_FILENO
-		      || (dup2 (nulloutfd, STDERR_FILENO) >= 0
-			  && close (nulloutfd) >= 0))))
-	  && (pipe_stdin
-	      || prog_stdin == NULL
-	      || ((stdinfd = open (prog_stdin, O_RDONLY, 0)) >= 0
-		  && (stdinfd == STDIN_FILENO
-		      || (dup2 (stdinfd, STDIN_FILENO) >= 0
-			  && close (stdinfd) >= 0))))
-	  && (pipe_stdout
-	      || prog_stdout == NULL
-	      || ((stdoutfd = open (prog_stdout, O_WRONLY, 0)) >= 0
-		  && (stdoutfd == STDOUT_FILENO
-		      || (dup2 (stdoutfd, STDOUT_FILENO) >= 0
-			  && close (stdoutfd) >= 0))))
-	  && (!slave_process || (unblock_fatal_signals (), true)))
-	execvp (prog_path, prog_argv);
-      _exit (127);
-    }
-  if (child == -1)
-    {
-      if (slave_process)
-	unblock_fatal_signals ();
-      if (exit_on_error || !null_stderr)
-	error (exit_on_error ? EXIT_FAILURE : 0, errno,
-	       _("%s subprocess failed"), progname);
-      if (pipe_stdout)
-	{
-	  close (ifd[0]);
-	  close (ifd[1]);
-	}
-      if (pipe_stdin)
-	{
-	  close (ofd[0]);
-	  close (ofd[1]);
-	}
-      return -1;
-    }
-# endif
   if (slave_process)
     {
       register_slave_subprocess (child);

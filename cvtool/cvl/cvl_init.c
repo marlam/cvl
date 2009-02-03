@@ -36,8 +36,6 @@
 
 #include <GL/glew.h>
 
-#include "strverscmp.h"
-
 #include "cvl_intern.h"
 #include "cvl/cvl_error.h"
 #include "cvl/cvl_gl.h"

@@ -1,6 +1,5 @@
-/* Provide a non-threads replacement for the POSIX raise function.
-
-   Copyright (C) 2002, 2003, 2005, 2006 Free Software Foundation, Inc.
+/* Copyright (C) 2000 Free Software Foundation, Inc.
+   This file is part of the GNU C Library.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -15,16 +14,20 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-/* written by Jim Meyering */
-
 #include <config.h>
 
-#include <sys/types.h>
-#include <signal.h>
-#include <unistd.h>
+/* Specification.  */
+#include <spawn.h>
 
+#include "spawn_int.h"
+
+/* Spawn a new process executing FILE with the attributes describes in *ATTRP.
+   Before running the process perform the actions described in FILE-ACTIONS. */
 int
-raise (int sig)
+posix_spawnp (pid_t *pid, const char *file,
+	      const posix_spawn_file_actions_t *file_actions,
+	      const posix_spawnattr_t *attrp, char *const argv[],
+	      char *const envp[])
 {
-  return kill (getpid (), sig);
+  return __spawni (pid, file, file_actions, attrp, argv, envp, 1);
 }

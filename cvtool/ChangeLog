@@ -1,5 +1,9 @@
 2009-02-03  Martin Lambers <marlam@marlam.de>
 
+	* Gnulib update.
+
+2009-02-03  Martin Lambers <marlam@marlam.de>
+
 	* cvl/cvl_init.c: Do not test for GLEW_VERSION_2_1 because it is not 
 	defined when OpenGL 3 is active.
 
