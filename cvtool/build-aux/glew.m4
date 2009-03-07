@@ -34,7 +34,7 @@ AC_DEFUN([AM_GLEW],
 	*-*-mingw32*)
 		AC_DEFINE([GLEW_STATIC], [1], [Use static GLEW on W32.])
 		AC_LIB_FROMPACKAGE([glew32s], [libglew])
-		AC_LIB_HAVE_LINKFLAGS([glew32s], [], 
+		AC_LIB_HAVE_LINKFLAGS([glew32s], [glu32 opengl32], 
 		  [#define GLEW_STATIC 1
 		   #include <GL/glew.h>],
 		  [GLEW_VERSION_2_1])
