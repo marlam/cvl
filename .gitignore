@@ -10,4 +10,6 @@ config.status
 configure
 cvl.info
 cvtool.info
+cvlview.info
+cvltonemap.info
 *~
