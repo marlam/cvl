@@ -8,4 +8,6 @@ config.h.in
 config.log
 config.status
 configure
+cvl.info
+cvtool.info
 *~
