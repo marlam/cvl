@@ -16,6 +16,8 @@ if W32
 cvltonemap_SOURCES += appicon.ico
 endif
 
+RESOURCES = appicon.png
+
 nodist_cvltonemap_SOURCES = \
 	moc_cvltonemap.cpp		\
 	moc_tonemap_selector.cpp	\
@@ -45,7 +47,7 @@ cvltonemap_CPPFLAGS = \
 	echo "IDI_ICON1 ICON DISCARDABLE \"$<\"" | $(WINDRES) -o $@
 
 moc_%.cpp: %.h
-	$(QT4_MOC) -o $@ $<
+	$(MOC) -o $@ $<
 
-rcc_%.cpp: %.qrc
-	$(QT4_RCC) -o $@ $<
+rcc_%.cpp: %.qrc $(RESOURCES)
+	$(RCC) -o $@ $<
