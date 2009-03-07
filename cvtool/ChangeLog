@@ -2,6 +2,7 @@
 
 	* Gnulib update.
 	* Move from SVN to git.
+	* cvl/glsl/wavelets/*.glsl: Minor compatibility fix.
 
 2009-02-03  Martin Lambers <marlam@marlam.de>
 
