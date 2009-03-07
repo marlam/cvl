@@ -1,3 +1,8 @@
+2009-03-07  Martin Lambers <marlam@marlam.de>
+
+	* Gnulib update.
+	* Move from SVN to git.
+
 2009-02-03  Martin Lambers <marlam@marlam.de>
 
 	* build-aux/glew.m4: Improve.
