@@ -304,6 +304,7 @@ AC_DEFUN([gltests_LIBSOURCES], [
 # gnulib-tool and may be removed by future gnulib-tool invocations.
 AC_DEFUN([gl_FILE_LIST], [
   build-aux/config.rpath
+  build-aux/gitlog-to-changelog
   build-aux/link-warning.h
   lib/alloca.in.h
   lib/asnprintf.c
