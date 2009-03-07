@@ -64,16 +64,16 @@ if test "$HAVE_LIBGLEW" != "yes"; then
 	AC_MSG_ERROR([libglew not found])
 fi
 
-dnl CVL
-AM_CVL([0], [2], [5])
-if test "$HAVE_LIBCVL" != "yes"; then
-	AC_MSG_ERROR([libcvl >= 0.2.5 not found])
-fi
-
 dnl Qt4
 AM_QTOPENGL([4], [4], [0])
 if test "$HAVE_LIBQTOPENGL" != "yes"; then
 	AC_MSG_ERROR([Qt >= 4.4.0 not found])
+fi
+
+dnl CVL
+AM_CVL([0], [2], [5])
+if test "$HAVE_LIBCVL" != "yes"; then
+	AC_MSG_ERROR([libcvl >= 0.2.5 not found])
 fi
 
 dnl Global #defines for all source files

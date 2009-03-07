@@ -35,6 +35,7 @@ AC_DEFUN([AM_QTGUI],
 	RCC=""
 	AC_ARG_VAR([RCC], [rcc command])
 	AC_CHECK_PROGS([RCC], [rcc-qt4 rcc])
+	MOC=""
 	AC_ARG_VAR([MOC], [moc command])
 	AC_CHECK_PROGS([MOC], [moc-qt4 moc])
 	AC_LANG([C++])
@@ -48,7 +49,7 @@ AC_DEFUN([AM_QTGUI],
 		AC_LIB_APPENDTOVAR([CXXFLAGS], [-I$QT_INCLUDE_DIR/QtCore])
 		AC_LIB_APPENDTOVAR([CXXFLAGS], [-I$QT_INCLUDE_DIR/QtGui])
 		AC_LIB_FROMPACKAGE([QtGui], [qt])
-		AC_LIB_HAVE_LINKFLAGS([QtGui], [], 
+		AC_LIB_HAVE_LINKFLAGS([QtGui], [QtCore], 
 			[#include <QApplication>
 			 #if (QT_VERSION < QT_VERSION_CHECK($1, $2, $3))
 			 # error Qt version too old
@@ -71,7 +72,7 @@ AC_DEFUN([AM_QTOPENGL],
 	if test "$HAVE_LIBQTGUI" = "yes"; then
 		AC_LIB_APPENDTOVAR([CXXFLAGS], [-I$QT_INCLUDE_DIR/QtOpenGL])
 		AC_LIB_FROMPACKAGE([QtOpenGL], [qt])
-		AC_LIB_HAVE_LINKFLAGS([QtOpenGL], [],
+		AC_LIB_HAVE_LINKFLAGS([QtOpenGL], [QtGui],
 			[#include <QGLWidget>], [QGLWidget::mouseGrabber();])
 	fi
 ])
