@@ -58,6 +58,10 @@
 #include <iostream>
 #include <sstream>
 
+#ifndef M_PIl
+# define M_PIl		3.1415926535897932384626433832795029L  /* pi */
+#endif
+
 
 namespace glvm
 {
@@ -1063,7 +1067,7 @@ namespace glvm
     {
 	bool result;
 
-	if (isinf(a) || isinf(b))
+	if (std::isinf(a) || std::isinf(b))
 	{
 	    result = (std::isinf(a) && std::isinf(b)
 		    && static_cast<int>(glvm::sign(a)) == static_cast<int>(glvm::sign(b)));
@@ -1117,14 +1121,38 @@ namespace glvm
 	    y.d = b;
 	    if (x.i < 0)
 	    {
-		x.i = 0x8000000000000000L - x.i;
+		x.i = 0x8000000000000000LL - x.i;
 	    }
 	    if (y.i < 0)
 	    {
-		y.i = 0x8000000000000000L - y.i;
+		y.i = 0x8000000000000000LL - y.i;
 	    }
 	    int64_t intdiff = glvm::abs(x.i - y.i);
 	    result = (intdiff <= max_ulps);
+	}
+	return result;
+    }
+
+    inline bool equal(const long double a, const long double b, const int max_ulps = 1)
+    {
+	bool result;
+
+	if (std::isinf(a) || std::isinf(b))
+	{
+	    result = (std::isinf(a) && std::isinf(b)
+		    && static_cast<int>(glvm::sign(a)) == static_cast<int>(glvm::sign(b)));
+	}
+	else if (std::isnan(a) || std::isnan(b))
+	{
+	    result = false;
+	}
+	else
+	{
+	    assert(0);
+	    assert(max_ulps > 0);
+	    /* FIXME: Implement this for long double.
+	     * Problem: There is no int128_t on most platforms. */
+	    result = (max_ulps < 1);
 	}
 	return result;
     }
@@ -1184,12 +1212,17 @@ namespace glvm
 	return a != b;
     }
 
-    inline bool notEqual(const float a, const float b, const uint32_t max_ulps = 1)
+    inline bool notEqual(const float a, const float b, const int max_ulps = 1)
     {
 	return !glvm::equal(a, b, max_ulps);
     }
 
-    inline bool notEqual(const double a, const double b, const uint64_t max_ulps = 1)
+    inline bool notEqual(const double a, const double b, const int max_ulps = 1)
+    {
+	return !glvm::equal(a, b, max_ulps);
+    }
+
+    inline bool notEqual(const long double a, const long double b, const int max_ulps = 1)
     {
 	return !glvm::equal(a, b, max_ulps);
     }
