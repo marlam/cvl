@@ -49,6 +49,7 @@ int cmd_draw(int argc UNUSED, char *argv[] UNUSED)
 #include <errno.h>
 
 #include <GL/gl.h>
+#include <GL/glext.h>
 
 #include <cairo.h>
 
