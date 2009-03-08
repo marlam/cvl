@@ -81,9 +81,11 @@ RotationSelector::~RotationSelector()
 
 void RotationSelector::reset()
 {
+    _lock = true;
     _xrot_spinbox->setValue(0.0);
     _yrot_spinbox->setValue(0.0);
     _zrot_spinbox->setValue(0.0);
+    _lock = false;
 }
 
 void RotationSelector::_reset_button_clicked()
@@ -123,7 +125,6 @@ void RotationSelector::set_x_rotation(float rx)
     while (rx < -180.0f)
 	rx += 360.0f;
     _xrot_spinbox->setValue(rx);
-    emit rotation_changed();
 }
 
 void RotationSelector::set_y_rotation(float ry)
@@ -133,7 +134,6 @@ void RotationSelector::set_y_rotation(float ry)
     while (ry < -180.0f)
 	ry += 360.0f;
     _yrot_spinbox->setValue(ry);
-    emit rotation_changed();
 }
 
 void RotationSelector::set_z_rotation(float rz)
@@ -143,7 +143,6 @@ void RotationSelector::set_z_rotation(float rz)
     while (rz < -180.0f)
 	rz += 360.0f;
     _zrot_spinbox->setValue(rz);
-    emit rotation_changed();
 }
 
 void RotationSelector::update_rotation(const quat &rotation)

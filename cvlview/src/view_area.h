@@ -104,6 +104,7 @@ class ViewArea : public QGLWidget
 	// Dragging and rotating
 	bool _dragging;
 	QPoint _drag_startpoint;
+	bool _rotating;
 	ArcBall *_arcball;
 	glvm::quat _rotation;
 	// Error handling

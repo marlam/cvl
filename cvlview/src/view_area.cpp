@@ -83,6 +83,7 @@ ViewArea::ViewArea(cvl_frame_t **frame,
     _lock = false;
     _mouse_pos = QPoint(0, 0);
     _dragging = false;
+    _rotating = false;
     _arcball = new ArcBall(min_size, min_size);
     _rotation = toQuat(0.0f, vec3(1.0f));
     _rendering_fails = false;
@@ -751,7 +752,7 @@ void ViewArea::update()
 
 void ViewArea::rotation_changed()
 {
-    _rotation = quat(radians(vec3(
+    _rotation = toQuat(radians(vec3(
 		    _rotation_selector->get_x_rotation(),
 		    _rotation_selector->get_y_rotation(),
 		    _rotation_selector->get_z_rotation())));
@@ -818,7 +819,9 @@ void ViewArea::mousePressEvent(QMouseEvent *event)
     }
     if (event->button() == Qt::RightButton)
     {
+	rotation_changed();
 	_arcball->start(event->pos().x(), event->pos().y());
+	_rotating = true;
     }
 }
 
@@ -834,6 +837,7 @@ void ViewArea::mouseReleaseEvent(QMouseEvent *event)
     if (event->button() == Qt::RightButton)
     {
 	_arcball->stop();
+	_rotating = false;
     }
 }
 
@@ -858,10 +862,13 @@ void ViewArea::mouseMoveEvent(QMouseEvent *event)
 	unlock();
 	update();
     }
-    quat new_rotation = _arcball->rotation(event->pos().x(), event->pos().y(), _rotation);
-    _rotation = normalize(new_rotation);
-    emit update_rotation(_rotation);
-    update();
+    if (_rotating)
+    {
+	quat new_rotation = _arcball->rotation(event->pos().x(), event->pos().y(), _rotation);
+	_rotation = normalize(new_rotation);
+	emit update_rotation(_rotation);
+	update();
+    }
 
     pixel_info();
 }
