@@ -1,3 +1,6 @@
+Version 0.2.3:
+- Minor bug fixes.
+
 Version 0.2.2:
 - This version uses much less graphics memory than older versions. This allows
   to use this program on older hardware and/or to tonemap much larger images.
