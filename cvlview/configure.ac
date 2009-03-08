@@ -3,7 +3,7 @@ dnl Process this file with autoconf to produce a configure script.
 #
 # This file is part of cvlview, an image viewer using the CVL library.
 #
-# Copyright (C) 2007, 2008  Martin Lambers <marlam@marlam.de>
+# Copyright (C) 2007, 2008, 2009  Martin Lambers <marlam@marlam.de>
 #
 #   This program is free software; you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@ dnl Process this file with autoconf to produce a configure script.
 #
 
 AC_PREREQ([2.61])
-AC_INIT([CVLView], [0.3.1], [marlam@marlam.de])
+AC_INIT([CVLView], [0.3.2], [marlam@marlam.de])
 AC_CONFIG_SRCDIR([src/cvlview.cpp])
 AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_MACRO_DIR([build-aux])

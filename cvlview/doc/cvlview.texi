@@ -1,10 +1,9 @@
 \input texinfo   @c -*-texinfo-*-
 @afourpaper
 @setfilename cvlview.info
-@set UPDATED July 22, 2008
-@set UPDATED-MONTH July 2008
-@set EDITION 0.3.1
-@set VERSION 0.3.1
+@set UPDATED March 8, 2009
+@set EDITION 0.3.2
+@set VERSION 0.3.2
 @settitle CVLView @value{VERSION}
 
 @c Define new index for commands
@@ -15,7 +14,7 @@
 This manual was last updated @value{UPDATED} for version
 @value{VERSION} of CVLView.
 
-Copyright @copyright{} 2007, 2008 Martin Lambers
+Copyright @copyright{} 2007, 2008, 2009 Martin Lambers
 
 @quotation
 Permission is granted to copy, distribute and/or modify this document
