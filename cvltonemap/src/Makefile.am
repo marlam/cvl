@@ -14,6 +14,7 @@ cvltonemap_SOURCES = main.cpp				\
 
 if W32
 cvltonemap_SOURCES += appicon.ico
+cvltonemap_LDFLAGS = -mwindows
 endif
 
 RESOURCES = appicon.png

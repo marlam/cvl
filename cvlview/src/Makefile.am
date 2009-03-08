@@ -24,6 +24,7 @@ cvlview_SOURCES = main.cpp					\
 
 if W32
 cvlview_SOURCES += icons/appicon.ico
+cvlview_LDFLAGS = -mwindows
 endif
 
 RESOURCES = icons/appicon.png
