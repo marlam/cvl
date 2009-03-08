@@ -1,3 +1,7 @@
+2009-03-08  Martin Lambers <marlam@marlam.de>
+
+	* Various bug fixes related to the move to git and the update of GLVM.
+
 2009-03-07  Martin Lambers <marlam@marlam.de>
 
 	* Gnulib update.
