@@ -3,7 +3,7 @@
  *
  * This file is part of cvltonemap, a tone mapping tool using the CVL library.
  *
- * Copyright (C) 2007, 2008  Martin Lambers <marlam@marlam.de>
+ * Copyright (C) 2007, 2008, 2009  Martin Lambers <marlam@marlam.de>
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -44,7 +44,7 @@ char *program_name;
 static void cvltonemap_print_version(void)
 {
     mh_msg_fmt_req("%s version %s\n"
-	    "Copyright (C) 2008  Martin Lambers and others.\n"
+	    "Copyright (C) 2009  Martin Lambers and others.\n"
     	    "This is free software. You may redistribute copies of it under the terms of "
 	    "the GNU General Public License.\n"
 	    "There is NO WARRANTY, to the extent permitted by law.",
