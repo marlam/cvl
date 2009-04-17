@@ -1,3 +1,8 @@
+2009-04-17  Martin Lambers <marlam@marlam.de>
+
+	* cvl/cvl_init.c: Use GL_ARB_texture_rg if available, to save a lot of
+	graphics memory in many situations.
+
 2009-03-07  Martin Lambers <marlam@marlam.de>
 
 	* Gnulib update.
