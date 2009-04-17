@@ -288,15 +288,14 @@ void ViewArea::paintGL()
 	if (channel == -1 || pseudocolor)
 	{
 	    _render_frame = cvl_frame_new(cvl_frame_width(*_frame), cvl_frame_height(*_frame),
-	    	    3, CVL_RGB, CVL_UINT8, CVL_TEXTURE);
+		    3, CVL_RGB, CVL_UINT8, CVL_TEXTURE);
 	    cvl_convert_format(_render_frame, src);
 	}
 	else
 	{
 	    _render_frame = cvl_frame_new(cvl_frame_width(*_frame), cvl_frame_height(*_frame),
-	    	    1, CVL_LUM, CVL_UINT8, CVL_TEXTURE);
-	    glUseProgram(0);
-	    cvl_transform(_render_frame, src);
+		    3, CVL_LUM, CVL_UINT8, CVL_TEXTURE);
+	    cvl_copy(_render_frame, src);
 	}
 
 	_processed_frame = *_frame;
