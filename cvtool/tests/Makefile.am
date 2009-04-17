@@ -38,6 +38,7 @@ testscripts = \
 	cmd_scale.sh		\
 	cmd_select.sh		\
 	cmd_shear.sh		\
+	cmd_sort.sh		\
 	cmd_split.sh		\
 	cmd_tonemap.sh		\
 	cmd_unsharpmask.sh	\

@@ -95,6 +95,7 @@ COMMAND_DECL(rotate)
 COMMAND_DECL(scale)
 COMMAND_DECL(select)
 COMMAND_DECL(shear)
+COMMAND_DECL(sort)
 COMMAND_DECL(split)
 COMMAND_DECL(tonemap)
 COMMAND_DECL(unsharpmask)
@@ -139,6 +140,7 @@ cvtool_command_t commands[] =
     COMMAND(scale),
     COMMAND(select),
     COMMAND(shear),
+    COMMAND(sort),
     COMMAND(split),
     COMMAND(tonemap),
     COMMAND(unsharpmask),

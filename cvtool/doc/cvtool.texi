@@ -1335,8 +1335,22 @@ High-Dynamic-Range Images. @cite{Proc. ACM SIGGRAPH 2002}, pp. 257-266.
 @section Miscellaneous
 
 @menu
+* sort::
 * visualize::
 @end menu
+
+@node sort
+@subsection sort
+@cmindex sort
+@code{sort [-k|--key-channel=@var{k}]}
+
+Sort frame contents. The channel @var{k} is used as the sorting key. If @var{k}
+is -1, then all channels are sorted independently.
+
+Example:
+@example
+$ cvtool sort < in.pnm > out.pnm
+@end example
 
 @node visualize
 @subsection visualize

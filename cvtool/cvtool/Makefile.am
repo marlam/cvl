@@ -35,6 +35,7 @@ cvtool_SOURCES = cvtool.c 	\
 	cmd_scale.c		\
 	cmd_select.c		\
 	cmd_shear.c		\
+	cmd_sort.c		\
 	cmd_split.c		\
 	cmd_tonemap.c		\
 	cmd_unsharpmask.c	\

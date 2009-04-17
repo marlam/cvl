@@ -2,6 +2,9 @@
 
 	* cvl/cvl_init.c: Use GL_ARB_texture_rg if available, to save a lot of
 	graphics memory in many situations.
+	* cvtool/cmd_sort.c, cvtool/Makefile.am, cvtool/cvtool.c,
+	tests/cmd_sort.sh, tests/Makefile.am, doc/cvtool.texi: New command
+	'sort'.
 
 2009-03-07  Martin Lambers <marlam@marlam.de>
 
