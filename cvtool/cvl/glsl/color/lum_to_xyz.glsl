@@ -27,7 +27,7 @@ void main()
 {
     const float d65_x = 0.31271;
     const float d65_y = 0.32902;
-    float Y = texture2D(tex, gl_TexCoord[0].xy).g;
+    float Y = texture2D(tex, gl_TexCoord[0].xy).r;
     float X = Y * (d65_x / d65_y);
     float Z = min(1.0, Y * (1.0 - d65_x - d65_y) / d65_y);
     gl_FragColor = vec4(X, Y, Z, 0.0);
