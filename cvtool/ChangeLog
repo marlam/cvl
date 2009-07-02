@@ -1,3 +1,8 @@
+2009-07-02  Martin Lambers <marlam@marlam.de>
+
+	* cvtool/cmd_convert.c, doc/cvtool.texi: Add the option to
+	convert data without applying color space conversions.
+
 2009-04-17  Martin Lambers <marlam@marlam.de>
 
 	* cvl/cvl_init.c: Use GL_ARB_texture_rg if available, to save a lot of

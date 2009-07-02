@@ -33,11 +33,12 @@
 void cmd_convert_print_help(void)
 {
     mh_msg_fmt_req(
-	    "convert [-t|--type=uint8|float] [-f|--format=lum|color]\n"
+	    "convert [-t|--type=uint8|float] [-f|--format=lum|color|data]\n"
 	    "\n"
 	    "Converts the input frames to another type and format. The default is to keep the "
 	    "input type and format. The output will be PNM for type uint8 "
-	    "and PFS for type float.");
+	    "and PFS for type float. If the format is set to 'data', no color space conversion "
+	    "will take place.");
 }
 
 
@@ -45,7 +46,7 @@ int cmd_convert(int argc, char *argv[])
 {
     const char *type_names[] = { "uint8", "float", NULL };
     mh_option_name_t t = { -1, type_names };
-    const char *format_names[] = { "lum", "color", NULL };
+    const char *format_names[] = { "lum", "color", "data", NULL };
     mh_option_name_t f = { -1, format_names };
     mh_option_t options[] = 
     {
@@ -101,18 +102,26 @@ int cmd_convert(int argc, char *argv[])
 	{
 	    newformat = CVL_LUM;
 	}
-	else
+	else if (f.value == 1)
 	{
 	    newformat = (newtype == CVL_UINT8 ? CVL_RGB : CVL_XYZ);
 	}
+	else
+	{
+	    newformat = CVL_UNKNOWN;
+	}
 
 	if (newtype == CVL_FLOAT)
+	{
 	    cvl_frame_set_type(frame, newtype);
+	}
 
 	cvl_convert_format_inplace(frame, newformat);
 
 	if (newtype != CVL_FLOAT)
+	{
 	    cvl_frame_set_type(frame, newtype);
+	}
 	
 	cvl_write(stdout, newtype == CVL_UINT8 ? CVL_PNM : CVL_PFS, frame);
     }
