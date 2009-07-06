@@ -1,3 +1,7 @@
+2009-07-06  Martin Lambers <marlam@marlam.de>
+
+	* doc/cvtool.texi: Fix some minor errors.
+
 2009-07-02  Martin Lambers <marlam@marlam.de>
 
 	* cvtool/cmd_convert.c, doc/cvtool.texi: Add the option to

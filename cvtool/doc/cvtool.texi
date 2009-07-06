@@ -120,7 +120,7 @@ floating point images.
 Cvtool supports the PFS format used by
 @url{http://www.mpi-inf.mpg.de/resources/pfstools/,pfstools}.
 
-Currently, cvtool ignore channel tags. This will be fixed in a future version.
+Currently, cvtool ignores channel tags. This will be fixed in a future version.
 
 @node Output
 @section Output
@@ -1268,8 +1268,8 @@ $ cvtool diff -s -o - red.pnm green.pnm
 frame pair 0: minimum error      = 1.0000 1.0000 0.0000
 frame pair 0: maximum error      = 1.0000 1.0000 0.0000
 frame pair 0: median error       = 1.0000 1.0000 0.0000
-frame pair 0: mean error         = 0.9600 0.9600 0.0000
-frame pair 0: standard deviation = 0.1969 0.1969 0.0000
+frame pair 0: mean error         = 1.0000 1.0000 0.0000
+frame pair 0: standard deviation = 0.0000 0.0000 0.0000
 @end example
 
 
