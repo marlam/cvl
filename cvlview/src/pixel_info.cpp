@@ -21,6 +21,8 @@
 
 #include "config.h"
 
+#include <cstdio>
+
 #include <QWidget>
 #include <QGridLayout>
 #include <QLabel>
