@@ -379,7 +379,7 @@ void ViewArea::paintGL()
 	    scale * 2.0f * static_cast<float>(mh_maxi(w, h)), 1.0f);
     if (!_flat_view)
     {
-	glMultMatrix(toMat4(_rotation));
+	glMultMatrixf(toMat4(_rotation).vl);
     }
     float frame_width = static_cast<float>(w);
     float frame_height = static_cast<float>(h);

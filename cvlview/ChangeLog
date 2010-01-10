@@ -2,6 +2,10 @@
 
 	* src/pixel_info.cpp: Add missing header. Reported by Ryan Southall.
 
+2009-07-06  Martin Lambers <marlam@marlam.de>
+
+	* gllib/glvm.h, gllib/glvm-gl.h: Update GLVM. Many improvements.
+
 2009-04-17  Martin Lambers <marlam@marlam.de>
 
 	* src/view_area.c: Fix bug caused by invalid assumptions about

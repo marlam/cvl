@@ -32,10 +32,8 @@
  * Example: "v4.wz() = v3.rg() + v2;"
  *
  * All data elements are accessible via a two-dimensional array v or a linear
- * array vl. Both v and vl are row-major, unlike OpenGL, but like everyone else
- * (but note that a mat2x3 matrix still has two columns and 3 rows and not
- * vice-versa). Use transpose() when reading OpenGL data (or use the functions 
- * from glvm-gl.h).
+ * array vl. Both v and vl are column-major, like OpenGL.
+ * Use transpose() to exchange data with row-major libraries.
  *
  * Everything that is specified by GLSL 1.30 should work, unless it is
  * impossible to implement in C++.
@@ -49,7 +47,6 @@
 #define GLVM_HAVE_CXX0X_MATH 0
 
 #include <cmath>
-#include <cassert>
 #include <cstdlib>
 #include <stdint.h>
 
@@ -646,6 +643,8 @@ namespace glvm
 #if GLVM_HAVE_CXX0X_MATH
     using std::round;
 #else
+    using ::round;
+
     inline float round(const float x)
     {
 	return ::roundf(x);
@@ -1078,8 +1077,8 @@ namespace glvm
 	}
 	else
 	{
-	    assert(sizeof(float) == sizeof(int32_t));
-	    assert(max_ulps > 0);
+	    //assert(sizeof(float) == sizeof(int32_t));
+	    //assert(max_ulps > 0);
 	    union { float f; int32_t i; } x;
 	    union { float f; int32_t i; } y;
 	    x.f = a;
@@ -1113,8 +1112,8 @@ namespace glvm
 	}
 	else
 	{
-	    assert(sizeof(double) == sizeof(int64_t));
-	    assert(max_ulps > 0);
+	    //assert(sizeof(double) == sizeof(int64_t));
+	    //assert(max_ulps > 0);
 	    union { double d; int64_t i; } x;
 	    union { double d; int64_t i; } y;
 	    x.d = a;
@@ -1148,8 +1147,8 @@ namespace glvm
 	}
 	else
 	{
-	    assert(0);
-	    assert(max_ulps > 0);
+	    abort();
+	    //assert(max_ulps > 0);
 	    /* FIXME: Implement this for long double.
 	     * Problem: There is no int128_t on most platforms. */
 	    result = (max_ulps < 1);
@@ -1245,15 +1244,15 @@ namespace glvm
 
     /* The array class is the base for both the vec and the mat class. */
 
-    template<typename T, int rows, int cols>
+    template<typename T, int cols, int rows>
     class array
     {
 	public:
 
 	union
 	{
-    	    T v[rows][cols];
-	    T vl[rows * cols];
+    	    T v[cols][rows];
+	    T vl[cols * rows];
 	};
 
 	/* Constructors, Destructor */
@@ -1266,7 +1265,7 @@ namespace glvm
 
 	array(const T x)
 	{
-	    for (int i = 0; i < rows * cols; i++)
+	    for (int i = 0; i < cols * rows; i++)
 		vl[i] = x;
 	}
 	
@@ -1366,40 +1365,40 @@ namespace glvm
 
 	array(const T *a)
 	{
-	    for (int i = 0; i < rows * cols; i++)
+	    for (int i = 0; i < cols * rows; i++)
 		vl[i] = a[i];
 	}
 
 	template<typename U>
-	array(const array<U, rows, cols> &a)
+	array(const array<U, cols, rows> &a)
 	{
-	    for (int i = 0; i < rows * cols; i++)
+	    for (int i = 0; i < cols * rows; i++)
 		vl[i] = a.vl[i];
 	}
 
 	array(const std::string &s)
 	{
 	    std::istringstream is(s);
-	    for (int i = 0; i < rows * cols; i++)
+	    for (int i = 0; i < cols * rows; i++)
 		is >> vl[i];
 	}
 
 	~array() {}
 
-	array<T, rows - 1, cols - 1> _strike(const int row, const int col) const
+	array<T, cols - 1, rows - 1> _strike(const int col, const int row) const
 	{
-	    array<T, rows - 1, cols - 1> r;
+	    array<T, cols - 1, rows - 1> r;
 	    int ii = 0;
-	    for (int i = 0; i < rows; i++)
+	    for (int i = 0; i < cols; i++)
 	    {
-		if (i == row)
+		if (i == col)
 		{
 		    continue;
 		}
 		int jj = 0;
-		for (int j = 0; j < cols; j++)
+		for (int j = 0; j < rows; j++)
 		{
-		    if (j == col)
+		    if (j == row)
 		    {
 			continue;
 		    }
@@ -1411,12 +1410,12 @@ namespace glvm
 	    return r;
 	}
 
-	template<int subrows, int subcols>
-	void _setSubArray(const array<T, subrows, subcols> &m, const int row = 0, const int col = 0)
+	template<int subcols, int subrows>
+	void _setSubArray(const array<T, subcols, subrows> &m, const int col = 0, const int row = 0)
 	{
-	    for (int i = 0; i < subrows; i++)
-		for (int j = 0; j < subcols; j++)
-		    v[row + i][col + j] = m.v[i][j];
+	    for (int i = 0; i < subcols; i++)
+		for (int j = 0; j < subrows; j++)
+		    v[col + i][row + j] = m.v[i][j];
 	}
 
 	/* Convert to/from string */
@@ -1424,8 +1423,8 @@ namespace glvm
 	std::string str() const
 	{
 	    std::ostringstream os;
-	    os.precision(std::numeric_limits<T>::digits10 * 2);
-	    for (int i = 0; i < rows * cols; i++)
+	    os.precision(std::numeric_limits<T>::digits10 + 2);
+	    for (int i = 0; i < cols * rows; i++)
 		os << vl[i] << " ";
 	    return os.str();
 	}
@@ -1438,7 +1437,7 @@ namespace glvm
 	friend std::istream &operator>>(std::istream &is, array &a)
 	{
 	    char blank;
-	    for (int i = 0; i < rows * cols; i++)
+	    for (int i = 0; i < cols * rows; i++)
 		is >> a.vl[i];
 	    is >> blank;
 	    return is;
@@ -1448,7 +1447,7 @@ namespace glvm
 
 	const array &_op_assign(const array &a)
 	{
-	    for (int i = 0; i < rows * cols; i++)
+	    for (int i = 0; i < cols * rows; i++)
 		vl[i] = a.vl[i];
 	    return *this;
 	}
@@ -1456,14 +1455,14 @@ namespace glvm
 	array _op_plus(const array &a) const
 	{
 	    array r;
-	    for (int i = 0; i < rows * cols; i++)
+	    for (int i = 0; i < cols * rows; i++)
 		r.vl[i] = vl[i] + a.vl[i];
 	    return r;
 	}
 
 	const array &_op_plus_assign(const array &a)
 	{
-	    for (int i = 0; i < rows * cols; i++)
+	    for (int i = 0; i < cols * rows; i++)
 		vl[i] += a.vl[i];
 	    return *this;
 	}
@@ -1476,14 +1475,14 @@ namespace glvm
 	array _op_minus(const array &a) const
 	{
 	    array r;
-	    for (int i = 0; i < rows * cols; i++)
+	    for (int i = 0; i < cols * rows; i++)
 		r.vl[i] = vl[i] - a.vl[i];
 	    return r;
 	}
 
 	const array &_op_minus_assign(const array &a)
 	{
-	    for (int i = 0; i < rows * cols; i++)
+	    for (int i = 0; i < cols * rows; i++)
 		vl[i] -= a.vl[i];
 	    return *this;
 	}
@@ -1491,7 +1490,7 @@ namespace glvm
 	array _op_unary_minus() const
 	{
 	    array r;
-	    for (int i = 0; i < rows * cols; i++)
+	    for (int i = 0; i < cols * rows; i++)
 		r.vl[i] = -vl[i];
 	    return r;
 	}
@@ -1499,14 +1498,14 @@ namespace glvm
 	array _op_scal_mult(const T s) const
 	{
 	    array r;
-	    for (int i = 0; i < rows * cols; i++)
+	    for (int i = 0; i < cols * rows; i++)
 		r.vl[i] = vl[i] * s;
 	    return r;
 	}
 
 	const array &_op_scal_mult_assign(const T s)
 	{
-	    for (int i = 0; i < rows * cols; i++)
+	    for (int i = 0; i < cols * rows; i++)
 		vl[i] *= s;
 	    return *this;
 	}
@@ -1514,14 +1513,14 @@ namespace glvm
 	array _op_comp_mult(const array &a) const
 	{
 	    array r;
-	    for (int i = 0; i < rows * cols; i++)
+	    for (int i = 0; i < cols * rows; i++)
 		r.vl[i] = vl[i] * a.vl[i];
 	    return r;
 	}
 
 	const array &_op_comp_mult_assign(const array &a)
 	{
-	    for (int i = 0; i < rows * cols; i++)
+	    for (int i = 0; i < cols * rows; i++)
 		vl[i] *= a.vl[i];
 	    return *this;
 	}
@@ -1529,14 +1528,14 @@ namespace glvm
 	array _op_scal_div(const T s) const
 	{
 	    array r;
-	    for (int i = 0; i < rows * cols; i++)
+	    for (int i = 0; i < cols * rows; i++)
 		r.vl[i] = vl[i] / s;
 	    return r;
 	}
      
 	const array &_op_scal_div_assign(const T s)
 	{
-	    for (int i = 0; i < rows * cols; i++)
+	    for (int i = 0; i < cols * rows; i++)
 		vl[i] /= s;
 	    return *this;
 	}
@@ -1544,14 +1543,14 @@ namespace glvm
 	array _op_comp_div(const array &a) const
 	{
 	    array r;
-	    for (int i = 0; i < rows * cols; i++)
+	    for (int i = 0; i < cols * rows; i++)
 		r.vl[i] = vl[i] / a.vl[i];
 	    return r;
 	}
 
 	const array &_op_comp_div_assign(const array &a)
 	{
-	    for (int i = 0; i < rows * cols; i++)
+	    for (int i = 0; i < cols * rows; i++)
 		vl[i] /= a.vl[i];
 	    return *this;
 	}
@@ -1559,14 +1558,14 @@ namespace glvm
 	array _op_scal_mod(const T s) const
 	{
 	    array r;
-	    for (int i = 0; i < rows * cols; i++)
+	    for (int i = 0; i < cols * rows; i++)
 		r.vl[i] = vl[i] % s;
 	    return r;
 	}
      
 	const array &_op_scal_mod_assign(const T s)
 	{
-	    for (int i = 0; i < rows * cols; i++)
+	    for (int i = 0; i < cols * rows; i++)
 		vl[i] %= s;
 	    return *this;
 	}
@@ -1574,14 +1573,14 @@ namespace glvm
 	array _op_comp_mod(const array &a) const
 	{
 	    array r;
-	    for (int i = 0; i < rows * cols; i++)
+	    for (int i = 0; i < cols * rows; i++)
 		r.vl[i] = vl[i] % a.vl[i];
 	    return r;
 	}
 
 	const array &_op_comp_mod_assign(const array &a)
 	{
-	    for (int i = 0; i < rows * cols; i++)
+	    for (int i = 0; i < cols * rows; i++)
 		vl[i] %= a.vl[i];
 	    return *this;
 	}
@@ -1589,7 +1588,7 @@ namespace glvm
 	bool _op_equal(const array &a) const
 	{
 	    bool ret = true;
-	    for (int i = 0; i < rows * cols; i++)
+	    for (int i = 0; i < cols * rows; i++)
 	    {
 		if (vl[i] != a.vl[i])
 		{
@@ -1610,7 +1609,7 @@ namespace glvm
 	array _sin() const
 	{
 	    array r;
-	    for (int i = 0; i < rows * cols; i++)
+	    for (int i = 0; i < cols * rows; i++)
 		r.vl[i] = glvm::sin(vl[i]);
 	    return r;
 	}
@@ -1618,7 +1617,7 @@ namespace glvm
 	array _cos() const
 	{
 	    array r;
-	    for (int i = 0; i < rows * cols; i++)
+	    for (int i = 0; i < cols * rows; i++)
 		r.vl[i] = glvm::cos(vl[i]);
 	    return r;
 	}
@@ -1626,7 +1625,7 @@ namespace glvm
 	array _tan() const
 	{
 	    array r;
-	    for (int i = 0; i < rows * cols; i++)
+	    for (int i = 0; i < cols * rows; i++)
 		r.vl[i] = glvm::tan(vl[i]);
 	    return r;
 	}
@@ -1634,7 +1633,7 @@ namespace glvm
 	array _asin() const
 	{
 	    array r;
-	    for (int i = 0; i < rows * cols; i++)
+	    for (int i = 0; i < cols * rows; i++)
 		r.vl[i] = glvm::asin(vl[i]);
 	    return r;
 	}
@@ -1642,7 +1641,7 @@ namespace glvm
 	array _acos() const
 	{
 	    array r;
-	    for (int i = 0; i < rows * cols; i++)
+	    for (int i = 0; i < cols * rows; i++)
 		r.vl[i] = glvm::acos(vl[i]);
 	    return r;
 	}
@@ -1650,7 +1649,7 @@ namespace glvm
 	array _atan() const
 	{
 	    array r;
-	    for (int i = 0; i < rows * cols; i++)
+	    for (int i = 0; i < cols * rows; i++)
 		r.vl[i] = glvm::atan(vl[i]);
 	    return r;
 	}
@@ -1658,7 +1657,7 @@ namespace glvm
 	array _atan(const array &a) const
 	{
 	    array r;
-	    for (int i = 0; i < rows * cols; i++)
+	    for (int i = 0; i < cols * rows; i++)
 		r.vl[i] = glvm::atan(vl[i], a.vl[i]);
 	    return r;
 	}
@@ -1666,7 +1665,7 @@ namespace glvm
 	array _radians() const
 	{
 	    array r;
-	    for (int i = 0; i < rows * cols; i++)
+	    for (int i = 0; i < cols * rows; i++)
 		r.vl[i] = glvm::radians(vl[i]);
 	    return r;
 	}
@@ -1674,7 +1673,7 @@ namespace glvm
 	array _degrees() const
 	{
 	    array r;
-	    for (int i = 0; i < rows * cols; i++)
+	    for (int i = 0; i < cols * rows; i++)
 		r.vl[i] = glvm::degrees(vl[i]);
 	    return r;
 	}
@@ -1684,7 +1683,7 @@ namespace glvm
 	array _pow(const T p) const
 	{
 	    array r;
-	    for (int i = 0; i < rows * cols; i++)
+	    for (int i = 0; i < cols * rows; i++)
 		r.vl[i] = glvm::pow(vl[i], p);
 	    return r;
 	}
@@ -1692,7 +1691,7 @@ namespace glvm
 	array _exp() const
 	{
 	    array r;
-	    for (int i = 0; i < rows * cols; i++)
+	    for (int i = 0; i < cols * rows; i++)
 		r.vl[i] = glvm::exp(vl[i]);
 	    return r;
 	}
@@ -1700,7 +1699,7 @@ namespace glvm
 	array _exp2() const
 	{
 	    array r;
-	    for (int i = 0; i < rows * cols; i++)
+	    for (int i = 0; i < cols * rows; i++)
 		r.vl[i] = glvm::exp2(vl[i]);
 	    return r;
 	}
@@ -1708,7 +1707,7 @@ namespace glvm
 	array _log() const
 	{
 	    array r;
-	    for (int i = 0; i < rows * cols; i++)
+	    for (int i = 0; i < cols * rows; i++)
 		r.vl[i] = glvm::log(vl[i]);
 	    return r;
 	}
@@ -1716,7 +1715,7 @@ namespace glvm
 	array _log2() const
 	{
 	    array r;
-	    for (int i = 0; i < rows * cols; i++)
+	    for (int i = 0; i < cols * rows; i++)
 		r.vl[i] = glvm::log2(vl[i]);
 	    return r;
 	}
@@ -1724,7 +1723,7 @@ namespace glvm
 	array _log10() const
 	{
 	    array r;
-	    for (int i = 0; i < rows * cols; i++)
+	    for (int i = 0; i < cols * rows; i++)
 		r.vl[i] = glvm::log10(vl[i]);
 	    return r;
 	}
@@ -1732,7 +1731,7 @@ namespace glvm
 	array _sqrt() const
 	{
 	    array r;
-	    for (int i = 0; i < rows * cols; i++)
+	    for (int i = 0; i < cols * rows; i++)
 		r.vl[i] = glvm::sqrt(vl[i]);
 	    return r;
 	}
@@ -1740,7 +1739,7 @@ namespace glvm
 	array _inversesqrt() const
 	{
 	    array r;
-	    for (int i = 0; i < rows * cols; i++)
+	    for (int i = 0; i < cols * rows; i++)
 		r.vl[i] = glvm::inversesqrt(vl[i]);
 	    return r;
 	}
@@ -1748,41 +1747,41 @@ namespace glvm
 	array _cbrt() const
 	{
 	    array r;
-	    for (int i = 0; i < rows * cols; i++)
+	    for (int i = 0; i < cols * rows; i++)
 		r.vl[i] = glvm::cbrt(vl[i]);
 	    return r;
 	}
 
 	/* Common functions */
 
-	array<bool, rows, cols> _isfinite() const
+	array<bool, cols, rows> _isfinite() const
 	{
-	    array<bool, rows, cols> r;
-	    for (int i = 0; i < rows * cols; i++)
+	    array<bool, cols, rows> r;
+	    for (int i = 0; i < cols * rows; i++)
 		r.vl[i] = glvm::isfinite(vl[i]);
 	    return r;
 	}
 
-	array<bool, rows, cols> _isinf() const
+	array<bool, cols, rows> _isinf() const
 	{
-	    array<bool, rows, cols> r;
-	    for (int i = 0; i < rows * cols; i++)
+	    array<bool, cols, rows> r;
+	    for (int i = 0; i < cols * rows; i++)
 		r.vl[i] = glvm::isinf(vl[i]);
 	    return r;
 	}
 
-	array<bool, rows, cols> _isnan() const
+	array<bool, cols, rows> _isnan() const
 	{
-	    array<bool, rows, cols> r;
-	    for (int i = 0; i < rows * cols; i++)
+	    array<bool, cols, rows> r;
+	    for (int i = 0; i < cols * rows; i++)
 		r.vl[i] = glvm::isnan(vl[i]);
 	    return r;
 	}
 
-	array<bool, rows, cols> _isnormal() const
+	array<bool, cols, rows> _isnormal() const
 	{
-	    array<bool, rows, cols> r;
-	    for (int i = 0; i < rows * cols; i++)
+	    array<bool, cols, rows> r;
+	    for (int i = 0; i < cols * rows; i++)
 		r.vl[i] = glvm::isnormal(vl[i]);
 	    return r;
 	}
@@ -1790,7 +1789,7 @@ namespace glvm
 	array _sign() const
 	{
 	    array r;
-	    for (int i = 0; i < rows * cols; i++)
+	    for (int i = 0; i < cols * rows; i++)
 		r.vl[i] = glvm::sign(vl[i]);
 	    return r;
 	}
@@ -1798,7 +1797,7 @@ namespace glvm
 	array _abs() const
 	{
 	    array r;
-	    for (int i = 0; i < rows * cols; i++)
+	    for (int i = 0; i < cols * rows; i++)
 		r.vl[i] = glvm::abs(vl[i]);
 	    return r;
 	}
@@ -1806,7 +1805,7 @@ namespace glvm
 	array _floor() const
 	{
 	    array r;
-	    for (int i = 0; i < rows * cols; i++)
+	    for (int i = 0; i < cols * rows; i++)
 		r.vl[i] = glvm::floor(vl[i]);
 	    return r;
 	}
@@ -1814,7 +1813,7 @@ namespace glvm
 	array _ceil() const
 	{
 	    array r;
-	    for (int i = 0; i < rows * cols; i++)
+	    for (int i = 0; i < cols * rows; i++)
 		r.vl[i] = glvm::ceil(vl[i]);
 	    return r;
 	}
@@ -1822,7 +1821,7 @@ namespace glvm
 	array _round() const
 	{
 	    array r;
-	    for (int i = 0; i < rows * cols; i++)
+	    for (int i = 0; i < cols * rows; i++)
 		r.vl[i] = glvm::round(vl[i]);
 	    return r;
 	}
@@ -1830,7 +1829,7 @@ namespace glvm
 	array _fract() const
 	{
 	    array r;
-	    for (int i = 0; i < rows * cols; i++)
+	    for (int i = 0; i < cols * rows; i++)
 		r.vl[i] = glvm::fract(vl[i]);
 	    return r;
 	}
@@ -1838,7 +1837,7 @@ namespace glvm
 	array _min(const T x) const
 	{
 	    array r;
-	    for (int i = 0; i < rows * cols; i++)
+	    for (int i = 0; i < cols * rows; i++)
 		r.vl[i] = glvm::min(x, vl[i]);
 	    return r;
 	}
@@ -1846,7 +1845,7 @@ namespace glvm
 	array _min(const array &a) const
 	{
 	    array r;
-	    for (int i = 0; i < rows * cols; i++)
+	    for (int i = 0; i < cols * rows; i++)
 		r.vl[i] = glvm::min(a.vl[i], vl[i]);
 	    return r;
 	}
@@ -1854,7 +1853,7 @@ namespace glvm
 	array _max(const T x) const
 	{
 	    array r;
-	    for (int i = 0; i < rows * cols; i++)
+	    for (int i = 0; i < cols * rows; i++)
 		r.vl[i] = glvm::max(x, vl[i]);
 	    return r;
 	}
@@ -1862,7 +1861,7 @@ namespace glvm
 	array _max(const array &a) const
 	{
 	    array r;
-	    for (int i = 0; i < rows * cols; i++)
+	    for (int i = 0; i < cols * rows; i++)
 		r.vl[i] = glvm::max(a.vl[i], vl[i]);
 	    return r;
 	}
@@ -1870,7 +1869,7 @@ namespace glvm
 	array _clamp(const T minval, const T maxval) const
 	{
 	    array r;
-	    for (int i = 0; i < rows * cols; i++)
+	    for (int i = 0; i < cols * rows; i++)
 		r.vl[i] = glvm::clamp(vl[i], minval, maxval);
 	    return r;
 	}
@@ -1878,7 +1877,7 @@ namespace glvm
 	array _clamp(const array &minval, const array &maxval) const
 	{
 	    array r;
-	    for (int i = 0; i < rows * cols; i++)
+	    for (int i = 0; i < cols * rows; i++)
 		r.vl[i] = glvm::clamp(vl[i], minval.vl[i], maxval.vl[i]);
 	    return r;
 	}
@@ -1886,7 +1885,7 @@ namespace glvm
 	array _mix(const array &a, const T alpha) const
 	{
 	    array r;
-	    for (int i = 0; i < rows * cols; i++)
+	    for (int i = 0; i < cols * rows; i++)
 		r.vl[i] = glvm::mix(vl[i], a.vl[i], alpha);
 	    return r;
 	}
@@ -1894,7 +1893,7 @@ namespace glvm
 	array _mix(const array &a, const array &alpha) const
 	{
 	    array r;
-	    for (int i = 0; i < rows * cols; i++)
+	    for (int i = 0; i < cols * rows; i++)
 		r.vl[i] = glvm::mix(vl[i], a.vl[i], alpha.vl[i]);
 	    return r;
 	}
@@ -1902,7 +1901,7 @@ namespace glvm
 	array _step(const T edge) const
 	{
 	    array r;
-	    for (int i = 0; i < rows * cols; i++)
+	    for (int i = 0; i < cols * rows; i++)
 		r.vl[i] = glvm::step(vl[i], edge);
 	    return r;
 	}
@@ -1910,7 +1909,7 @@ namespace glvm
 	array _step(const array &edge) const
 	{
 	    array r;
-	    for (int i = 0; i < rows * cols; i++)
+	    for (int i = 0; i < cols * rows; i++)
 		r.vl[i] = glvm::step(vl[i], edge.vl[i]);
 	    return r;
 	}
@@ -1918,7 +1917,7 @@ namespace glvm
 	array _smoothstep(const T edge0, const T edge1) const
 	{
 	    array r;
-	    for (int i = 0; i < rows * cols; i++)
+	    for (int i = 0; i < cols * rows; i++)
 		r.vl[i] = glvm::smoothstep(vl[i], edge0, edge1);
 	    return r;
 	}
@@ -1926,7 +1925,7 @@ namespace glvm
 	array _smoothstep(const array &edge0, const array &edge1) const
 	{
 	    array r;
-	    for (int i = 0; i < rows * cols; i++)
+	    for (int i = 0; i < cols * rows; i++)
 		r.vl[i] = glvm::smoothstep(vl[i], edge0.vl[i], edge1.vl[i]);
 	    return r;
 	}
@@ -1934,7 +1933,7 @@ namespace glvm
 	array _mod(const T y) const
 	{
 	    array r;
-	    for (int i = 0; i < rows * cols; i++)
+	    for (int i = 0; i < cols * rows; i++)
 		r.vl[i] = glvm::mod(vl[i], y);
 	    return r;
 	}
@@ -1942,73 +1941,73 @@ namespace glvm
 	array _mod(const array &y) const
 	{
 	    array r;
-	    for (int i = 0; i < rows * cols; i++)
+	    for (int i = 0; i < cols * rows; i++)
 		r.vl[i] = glvm::mod(vl[i], y.vl[i]);
 	    return r;
 	}
 
 	/* Comparison functions */
 
-	array<bool, rows, cols> _greaterThan(const array &a) const
+	array<bool, cols, rows> _greaterThan(const array &a) const
 	{
-	    array<bool, rows, cols> r;
-	    for (int i = 0; i < rows * cols; i++)
+	    array<bool, cols, rows> r;
+	    for (int i = 0; i < cols * rows; i++)
 		r.vl[i] = glvm::greaterThan(vl[i], a.vl[i]);
 	    return r;
 	}
 
-	array<bool, rows, cols> _greaterThanEqual(const array &a) const
+	array<bool, cols, rows> _greaterThanEqual(const array &a) const
 	{
-	    array<bool, rows, cols> r;
-	    for (int i = 0; i < rows * cols; i++)
+	    array<bool, cols, rows> r;
+	    for (int i = 0; i < cols * rows; i++)
 		r.vl[i] = glvm::greaterThanEqual(vl[i], a.vl[i]);
 	    return r;
 	}
 
-	array<bool, rows, cols> _lessThan(const array &a) const
+	array<bool, cols, rows> _lessThan(const array &a) const
 	{
-	    array<bool, rows, cols> r;
-	    for (int i = 0; i < rows * cols; i++)
+	    array<bool, cols, rows> r;
+	    for (int i = 0; i < cols * rows; i++)
 		r.vl[i] = glvm::lessThan(vl[i], a.vl[i]);
 	    return r;
 	}
 
-	array<bool, rows, cols> _lessThanEqual(const array &a) const
+	array<bool, cols, rows> _lessThanEqual(const array &a) const
 	{
-	    array<bool, rows, cols> r;
-	    for (int i = 0; i < rows * cols; i++)
+	    array<bool, cols, rows> r;
+	    for (int i = 0; i < cols * rows; i++)
 		r.vl[i] = glvm::lessThanEqual(vl[i], a.vl[i]);
 	    return r;
 	}
 
-	array<bool, rows, cols> _equal(const array &a) const
+	array<bool, cols, rows> _equal(const array &a) const
 	{
-	    array<bool, rows, cols> r;
-	    for (int i = 0; i < rows * cols; i++)
+	    array<bool, cols, rows> r;
+	    for (int i = 0; i < cols * rows; i++)
 		r.vl[i] = glvm::equal(vl[i], a.vl[i]);
 	    return r;
 	}
 
-	array<bool, rows, cols> _equal(const array &a, const int max_ulps) const
+	array<bool, cols, rows> _equal(const array &a, const int max_ulps) const
 	{
-	    array<bool, rows, cols> r;
-	    for (int i = 0; i < rows * cols; i++)
+	    array<bool, cols, rows> r;
+	    for (int i = 0; i < cols * rows; i++)
 		r.vl[i] = glvm::equal(vl[i], a.vl[i], max_ulps);
 	    return r;
 	}
 
-	array<bool, rows, cols> _notEqual(const array &a) const
+	array<bool, cols, rows> _notEqual(const array &a) const
 	{
-	    array<bool, rows, cols> r;
-	    for (int i = 0; i < rows * cols; i++)
+	    array<bool, cols, rows> r;
+	    for (int i = 0; i < cols * rows; i++)
 		r.vl[i] = glvm::notEqual(vl[i], a.vl[i]);
 	    return r;
 	}
 
-	array<bool, rows, cols> _notEqual(const array &a, const int max_ulps) const
+	array<bool, cols, rows> _notEqual(const array &a, const int max_ulps) const
 	{
-	    array<bool, rows, cols> r;
-	    for (int i = 0; i < rows * cols; i++)
+	    array<bool, cols, rows> r;
+	    for (int i = 0; i < cols * rows; i++)
 		r.vl[i] = glvm::notEqual(vl[i], a.vl[i], max_ulps);
 	    return r;
 	}
@@ -2016,7 +2015,7 @@ namespace glvm
 	bool _any() const
 	{
 	    bool ret = false;
-	    for (int i = 0; i < rows * cols; i++)
+	    for (int i = 0; i < cols * rows; i++)
 	    {
 		if (vl[i])
 		{
@@ -2030,7 +2029,7 @@ namespace glvm
 	bool _all() const
 	{
 	    bool ret = true;
-	    for (int i = 0; i < rows * cols; i++)
+	    for (int i = 0; i < cols * rows; i++)
 	    {
 		if (!vl[i])
 		{
@@ -2041,10 +2040,10 @@ namespace glvm
 	    return ret;
 	}
 
-	array<bool, rows, cols> _negate() const
+	array<bool, cols, rows> _negate() const
 	{
-	    array<bool, rows, cols> r;
-	    for (int i = 0; i < rows * cols; i++)
+	    array<bool, cols, rows> r;
+	    for (int i = 0; i < cols * rows; i++)
 		r.vl[i] = !vl[i];
 	    return r;
 	}
@@ -2054,7 +2053,7 @@ namespace glvm
 	T _length() const
 	{
 	    T l = static_cast<T>(0);
-	    for (int i = 0; i < rows * cols; i++)
+	    for (int i = 0; i < cols * rows; i++)
 		l += vl[i] * vl[i];
 	    return glvm::sqrt(l);
 	}
@@ -2067,7 +2066,7 @@ namespace glvm
 	T _dot(const array &a) const
 	{
 	    T d = static_cast<T>(0);
-	    for (int i = 0; i < rows; i++)
+	    for (int i = 0; i < cols * rows; i++)
 		d += vl[i] * a.vl[i];
 	    return d;
 	}
@@ -2091,15 +2090,15 @@ namespace glvm
 	{
 	    const T d = N.dot(*this);
 	    const T k = static_cast<T>(1) - eta * eta * (static_cast<T>(1) - d * d);
-	    return k < static_cast<T>(0) ? array<T, rows, 1>(static_cast<T>(0)) : *this * eta - N * (eta * d + glvm::sqrt(k));
+	    return k < static_cast<T>(0) ? array<T, cols, 1>(static_cast<T>(0)) : *this * eta - N * (eta * d + glvm::sqrt(k));
 	}
 
-	array<T, cols, rows> _transpose() const
+	array<T, rows, cols> _transpose() const
 	{
-	    array<T, cols, rows> r;
+	    array<T, rows, cols> r;
 	    for (int i = 0; i < rows; i++)
 		for (int j = 0; j < cols; j++)
-		    r.v[i][j] = array<T, rows, cols>::v[j][i];
+		    r.v[i][j] = array<T, cols, rows>::v[j][i];
 	    return r;
 	}
     };
@@ -2108,12 +2107,12 @@ namespace glvm
     /* Swizzlers */
 
     template<typename T>
-    class swizzler2 : public array<T, 2, 1>
+    class swizzler2 : public array<T, 1, 2>
     {
 	public:
         T &x, &y;
 
-    	swizzler2(T &s0, T &s1) : array<T, 2, 1>(s0, s1), x(s0), y(s1) {}
+    	swizzler2(T &s0, T &s1) : array<T, 1, 2>(s0, s1), x(s0), y(s1) {}
 
     	const swizzler2 &operator=(const swizzler2 &s)
 	{
@@ -2121,28 +2120,28 @@ namespace glvm
 	    T b = s.y;
 	    x = a;
 	    y = b;
-	    array<T, 2, 1>::vl[0] = a;
-	    array<T, 2, 1>::vl[1] = b;
+	    array<T, 1, 2>::vl[0] = a;
+	    array<T, 1, 2>::vl[1] = b;
 	    return *this;
 	}
 
-    	const swizzler2 &operator=(const array<T, 2, 1> &v)
+    	const swizzler2 &operator=(const array<T, 1, 2> &v)
 	{
 	    x = v.vl[0];
 	    y = v.vl[1];
-	    array<T, 2, 1>::vl[0] = v.vl[0];
-	    array<T, 2, 1>::vl[1] = v.vl[1];
+	    array<T, 1, 2>::vl[0] = v.vl[0];
+	    array<T, 1, 2>::vl[1] = v.vl[1];
 	    return *this;
 	}
     };
 
     template<typename T> 
-    class swizzler3 : public array<T, 3, 1>
+    class swizzler3 : public array<T, 1, 3>
     {
 	public:
         T &x, &y, &z;
 
-    	swizzler3(T &s0, T &s1, T &s2) : array<T, 3, 1>(s0, s1, s2), x(s0), y(s1), z(s2) {}
+    	swizzler3(T &s0, T &s1, T &s2) : array<T, 1, 3>(s0, s1, s2), x(s0), y(s1), z(s2) {}
 
     	const swizzler3 &operator=(const swizzler3 &s)
 	{
@@ -2152,31 +2151,31 @@ namespace glvm
 	    x = a;
 	    y = b;
 	    z = c;
-	    array<T, 3, 1>::vl[0] = a;
-	    array<T, 3, 1>::vl[1] = b;
-	    array<T, 3, 1>::vl[2] = c;
+	    array<T, 1, 3>::vl[0] = a;
+	    array<T, 1, 3>::vl[1] = b;
+	    array<T, 1, 3>::vl[2] = c;
 	    return *this;
 	}
 
-    	const swizzler3 &operator=(const array<T, 3, 1> &v)
+    	const swizzler3 &operator=(const array<T, 1, 3> &v)
 	{
 	    x = v.vl[0];
 	    y = v.vl[1];
 	    z = v.vl[2];
-	    array<T, 3, 1>::vl[0] = v.vl[0];
-	    array<T, 3, 1>::vl[1] = v.vl[1];
-	    array<T, 3, 1>::vl[2] = v.vl[2];
+	    array<T, 1, 3>::vl[0] = v.vl[0];
+	    array<T, 1, 3>::vl[1] = v.vl[1];
+	    array<T, 1, 3>::vl[2] = v.vl[2];
 	    return *this;
 	}
     };
 
     template<typename T>
-    class swizzler4 : public array<T, 4, 1>
+    class swizzler4 : public array<T, 1, 4>
     {
 	public:
         T &x, &y, &z, &w;
 
-    	swizzler4(T &s0, T &s1, T &s2, T &s3) : array<T, 4, 1>(s0, s1, s2, s3), x(s0), y(s1), z(s2), w(s3) {}
+    	swizzler4(T &s0, T &s1, T &s2, T &s3) : array<T, 1, 4>(s0, s1, s2, s3), x(s0), y(s1), z(s2), w(s3) {}
 
     	const swizzler4 &operator=(const swizzler4 &s)
 	{
@@ -2188,23 +2187,23 @@ namespace glvm
 	    y = b;
 	    z = c;
 	    w = d;
-	    array<T, 4, 1>::vl[0] = a;
-	    array<T, 4, 1>::vl[1] = b;
-	    array<T, 4, 1>::vl[2] = c;
-	    array<T, 4, 1>::vl[3] = d;
+	    array<T, 1, 4>::vl[0] = a;
+	    array<T, 1, 4>::vl[1] = b;
+	    array<T, 1, 4>::vl[2] = c;
+	    array<T, 1, 4>::vl[3] = d;
 	    return *this;
 	}
 
-    	const swizzler4 &operator=(const array<T, 4, 1> &v)
+    	const swizzler4 &operator=(const array<T, 1, 4> &v)
 	{
 	    x = v.vl[0];
 	    y = v.vl[1];
 	    z = v.vl[2];
 	    w = v.vl[3];
-	    array<T, 4, 1>::vl[0] = v.vl[0];
-	    array<T, 4, 1>::vl[1] = v.vl[1];
-	    array<T, 4, 1>::vl[2] = v.vl[2];
-	    array<T, 4, 1>::vl[3] = v.vl[3];
+	    array<T, 1, 4>::vl[0] = v.vl[0];
+	    array<T, 1, 4>::vl[1] = v.vl[1];
+	    array<T, 1, 4>::vl[2] = v.vl[2];
+	    array<T, 1, 4>::vl[3] = v.vl[3];
 	    return *this;
 	}
     };
@@ -2213,95 +2212,95 @@ namespace glvm
     /* Vectors */
 
     template<typename T, int rows>
-    class vec : public array<T, rows, 1>
+    class vec : public array<T, 1, rows>
     {
 	public:
 
 	/* Constructors, Destructor */
 
 	vec() {}
-	vec(const array<T, rows, 1> &v) : array<T, rows, 1>(v) {}
-	vec(const T x) : array<T, rows, 1>(x) {}
-	vec(const T x, const T y) : array<T, rows, 1>(x, y) {}
-	vec(const vec<T, 2> &xy) : array<T, rows, 1>(xy.vl[0], xy.vl[1]) {}
-	vec(const swizzler2<T> &xy) : array<T, rows, 1>(xy.vl[0], xy.vl[1]) {}
-	vec(const T x, const T y, const T z) : array<T, rows, 1>(x, y, z) {}
-	vec(const vec<T, 3> &xyz) : array<T, rows, 1>(xyz.vl[0], xyz.vl[1], xyz.vl[2]) {}
-	vec(const swizzler3<T> &xyz) : array<T, rows, 1>(xyz.vl[0], xyz.vl[1], xyz.vl[2]) {}
-	vec(const vec<T, 2> &xy, const T z) : array<T, rows, 1>(xy.vl[0], xy.vl[1], z) {}
-	vec(const swizzler2<T> &xy, const T z) : array<T, rows, 1>(xy.vl[0], xy.vl[1], z) {}
-	vec(const T x, const vec<T, 2> &yz) : array<T, rows, 1>(z, yz.vl[0], yz.vl[1]) {}
-	vec(const T x, const swizzler2<T> &yz) : array<T, rows, 1>(z, yz.vl[0], yz.vl[1]) {}
-	vec(const T x, const T y, const T z, const T w) : array<T, rows, 1>(x, y, z, w) {}
-	vec(const vec<T, 4> &xyzw) : array<T, rows, 1>(xyzw.vl[0], xyzw.vl[1], xyzw.vl[2], xyzw.vl[3]) {}
-	vec(const swizzler4<T> &xyzw) : array<T, rows, 1>(xyzw.vl[0], xyzw.vl[1], xyzw.vl[2], xyzw.vl[3]) {}
-	vec(const vec<T, 2> xy, const T z, const T w) : array<T, rows, 1>(xy.vl[0], xy.vl[1], z, w) {}
-	vec(const swizzler2<T> xy, const T z, const T w) : array<T, rows, 1>(xy.vl[0], xy.vl[1], z, w) {}
-	vec(const vec<T, 2> xy, const vec<T, 2> zw) : array<T, rows, 1>(xy.vl[0], xy.vl[1], zw.vl[0], zw.vl[1]) {}
-	vec(const swizzler2<T> xy, const swizzler2<T> zw) : array<T, rows, 1>(xy.vl[0], xy.vl[1], zw.vl[0], zw.vl[1]) {}
-	vec(const T x, const vec<T, 2> yz, const T w) : array<T, rows, 1>(x, yz.vl[0], yz.vl[1], w) {}
-	vec(const T x, const swizzler2<T> yz, const T w) : array<T, rows, 1>(x, yz.vl[0], yz.vl[1], w) {}
-	vec(const T x, const T y, const vec<T, 2> zw) : array<T, rows, 1>(x, y, zw.vl[0], zw.vl[1]) {}
-	vec(const T x, const T y, const swizzler3<T> zw) : array<T, rows, 1>(x, y, zw.vl[0], zw.vl[1]) {}
-	vec(const vec<T, 3> xyz, const T w) : array<T, rows, 1>(xyz.vl[0], xyz.vl[1], xyz.vl[2], w) {}
-	vec(const swizzler3<T> xyz, const T w) : array<T, rows, 1>(xyz.vl[0], xyz.vl[1], xyz.vl[2], w) {}
-	vec(const T x, const vec<T, 3> yzw) : array<T, rows, 1>(x, yzw.vl[0], yzw.vl[1], yzw.vl[2]) {}
-	vec(const T x, const swizzler3<T> yzw) : array<T, rows, 1>(x, yzw.vl[0], yzw.vl[1], yzw.vl[2]) {}
-	vec(const T *v) : array<T, rows, 1>(v) {}
+	vec(const array<T, 1, rows> &v) : array<T, 1, rows>(v) {}
+	vec(const T x) : array<T, 1, rows>(x) {}
+	vec(const T x, const T y) : array<T, 1, rows>(x, y) {}
+	vec(const vec<T, 2> &xy) : array<T, 1, rows>(xy.vl[0], xy.vl[1]) {}
+	vec(const swizzler2<T> &xy) : array<T, 1, rows>(xy.vl[0], xy.vl[1]) {}
+	vec(const T x, const T y, const T z) : array<T, 1, rows>(x, y, z) {}
+	vec(const vec<T, 3> &xyz) : array<T, 1, rows>(xyz.vl[0], xyz.vl[1], xyz.vl[2]) {}
+	vec(const swizzler3<T> &xyz) : array<T, 1, rows>(xyz.vl[0], xyz.vl[1], xyz.vl[2]) {}
+	vec(const vec<T, 2> &xy, const T z) : array<T, 1, rows>(xy.vl[0], xy.vl[1], z) {}
+	vec(const swizzler2<T> &xy, const T z) : array<T, 1, rows>(xy.vl[0], xy.vl[1], z) {}
+	vec(const T x, const vec<T, 2> &yz) : array<T, 1, rows>(z, yz.vl[0], yz.vl[1]) {}
+	vec(const T x, const swizzler2<T> &yz) : array<T, 1, rows>(z, yz.vl[0], yz.vl[1]) {}
+	vec(const T x, const T y, const T z, const T w) : array<T, 1, rows>(x, y, z, w) {}
+	vec(const vec<T, 4> &xyzw) : array<T, 1, rows>(xyzw.vl[0], xyzw.vl[1], xyzw.vl[2], xyzw.vl[3]) {}
+	vec(const swizzler4<T> &xyzw) : array<T, 1, rows>(xyzw.vl[0], xyzw.vl[1], xyzw.vl[2], xyzw.vl[3]) {}
+	vec(const vec<T, 2> xy, const T z, const T w) : array<T, 1, rows>(xy.vl[0], xy.vl[1], z, w) {}
+	vec(const swizzler2<T> xy, const T z, const T w) : array<T, 1, rows>(xy.vl[0], xy.vl[1], z, w) {}
+	vec(const vec<T, 2> xy, const vec<T, 2> zw) : array<T, 1, rows>(xy.vl[0], xy.vl[1], zw.vl[0], zw.vl[1]) {}
+	vec(const swizzler2<T> xy, const swizzler2<T> zw) : array<T, 1, rows>(xy.vl[0], xy.vl[1], zw.vl[0], zw.vl[1]) {}
+	vec(const T x, const vec<T, 2> yz, const T w) : array<T, 1, rows>(x, yz.vl[0], yz.vl[1], w) {}
+	vec(const T x, const swizzler2<T> yz, const T w) : array<T, 1, rows>(x, yz.vl[0], yz.vl[1], w) {}
+	vec(const T x, const T y, const vec<T, 2> zw) : array<T, 1, rows>(x, y, zw.vl[0], zw.vl[1]) {}
+	vec(const T x, const T y, const swizzler3<T> zw) : array<T, 1, rows>(x, y, zw.vl[0], zw.vl[1]) {}
+	vec(const vec<T, 3> xyz, const T w) : array<T, 1, rows>(xyz.vl[0], xyz.vl[1], xyz.vl[2], w) {}
+	vec(const swizzler3<T> xyz, const T w) : array<T, 1, rows>(xyz.vl[0], xyz.vl[1], xyz.vl[2], w) {}
+	vec(const T x, const vec<T, 3> yzw) : array<T, 1, rows>(x, yzw.vl[0], yzw.vl[1], yzw.vl[2]) {}
+	vec(const T x, const swizzler3<T> yzw) : array<T, 1, rows>(x, yzw.vl[0], yzw.vl[1], yzw.vl[2]) {}
+	vec(const T *v) : array<T, 1, rows>(v) {}
 	template<typename U>
-	vec(const vec<U, rows> &v) : array<T, rows, 1>(v) {}
-	vec(const std::string &s) : array<T, rows, 1>(s) {}
+	vec(const vec<U, rows> &v) : array<T, 1, rows>(v) {}
+	vec(const std::string &s) : array<T, 1, rows>(s) {}
 	~vec() {}
 
 	/* Operators */
 
 	T &operator[](const unsigned int i)
 	{
-	    return array<T, rows, 1>::vl[i];
+	    return array<T, 1, rows>::vl[i];
 	}
 
 	const T &operator[](const unsigned int i) const
 	{
-	    return array<T, rows, 1>::vl[i];
+	    return array<T, 1, rows>::vl[i];
 	}
 
-	const vec &operator=(const vec &a)                { array<T, rows, 1>::_op_assign(a); return *this; }
-	vec operator+(const array<T, rows, 1> &a) const   { return array<T, rows, 1>::_op_plus(a); }
-	const vec &operator+=(const array<T, rows, 1> &a) { array<T, rows, 1>::_op_plus_assign(a); return *this; }
-	vec operator+() const                             { return array<T, rows, 1>::_op_unary_plus(); }
-	vec operator-(const array<T, rows, 1> &a) const   { return array<T, rows, 1>::_op_minus(a); }
-	const vec &operator-=(const array<T, rows, 1> &a) { array<T, rows, 1>::_op_minus_assign(a); return *this; }
-	vec operator-() const                             { return array<T, rows, 1>::_op_unary_minus(); }
-	vec operator*(const T s) const                    { return array<T, rows, 1>::_op_scal_mult(s); }
-	friend vec operator*(const T s, const array<T, rows, 1> &a) { return a._op_scal_mult(s); }
-	const vec &operator*=(const T s)                  { array<T, rows, 1>::_op_scal_mult_assign(s); return *this; }
-	vec operator*(const array<T, rows, 1> &a) const   { return array<T, rows, 1>::_op_comp_mult(a); }
-	const vec &operator*=(const array<T, rows, 1> &a) { array<T, rows, 1>::_op_comp_mult_assign(a); return *this; }
-	vec operator/(const T s) const                    { return array<T, rows, 1>::_op_scal_div(s); }
-	const vec &operator/=(const T s)                  { array<T, rows, 1>::_op_scal_div_assign(s); return *this; }
-	vec operator/(const array<T, rows, 1> &a) const   { return array<T, rows, 1>::_op_comp_div(a); }
-	const vec &operator/=(const array<T, rows, 1> &a) { array<T, rows, 1>::_op_comp_div_assign(a); return *this; }
-	vec operator%(const T s) const                    { return array<T, rows, 1>::_op_scal_mod(s); }
-	const vec &operator%=(const T s)                  { array<T, rows, 1>::_op_scal_mod_assign(s); return *this; }
-	vec operator%(const array<T, rows, 1> &a) const   { return array<T, rows, 1>::_op_comp_mod(a); }
-	const vec &operator%=(const array<T, rows, 1> &a) { array<T, rows, 1>::_op_comp_mod_assign(a); return *this; }
-	bool operator==(const array<T, rows, 1> &a) const { return array<T, rows, 1>::_op_equal(a); }
-	bool operator!=(const array<T, rows, 1> &a) const { return array<T, rows, 1>::_op_notequal(a); }
+	const vec &operator=(const vec &a)                { array<T, 1, rows>::_op_assign(a); return *this; }
+	vec operator+(const array<T, 1, rows> &a) const   { return array<T, 1, rows>::_op_plus(a); }
+	const vec &operator+=(const array<T, 1, rows> &a) { array<T, 1, rows>::_op_plus_assign(a); return *this; }
+	vec operator+() const                             { return array<T, 1, rows>::_op_unary_plus(); }
+	vec operator-(const array<T, 1, rows> &a) const   { return array<T, 1, rows>::_op_minus(a); }
+	const vec &operator-=(const array<T, 1, rows> &a) { array<T, 1, rows>::_op_minus_assign(a); return *this; }
+	vec operator-() const                             { return array<T, 1, rows>::_op_unary_minus(); }
+	vec operator*(const T s) const                    { return array<T, 1, rows>::_op_scal_mult(s); }
+	friend vec operator*(const T s, const array<T, 1, rows> &a) { return a._op_scal_mult(s); }
+	const vec &operator*=(const T s)                  { array<T, 1, rows>::_op_scal_mult_assign(s); return *this; }
+	vec operator*(const array<T, 1, rows> &a) const   { return array<T, 1, rows>::_op_comp_mult(a); }
+	const vec &operator*=(const array<T, 1, rows> &a) { array<T, 1, rows>::_op_comp_mult_assign(a); return *this; }
+	vec operator/(const T s) const                    { return array<T, 1, rows>::_op_scal_div(s); }
+	const vec &operator/=(const T s)                  { array<T, 1, rows>::_op_scal_div_assign(s); return *this; }
+	vec operator/(const array<T, 1, rows> &a) const   { return array<T, 1, rows>::_op_comp_div(a); }
+	const vec &operator/=(const array<T, 1, rows> &a) { array<T, 1, rows>::_op_comp_div_assign(a); return *this; }
+	vec operator%(const T s) const                    { return array<T, 1, rows>::_op_scal_mod(s); }
+	const vec &operator%=(const T s)                  { array<T, 1, rows>::_op_scal_mod_assign(s); return *this; }
+	vec operator%(const array<T, 1, rows> &a) const   { return array<T, 1, rows>::_op_comp_mod(a); }
+	const vec &operator%=(const array<T, 1, rows> &a) { array<T, 1, rows>::_op_comp_mod_assign(a); return *this; }
+	bool operator==(const array<T, 1, rows> &a) const { return array<T, 1, rows>::_op_equal(a); }
+	bool operator!=(const array<T, 1, rows> &a) const { return array<T, 1, rows>::_op_notequal(a); }
 
 	/* Swizzling */
 
-	const T &x() const { return array<T, rows, 1>::vl[0]; }
-	const T &r() const { return array<T, rows, 1>::vl[0]; }
-	const T &s() const { return array<T, rows, 1>::vl[0]; }
-	const T &y() const { return array<T, rows, 1>::vl[1]; }
-	const T &g() const { return array<T, rows, 1>::vl[1]; }
-	const T &t() const { return array<T, rows, 1>::vl[1]; }
-	const T &z() const { return array<T, rows, 1>::vl[2]; }
-	const T &b() const { return array<T, rows, 1>::vl[2]; }
-	const T &p() const { return array<T, rows, 1>::vl[2]; }
-	const T &w() const { return array<T, rows, 1>::vl[3]; }
-	const T &a() const { return array<T, rows, 1>::vl[3]; }
-	const T &q() const { return array<T, rows, 1>::vl[3]; }
+	const T &x() const { return array<T, 1, rows>::vl[0]; }
+	const T &r() const { return array<T, 1, rows>::vl[0]; }
+	const T &s() const { return array<T, 1, rows>::vl[0]; }
+	const T &y() const { return array<T, 1, rows>::vl[1]; }
+	const T &g() const { return array<T, 1, rows>::vl[1]; }
+	const T &t() const { return array<T, 1, rows>::vl[1]; }
+	const T &z() const { return array<T, 1, rows>::vl[2]; }
+	const T &b() const { return array<T, 1, rows>::vl[2]; }
+	const T &p() const { return array<T, 1, rows>::vl[2]; }
+	const T &w() const { return array<T, 1, rows>::vl[3]; }
+	const T &a() const { return array<T, 1, rows>::vl[3]; }
+	const T &q() const { return array<T, 1, rows>::vl[3]; }
 	vec<T, 2> xx() const { return vec<T, 2>(x(), x()); }
 	vec<T, 2> rr() const { return vec<T, 2>(r(), r()); }
 	vec<T, 2> ss() const { return vec<T, 2>(s(), s()); }
@@ -3310,18 +3309,18 @@ namespace glvm
 	vec<T, 4> wwww() const { return vec<T, 4>(w(), w(), w(), w()); }
 	vec<T, 4> aaaa() const { return vec<T, 4>(a(), a(), a(), a()); }
 	vec<T, 4> qqqq() const { return vec<T, 4>(q(), q(), q(), q()); }
-	T &x() { return array<T, rows, 1>::vl[0]; }
-	T &r() { return array<T, rows, 1>::vl[0]; }
-	T &s() { return array<T, rows, 1>::vl[0]; }
-	T &y() { return array<T, rows, 1>::vl[1]; }
-	T &g() { return array<T, rows, 1>::vl[1]; }
-	T &t() { return array<T, rows, 1>::vl[1]; }
-	T &z() { return array<T, rows, 1>::vl[2]; }
-	T &b() { return array<T, rows, 1>::vl[2]; }
-	T &p() { return array<T, rows, 1>::vl[2]; }
-	T &w() { return array<T, rows, 1>::vl[3]; }
-	T &a() { return array<T, rows, 1>::vl[3]; }
-	T &q() { return array<T, rows, 1>::vl[3]; }
+	T &x() { return array<T, 1, rows>::vl[0]; }
+	T &r() { return array<T, 1, rows>::vl[0]; }
+	T &s() { return array<T, 1, rows>::vl[0]; }
+	T &y() { return array<T, 1, rows>::vl[1]; }
+	T &g() { return array<T, 1, rows>::vl[1]; }
+	T &t() { return array<T, 1, rows>::vl[1]; }
+	T &z() { return array<T, 1, rows>::vl[2]; }
+	T &b() { return array<T, 1, rows>::vl[2]; }
+	T &p() { return array<T, 1, rows>::vl[2]; }
+	T &w() { return array<T, 1, rows>::vl[3]; }
+	T &a() { return array<T, 1, rows>::vl[3]; }
+	T &q() { return array<T, 1, rows>::vl[3]; }
 	swizzler2<T> xy() { return swizzler2<T>(x(), y()); }
 	swizzler2<T> rg() { return swizzler2<T>(r(), g()); }
 	swizzler2<T> st() { return swizzler2<T>(s(), t()); }
@@ -3504,76 +3503,76 @@ namespace glvm
 	swizzler4<T> qpts() { return swizzler4<T>(q(), p(), t(), s()); }
     };
 
-    template<typename T, int r> vec<T, r> sin(const array<T, r, 1> &v) { return v._sin(); }
-    template<typename T, int r> vec<T, r> cos(const array<T, r, 1> &v) { return v._cos(); }
-    template<typename T, int r> vec<T, r> tan(const array<T, r, 1> &v) { return v._tan(); }
-    template<typename T, int r> vec<T, r> asin(const array<T, r, 1> &v) { return v._asin(); }
-    template<typename T, int r> vec<T, r> acos(const array<T, r, 1> &v) { return v._acos(); }
-    template<typename T, int r> vec<T, r> atan(const array<T, r, 1> &v) { return v._atan(); }
-    template<typename T, int r> vec<T, r> atan(const array<T, r, 1> &v, const array<T, r, 1> &w) { return v._atan(w); }
-    template<typename T, int r> vec<T, r> radians(const array<T, r, 1> &v) { return v._radians(); }
-    template<typename T, int r> vec<T, r> degrees(const array<T, r, 1> &v) { return v._degrees(); }
+    template<typename T, int r> vec<T, r> sin(const array<T, 1, r> &v) { return v._sin(); }
+    template<typename T, int r> vec<T, r> cos(const array<T, 1, r> &v) { return v._cos(); }
+    template<typename T, int r> vec<T, r> tan(const array<T, 1, r> &v) { return v._tan(); }
+    template<typename T, int r> vec<T, r> asin(const array<T, 1, r> &v) { return v._asin(); }
+    template<typename T, int r> vec<T, r> acos(const array<T, 1, r> &v) { return v._acos(); }
+    template<typename T, int r> vec<T, r> atan(const array<T, 1, r> &v) { return v._atan(); }
+    template<typename T, int r> vec<T, r> atan(const array<T, 1, r> &v, const array<T, 1, r> &w) { return v._atan(w); }
+    template<typename T, int r> vec<T, r> radians(const array<T, 1, r> &v) { return v._radians(); }
+    template<typename T, int r> vec<T, r> degrees(const array<T, 1, r> &v) { return v._degrees(); }
 
-    template<typename T, int r> vec<T, r> pow(const array<T, r, 1> &v, const T p) { return v._pow(p); }
-    template<typename T, int r> vec<T, r> exp(const array<T, r, 1> &v) { return v._exp(); }
-    template<typename T, int r> vec<T, r> exp2(const array<T, r, 1> &v) { return v._exp2(); }
-    template<typename T, int r> vec<T, r> log(const array<T, r, 1> &v) { return v._log(); }
-    template<typename T, int r> vec<T, r> log2(const array<T, r, 1> &v) { return v._log2(); }
-    template<typename T, int r> vec<T, r> log10(const array<T, r, 1> &v) { return v._log10(); }
-    template<typename T, int r> vec<T, r> sqrt(const array<T, r, 1> &v) { return v._sqrt(); }
-    template<typename T, int r> vec<T, r> inversesqrt(const array<T, r, 1> &v) { return v._inversesqrt(); }
-    template<typename T, int r> vec<T, r> cbrt(const array<T, r, 1> &v) { return v._cbrt(); }
+    template<typename T, int r> vec<T, r> pow(const array<T, 1, r> &v, const T p) { return v._pow(p); }
+    template<typename T, int r> vec<T, r> exp(const array<T, 1, r> &v) { return v._exp(); }
+    template<typename T, int r> vec<T, r> exp2(const array<T, 1, r> &v) { return v._exp2(); }
+    template<typename T, int r> vec<T, r> log(const array<T, 1, r> &v) { return v._log(); }
+    template<typename T, int r> vec<T, r> log2(const array<T, 1, r> &v) { return v._log2(); }
+    template<typename T, int r> vec<T, r> log10(const array<T, 1, r> &v) { return v._log10(); }
+    template<typename T, int r> vec<T, r> sqrt(const array<T, 1, r> &v) { return v._sqrt(); }
+    template<typename T, int r> vec<T, r> inversesqrt(const array<T, 1, r> &v) { return v._inversesqrt(); }
+    template<typename T, int r> vec<T, r> cbrt(const array<T, 1, r> &v) { return v._cbrt(); }
 
-    template<typename T, int r> vec<bool, r> isfinite(const array<T, r, 1> &v) { return v._isfinite(); }
-    template<typename T, int r> vec<bool, r> isinf(const array<T, r, 1> &v) { return v._isinf(); }
-    template<typename T, int r> vec<bool, r> isnan(const array<T, r, 1> &v) { return v._isnan(); }
-    template<typename T, int r> vec<bool, r> isnormal(const array<T, r, 1> &v) { return v._isnormal(); }
+    template<typename T, int r> vec<bool, r> isfinite(const array<T, 1, r> &v) { return v._isfinite(); }
+    template<typename T, int r> vec<bool, r> isinf(const array<T, 1, r> &v) { return v._isinf(); }
+    template<typename T, int r> vec<bool, r> isnan(const array<T, 1, r> &v) { return v._isnan(); }
+    template<typename T, int r> vec<bool, r> isnormal(const array<T, 1, r> &v) { return v._isnormal(); }
 
-    template<typename T, int r> vec<T, r> abs(const array<T, r, 1> &v) { return v._abs(); }
-    template<typename T, int r> vec<T, r> sign(const array<T, r, 1> &v) { return v._sign(); }
-    template<typename T, int r> vec<T, r> floor(const array<T, r, 1> &v) { return v._floor(); }
-    template<typename T, int r> vec<T, r> ceil(const array<T, r, 1> &v) { return v._ceil(); }
-    template<typename T, int r> vec<T, r> round(const array<T, r, 1> &v) { return v._round(); }
-    template<typename T, int r> vec<T, r> fract(const array<T, r, 1> &v) { return v._fract(); }
+    template<typename T, int r> vec<T, r> abs(const array<T, 1, r> &v) { return v._abs(); }
+    template<typename T, int r> vec<T, r> sign(const array<T, 1, r> &v) { return v._sign(); }
+    template<typename T, int r> vec<T, r> floor(const array<T, 1, r> &v) { return v._floor(); }
+    template<typename T, int r> vec<T, r> ceil(const array<T, 1, r> &v) { return v._ceil(); }
+    template<typename T, int r> vec<T, r> round(const array<T, 1, r> &v) { return v._round(); }
+    template<typename T, int r> vec<T, r> fract(const array<T, 1, r> &v) { return v._fract(); }
 
-    template<typename T, int r> vec<T, r> min(const array<T, r, 1> &v, const T x) { return v._min(x); }
-    template<typename T, int r> vec<T, r> min(const array<T, r, 1> &v, const array<T, r, 1> &w) { return v._min(w); }
-    template<typename T, int r> vec<T, r> max(const array<T, r, 1> &v, const T x) { return v._max(x); }
-    template<typename T, int r> vec<T, r> max(const array<T, r, 1> &v, const array<T, r, 1> &w) { return v._max(w); }
+    template<typename T, int r> vec<T, r> min(const array<T, 1, r> &v, const T x) { return v._min(x); }
+    template<typename T, int r> vec<T, r> min(const array<T, 1, r> &v, const array<T, 1, r> &w) { return v._min(w); }
+    template<typename T, int r> vec<T, r> max(const array<T, 1, r> &v, const T x) { return v._max(x); }
+    template<typename T, int r> vec<T, r> max(const array<T, 1, r> &v, const array<T, 1, r> &w) { return v._max(w); }
 
-    template<typename T, int r> vec<T, r> clamp(const array<T, r, 1> &v, const T a, const T b) { return v._clamp(a, b); }
-    template<typename T, int r> vec<T, r> clamp(const array<T, r, 1> &v, const array<T, r, 1> &a, const array<T, r, 1> &b) { return v._clamp(a, b); }
-    template<typename T, int r> vec<T, r> mix(const array<T, r, 1> &v, const array<T, r, 1> &w, const T a) { return v._mix(w, a); }
-    template<typename T, int r> vec<T, r> mix(const array<T, r, 1> &v, const array<T, r, 1> &w, const array<T, r, 1> &a) { return v._mix(w, a); }
-    template<typename T, int r> vec<T, r> step(const array<T, r, 1> &v, const T a) { return v._step(a); }
-    template<typename T, int r> vec<T, r> step(const array<T, r, 1> &v, const array<T, r, 1> &a) { return v._step(a); }
-    template<typename T, int r> vec<T, r> smoothstep(const array<T, r, 1> &v, const T e0, const T e1) { return v._smoothstep(e0, e1); }
-    template<typename T, int r> vec<T, r> smoothstep(const array<T, r, 1> &v, const array<T, r, 1> &e0, const array<T, r, 1> &e1) { return v._smoothstep(e0, e1); }
-    template<typename T, int r> vec<T, r> mod(const array<T, r, 1> &v, const T x) { return v._mod(x); }
-    template<typename T, int r> vec<T, r> mod(const array<T, r, 1> &v, const array<T, r, 1> &w) { return v._mod(w); }
+    template<typename T, int r> vec<T, r> clamp(const array<T, 1, r> &v, const T a, const T b) { return v._clamp(a, b); }
+    template<typename T, int r> vec<T, r> clamp(const array<T, 1, r> &v, const array<T, 1, r> &a, const array<T, 1, r> &b) { return v._clamp(a, b); }
+    template<typename T, int r> vec<T, r> mix(const array<T, 1, r> &v, const array<T, 1, r> &w, const T a) { return v._mix(w, a); }
+    template<typename T, int r> vec<T, r> mix(const array<T, 1, r> &v, const array<T, 1, r> &w, const array<T, 1, r> &a) { return v._mix(w, a); }
+    template<typename T, int r> vec<T, r> step(const array<T, 1, r> &v, const T a) { return v._step(a); }
+    template<typename T, int r> vec<T, r> step(const array<T, 1, r> &v, const array<T, 1, r> &a) { return v._step(a); }
+    template<typename T, int r> vec<T, r> smoothstep(const array<T, 1, r> &v, const T e0, const T e1) { return v._smoothstep(e0, e1); }
+    template<typename T, int r> vec<T, r> smoothstep(const array<T, 1, r> &v, const array<T, 1, r> &e0, const array<T, 1, r> &e1) { return v._smoothstep(e0, e1); }
+    template<typename T, int r> vec<T, r> mod(const array<T, 1, r> &v, const T x) { return v._mod(x); }
+    template<typename T, int r> vec<T, r> mod(const array<T, 1, r> &v, const array<T, 1, r> &w) { return v._mod(w); }
 
-    template<typename T, int r> vec<bool, r> greaterThan(const array<T, r, 1> &v, const array<T, r, 1> &w) { return v._greaterThan(w); }
-    template<typename T, int r> vec<bool, r> greaterThanEqual(const array<T, r, 1> &v, const array<T, r, 1> &w) { return v._greaterThanEqual(w); }
-    template<typename T, int r> vec<bool, r> lessThan(const array<T, r, 1> &v, const array<T, r, 1> &w) { return v._lessThan(w); }
-    template<typename T, int r> vec<bool, r> lessThanEqual(const array<T, r, 1> &v, const array<T, r, 1> &w) { return v._lessThanEqual(w); }
-    template<typename T, int r> vec<bool, r> equal(const array<T, r, 1> &v, const array<T, r, 1> &w) { return v._equal(w); }
-    template<typename T, int r> vec<bool, r> equal(const array<T, r, 1> &v, const array<T, r, 1> &w, const int max_ulps) { return v._equal(w, max_ulps); }
-    template<typename T, int r> vec<bool, r> notEqual(const array<T, r, 1> &v, const array<T, r, 1> &w) { return v._notEqual(w); }
-    template<typename T, int r> vec<bool, r> notEqual(const array<T, r, 1> &v, const array<T, r, 1> &w, const int max_ulps) { return v._notEqual(w, max_ulps); }
-    template<int r> bool any(const array<bool, r, 1> &v) { return v._any(); }
-    template<int r> bool all(const array<bool, r, 1> &v) { return v._all(); }
-    template<int r> bool negate(const array<bool, r, 1> &v) { return v._negate(); }
+    template<typename T, int r> vec<bool, r> greaterThan(const array<T, 1, r> &v, const array<T, 1, r> &w) { return v._greaterThan(w); }
+    template<typename T, int r> vec<bool, r> greaterThanEqual(const array<T, 1, r> &v, const array<T, 1, r> &w) { return v._greaterThanEqual(w); }
+    template<typename T, int r> vec<bool, r> lessThan(const array<T, 1, r> &v, const array<T, 1, r> &w) { return v._lessThan(w); }
+    template<typename T, int r> vec<bool, r> lessThanEqual(const array<T, 1, r> &v, const array<T, 1, r> &w) { return v._lessThanEqual(w); }
+    template<typename T, int r> vec<bool, r> equal(const array<T, 1, r> &v, const array<T, 1, r> &w) { return v._equal(w); }
+    template<typename T, int r> vec<bool, r> equal(const array<T, 1, r> &v, const array<T, 1, r> &w, const int max_ulps) { return v._equal(w, max_ulps); }
+    template<typename T, int r> vec<bool, r> notEqual(const array<T, 1, r> &v, const array<T, 1, r> &w) { return v._notEqual(w); }
+    template<typename T, int r> vec<bool, r> notEqual(const array<T, 1, r> &v, const array<T, 1, r> &w, const int max_ulps) { return v._notEqual(w, max_ulps); }
+    template<int r> bool any(const array<bool, 1, r> &v) { return v._any(); }
+    template<int r> bool all(const array<bool, 1, r> &v) { return v._all(); }
+    template<int r> bool negate(const array<bool, 1, r> &v) { return v._negate(); }
 
-    template<typename T, int r> T length(const array<T, r, 1> &v) { return v._length(); }
-    template<typename T, int r> T distance(const array<T, r, 1> &v, const array<T, r, 1> &w) { return v._distance(w); }
-    template<typename T, int r> T dot(const array<T, r, 1> &v, const array<T, r, 1> &w) { return v._dot(w); }
-    template<typename T, int r> vec<T, r> normalize(const array<T, r, 1> &v) { return v._normalize(); }
+    template<typename T, int r> T length(const array<T, 1, r> &v) { return v._length(); }
+    template<typename T, int r> T distance(const array<T, 1, r> &v, const array<T, 1, r> &w) { return v._distance(w); }
+    template<typename T, int r> T dot(const array<T, 1, r> &v, const array<T, 1, r> &w) { return v._dot(w); }
+    template<typename T, int r> vec<T, r> normalize(const array<T, 1, r> &v) { return v._normalize(); }
 
-    template<typename T, int r> vec<T, r> faceforward(const array<T, r, 1> &v, const array<T, r, 1> &I, const array<T, r, 1> &Nref) { return v._faceforward(I, Nref); } 
-    template<typename T, int r> vec<T, r> reflect(const array<T, r, 1> &I, const array<T, r, 1> &N) { return I._reflect(N); }
-    template<typename T, int r> vec<T, r> refract(const array<T, r, 1> &I, const array<T, r, 1> &N, T eta) { return I._refract(N, eta); }
+    template<typename T, int r> vec<T, r> faceforward(const array<T, 1, r> &v, const array<T, 1, r> &I, const array<T, 1, r> &Nref) { return v._faceforward(I, Nref); } 
+    template<typename T, int r> vec<T, r> reflect(const array<T, 1, r> &I, const array<T, 1, r> &N) { return I._reflect(N); }
+    template<typename T, int r> vec<T, r> refract(const array<T, 1, r> &I, const array<T, 1, r> &N, T eta) { return I._refract(N, eta); }
 
-    template<typename T> vec<T, 3> cross(const array<T, 3, 1> &v, const array<T, 3, 1> &w)
+    template<typename T> vec<T, 3> cross(const array<T, 1, 3> &v, const array<T, 1, 3> &w)
     {
 	return vec<T, 3>(
 		v.vl[1] * w.vl[2] - v.vl[2] * w.vl[1], 
@@ -3582,113 +3581,116 @@ namespace glvm
     }
 
     typedef vec<bool, 2> bvec2;
-    typedef vec<int, 2> ivec2;
+    typedef vec<int32_t, 2> ivec2;
+    typedef vec<uint32_t, 2> uvec2;
     typedef vec<float, 2> vec2;
     typedef vec<double, 2> dvec2;
     typedef vec<bool, 3> bvec3;
-    typedef vec<int, 3> ivec3;
+    typedef vec<int32_t, 3> ivec3;
+    typedef vec<uint32_t, 3> uvec3;
     typedef vec<float, 3> vec3;
     typedef vec<double, 3> dvec3;
     typedef vec<bool, 4> bvec4;
-    typedef vec<int, 4> ivec4;
+    typedef vec<int32_t, 4> ivec4;
+    typedef vec<uint32_t, 4> uvec4;
     typedef vec<float, 4> vec4;
     typedef vec<double, 4> dvec4;
 
 
     /* Matrices */
 
-    template<typename T, int rows, int cols>
-    class mat : public array<T, rows, cols>
+    template<typename T, int cols, int rows>
+    class mat : public array<T, cols, rows>
     {
 	public:
 
 	/* Constructors, Destructor */
 
 	mat() {}
-	mat(const array<T, rows, cols> &a) : array<T, rows, cols>(a) {}
+	mat(const array<T, cols, rows> &a) : array<T, cols, rows>(a) {}
 	mat(const T x)
 	{
-	    for (int i = 0; i < rows; i++)
-		for (int j = 0; j < cols; j++)
-		    array<T, rows, cols>::v[i][j] = (i == j ? x : static_cast<T>(0));
+	    for (int i = 0; i < cols; i++)
+		for (int j = 0; j < rows; j++)
+		    array<T, cols, rows>::v[i][j] = (i == j ? x : static_cast<T>(0));
 	}
 	mat(const T v0, const T v1, const T v2, const T v3) 
-	    : array<T, rows, cols>(v0, v1, v2, v3) {}
+	    : array<T, cols, rows>(v0, v1, v2, v3) {}
 	mat(const T v0, const T v1, const T v2, const T v3, const T v4, const T v5)
-	    : array<T, rows, cols>(v0, v1, v2, v3, v4, v5) {}
+	    : array<T, cols, rows>(v0, v1, v2, v3, v4, v5) {}
 	mat(const T v0, const T v1, const T v2, const T v3, const T v4, const T v5, const T v6, const T v7)
-	    : array<T, rows, cols>(v0, v1, v2, v3, v4, v5, v6, v7) {}
+	    : array<T, cols, rows>(v0, v1, v2, v3, v4, v5, v6, v7) {}
 	mat(const T v0, const T v1, const T v2, const T v3, const T v4, const T v5, const T v6, const T v7, const T v8)
-	    : array<T, rows, cols>(v0, v1, v2, v3, v4, v5, v6, v7, v8) {}
+	    : array<T, cols, rows>(v0, v1, v2, v3, v4, v5, v6, v7, v8) {}
 	mat(const T v0, const T v1, const T v2, const T v3, const T v4, const T v5,
 		const T v6, const T v7, const T v8, const T v9, const T v10, const T v11)
-	    : array<T, rows, cols>(v0, v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11) {}
+	    : array<T, cols, rows>(v0, v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11) {}
 	mat(const T v0, const T v1, const T v2, const T v3, const T v4, const T v5, const T v6, const T v7,
 		const T v8, const T v9, const T v10, const T v11, const T v12, const T v13, const T v14, const T v15)
-	    : array<T, rows, cols>(v0, v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15) {}
+	    : array<T, cols, rows>(v0, v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15) {}
 
 	mat(const vec<T, rows> &col0, const vec<T, rows> &col1)
 	{
 	    for (int i = 0; i < rows; i++)
 	    {
-		array<T, rows, cols>::v[i][0] = col0.vl[i];
-		array<T, rows, cols>::v[i][1] = col1.vl[i];
+		array<T, cols, rows>::v[0][i] = col0.vl[i];
+		array<T, cols, rows>::v[1][i] = col1.vl[i];
 	    }
 	}
 	mat(const vec<T, rows> &col0, const vec<T, rows> &col1, const vec<T, rows> &col2)
 	{
 	    for (int i = 0; i < rows; i++)
 	    {
-		array<T, rows, cols>::v[i][0] = col0.vl[i];
-		array<T, rows, cols>::v[i][1] = col1.vl[i];
-		array<T, rows, cols>::v[i][2] = col2.vl[i];
+		array<T, cols, rows>::v[0][i] = col0.vl[i];
+		array<T, cols, rows>::v[1][i] = col1.vl[i];
+		array<T, cols, rows>::v[2][i] = col2.vl[i];
 	    }
 	}
 	mat(const vec<T, rows> &col0, const vec<T, rows> &col1, const vec<T, rows> &col2, const vec<T, rows> &col3)
 	{
 	    for (int i = 0; i < rows; i++)
 	    {
-		array<T, rows, cols>::v[i][0] = col0.vl[i];
-		array<T, rows, cols>::v[i][1] = col1.vl[i];
-		array<T, rows, cols>::v[i][2] = col2.vl[i];
-		array<T, rows, cols>::v[i][3] = col3.vl[i];
+		array<T, cols, rows>::v[0][i] = col0.vl[i];
+		array<T, cols, rows>::v[1][i] = col1.vl[i];
+		array<T, cols, rows>::v[2][i] = col2.vl[i];
+		array<T, cols, rows>::v[3][i] = col3.vl[i];
 	    }
 	}
 
-	mat(const T *a) : array<T, rows, cols>(a) {}
+	mat(const T *a) : array<T, cols, rows>(a) {}
 	template<typename U>
-	mat(const mat<U, rows, cols> &a) : array<T, rows, cols>(a) {}
-	mat(const std::string &s) : array<T, rows, cols>(s) {}
+	mat(const mat<U, cols, rows> &a) : array<T, cols, rows>(a) {}
+	mat(const std::string &s) : array<T, cols, rows>(s) {}
 	~mat() {}
 
 	/* Operators */
 
-	T *operator[](const int row)
+	T *operator[](const unsigned int i)
 	{
-	    return array<T, rows, cols>::v[row];
+	    return array<T, cols, rows>::v[i];
 	}
 
-	const T *operator[](const int row) const
+	const T *operator[](const unsigned int i) const
 	{
-	    return array<T, rows, cols>::v[row];
+	    return array<T, cols, rows>::v[i];
 	}
 
-	const mat &operator=(const mat &a)  { array<T, rows, cols>::_op_assign(a); return *this; }
-	mat operator+(const mat &a) const   { return array<T, rows, cols>::_op_plus(a); }
-	const mat &operator+=(const mat &a) { array<T, rows, cols>::_op_plus_assign(a); return *this; }
-	mat operator+() const               { return array<T, rows, cols>::_op_unary_plus(); }
-	mat operator-(const mat &a) const   { return array<T, rows, cols>::_op_minus(a); }
-	const mat &operator-=(const mat &a) { array<T, rows, cols>::_op_minus_assign(a); return *this; }
-	mat operator-() const               { return array<T, rows, cols>::_op_unary_minus(); }
-	mat operator*(const T s) const      { return array<T, rows, cols>::_op_scal_mult(s); }
+	const mat &operator=(const mat &a)  { array<T, cols, rows>::_op_assign(a); return *this; }
+	mat operator+(const mat &a) const   { return array<T, cols, rows>::_op_plus(a); }
+	const mat &operator+=(const mat &a) { array<T, cols, rows>::_op_plus_assign(a); return *this; }
+	mat operator+() const               { return array<T, cols, rows>::_op_unary_plus(); }
+	mat operator-(const mat &a) const   { return array<T, cols, rows>::_op_minus(a); }
+	const mat &operator-=(const mat &a) { array<T, cols, rows>::_op_minus_assign(a); return *this; }
+	mat operator-() const               { return array<T, cols, rows>::_op_unary_minus(); }
+	mat operator*(const T s) const      { return array<T, cols, rows>::_op_scal_mult(s); }
 	friend mat operator*(const T s, const mat &a) { return a._op_scal_mult(s); }
-	const mat &operator*=(const T s)    { array<T, rows, cols>::_op_scal_mult_assign(s); return *this; }
-	mat operator/(const T s) const      { return array<T, rows, cols>::_op_scal_div(s); }
-	const mat &operator/=(const T s)    { array<T, rows, cols>::_op_scal_div_assign(s); return *this; }
-	mat operator%(const T s) const      { return array<T, rows, cols>::_op_scal_mod(s); }
-	const mat &operator%=(const T s)    { array<T, rows, cols>::_op_scal_mod_assign(s); return *this; }
-	bool operator==(const mat &a) const { return array<T, rows, cols>::_op_equal(a); }
-	bool operator!=(const mat &a) const { return array<T, rows, cols>::_op_notequal(a); }
+	const mat &operator*=(const T s)    { array<T, cols, rows>::_op_scal_mult_assign(s); return *this; }
+	mat operator/(const T s) const      { return array<T, cols, rows>::_op_scal_div(s); }
+	const mat &operator/=(const T s)    { array<T, cols, rows>::_op_scal_div_assign(s); return *this; }
+	mat operator%(const T s) const      { return array<T, cols, rows>::_op_scal_mod(s); }
+	const mat &operator%=(const T s)    { array<T, cols, rows>::_op_scal_mod_assign(s); return *this; }
+	bool operator==(const mat &a) const { return array<T, cols, rows>::_op_equal(a); }
+	bool operator!=(const mat &a) const { return array<T, cols, rows>::_op_notequal(a); }
 	
 	vec<T, rows> operator*(const vec<T, cols> &w) const
 	{
@@ -3698,7 +3700,7 @@ namespace glvm
 		r.vl[i] = static_cast<T>(0);
 		for (int j = 0; j < cols; j++)
 	       	{
-    		    r.vl[i] += array<T, rows, cols>::v[i][j] * w.vl[j];
+    		    r.vl[i] += array<T, cols, rows>::v[j][i] * w.vl[j];
 		}
 	    }
 	    return r;
@@ -3707,10 +3709,10 @@ namespace glvm
     	friend vec<T, cols> operator*(const vec<T, rows> &w, const mat &m)
 	{
 	    vec<T, cols> r;
-	    for (int i = 0; i < rows; i++)
+	    for (int i = 0; i < cols; i++)
 	    {
 		r.vl[i] = static_cast<T>(0);
-		for (int j = 0; j < cols; j++)
+		for (int j = 0; j < rows; j++)
 	       	{
     		    r.vl[i] += m.v[i][j] * w.vl[j];
 		}
@@ -3719,7 +3721,7 @@ namespace glvm
 
 	}
 
-	mat<T, rows, rows> operator*(const mat<T, cols, rows> &n) const 
+	mat<T, rows, rows> operator*(const mat<T, rows, cols> &n) const 
 	{
 	    mat<T, rows, rows> r;
 	    for (int i = 0; i < rows; i++)
@@ -3727,122 +3729,122 @@ namespace glvm
 		for (int j = 0; j < rows; j++)
 		{
 		    r.v[i][j] = static_cast<T>(0);
-		    for (int k = 0; k < rows; k++)
+		    for (int k = 0; k < cols; k++)
 		    {
-			r.v[i][j] += array<T, rows, cols>::v[i][k] * n.v[k][j];
+			r.v[i][j] += array<T, cols, rows>::v[k][j] * n.v[i][k];
 		    }
 		}
 	    }
 	    return r;
 	}
 
-	const mat<T, rows, cols> &operator*=(const mat<T, rows, cols> &n) const 
+	const mat<T, cols, rows> &operator*=(const mat<T, cols, rows> &n) const 
 	{
-	    mat<T, rows, cols> r = *this * n;
+	    mat<T, cols, rows> r = *this * n;
 	    *this = r;
 	    return *this;
 	}
     };
 
-    template<typename T, int r> vec<T, 2> row(const mat<T, r, 2> &m, const int row) { return vec<T, 2>(m[row][0], m[row][1]); }
-    template<typename T, int r> vec<T, 3> row(const mat<T, r, 3> &m, const int row) { return vec<T, 3>(m[row][0], m[row][1], m[row][2]); }
-    template<typename T, int r> vec<T, 4> row(const mat<T, r, 4> &m, const int row) { return vec<T, 4>(m[row][0], m[row][1], m[row][2], m[row][3]); }
-    template<typename T, int r> swizzler2<T> row(mat<T, r, 2> &m, const int row) { return swizzler2<T>(m[row][0], m[row][1]); }
-    template<typename T, int r> swizzler3<T> row(mat<T, r, 3> &m, const int row) { return swizzler3<T>(m[row][0], m[row][1], m[row][2]); }
-    template<typename T, int r> swizzler4<T> row(mat<T, r, 4> &m, const int row) { return swizzler4<T>(m[row][0], m[row][1], m[row][2], m[row][3]); }
-    template<typename T, int c> vec<T, 2> col(const mat<T, 2, c> &m, const int col) { return vec<T, 2>(m[0][col], m[1][col]); }
-    template<typename T, int c> vec<T, 3> col(const mat<T, 3, c> &m, const int col) { return vec<T, 3>(m[0][col], m[1][col], m[2][col]); }
-    template<typename T, int c> vec<T, 4> col(const mat<T, 4, c> &m, const int col) { return vec<T, 4>(m[0][col], m[1][col], m[2][col], m[3][col]); }
-    template<typename T, int c> swizzler2<T> col(mat<T, 2, c> &m, const int col) { return swizzler2<T>(m[0][col], m[1][col]); }
-    template<typename T, int c> swizzler3<T> col(mat<T, 3, c> &m, const int col) { return swizzler3<T>(m[0][col], m[1][col], m[2][col]); }
-    template<typename T, int c> swizzler4<T> col(mat<T, 4, c> &m, const int col) { return swizzler4<T>(m[0][col], m[1][col], m[2][col], m[3][col]); }
+    template<typename T, int r> vec<T, 2> row(const mat<T, 2, r> &m, const int row) { return vec<T, 2>(m[0][row], m[1][row]); }
+    template<typename T, int r> vec<T, 3> row(const mat<T, 3, r> &m, const int row) { return vec<T, 3>(m[0][row], m[1][row], m[2][row]); }
+    template<typename T, int r> vec<T, 4> row(const mat<T, 4, r> &m, const int row) { return vec<T, 4>(m[0][row], m[1][row], m[2][row], m[3][row]); }
+    template<typename T, int r> swizzler2<T> row(mat<T, 2, r> &m, const int row) { return swizzler2<T>(m[0][row], m[1][row]); }
+    template<typename T, int r> swizzler3<T> row(mat<T, 3, r> &m, const int row) { return swizzler3<T>(m[0][row], m[1][row], m[2][row]); }
+    template<typename T, int r> swizzler4<T> row(mat<T, 4, r> &m, const int row) { return swizzler4<T>(m[0][row], m[1][row], m[2][row], m[3][row]); }
+    template<typename T, int c> vec<T, 2> col(const mat<T, c, 2> &m, const int col) { return vec<T, 2>(m[col][0], m[col][1]); }
+    template<typename T, int c> vec<T, 3> col(const mat<T, c, 3> &m, const int col) { return vec<T, 3>(m[col][0], m[col][1], m[col][2]); }
+    template<typename T, int c> vec<T, 4> col(const mat<T, c, 4> &m, const int col) { return vec<T, 4>(m[col][0], m[col][1], m[col][2], m[col][3]); }
+    template<typename T, int c> swizzler2<T> col(mat<T, c, 2> &m, const int col) { return swizzler2<T>(m[col][0], m[col][1]); }
+    template<typename T, int c> swizzler3<T> col(mat<T, c, 3> &m, const int col) { return swizzler3<T>(m[col][0], m[col][1], m[col][2]); }
+    template<typename T, int c> swizzler4<T> col(mat<T, c, 4> &m, const int col) { return swizzler4<T>(m[col][0], m[col][1], m[col][2], m[col][3]); }
 
-    template<typename T, int r, int c> mat<T, r - 1, c - 1> strike(const mat<T, r, c> &m, const int row, const int col) { return m._strike(row, col); }
+    template<typename T, int c, int r> mat<T, c - 1, r - 1> strike(const mat<T, c, r> &m, const int col, const int row) { return m._strike(col, row); }
 
-    template<typename T, int r, int c, int rs, int cs> mat<T, r, c> set(
-	    const mat<T, r, c> &m, const mat<T, rs, cs> &s, const int row = 0, const int col = 0)
+    template<typename T, int c, int r, int rs, int cs> mat<T, c, r> set(
+	    const mat<T, c, r> &m, const mat<T, cs, rs> &s, const int col = 0, const int row = 0)
     { 
-	mat<T, r, c> result(m);
-	result._setSubArray(s, row, col); 
+	mat<T, c, r> result(m);
+	result._setSubArray(s, col, row); 
 	return result;
     }
 
-    template<typename T, int r, int c> mat<T, r, c> sin(const mat<T, r, c> &v) { return v._sin(); }
-    template<typename T, int r, int c> mat<T, r, c> cos(const mat<T, r, c> &v) { return v._cos(); }
-    template<typename T, int r, int c> mat<T, r, c> tan(const mat<T, r, c> &v) { return v._tan(); }
-    template<typename T, int r, int c> mat<T, r, c> asin(const mat<T, r, c> &v) { return v._asin(); }
-    template<typename T, int r, int c> mat<T, r, c> acos(const mat<T, r, c> &v) { return v._acos(); }
-    template<typename T, int r, int c> mat<T, r, c> atan(const mat<T, r, c> &v) { return v._atan(); }
-    template<typename T, int r, int c> mat<T, r, c> atan(const mat<T, r, c> &v, const mat<T, r, c> &w) { return v._atan(w); }
-    template<typename T, int r, int c> mat<T, r, c> radians(const mat<T, r, c> &v) { return v._radians(); }
-    template<typename T, int r, int c> mat<T, r, c> degrees(const mat<T, r, c> &v) { return v._degrees(); }
+    template<typename T, int c, int r> mat<T, c, r> sin(const mat<T, c, r> &v) { return v._sin(); }
+    template<typename T, int c, int r> mat<T, c, r> cos(const mat<T, c, r> &v) { return v._cos(); }
+    template<typename T, int c, int r> mat<T, c, r> tan(const mat<T, c, r> &v) { return v._tan(); }
+    template<typename T, int c, int r> mat<T, c, r> asin(const mat<T, c, r> &v) { return v._asin(); }
+    template<typename T, int c, int r> mat<T, c, r> acos(const mat<T, c, r> &v) { return v._acos(); }
+    template<typename T, int c, int r> mat<T, c, r> atan(const mat<T, c, r> &v) { return v._atan(); }
+    template<typename T, int c, int r> mat<T, c, r> atan(const mat<T, c, r> &v, const mat<T, c, r> &w) { return v._atan(w); }
+    template<typename T, int c, int r> mat<T, c, r> radians(const mat<T, c, r> &v) { return v._radians(); }
+    template<typename T, int c, int r> mat<T, c, r> degrees(const mat<T, c, r> &v) { return v._degrees(); }
 
-    template<typename T, int r, int c> mat<T, r, c> pow(const mat<T, r, c> &v, const T p) { return v._pow(p); }
-    template<typename T, int r, int c> mat<T, r, c> exp(const mat<T, r, c> &v) { return v._exp(); }
-    template<typename T, int r, int c> mat<T, r, c> exp2(const mat<T, r, c> &v) { return v._exp2(); }
-    template<typename T, int r, int c> mat<T, r, c> log(const mat<T, r, c> &v) { return v._log(); }
-    template<typename T, int r, int c> mat<T, r, c> log2(const mat<T, r, c> &v) { return v._log2(); }
-    template<typename T, int r, int c> mat<T, r, c> log10(const mat<T, r, c> &v) { return v._log10(); }
-    template<typename T, int r, int c> mat<T, r, c> sqrt(const mat<T, r, c> &v) { return v._sqrt(); }
-    template<typename T, int r, int c> mat<T, r, c> inversesqrt(const mat<T, r, c> &v) { return v._inversesqrt(); }
-    template<typename T, int r, int c> mat<T, r, c> cbrt(const mat<T, r, c> &v) { return v._cbrt(); }
+    template<typename T, int c, int r> mat<T, c, r> pow(const mat<T, c, r> &v, const T p) { return v._pow(p); }
+    template<typename T, int c, int r> mat<T, c, r> exp(const mat<T, c, r> &v) { return v._exp(); }
+    template<typename T, int c, int r> mat<T, c, r> exp2(const mat<T, c, r> &v) { return v._exp2(); }
+    template<typename T, int c, int r> mat<T, c, r> log(const mat<T, c, r> &v) { return v._log(); }
+    template<typename T, int c, int r> mat<T, c, r> log2(const mat<T, c, r> &v) { return v._log2(); }
+    template<typename T, int c, int r> mat<T, c, r> log10(const mat<T, c, r> &v) { return v._log10(); }
+    template<typename T, int c, int r> mat<T, c, r> sqrt(const mat<T, c, r> &v) { return v._sqrt(); }
+    template<typename T, int c, int r> mat<T, c, r> inversesqrt(const mat<T, c, r> &v) { return v._inversesqrt(); }
+    template<typename T, int c, int r> mat<T, c, r> cbrt(const mat<T, c, r> &v) { return v._cbrt(); }
 
-    template<typename T, int r, int c> mat<bool, r, c> isfinite(const mat<T, r, c> &v) { return v._isfinite(); }
-    template<typename T, int r, int c> mat<bool, r, c> isinf(const mat<T, r, c> &v) { return v._isinf(); }
-    template<typename T, int r, int c> mat<bool, r, c> isnan(const mat<T, r, c> &v) { return v._isnan(); }
-    template<typename T, int r, int c> mat<bool, r, c> isnormal(const mat<T, r, c> &v) { return v._isnormal(); }
+    template<typename T, int c, int r> mat<bool, c, r> isfinite(const mat<T, c, r> &v) { return v._isfinite(); }
+    template<typename T, int c, int r> mat<bool, c, r> isinf(const mat<T, c, r> &v) { return v._isinf(); }
+    template<typename T, int c, int r> mat<bool, c, r> isnan(const mat<T, c, r> &v) { return v._isnan(); }
+    template<typename T, int c, int r> mat<bool, c, r> isnormal(const mat<T, c, r> &v) { return v._isnormal(); }
 
-    template<typename T, int r, int c> mat<T, r, c> abs(const mat<T, r, c> &v) { return v._abs(); }
-    template<typename T, int r, int c> mat<T, r, c> sign(const mat<T, r, c> &v) { return v._sign(); }
-    template<typename T, int r, int c> mat<T, r, c> floor(const mat<T, r, c> &v) { return v._floor(); }
-    template<typename T, int r, int c> mat<T, r, c> ceil(const mat<T, r, c> &v) { return v._ceil(); }
-    template<typename T, int r, int c> mat<T, r, c> round(const mat<T, r, c> &v) { return v._round(); }
-    template<typename T, int r, int c> mat<T, r, c> fract(const mat<T, r, c> &v) { return v._fract(); }
+    template<typename T, int c, int r> mat<T, c, r> abs(const mat<T, c, r> &v) { return v._abs(); }
+    template<typename T, int c, int r> mat<T, c, r> sign(const mat<T, c, r> &v) { return v._sign(); }
+    template<typename T, int c, int r> mat<T, c, r> floor(const mat<T, c, r> &v) { return v._floor(); }
+    template<typename T, int c, int r> mat<T, c, r> ceil(const mat<T, c, r> &v) { return v._ceil(); }
+    template<typename T, int c, int r> mat<T, c, r> round(const mat<T, c, r> &v) { return v._round(); }
+    template<typename T, int c, int r> mat<T, c, r> fract(const mat<T, c, r> &v) { return v._fract(); }
 
-    template<typename T, int r, int c> mat<T, r, c> min(const mat<T, r, c> &v, const T x) { return v._min(x); }
-    template<typename T, int r, int c> mat<T, r, c> min(const mat<T, r, c> &v, const mat<T, r, c> &w) { return v._min(w); }
-    template<typename T, int r, int c> mat<T, r, c> max(const mat<T, r, c> &v, const T x) { return v._max(x); }
-    template<typename T, int r, int c> mat<T, r, c> max(const mat<T, r, c> &v, const mat<T, r, c> &w) { return v._max(w); }
+    template<typename T, int c, int r> mat<T, c, r> min(const mat<T, c, r> &v, const T x) { return v._min(x); }
+    template<typename T, int c, int r> mat<T, c, r> min(const mat<T, c, r> &v, const mat<T, c, r> &w) { return v._min(w); }
+    template<typename T, int c, int r> mat<T, c, r> max(const mat<T, c, r> &v, const T x) { return v._max(x); }
+    template<typename T, int c, int r> mat<T, c, r> max(const mat<T, c, r> &v, const mat<T, c, r> &w) { return v._max(w); }
 
-    template<typename T, int r, int c> mat<T, r, c> clamp(const mat<T, r, c> &v, const T a, const T b) { return v._clamp(a, b); }
-    template<typename T, int r, int c> mat<T, r, c> clamp(const mat<T, r, c> &v, const mat<T, r, c> &a, const mat<T, r, c> &b) { return v._clamp(a, b); }
-    template<typename T, int r, int c> mat<T, r, c> mix(const mat<T, r, c> &v, const mat<T, r, c> &w, const T a) { return v._mix(w, a); }
-    template<typename T, int r, int c> mat<T, r, c> mix(const mat<T, r, c> &v, const mat<T, r, c> &w, const mat<T, r, c> &a) { return v._mix(w, a); }
-    template<typename T, int r, int c> mat<T, r, c> step(const mat<T, r, c> &v, const T a) { return v._step(a); }
-    template<typename T, int r, int c> mat<T, r, c> step(const mat<T, r, c> &v, const mat<T, r, c> &a) { return v._step(a); }
-    template<typename T, int r, int c> mat<T, r, c> smoothstep(const mat<T, r, c> &v, const T e0, const T e1) { return v._smoothstep(e0, e1); }
-    template<typename T, int r, int c> mat<T, r, c> smoothstep(const mat<T, r, c> &v, const vec<T, 1> &e0, const vec<T, 1> &e1) { return v._smoothstep(e0, e1); }
-    template<typename T, int r, int c> mat<T, r, c> mod(const mat<T, r, c> &v, const T x) { return v._mod(x); }
-    template<typename T, int r, int c> mat<T, r, c> mod(const mat<T, r, c> &v, const mat<T, r, c> &w) { return v._mod(w); }
+    template<typename T, int c, int r> mat<T, c, r> clamp(const mat<T, c, r> &v, const T a, const T b) { return v._clamp(a, b); }
+    template<typename T, int c, int r> mat<T, c, r> clamp(const mat<T, c, r> &v, const mat<T, c, r> &a, const mat<T, c, r> &b) { return v._clamp(a, b); }
+    template<typename T, int c, int r> mat<T, c, r> mix(const mat<T, c, r> &v, const mat<T, c, r> &w, const T a) { return v._mix(w, a); }
+    template<typename T, int c, int r> mat<T, c, r> mix(const mat<T, c, r> &v, const mat<T, c, r> &w, const mat<T, c, r> &a) { return v._mix(w, a); }
+    template<typename T, int c, int r> mat<T, c, r> step(const mat<T, c, r> &v, const T a) { return v._step(a); }
+    template<typename T, int c, int r> mat<T, c, r> step(const mat<T, c, r> &v, const mat<T, c, r> &a) { return v._step(a); }
+    template<typename T, int c, int r> mat<T, c, r> smoothstep(const mat<T, c, r> &v, const T e0, const T e1) { return v._smoothstep(e0, e1); }
+    template<typename T, int c, int r> mat<T, c, r> smoothstep(const mat<T, c, r> &v, const vec<T, 1> &e0, const vec<T, 1> &e1) { return v._smoothstep(e0, e1); }
+    template<typename T, int c, int r> mat<T, c, r> mod(const mat<T, c, r> &v, const T x) { return v._mod(x); }
+    template<typename T, int c, int r> mat<T, c, r> mod(const mat<T, c, r> &v, const mat<T, c, r> &w) { return v._mod(w); }
 
-    template<typename T, int r, int c> mat<bool, r, c> greaterThan(const mat<T, r, c> &v, const mat<T, r, c> &w) { return v._greaterThan(w); }
-    template<typename T, int r, int c> mat<bool, r, c> greaterThanEqual(const mat<T, r, c> &v, const mat<T, r, c> &w) { return v._greaterThanEqual(w); }
-    template<typename T, int r, int c> mat<bool, r, c> lessThan(const mat<T, r, c> &v, const mat<T, r, c> &w) { return v._lessThan(w); }
-    template<typename T, int r, int c> mat<bool, r, c> lessThanEqual(const mat<T, r, c> &v, const mat<T, r, c> &w) { return v._lessThanEqual(w); }
-    template<typename T, int r, int c> mat<bool, r, c> equal(const mat<T, r, c> &v, const mat<T, r, c> &w) { return v._equal(w); }
-    template<typename T, int r, int c> mat<bool, r, c> equal(const mat<T, r, c> &v, const mat<T, r, c> &w, const int max_ulps) { return v._equal(w, max_ulps); }
-    template<typename T, int r, int c> mat<bool, r, c> notEqual(const mat<T, r, c> &v, const mat<T, r, c> &w) { return v._notEqual(w); }
-    template<typename T, int r, int c> mat<bool, r, c> notEqual(const mat<T, r, c> &v, const mat<T, r, c> &w, const int max_ulps) { return v._notEqual(w, max_ulps); }
-    template<int r, int c> bool any(const mat<bool, r, c> &v) { return v._any(); }
-    template<int r, int c> bool all(const mat<bool, r, c> &v) { return v._all(); }
-    template<int r, int c> bool negate(const mat<bool, r, c> &v) { return v._negate(); }
+    template<typename T, int c, int r> mat<bool, c, r> greaterThan(const mat<T, c, r> &v, const mat<T, c, r> &w) { return v._greaterThan(w); }
+    template<typename T, int c, int r> mat<bool, c, r> greaterThanEqual(const mat<T, c, r> &v, const mat<T, c, r> &w) { return v._greaterThanEqual(w); }
+    template<typename T, int c, int r> mat<bool, c, r> lessThan(const mat<T, c, r> &v, const mat<T, c, r> &w) { return v._lessThan(w); }
+    template<typename T, int c, int r> mat<bool, c, r> lessThanEqual(const mat<T, c, r> &v, const mat<T, c, r> &w) { return v._lessThanEqual(w); }
+    template<typename T, int c, int r> mat<bool, c, r> equal(const mat<T, c, r> &v, const mat<T, c, r> &w) { return v._equal(w); }
+    template<typename T, int c, int r> mat<bool, c, r> equal(const mat<T, c, r> &v, const mat<T, c, r> &w, const int max_ulps) { return v._equal(w, max_ulps); }
+    template<typename T, int c, int r> mat<bool, c, r> notEqual(const mat<T, c, r> &v, const mat<T, c, r> &w) { return v._notEqual(w); }
+    template<typename T, int c, int r> mat<bool, c, r> notEqual(const mat<T, c, r> &v, const mat<T, c, r> &w, const int max_ulps) { return v._notEqual(w, max_ulps); }
+    template<int c, int r> bool any(const mat<bool, c, r> &v) { return v._any(); }
+    template<int c, int r> bool all(const mat<bool, c, r> &v) { return v._all(); }
+    template<int c, int r> bool negate(const mat<bool, c, r> &v) { return v._negate(); }
 
-    template<typename T, int r, int c> mat<T, c, r> transpose(const mat<T, r, c> &m) { return m._transpose(); }
+    template<typename T, int c, int r> mat<T, c, r> transpose(const mat<T, r, c> &m) { return m._transpose(); }
 
-    template<typename T, int r, int c> mat<T, r, c> matrixCompMult(const mat<T, r, c> &m, const mat<T, r, c> &n) { return m._op_comp_mult(n); }
+    template<typename T, int c, int r> mat<T, c, r> matrixCompMult(const mat<T, c, r> &m, const mat<T, c, r> &n) { return m._op_comp_mult(n); }
     
-    template<typename T, int r, int c> mat<T, r, c> outerProduct(const vec<T, r> &v, const vec<T, c> &w)
+    template<typename T, int c, int r> mat<T, c, r> outerProduct(const vec<T, r> &v, const vec<T, c> &w)
     {
-	mat<T, r, c> m;
-	for (int i = 0; i < r; i++)
-	    for (int j = 0; j < c; j++)
-		m[i][j] = v[i] * w[j];
+	mat<T, c, r> m;
+	for (int i = 0; i < c; i++)
+	    for (int j = 0; j < r; j++)
+		m[i][j] = v[j] * w[i];
 	return m;
     }
 
     template<typename T> T det(const mat<T, 2, 2> &m)
     {
-	return m[0][0] * m[1][1] - m[0][1] * m[1][0];
+	return m[0][0] * m[1][1] - m[1][0] * m[0][1];
     }
 
     template<typename T> bool invertible(const mat<T, 2, 2> &m, const T epsilon = std::numeric_limits<T>::epsilon())
@@ -3851,9 +3853,9 @@ namespace glvm
     	return (d > epsilon || d < -epsilon);
     }
 
-    template<typename T> mat<T, 2, 2> invert(const mat<T, 2, 2> &m)
+    template<typename T> mat<T, 2, 2> inverse(const mat<T, 2, 2> &m)
     {
-	return mat<T, 2, 2>(m[1][1], -m[0][1], -m[1][0], m[0][0]) / det(m);
+	return mat<T, 2, 2>(m[1][1], -m[1][0], -m[0][1], m[0][0]) / det(m);
     }
 
     template<typename T> T det(const mat<T, 3, 3> &m)
@@ -3869,40 +3871,40 @@ namespace glvm
     	return (d > epsilon || d < -epsilon);
     }
 
-    template<typename T> mat<T, 3, 3> invert(const mat<T, 3, 3> &m)
+    template<typename T> mat<T, 3, 3> inverse(const mat<T, 3, 3> &m)
     {
 	// Using cofactors; see 
     	// http://en.wikipedia.org/wiki/Invertible_matrix
 	// http://en.wikipedia.org/wiki/Minor_(linear_algebra)#Cofactors
 	mat<T, 3, 3> I;
-	I.v[0][0] = m[1][1] * m[2][2] - m[1][2] * m[2][1];
-	I.v[0][1] = m[0][2] * m[2][1] - m[0][1] * m[2][2];
-	I.v[0][2] = m[0][1] * m[1][2] - m[0][2] * m[1][1];
-	I.v[1][0] = m[1][2] * m[2][0] - m[1][0] * m[2][2];
-	I.v[1][1] = m[0][0] * m[2][2] - m[0][2] * m[2][0];
-	I.v[1][2] = m[0][2] * m[1][0] - m[0][0] * m[1][2];
-	I.v[2][0] = m[1][0] * m[2][1] - m[1][1] * m[2][0];
-	I.v[2][1] = m[0][1] * m[2][0] - m[0][0] * m[2][1];
-	I.v[2][2] = m[0][0] * m[1][1] - m[0][1] * m[1][0];
-	const T det = m[0][0] * I.v[0][0] + m[0][1] * I.v[1][0] + m[0][2] * I.v[2][0];
+	I.v[0][0] = m[1][1] * m[2][2] - m[2][1] * m[1][2];
+	I.v[0][1] = m[2][1] * m[0][2] - m[0][1] * m[2][2];
+	I.v[0][2] = m[0][1] * m[1][2] - m[1][1] * m[0][2];
+	I.v[1][0] = m[2][0] * m[1][2] - m[1][0] * m[2][2];
+	I.v[1][1] = m[0][0] * m[2][2] - m[2][0] * m[0][2];
+	I.v[1][2] = m[1][0] * m[0][2] - m[0][0] * m[1][2];
+	I.v[2][0] = m[1][0] * m[2][1] - m[2][0] * m[1][1];
+	I.v[2][1] = m[2][0] * m[0][1] - m[0][0] * m[2][1];
+	I.v[2][2] = m[0][0] * m[1][1] - m[1][0] * m[0][1];
+	const T det = m[0][0] * I.v[0][0] + m[1][0] * I.v[0][1] + m[2][0] * I.v[0][2];
 	return I / det;
     }
 
     template<typename T> T det(const mat<T, 4, 4> &m)
     {
-	const T d0 = m[1][1] * (m[2][2] * m[3][3] - m[2][3] * m[3][2]) 
-	    + m[1][2] * (m[2][3] * m[3][1] - m[2][1] * m[3][3]) 
-	    + m[1][3] * (m[2][1] * m[3][2] - m[2][2] * m[3][1]);
-	const T d1 = m[1][0] * (m[2][2] * m[3][3] - m[2][3] * m[3][2]) 
-	    + m[1][2] * (m[2][3] * m[3][0] - m[2][0] * m[3][3]) 
-	    + m[1][3] * (m[2][0] * m[3][2] - m[2][2] * m[3][0]);
-	const T d2 = m[1][0] * (m[2][1] * m[3][3] - m[2][3] * m[3][1]) 
-	    + m[1][1] * (m[2][3] * m[3][0] - m[2][0] * m[3][3]) 
-	    + m[1][3] * (m[2][0] * m[3][1] - m[2][1] * m[3][0]);
-	const T d3 = m[1][0] * (m[2][1] * m[3][2] - m[2][2] * m[3][1]) 
-	    + m[1][1] * (m[2][2] * m[3][0] - m[2][0] * m[3][2]) 
-	    + m[1][2] * (m[2][0] * m[3][1] - m[2][1] * m[3][0]);
-	return m[0][0] * d0 - m[0][1] * d1 + m[0][2] * d2 - m[0][3] * d3;
+	const T d0 = m[1][1] * (m[2][2] * m[3][3] - m[3][2] * m[2][3]) 
+	    + m[2][1] * (m[3][2] * m[1][3] - m[1][2] * m[3][3]) 
+	    + m[3][1] * (m[1][2] * m[2][3] - m[2][2] * m[1][3]);
+	const T d1 = m[0][1] * (m[2][2] * m[3][3] - m[3][2] * m[2][3]) 
+	    + m[2][1] * (m[3][2] * m[0][3] - m[0][2] * m[3][3]) 
+	    + m[3][1] * (m[0][2] * m[2][3] - m[2][2] * m[0][3]);
+	const T d2 = m[0][1] * (m[1][2] * m[3][3] - m[3][2] * m[1][3]) 
+	    + m[1][1] * (m[3][2] * m[0][3] - m[0][2] * m[3][3]) 
+	    + m[3][1] * (m[0][2] * m[1][3] - m[1][2] * m[0][3]);
+	const T d3 = m[0][1] * (m[1][2] * m[2][3] - m[2][2] * m[1][3]) 
+	    + m[1][1] * (m[2][2] * m[0][3] - m[0][2] * m[2][3]) 
+	    + m[2][1] * (m[0][2] * m[1][3] - m[1][2] * m[0][3]);
+	return m[0][0] * d0 - m[1][0] * d1 + m[2][0] * d2 - m[3][0] * d3;
     }
 
     template<typename T> bool invertible(const mat<T, 4, 4> &m, const T epsilon = std::numeric_limits<T>::epsilon())
@@ -3911,7 +3913,7 @@ namespace glvm
     	return (d > epsilon || d < -epsilon);
     }
 
-    template<typename T> mat<T, 4, 4> invert(const mat<T, 4, 4> &m)
+    template<typename T> mat<T, 4, 4> inverse(const mat<T, 4, 4> &m)
     {
 	// Using cofactors; see 
     	// http://en.wikipedia.org/wiki/Invertible_matrix
@@ -3941,49 +3943,49 @@ namespace glvm
     	/* first set of 2x2 determinants: 12 multiplications, 6 additions */
 	const T t1[6] = 
 	{ 
-	    m[0][2] * m[1][3] - m[1][2] * m[0][3],
-	    m[0][2] * m[2][3] - m[2][2] * m[0][3],
-	    m[0][2] * m[3][3] - m[3][2] * m[0][3],
-	    m[1][2] * m[2][3] - m[2][2] * m[1][3],
-	    m[1][2] * m[3][3] - m[3][2] * m[1][3],
-	    m[2][2] * m[3][3] - m[3][2] * m[2][3] 
+	    m[2][0] * m[3][1] - m[2][1] * m[3][0],
+	    m[2][0] * m[3][2] - m[2][2] * m[3][0],
+	    m[2][0] * m[3][3] - m[2][3] * m[3][0],
+	    m[2][1] * m[3][2] - m[2][2] * m[3][1],
+	    m[2][1] * m[3][3] - m[2][3] * m[3][1],
+	    m[2][2] * m[3][3] - m[2][3] * m[3][2] 
 	};
 
     	/* first half of co_matrix: 24 multiplications, 16 additions */
-	result[0][0] = m[1][1] * t1[5] - m[2][1] * t1[4] + m[3][1] * t1[3];
-	result[0][1] = m[2][1] * t1[2] - m[3][1] * t1[1] - m[0][1] * t1[5];
-	result[0][2] = m[3][1] * t1[0] - m[1][1] * t1[2] + m[0][1] * t1[4];
-	result[0][3] = m[1][1] * t1[1] - m[0][1] * t1[3] - m[2][1] * t1[0];
-	result[1][0] = m[2][0] * t1[4] - m[1][0] * t1[5] - m[3][0] * t1[3];
-	result[1][1] = m[0][0] * t1[5] - m[2][0] * t1[2] + m[3][0] * t1[1];
-	result[1][2] = m[1][0] * t1[2] - m[3][0] * t1[0] - m[0][0] * t1[4];
-	result[1][3] = m[0][0] * t1[3] - m[1][0] * t1[1] + m[2][0] * t1[0];
+	result[0][0] = m[1][1] * t1[5] - m[1][2] * t1[4] + m[1][3] * t1[3];
+	result[1][0] = m[1][2] * t1[2] - m[1][3] * t1[1] - m[1][0] * t1[5];
+	result[2][0] = m[1][3] * t1[0] - m[1][1] * t1[2] + m[1][0] * t1[4];
+	result[3][0] = m[1][1] * t1[1] - m[1][0] * t1[3] - m[1][2] * t1[0];
+	result[0][1] = m[0][2] * t1[4] - m[0][1] * t1[5] - m[0][3] * t1[3];
+	result[1][1] = m[0][0] * t1[5] - m[0][2] * t1[2] + m[0][3] * t1[1];
+	result[2][1] = m[0][1] * t1[2] - m[0][3] * t1[0] - m[0][0] * t1[4];
+	result[3][1] = m[0][0] * t1[3] - m[0][1] * t1[1] + m[0][2] * t1[0];
 
     	/* second set of 2x2 determinants: 12 multiplications, 6 additions */
 	const T t2[6] = 
 	{
-	    m[0][0] * m[1][1] - m[1][0] * m[0][1],
-	    m[0][0] * m[2][1] - m[2][0] * m[0][1],
-	    m[0][0] * m[3][1] - m[3][0] * m[0][1],
-	    m[1][0] * m[2][1] - m[2][0] * m[1][1],
-	    m[1][0] * m[3][1] - m[3][0] * m[1][1],
-	    m[2][0] * m[3][1] - m[3][0] * m[2][1] 
+	    m[0][0] * m[1][1] - m[0][1] * m[1][0],
+	    m[0][0] * m[1][2] - m[0][2] * m[1][0],
+	    m[0][0] * m[1][3] - m[0][3] * m[1][0],
+	    m[0][1] * m[1][2] - m[0][2] * m[1][1],
+	    m[0][1] * m[1][3] - m[0][3] * m[1][1],
+	    m[0][2] * m[1][3] - m[0][3] * m[1][2] 
 	};
 
     	/* second half of co_matrix: 24 multiplications, 16 additions */
-	result[2][0] = m[1][3] * t2[5] - m[2][3] * t2[4] + m[3][3] * t2[3];
-	result[2][1] = m[2][3] * t2[2] - m[3][3] * t2[1] - m[0][3] * t2[5];
-	result[2][2] = m[3][3] * t2[0] - m[1][3] * t2[2] + m[0][3] * t2[4];
-	result[2][3] = m[1][3] * t2[1] - m[0][3] * t2[3] - m[2][3] * t2[0];
-	result[3][0] = m[2][2] * t2[4] - m[1][2] * t2[5] - m[3][2] * t2[3];
-	result[3][1] = m[0][2] * t2[5] - m[2][2] * t2[2] + m[3][2] * t2[1];
-	result[3][2] = m[1][2] * t2[2] - m[3][2] * t2[0] - m[0][2] * t2[4];
-	result[3][3] = m[0][2] * t2[3] - m[1][2] * t2[1] + m[2][2] * t2[0];
+	result[0][2] = m[3][1] * t2[5] - m[3][2] * t2[4] + m[3][3] * t2[3];
+	result[1][2] = m[3][2] * t2[2] - m[3][3] * t2[1] - m[3][0] * t2[5];
+	result[2][2] = m[3][3] * t2[0] - m[3][1] * t2[2] + m[3][0] * t2[4];
+	result[3][2] = m[3][1] * t2[1] - m[3][0] * t2[3] - m[3][2] * t2[0];
+	result[0][3] = m[2][2] * t2[4] - m[2][1] * t2[5] - m[2][3] * t2[3];
+	result[1][3] = m[2][0] * t2[5] - m[2][2] * t2[2] + m[2][3] * t2[1];
+	result[2][3] = m[2][1] * t2[2] - m[2][3] * t2[0] - m[2][0] * t2[4];
+	result[3][3] = m[2][0] * t2[3] - m[2][1] * t2[1] + m[2][2] * t2[0];
 
     	/* determinant: 4 multiplications, 3 additions */
 	const T determinant =
-	    m[0][0] * result[0][0] + m[1][0] * result[0][1] +
-	    m[2][0] * result[0][2] + m[3][0] * result[0][3];
+	    m[0][0] * result[0][0] + m[0][1] * result[1][0] +
+	    m[0][2] * result[2][0] + m[0][3] * result[3][0];
 
     	/* division: 16 multiplications, 1 division */
     	return result / determinant;
@@ -3991,12 +3993,12 @@ namespace glvm
 
     template<typename T> vec<T, 3> translation(const mat<T, 4, 4> &m)
     {
-	return vec<T, 3>(m[0][3], m[1][3], m[2][3]);
+	return vec<T, 3>(m[3][0], m[3][1], m[3][2]);
     }
 
     template<typename T> swizzler3<T> translation(mat<T, 4, 4> &m)
     {
-	return swizzler3<T>(m[0][3], m[1][3], m[2][3]);
+	return swizzler3<T>(m[3][0], m[3][1], m[3][2]);
     }
 
     template<typename T> mat<T, 4, 4> translate(const mat<T, 4, 4> &m, const vec<T, 3> &v)
@@ -4006,19 +4008,19 @@ namespace glvm
 	r[0][0] = m[0][0];
 	r[0][1] = m[0][1];
 	r[0][2] = m[0][2];
-	r[0][3] = dot(t, row(m, 0));
+	r[0][3] = m[0][3];
 	r[1][0] = m[1][0];
 	r[1][1] = m[1][1];
 	r[1][2] = m[1][2];
-	r[1][3] = dot(t, row(m, 1));
+	r[1][3] = m[1][3];
 	r[2][0] = m[2][0];
 	r[2][1] = m[2][1];
 	r[2][2] = m[2][2];
-	r[2][3] = dot(t, row(m, 2));
-	r[3][0] = m[2][0];
-	r[3][1] = m[2][1];
-	r[3][2] = m[2][2];
-	r[3][3] = dot(t, row(m, 3));
+	r[2][3] = m[2][3];
+	r[3][0] = dot(row(m, 0), t);
+	r[3][1] = dot(row(m, 1), t);
+	r[3][2] = dot(row(m, 2), t);
+	r[3][3] = dot(row(m, 3), t);
 	return r;
     }
 
@@ -4038,77 +4040,87 @@ namespace glvm
     typedef mat<double, 3, 3> dmat3;
     typedef mat<float, 4, 4> mat4;
     typedef mat<double, 4, 4> dmat4;
-    typedef mat<float, 3, 2> mat2x3;
-    typedef mat<double, 3, 2> dmat2x3;
-    typedef mat<float, 2, 3> mat3x2;
-    typedef mat<double, 2, 3> dmat3x2;
-    typedef mat<float, 4, 2> mat2x4;
-    typedef mat<double, 4, 2> dmat2x4;
-    typedef mat<float, 2, 4> mat4x2;
-    typedef mat<double, 2, 4> dmat4x2;
-    typedef mat<float, 4, 3> mat3x4;
-    typedef mat<double, 4, 3> dmat3x4;
-    typedef mat<float, 3, 4> mat4x3;
-    typedef mat<double, 3, 4> dmat4x3;
+    typedef mat<float, 2, 3> mat2x3;
+    typedef mat<double, 2, 3> dmat2x3;
+    typedef mat<float, 3, 2> mat3x2;
+    typedef mat<double, 3, 2> dmat3x2;
+    typedef mat<float, 2, 4> mat2x4;
+    typedef mat<double, 2, 4> dmat2x4;
+    typedef mat<float, 4, 2> mat4x2;
+    typedef mat<double, 4, 2> dmat4x2;
+    typedef mat<float, 3, 4> mat3x4;
+    typedef mat<double, 4, 4> dmat3x4;
+    typedef mat<float, 4, 3> mat4x3;
+    typedef mat<double, 4, 3> dmat4x3;
 
     template<typename T>
-    class quaternion : public array<T, 4, 1>
+    class quaternion : public array<T, 1, 4>
     {
 	public:
 
 	/* Constructors, Destructor */
 
 	quaternion() {}
-	quaternion(const array<T, 4, 1> &a) : array<T, 4, 1>(a) {}
-	quaternion(const vec<T, 4> &a) : array<T, 4, 1>(a) {}
-	quaternion(const T *v) : array<T, 4, 1>(v) {}
-	quaternion(const std::string &s) : array<T, 4, 1>(s) {}
+	quaternion(const array<T, 1, 4> &a) : array<T, 1, 4>(a) {}
+	quaternion(const vec<T, 4> &a) : array<T, 1, 4>(a) {}
+	quaternion(const T *v) : array<T, 1, 4>(v) {}
+	quaternion(const std::string &s) : array<T, 1, 4>(s) {}
 	template<typename U>
-	quaternion(const quaternion<U> &q) : array<T, 4, 1>(q) {}
-	quaternion(const T w, const T x, const T y, const T z) : array<T, 4, 1>(w, x, y, z) {}
+	quaternion(const quaternion<U> &q) : array<T, 1, 4>(q) {}
+	quaternion(const T w, const T x, const T y, const T z) : array<T, 1, 4>(w, x, y, z) {}
 
 	~quaternion() {}
 
 	/* Get / set components */
 
+	T &operator[](const unsigned int i)
+	{
+	    return array<T, 1, 4>::vl[i];
+	}
+
+	const T &operator[](const unsigned int i) const
+	{
+	    return array<T, 1, 4>::vl[i];
+	}
+
 	T &w()
 	{
-	    return array<T, 4, 1>::vl[0];
+	    return array<T, 1, 4>::vl[0];
 	}
 	
 	const T &w() const
 	{
-	    return array<T, 4, 1>::vl[0];
+	    return array<T, 1, 4>::vl[0];
    	}
 
 	T &x()
 	{
-	    return array<T, 4, 1>::vl[1];
+	    return array<T, 1, 4>::vl[1];
 	}
 	
 	const T &x() const
 	{
-	    return array<T, 4, 1>::vl[1];
+	    return array<T, 1, 4>::vl[1];
    	}
 
 	T &y()
 	{
-	    return array<T, 4, 1>::vl[2];
+	    return array<T, 1, 4>::vl[2];
 	}
 	
 	const T &y() const
 	{
-	    return array<T, 4, 1>::vl[2];
+	    return array<T, 1, 4>::vl[2];
    	}
 
 	T &z()
 	{
-	    return array<T, 4, 1>::vl[3];
+	    return array<T, 1, 4>::vl[3];
 	}
 	
 	const T &z() const
 	{
-	    return array<T, 4, 1>::vl[3];
+	    return array<T, 1, 4>::vl[3];
    	}
 
 	vec<T, 3> axis() const
@@ -4175,7 +4187,7 @@ namespace glvm
 
 
     template<typename T>
-    class frustum : public array<T, 6, 1>
+    class frustum : public array<T, 1, 6>
     {
 	public:
 
@@ -4183,29 +4195,39 @@ namespace glvm
 
 	frustum() {}
 
-	frustum(const array<T, 6, 1> &a) : array<T, 6, 1>(a) {}
-	frustum(const vec<T, 6> &a) : array<T, 6, 1>(a) {}
-	frustum(const T *v) : array<T, 6, 1>(v) {}
-	frustum(const std::string &s) : array<T, 6, 1>(s) {}
+	frustum(const array<T, 1, 6> &a) : array<T, 1, 6>(a) {}
+	frustum(const vec<T, 6> &a) : array<T, 1, 6>(a) {}
+	frustum(const T *v) : array<T, 1, 6>(v) {}
+	frustum(const std::string &s) : array<T, 1, 6>(s) {}
 	template<typename U>
-	frustum(const frustum<U> &q) : array<T, 6, 1>(q) {}
-	frustum(const T l, const T r, const T b, const T t, const T n, const T f) : array<T, 6, 1>(l, r, b, t, n ,f) {}
+	frustum(const frustum<U> &q) : array<T, 1, 6>(q) {}
+	frustum(const T l, const T r, const T b, const T t, const T n, const T f) : array<T, 1, 6>(l, r, b, t, n ,f) {}
 	~frustum() {}
 
 	/* Get / set components */
 
-	const T &l() const { return array<T, 6, 1>::vl[0]; }
-	const T &r() const { return array<T, 6, 1>::vl[1]; }
-	const T &b() const { return array<T, 6, 1>::vl[2]; }
-	const T &t() const { return array<T, 6, 1>::vl[3]; }
-	const T &n() const { return array<T, 6, 1>::vl[4]; }
-	const T &f() const { return array<T, 6, 1>::vl[5]; }
-	T &l() { return array<T, 6, 1>::vl[0]; }
-	T &r() { return array<T, 6, 1>::vl[1]; }
-	T &b() { return array<T, 6, 1>::vl[2]; }
-	T &t() { return array<T, 6, 1>::vl[3]; }
-	T &n() { return array<T, 6, 1>::vl[4]; }
-	T &f() { return array<T, 6, 1>::vl[5]; }
+	T &operator[](const unsigned int i)
+	{
+	    return array<T, 1, 6>::vl[i];
+	}
+
+	const T &operator[](const unsigned int i) const
+	{
+	    return array<T, 1, 6>::vl[i];
+	}
+
+	const T &l() const { return array<T, 1, 6>::vl[0]; }
+	const T &r() const { return array<T, 1, 6>::vl[1]; }
+	const T &b() const { return array<T, 1, 6>::vl[2]; }
+	const T &t() const { return array<T, 1, 6>::vl[3]; }
+	const T &n() const { return array<T, 1, 6>::vl[4]; }
+	const T &f() const { return array<T, 1, 6>::vl[5]; }
+	T &l() { return array<T, 1, 6>::vl[0]; }
+	T &r() { return array<T, 1, 6>::vl[1]; }
+	T &b() { return array<T, 1, 6>::vl[2]; }
+	T &t() { return array<T, 1, 6>::vl[3]; }
+	T &n() { return array<T, 1, 6>::vl[4]; }
+	T &f() { return array<T, 1, 6>::vl[5]; }
 
 	/* Frustum operations */
 
@@ -4220,24 +4242,24 @@ namespace glvm
 	}
     };
 
-    template<typename T> mat<T, 4, 4> mat4Frustum(const frustum<T> &f)
+    template<typename T> mat<T, 4, 4> toMat4(const frustum<T> &f)
     {
 	mat<T, 4, 4> m;
 	m[0][0] = static_cast<T>(2) * f.n() / (f.r() - f.l());
 	m[0][1] = static_cast<T>(0);
-	m[0][2] = (f.r() + f.l()) / (f.r() - f.l());
-    	m[0][3] = static_cast<T>(0);
+	m[0][2] = static_cast<T>(0);
+	m[0][3] = static_cast<T>(0);
 	m[1][0] = static_cast<T>(0);
 	m[1][1] = static_cast<T>(2) * f.n() / (f.t() - f.b());
-	m[1][2] = (f.t() + f.b()) / (f.t() - f.b());
+	m[1][2] = static_cast<T>(0);
 	m[1][3] = static_cast<T>(0);
-	m[2][0] = static_cast<T>(0);
-	m[2][1] = static_cast<T>(0);
+	m[2][0] = (f.r() + f.l()) / (f.r() - f.l());
+	m[2][1] = (f.t() + f.b()) / (f.t() - f.b());
 	m[2][2] = - (f.f() + f.n()) / (f.f() - f.n());
-	m[2][3] = - static_cast<T>(2) * f.f() * f.n() / (f.f() - f.n());
-	m[3][0] = static_cast<T>(0);
+	m[2][3] = static_cast<T>(-1);
+    	m[3][0] = static_cast<T>(0);
 	m[3][1] = static_cast<T>(0);
-	m[3][2] = static_cast<T>(-1);
+	m[3][2] = - static_cast<T>(2) * f.f() * f.n() / (f.f() - f.n());
 	m[3][3] = static_cast<T>(0);
 	return m;
     }
@@ -4247,10 +4269,10 @@ namespace glvm
 
 
     /* Conversions between different representations of rotations:
-     * from angle/axis, euler angles, mat3 to quat
-     * from angle/axis, euler angles, quat to mat3
-     * from angle/axis, euler angles, quat to mat4
-     * from angle/axis, mat3, quat to euler angles
+     * from angle/axis, oldpoint/newpoint, euler angles, mat3 to quat
+     * from angle/axis, oldpoint/newpoint, euler angles, quat to mat3
+     * from angle/axis, oldpoint/newpoint, euler angles, quat to mat4
+     * from angle/axis, oldpoint/newpoint, mat3, quat to euler angles
      * TODO: Conversions from euler angles, mat3, quat to angle/axis.
      */
 
@@ -4262,19 +4284,30 @@ namespace glvm
 	return quaternion<T>(cos_a, naxis.x() * sin_a, naxis.y() * sin_a, naxis.z() * sin_a);
     }
 
+    template<typename T> quaternion<T> toQuat(const vec<T, 3> &oldpoint, const vec<T, 3> &newpoint)
+    {
+	const dvec3 axis = cross(oldpoint, newpoint);
+	const double angle = acos(dot(oldpoint, newpoint) / sqrt(dot(oldpoint, oldpoint) * dot(newpoint, newpoint)));
+	return toQuat(angle, axis);
+    }
+
     template<typename T> quaternion<T> toQuat(const vec<T, 3> &euler_rot)
     {
-	// quaternion<T> qx, qy, qz;
-	// qx.from_axis_angle(vec<T, 3>(1, 0, 0), rx)
-	// qy.from_axis_angle(vec<T, 3>(1, 0, 0), ry)
-	// qz.from_axis_angle(vec<T, 3>(1, 0, 0), rz)
-	quaternion<T> qx(glvm::cos(euler_rot.x() / static_cast<T>(2)), glvm::sin(euler_rot.x() / static_cast<T>(2)), static_cast<T>(0), static_cast<T>(0));
-	quaternion<T> qy(glvm::cos(euler_rot.y() / static_cast<T>(2)), static_cast<T>(0), glvm::sin(euler_rot.y() / static_cast<T>(2)), static_cast<T>(0));
-	quaternion<T> qz(glvm::cos(euler_rot.z() / static_cast<T>(2)), static_cast<T>(0), static_cast<T>(0), glvm::sin(euler_rot.z() / static_cast<T>(2)));
-	return qx * qy * qz;
-	// TODO: Does this need to be optimized by cancelling out the
-	// multiplications with zero? Or is the compiler smart enough to do this
-	// for us?
+	const T x2 = euler_rot.x() / static_cast<T>(2);
+	const T y2 = euler_rot.y() / static_cast<T>(2);
+	const T z2 = euler_rot.z() / static_cast<T>(2);
+	const T cx2 = cos(x2);
+	const T sx2 = sin(x2);
+	const T cy2 = cos(y2);
+	const T sy2 = sin(y2);
+	const T cz2 = cos(z2);
+	const T sz2 = sin(z2);
+	quaternion<T> q;
+	q.w() = cx2 * cy2 * cz2 + sx2 * sy2 * sz2;
+	q.x() = sx2 * cy2 * cz2 - cx2 * sy2 * sz2;
+	q.y() = cx2 * sy2 * cz2 + sx2 * cy2 * sz2;
+	q.z() = cx2 * cy2 * sz2 - sx2 * sy2 * cz2;
+	return q;
     }
 
     template<typename T> quaternion<T> toQuat(const mat<T, 3, 3> &rot_mat)
@@ -4285,9 +4318,9 @@ namespace glvm
 	if (t > static_cast<T>(1e-8))
 	{
 	    const T s = sqrt(t) * static_cast<T>(2);
-	    q.x() = (rot_mat[2][1] - rot_mat[1][2]) / s;
-	    q.y() = (rot_mat[0][2] - rot_mat[2][0]) / s;
-	    q.z() = (rot_mat[1][0] - rot_mat[0][1]) / s;
+	    q.x() = (rot_mat[1][2] - rot_mat[2][1]) / s;
+	    q.y() = (rot_mat[2][0] - rot_mat[0][2]) / s;
+	    q.z() = (rot_mat[0][1] - rot_mat[1][0]) / s;
 	    q.w() = s / static_cast<T>(4);
 	}
 	else if (rot_mat[0][0] > rot_mat[1][1] && rot_mat[0][0] > rot_mat[2][2])
@@ -4295,28 +4328,29 @@ namespace glvm
 	    t = static_cast<T>(1) + rot_mat[0][0] - rot_mat[1][1] - rot_mat[2][2];
 	    const T s = sqrt(t) * static_cast<T>(2);
 	    q.x() = s / static_cast<T>(4);
-	    q.y() = (rot_mat[1][0] + rot_mat[0][1]) / s;
-	    q.z() = (rot_mat[0][2] + rot_mat[2][0]) / s;
-	    q.w() = (rot_mat[2][1] - rot_mat[1][2]) / s;
+	    q.y() = (rot_mat[0][1] + rot_mat[1][0]) / s;
+	    q.z() = (rot_mat[2][0] + rot_mat[0][2]) / s;
+	    q.w() = (rot_mat[1][2] - rot_mat[2][1]) / s;
 	} 
 	else if (rot_mat[1][1] > rot_mat[2][2])
 	{
 	    t = static_cast<T>(1) + rot_mat[1][1] - rot_mat[0][0] - rot_mat[2][2];
 	    const T s = sqrt(t) * static_cast<T>(2);
-	    q.x() = (rot_mat[1][0] + rot_mat[0][1]) / s;
+	    q.x() = (rot_mat[0][1] + rot_mat[1][0]) / s;
 	    q.y() = s / static_cast<T>(4);
-	    q.z() = (rot_mat[2][1] + rot_mat[1][2]) / s;
-	    q.w() = (rot_mat[0][2] - rot_mat[2][0]) / s;
+	    q.z() = (rot_mat[1][2] + rot_mat[2][1]) / s;
+	    q.w() = (rot_mat[2][0] - rot_mat[0][2]) / s;
 	}
 	else
 	{
 	    t = static_cast<T>(1) + rot_mat[2][2] - rot_mat[0][0] - rot_mat[1][1];
 	    const T s = sqrt(t) * static_cast<T>(2);
-	    q.x() = (rot_mat[0][2] + rot_mat[2][0]) / s;
-	    q.y() = (rot_mat[2][1] + rot_mat[1][2]) / s;
+	    q.x() = (rot_mat[2][0] + rot_mat[0][2]) / s;
+	    q.y() = (rot_mat[1][2] + rot_mat[2][1]) / s;
 	    q.z() = s / static_cast<T>(4);
-	    q.w() = (rot_mat[1][0] - rot_mat[0][1]) / s;
+	    q.w() = (rot_mat[0][1] - rot_mat[1][0]) / s;
 	}
+	return q;
     }
 
     template<typename T> mat<T, 3, 3> toMat3(const T angle, const vec<T, 3> &axis)
@@ -4327,15 +4361,22 @@ namespace glvm
 	const T mc = static_cast<T>(1) - c;
 	mat<T, 3, 3> m;
 	m[0][0] = n.x() * n.x() * mc + c;
-	m[0][1] = n.x() * n.y() * mc - n.z() * s;
-	m[0][2] = n.x() * n.z() * mc + n.y() * s;
-	m[1][0] = n.y() * n.x() * mc + n.z() * s;
+	m[0][1] = n.y() * n.x() * mc + n.z() * s;
+	m[0][2] = n.x() * n.z() * mc - n.y() * s;
+	m[1][0] = n.x() * n.y() * mc - n.z() * s;
 	m[1][1] = n.y() * n.y() * mc + c;
-	m[1][2] = n.y() * n.z() * mc - n.x() * s;
-	m[2][0] = n.x() * n.z() * mc - n.y() * s;
-	m[2][1] = n.y() * n.z() * mc + n.x() * s;
+	m[1][2] = n.y() * n.z() * mc + n.x() * s;
+	m[2][0] = n.x() * n.z() * mc + n.y() * s;
+	m[2][1] = n.y() * n.z() * mc - n.x() * s;
 	m[2][2] = n.z() * n.z() * mc + c;
 	return m;
+    }
+
+    template<typename T> mat<T, 3, 3> toMat3(const vec<T, 3> &oldpoint, const vec<T, 3> &newpoint)
+    {
+	const dvec3 axis = cross(oldpoint, newpoint);
+	const double angle = acos(dot(oldpoint, newpoint) / sqrt(dot(oldpoint, oldpoint) * dot(newpoint, newpoint)));
+	return toMat3(angle, axis);
     }
 
     template<typename T> mat<T, 3, 3> toMat3(const vec<T, 3> &euler_rot)
@@ -4356,13 +4397,13 @@ namespace glvm
 	const T zz = q.z() * q.z();
 	const T zw = q.z() * q.w();
 	m[0][0] = static_cast<T>(1) - static_cast<T>(2) * (yy + zz);
-	m[0][1] = static_cast<T>(2) * (xy - zw);
-	m[0][2] = static_cast<T>(2) * (xz + yw);
-	m[1][0] = static_cast<T>(2) * (xy + zw);
+	m[0][1] = static_cast<T>(2) * (xy + zw);
+	m[0][2] = static_cast<T>(2) * (xz - yw);
+	m[1][0] = static_cast<T>(2) * (xy - zw);
 	m[1][1] = static_cast<T>(1) - static_cast<T>(2) * (xx + zz);
-	m[1][2] = static_cast<T>(2) * (yz - xw);
-	m[2][0] = static_cast<T>(2) * (xz - yw);
-	m[2][1] = static_cast<T>(2) * (yz + xw);
+	m[1][2] = static_cast<T>(2) * (yz + xw);
+	m[2][0] = static_cast<T>(2) * (xz + yw);
+	m[2][1] = static_cast<T>(2) * (yz - xw);
 	m[2][2] = static_cast<T>(1) - static_cast<T>(2) * (xx + yy);
 	return m;
     }
@@ -4370,7 +4411,7 @@ namespace glvm
     template<typename T> mat<T, 4, 4> toMat4(const T angle, const vec<T, 3> &axis)
     {
 	mat<T, 4, 4> m;
-	m._setSubArray(mat3(angle, axis));
+	m._setSubArray(toMat3(angle, axis));
 	m[0][3] = static_cast<T>(0);
 	m[1][3] = static_cast<T>(0);
 	m[2][3] = static_cast<T>(0);
@@ -4379,6 +4420,13 @@ namespace glvm
 	m[3][2] = static_cast<T>(0);
 	m[3][3] = static_cast<T>(1);
 	return m;
+    }
+
+    template<typename T> mat<T, 4, 4> toMat4(const vec<T, 3> &oldpoint, const vec<T, 3> &newpoint)
+    {
+	const dvec3 axis = cross(oldpoint, newpoint);
+	const double angle = acos(dot(oldpoint, newpoint) / sqrt(dot(oldpoint, oldpoint) * dot(newpoint, newpoint)));
+	return toMat4(angle, axis);
     }
 
     template<typename T> mat<T, 4, 4> toMat4(const vec<T, 3> &euler_rot)
@@ -4391,10 +4439,10 @@ namespace glvm
 	mat<T, 4, 4> m;
 	m._setSubArray(toMat3(q));
 	m[0][3] = static_cast<T>(0);
-    	m[1][3] = static_cast<T>(0);
+	m[1][3] = static_cast<T>(0);
 	m[2][3] = static_cast<T>(0);
 	m[3][0] = static_cast<T>(0);
-	m[3][1] = static_cast<T>(0);
+    	m[3][1] = static_cast<T>(0);
 	m[3][2] = static_cast<T>(0);
 	m[3][3] = static_cast<T>(1);
 	return m;
@@ -4405,6 +4453,11 @@ namespace glvm
 	return toEuler(toQuat(angle, axis));
     }
 
+    template<typename T> vec<T, 3> toEuler(const vec<T, 3> &oldpoint, const vec<T, 3> &newpoint)
+    {
+	return toEuler(toQuat(oldpoint, newpoint));
+    }
+
     template<typename T> mat<T, 3, 3> toEuler(const mat<T, 3, 3> &rot_mat)
     {
 	return toEuler(toQuat(rot_mat));
@@ -4412,12 +4465,34 @@ namespace glvm
 
     template<typename T> vec<T, 3> toEuler(const quaternion<T> &q)
     {
-	return vec<T, 3>(
-		glvm::atan(static_cast<T>(2) * (q.w() * q.x() + q.y() * q.z()) 
-		    / (static_cast<T>(1) - static_cast<T>(2) * (q.x() * q.x() + q.y() * q.y()))),
-		glvm::asin(static_cast<T>(2) * (q.w() * q.y() - q.x() * q.z())),
-		glvm::atan(static_cast<T>(2) * (q.w() * q.z() + q.x() * q.y()) 
-		    / (static_cast<T>(1) - static_cast<T>(2) * (q.y() * q.y() + q.z() * q.z()))));
+	T singularity_test = q.x() * q.y() + q.z() * q.w();
+	vec<T, 3> result;
+	if (singularity_test > static_cast<T>(+0.4999))
+	{
+	    // north pole
+	    result = vec<T, 3>(
+		    static_cast<T>(2) * glvm::atan(q.x(), q.w()),
+		    static_cast<T>(M_PIl) / static_cast<T>(2),
+		    0.0);
+	}
+	else if (singularity_test < static_cast<T>(-0.4999))
+	{
+	    // soth pole
+	    result = vec<T, 3>(
+		    -static_cast<T>(2) * glvm::atan(q.x(), q.w()),
+		    -static_cast<T>(M_PIl) / static_cast<T>(2),
+		    0.0);
+	}
+	else
+	{
+	    result = vec<T, 3>(
+		    glvm::atan(static_cast<T>(2) * (q.w() * q.x() + q.y() * q.z()),
+			(static_cast<T>(1) - static_cast<T>(2) * (q.x() * q.x() + q.y() * q.y()))),
+		    glvm::asin(static_cast<T>(2) * (q.w() * q.y() - q.x() * q.z())),
+		    glvm::atan(static_cast<T>(2) * (q.w() * q.z() + q.x() * q.y()),
+			(static_cast<T>(1) - static_cast<T>(2) * (q.y() * q.y() + q.z() * q.z()))));
+	}
+	return result;
     }
 }
 
