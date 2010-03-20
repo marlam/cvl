@@ -1,4 +1,4 @@
-SUBDIRS = build-aux gnulib mhlib cvl cvtool doc tests
+SUBDIRS = gnulib mhlib cvl cvtool doc tests
 ACLOCAL_AMFLAGS = -I m4 -I gnulib/m4
 
 doxy:

@@ -1,5 +1,5 @@
 %.glsl.h: %.glsl
-	DIRNAME="`echo $@ | sed -e s/\\\.glsl\\\.h$$// -e s/[a-zA-Z0-9_-]*$$// -e s/\\\/$$//`"; \
+	$(AM_V_GEN)DIRNAME="`echo $@ | sed -e s/\\\.glsl\\\.h$$// -e s/[a-zA-Z0-9_-]*$$// -e s/\\\/$$//`"; \
 	if [ -n "$$DIRNAME" ]; then mkdir -p "$$DIRNAME"; fi; \
 	MACRONAME="CVL_`echo $< | sed -e s/^.*\\\/// -e s/\\\.glsl$$// -e s/-/_/g | tr [a-z] [A-Z]`_GLSL_STR"; \
 	(echo "#ifndef $$MACRONAME"; \
