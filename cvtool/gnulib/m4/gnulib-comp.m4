@@ -49,7 +49,6 @@ AC_DEFUN([gl_EARLY],
   # Code from module getopt-gnu:
   # Code from module getopt-posix:
   # Code from module gettext-h:
-  # Code from module gitlog-to-changelog:
   # Code from module gperf:
   # Code from module havelib:
   # Code from module iconv:
@@ -173,7 +172,6 @@ AC_DEFUN([gl_INIT],
   # Code from module gettext-h:
   AC_SUBST([LIBINTL])
   AC_SUBST([LTLIBINTL])
-  # Code from module gitlog-to-changelog:
   # Code from module gperf:
   # Code from module havelib:
   # Code from module iconv:
@@ -493,7 +491,6 @@ AC_DEFUN([gl_FILE_LIST], [
   build-aux/arg-nonnull.h
   build-aux/c++defs.h
   build-aux/config.rpath
-  build-aux/gitlog-to-changelog
   build-aux/warn-on-use.h
   lib/alloca.in.h
   lib/asnprintf.c

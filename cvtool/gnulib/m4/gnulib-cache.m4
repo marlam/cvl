@@ -15,13 +15,12 @@
 
 
 # Specification in the form of a command-line invocation:
-#   gnulib-tool --import --dir=. --lib=libgnu --source-base=gnulib --m4-base=gnulib/m4 --doc-base=doc --tests-base=tests --aux-dir=build-aux --libtool --macro-prefix=gl getopt-gnu gitlog-to-changelog havelib inttostr localcharset pipe striconv strndup strverscmp vasprintf
+#   gnulib-tool --import --dir=. --lib=libgnu --source-base=gnulib --m4-base=gnulib/m4 --doc-base=doc --tests-base=tests --aux-dir=build-aux --libtool --macro-prefix=gl getopt-gnu havelib inttostr localcharset pipe striconv strndup strverscmp vasprintf
 
 # Specification in the form of a few gnulib-tool.m4 macro invocations:
 gl_LOCAL_DIR([])
 gl_MODULES([
   getopt-gnu
-  gitlog-to-changelog
   havelib
   inttostr
   localcharset
