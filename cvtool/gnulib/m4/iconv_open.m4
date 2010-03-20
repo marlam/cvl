@@ -1,5 +1,5 @@
-# iconv_open.m4 serial 5
-dnl Copyright (C) 2007-2009 Free Software Foundation, Inc.
+# iconv_open.m4 serial 7
+dnl Copyright (C) 2007-2010 Free Software Foundation, Inc.
 dnl This file is free software; the Free Software Foundation
 dnl gives unlimited permission to copy and/or distribute it,
 dnl with or without modifications, as long as this notice is preserved.
@@ -10,6 +10,8 @@ AC_DEFUN([gl_FUNC_ICONV_OPEN],
   AC_REQUIRE([AC_CANONICAL_HOST])
   AC_REQUIRE([gl_ICONV_H_DEFAULTS])
   if test "$am_cv_func_iconv" = yes; then
+    dnl Provide the <iconv.h> override, for the sake of the C++ aliases.
+    gl_REPLACE_ICONV_H
     dnl Test whether iconv_open accepts standardized encoding names.
     dnl We know that GNU libiconv and GNU libc do.
     AC_EGREP_CPP([gnu_iconv], [
@@ -21,10 +23,11 @@ AC_DEFUN([gl_FUNC_ICONV_OPEN],
     if test $gl_func_iconv_gnu = no; then
       iconv_flavor=
       case "$host_os" in
-        aix*)  iconv_flavor=ICONV_FLAVOR_AIX ;;
-        irix*) iconv_flavor=ICONV_FLAVOR_IRIX ;;
-        hpux*) iconv_flavor=ICONV_FLAVOR_HPUX ;;
-        osf*)  iconv_flavor=ICONV_FLAVOR_OSF ;;
+        aix*)     iconv_flavor=ICONV_FLAVOR_AIX ;;
+        irix*)    iconv_flavor=ICONV_FLAVOR_IRIX ;;
+        hpux*)    iconv_flavor=ICONV_FLAVOR_HPUX ;;
+        osf*)     iconv_flavor=ICONV_FLAVOR_OSF ;;
+        solaris*) iconv_flavor=ICONV_FLAVOR_SOLARIS ;;
       esac
       if test -n "$iconv_flavor"; then
         AC_DEFINE_UNQUOTED([ICONV_FLAVOR], [$iconv_flavor],
@@ -89,8 +92,8 @@ int main ()
     outptr = buf;
     outbytesleft = sizeof (buf);
     res = iconv (cd,
-		 (ICONV_CONST char **) &inptr, &inbytesleft,
-		 &outptr, &outbytesleft);
+                 (ICONV_CONST char **) &inptr, &inbytesleft,
+                 &outptr, &outbytesleft);
     ASSERT (res == 0 && inbytesleft == 0);
     ASSERT (outptr == buf + (sizeof (expected) - 1));
     ASSERT (memcmp (buf, expected, sizeof (expected) - 1) == 0);
@@ -116,8 +119,8 @@ int main ()
     outptr = buf;
     outbytesleft = sizeof (buf);
     res = iconv (cd,
-		 (ICONV_CONST char **) &inptr, &inbytesleft,
-		 &outptr, &outbytesleft);
+                 (ICONV_CONST char **) &inptr, &inbytesleft,
+                 &outptr, &outbytesleft);
     ASSERT (res == 0 && inbytesleft == 0);
     ASSERT (outptr == buf + (sizeof (expected) - 1));
     ASSERT (memcmp (buf, expected, sizeof (expected) - 1) == 0);
@@ -143,8 +146,8 @@ int main ()
     outptr = buf;
     outbytesleft = sizeof (buf);
     res = iconv (cd,
-		 (ICONV_CONST char **) &inptr, &inbytesleft,
-		 &outptr, &outbytesleft);
+                 (ICONV_CONST char **) &inptr, &inbytesleft,
+                 &outptr, &outbytesleft);
     ASSERT (res == 0 && inbytesleft == 0);
     ASSERT (outptr == buf + (sizeof (expected) - 1));
     ASSERT (memcmp (buf, expected, sizeof (expected) - 1) == 0);
@@ -170,8 +173,8 @@ int main ()
     outptr = buf;
     outbytesleft = sizeof (buf);
     res = iconv (cd,
-		 (ICONV_CONST char **) &inptr, &inbytesleft,
-		 &outptr, &outbytesleft);
+                 (ICONV_CONST char **) &inptr, &inbytesleft,
+                 &outptr, &outbytesleft);
     ASSERT (res == 0 && inbytesleft == 0);
     ASSERT (outptr == buf + (sizeof (expected) - 1));
     ASSERT (memcmp (buf, expected, sizeof (expected) - 1) == 0);
@@ -198,8 +201,8 @@ int main ()
     outptr = buf;
     outbytesleft = sizeof (buf);
     res = iconv (cd,
-		 (ICONV_CONST char **) &inptr, &inbytesleft,
-		 &outptr, &outbytesleft);
+                 (ICONV_CONST char **) &inptr, &inbytesleft,
+                 &outptr, &outbytesleft);
     ASSERT (res == 0 && inbytesleft == 0);
     ASSERT (outptr == buf + (sizeof (expected) - 1));
     ASSERT (memcmp (buf, expected, sizeof (expected) - 1) == 0);

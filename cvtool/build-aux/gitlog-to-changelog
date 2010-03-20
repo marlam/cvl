@@ -1,13 +1,15 @@
-#!/usr/bin/perl
+eval '(exit $?0)' && eval 'exec perl -wS "$0" ${1+"$@"}'
+  & eval 'exec perl -wS "$0" $argv:q'
+    if 0;
 # Convert git log output to ChangeLog format.
 
-my $VERSION = '2008-12-21 12:07'; # UTC
+my $VERSION = '2009-10-30 13:46'; # UTC
 # The definition above must lie within the first 8 lines in order
 # for the Emacs time-stamp write hook (at end) to update it.
 # If you change this file with Emacs, please let the write hook
 # do its job.  Otherwise, update this string manually.
 
-# Copyright (C) 2008 Free Software Foundation, Inc.
+# Copyright (C) 2008-2010 Free Software Foundation, Inc.
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -60,6 +62,9 @@ OPTIONS:
 
    --since=DATE convert only the logs since DATE;
                   the default is to convert all log entries.
+   --format=FMT set format string for commit subject and body;
+                  see 'man git-log' for the list of format metacharacters;
+                  the default is '%s%n%b%n'
 
    --help       display this help and exit
    --version    output version information and exit
@@ -96,15 +101,17 @@ sub quoted_cmd(@)
 
 {
   my $since_date = '1970-01-01 UTC';
+  my $format_string = '%s%n%b%n';
   GetOptions
     (
      help => sub { usage 0 },
      version => sub { print "$ME version $VERSION\n"; exit },
      'since=s' => \$since_date,
+     'format=s' => \$format_string,
     ) or usage 1;
 
   my @cmd = (qw (git log --log-size), "--since=$since_date",
-             '--pretty=format:%ct  %an  <%ae>%n%n%s%n%b%n', @ARGV);
+             '--pretty=format:%ct  %an  <%ae>%n%n'.$format_string, @ARGV);
   open PIPE, '-|', @cmd
     or die ("$ME: failed to run `". quoted_cmd (@cmd) ."': $!\n"
             . "(Is your Git too old?  Version 1.5.1 or later is required.)\n");
@@ -145,14 +152,22 @@ sub quoted_cmd(@)
       # Omit "Signed-off-by..." lines.
       @line = grep !/^Signed-off-by: .*>$/, @line;
 
-      # Remove leading and trailing blank lines.
-      while ($line[0] =~ /^\s*$/) { shift @line; }
-      while ($line[$#line] =~ /^\s*$/) { pop @line; }
+      # If there were any lines
+      if (@line == 0)
+        {
+          warn "$ME: warning: empty commit message:\n  $date_line\n";
+        }
+      else
+        {
+          # Remove leading and trailing blank lines.
+          while ($line[0] =~ /^\s*$/) { shift @line; }
+          while ($line[$#line] =~ /^\s*$/) { pop @line; }
 
-      # Prefix each non-empty line with a TAB.
-      @line = map { length $_ ? "\t$_" : '' } @line;
+          # Prefix each non-empty line with a TAB.
+          @line = map { length $_ ? "\t$_" : '' } @line;
 
-      print "\n", join ("\n", @line), "\n";
+          print "\n", join ("\n", @line), "\n";
+        }
 
       defined ($in = <PIPE>)
         or last;
@@ -166,6 +181,7 @@ sub quoted_cmd(@)
 }
 
 # Local Variables:
+# mode: perl
 # indent-tabs-mode: nil
 # eval: (add-hook 'write-file-hooks 'time-stamp)
 # time-stamp-start: "my $VERSION = '"
