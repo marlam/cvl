@@ -3,7 +3,8 @@
  * 
  * This file is part of CVL, a computer vision library.
  *
- * Copyright (C) 2007, 2008  Martin Lambers <marlam@marlam.de>
+ * Copyright (C) 2007, 2008, 2009, 2010
+ * Martin Lambers <marlam@marlam.de>
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -28,16 +29,13 @@
 
 #include "config.h"
 
+#include <stdlib.h>
+
 #include <GL/glew.h>
 
-#include "mh.h"
-
+#define CVL_BUILD
 #include "cvl_intern.h"
-#include "cvl/cvl_error.h"
-#include "cvl/cvl_gl.h"
-#include "cvl/cvl_frame.h"
-#include "cvl/cvl_basic.h"
-#include "cvl/cvl_mix.h"
+#include "cvl/cvl.h"
 
 #include "glsl/mix/layer.glsl.h"
 #include "glsl/mix/blend.glsl.h"

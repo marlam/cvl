@@ -3,7 +3,8 @@
  * 
  * This file is part of CVL, a computer vision library.
  *
- * Copyright (C) 2005, 2006, 2007, 2008  Martin Lambers <marlam@marlam.de>
+ * Copyright (C) 2005, 2006, 2007, 2008, 2009, 2010
+ * Martin Lambers <marlam@marlam.de>
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -22,9 +23,6 @@
 #ifndef CVL_TRANSFORM_H
 #define CVL_TRANSFORM_H
 
-#include "cvl_frame.h"
-#include "cvl_color.h"
-
 typedef enum
 {
     CVL_NONE			= 0,
@@ -35,15 +33,15 @@ typedef enum
     CVL_BICUBIC_CR_SPLINE	= 5
 } cvl_interpolation_type_t;
 
-cvl_frame_t *cvl_affine(cvl_frame_t *frame, const float *matrix, 
+extern CVL_EXPORT cvl_frame_t *cvl_affine(cvl_frame_t *frame, const float *matrix, 
 	cvl_interpolation_type_t interpolation_type, const float *val);
-cvl_frame_t *cvl_rotate(cvl_frame_t *frame, float angle,
+extern CVL_EXPORT cvl_frame_t *cvl_rotate(cvl_frame_t *frame, float angle,
 	cvl_interpolation_type_t interpolation_type, const float *val);
-cvl_frame_t *cvl_shear(cvl_frame_t *frame, float shear_angle_x, float shear_angle_y,
+extern CVL_EXPORT cvl_frame_t *cvl_shear(cvl_frame_t *frame, float shear_angle_x, float shear_angle_y,
 	cvl_interpolation_type_t interpolation_type, const float *val);
-cvl_frame_t *cvl_scale(cvl_frame_t *frame, int new_width, int new_height,
+extern CVL_EXPORT cvl_frame_t *cvl_scale(cvl_frame_t *frame, int new_width, int new_height,
 	cvl_interpolation_type_t interpolation_type);
-void cvl_flip(cvl_frame_t *dst, cvl_frame_t *src);
-void cvl_flop(cvl_frame_t *dst, cvl_frame_t *src);
+extern CVL_EXPORT void cvl_flip(cvl_frame_t *dst, cvl_frame_t *src);
+extern CVL_EXPORT void cvl_flop(cvl_frame_t *dst, cvl_frame_t *src);
 
 #endif

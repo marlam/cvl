@@ -3,7 +3,8 @@
  * 
  * This file is part of CVL, a computer vision library.
  *
- * Copyright (C) 2007, 2008  Martin Lambers <marlam@marlam.de>
+ * Copyright (C) 2007, 2008, 2009, 2010
+ * Martin Lambers <marlam@marlam.de>
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -36,18 +37,9 @@
 
 #include <GL/glew.h>
 
-#include "mh.h"
-
+#define CVL_BUILD
 #include "cvl_intern.h"
-#include "cvl/cvl_error.h"
-#include "cvl/cvl_frame.h"
-#include "cvl/cvl_basic.h"
-#include "cvl/cvl_color.h"
-#include "cvl/cvl_gl.h"
-#include "cvl/cvl_transform.h"
-#include "cvl/cvl_mix.h"
-#include "cvl/cvl_math.h"
-#include "cvl/cvl_misc.h"
+#include "cvl/cvl.h"
 
 #include "glsl/misc/resize_seq.glsl.h"
 #include "glsl/misc/reduce.glsl.h"
@@ -164,8 +156,8 @@ void cvl_reduce(cvl_frame_t *frame, cvl_reduce_mode_t mode, int channel, float *
     else
 	internalformat = GL_RGBA;
     
-    int src_w = mh_next_power_of_two(cvl_frame_width(frame));
-    int src_h = mh_next_power_of_two(cvl_frame_height(frame));
+    int src_w = cvl_next_power_of_two(cvl_frame_width(frame));
+    int src_h = cvl_next_power_of_two(cvl_frame_height(frame));
     if (src_w != cvl_frame_width(frame) || src_h != cvl_frame_height(frame))
     {
 	if (src_w > 32 && src_h > 32)
@@ -242,17 +234,17 @@ void cvl_reduce(cvl_frame_t *frame, cvl_reduce_mode_t mode, int channel, float *
 			|| mode == CVL_REDUCE_ABSMIN_GREATER_ZERO)
 		{
 		    if (rectangles == 2)
-			result[c] = mh_minf(rect_result[0][c], rect_result[1][c]);
+			result[c] = cvl_minf(rect_result[0][c], rect_result[1][c]);
 		    else
-			result[c] = mh_min4f(rect_result[0][c], rect_result[1][c],
+			result[c] = cvl_min4f(rect_result[0][c], rect_result[1][c],
 				rect_result[2][c], rect_result[3][c]);
 		}
 		else if (mode == CVL_REDUCE_MAX || mode == CVL_REDUCE_ABSMAX)
 		{
 		    if (rectangles == 2)
-			result[c] = mh_maxf(rect_result[0][c], rect_result[1][c]);
+			result[c] = cvl_maxf(rect_result[0][c], rect_result[1][c]);
 		    else
-			result[c] = mh_max4f(rect_result[0][c], rect_result[1][c],
+			result[c] = cvl_max4f(rect_result[0][c], rect_result[1][c],
 				rect_result[2][c], rect_result[3][c]);
 		}
 		else // mode == CVL_REDUCE_SUM
@@ -316,8 +308,8 @@ void cvl_reduce(cvl_frame_t *frame, cvl_reduce_mode_t mode, int channel, float *
 
     while (src_w > 1 || src_h > 1)
     {
-	int dst_w = mh_max(1, src_w / 2);
-	int dst_h = mh_max(1, src_h / 2);
+	int dst_w = cvl_maxi(1, src_w / 2);
+	int dst_h = cvl_maxi(1, src_h / 2);
 	GLuint dst_tex;
 	glGenTextures(1, &dst_tex);
 	glBindTexture(GL_TEXTURE_2D, dst_tex);
@@ -387,8 +379,8 @@ void cvl_sort(cvl_frame_t *dst, cvl_frame_t *src, int channel)
     GLuint srctex, dsttex;
     cvl_frame_t *buf1, *buf2;
 
-    int width = mh_next_power_of_two(cvl_frame_width(src));
-    int height = mh_next_power_of_two(cvl_frame_height(src));
+    int width = cvl_next_power_of_two(cvl_frame_width(src));
+    int height = cvl_next_power_of_two(cvl_frame_height(src));
     /* TODO: Do not resize if width/height were already powers of two */
     float fltmax[4] = { FLT_MAX, FLT_MAX, FLT_MAX, FLT_MAX };
     input_frame = cvl_frame_new(width, height, cvl_frame_channels(src),
@@ -418,7 +410,7 @@ void cvl_sort(cvl_frame_t *dst, cvl_frame_t *src, int channel)
     glUniform1i(glGetUniformLocation(prg, "height"), height);
     glViewport(0, 0, width, height);
 
-    int log2_n = mh_log2(width * height);
+    int log2_n = cvl_log2(width * height);
     for (int step = 1, stepno = 2; step <= log2_n; step++, stepno *= 2)
     {
 	for (int stage = step, stageno = stepno; stage >= 1; stage--, stageno /= 2)
@@ -467,7 +459,7 @@ void cvl_quantil(cvl_frame_t *frame, int channel, float q, float *result)
     if (cvl_error())
 	return;
 
-    int i = mh_iroundf(q * (float)(cvl_frame_size(frame) - 1));
+    int i = cvl_iroundf(q * (float)(cvl_frame_size(frame) - 1));
     GLint x = i % cvl_frame_width(frame);
     GLint y = i / cvl_frame_width(frame);
     cvl_get(frame, channel, x, y, result);
@@ -639,8 +631,8 @@ void cvl_pyramid_gaussian(cvl_frame_t *frame, int n, cvl_frame_t **pyramid)
 	glUseProgram(prg);	// The GL complains if this is moved out of the loop.
 	glUniform1f(glGetUniformLocation(prg, "width"), (float)width);
 	glUniform1f(glGetUniformLocation(prg, "height"), (float)height);
-	width = mh_max(1, width / 2);
-	height = mh_max(1, height / 2);
+	width = cvl_maxi(1, width / 2);
+	height = cvl_maxi(1, height / 2);
 	pyramid[l] = cvl_frame_new(width, height, cvl_frame_channels(frame),
 		cvl_frame_format(frame), cvl_frame_type(frame), CVL_TEXTURE);
 	cvl_transform(pyramid[l], pyramid[l - 1]);
@@ -673,8 +665,8 @@ void cvl_pyramid_laplacian(cvl_frame_t **gaussian_pyramid, int n, cvl_frame_t **
 	cvl_frame_t *layers[2];
 	int width, height;
 
-	width = mh_maxi(1, cvl_frame_width(gaussian_pyramid[l]) / 2);
-	height = mh_maxi(1, cvl_frame_height(gaussian_pyramid[l]) / 2);
+	width = cvl_maxi(1, cvl_frame_width(gaussian_pyramid[l]) / 2);
+	height = cvl_maxi(1, cvl_frame_height(gaussian_pyramid[l]) / 2);
 	layers[0] = gaussian_pyramid[l];
 	layers[1] = cvl_scale(gaussian_pyramid[l + 1], width, height, CVL_BILINEAR);
 	laplacian_pyramid[l] = cvl_frame_new(width, height, cvl_frame_channels(gaussian_pyramid[l]),
@@ -729,7 +721,7 @@ void cvl_histogram(cvl_frame_t *frame, int channel, int bins, const float *min, 
 	    {
 		if (!isfinite(p[c]) || p[c] < min[c] || p[c] > max[c])
 		    continue;
-		int hi = mh_clampi((p[c] - min[c]) / (max[c] - min[c]) * (float)(bins - 1), 0, bins - 1);
+		int hi = cvl_clampi((p[c] - min[c]) / (max[c] - min[c]) * (float)(bins - 1), 0, bins - 1);
 		histogram[c * bins + hi]++;
 	    }
 	}
@@ -753,7 +745,7 @@ void cvl_histogram(cvl_frame_t *frame, int channel, int bins, const float *min, 
 	    float *p = ptr + i;
 	    if (!isfinite(p[0]) || p[0] < min[0] || p[0] > max[0])
     		continue;
-	    int hi = mh_clampi((p[0] - min[0]) / (max[0] - min[0]) * (float)(bins - 1), 0, bins - 1);
+	    int hi = cvl_clampi((p[0] - min[0]) / (max[0] - min[0]) * (float)(bins - 1), 0, bins - 1);
 	    histogram[hi]++;
 	}
 	free(ptr);

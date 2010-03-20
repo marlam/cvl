@@ -3,7 +3,8 @@
  * 
  * This file is part of CVL, a computer vision library.
  *
- * Copyright (C) 2008  Martin Lambers <marlam@marlam.de>
+ * Copyright (C) 2008, 2009, 2010
+ * Martin Lambers <marlam@marlam.de>
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -30,14 +31,9 @@
 
 #include <stdlib.h>
 
-#include "mh.h"
-
+#define CVL_BUILD
 #include "cvl_intern.h"
-#include "cvl/cvl_error.h"
-#include "cvl/cvl_gl.h"
-#include "cvl/cvl_frame.h"
-#include "cvl/cvl_basic.h"
-#include "cvl/cvl_wavelets.h"
+#include "cvl/cvl.h"
 
 #include "glsl/wavelets/dwt_step1.glsl.h"
 #include "glsl/wavelets/dwt_step2.glsl.h"
@@ -103,8 +99,8 @@ void cvl_wavelets_dwt(cvl_frame_t *dst, cvl_frame_t *src, cvl_frame_t *tmp, int 
     cvl_assert(cvl_frame_height(tmp) == cvl_frame_height(dst));
     cvl_assert(D >= 2 && D <= 20 && D % 2 == 0);
     cvl_assert(level >= 1);
-    cvl_assert(cvl_frame_width(src) % mh_powi(2, level) == 0);
-    cvl_assert(cvl_frame_height(src) % mh_powi(2, level) == 0);
+    cvl_assert(cvl_frame_width(src) % cvl_powi(2, level) == 0);
+    cvl_assert(cvl_frame_height(src) % cvl_powi(2, level) == 0);
     if (cvl_error())
 	return;
     
@@ -137,7 +133,7 @@ void cvl_wavelets_dwt(cvl_frame_t *dst, cvl_frame_t *src, cvl_frame_t *tmp, int 
 
     for (int l = 0; l < level; l++)
     {
-	float level_boundary = 1.0f / (float)mh_powi(2, l);
+	float level_boundary = 1.0f / (float)cvl_powi(2, l);
 
 	glUseProgram(step1_prg);
 	glUniform1f(glGetUniformLocation(step1_prg, "xstep"), xstep);
@@ -187,8 +183,8 @@ void cvl_wavelets_idwt(cvl_frame_t *dst, cvl_frame_t *src, cvl_frame_t *tmp, int
     cvl_assert(cvl_frame_height(tmp) == cvl_frame_height(dst));
     cvl_assert(D >= 2 && D <= 20 && D % 2 == 0);
     cvl_assert(level >= 1);
-    cvl_assert(cvl_frame_width(src) % mh_powi(2, level) == 0);
-    cvl_assert(cvl_frame_height(src) % mh_powi(2, level) == 0);
+    cvl_assert(cvl_frame_width(src) % cvl_powi(2, level) == 0);
+    cvl_assert(cvl_frame_height(src) % cvl_powi(2, level) == 0);
     if (cvl_error())
 	return;
     
@@ -227,7 +223,7 @@ void cvl_wavelets_idwt(cvl_frame_t *dst, cvl_frame_t *src, cvl_frame_t *tmp, int
 
     for (int l = level - 1; l >= 0; l--)
     {
-	float level_boundary = 1.0f / (float)mh_powi(2, l);
+	float level_boundary = 1.0f / (float)cvl_powi(2, l);
 
 	glUseProgram(step1_prg);
 	glUniform1f(glGetUniformLocation(step1_prg, "texwidth"), texwidth);
@@ -274,7 +270,7 @@ void cvl_wavelets_hard_thresholding(cvl_frame_t *dst, cvl_frame_t *src, int leve
     {
 	threshold[t] = T[t];
     }
-    float upper_bound = 1.0f / (float)mh_powi(2, level - 1);
+    float upper_bound = 1.0f / (float)cvl_powi(2, level - 1);
     float lower_bound = upper_bound / 2.0f;
     GLuint prg;
     if ((prg = cvl_gl_program_cache_get("cvl_wavelets_hard_thresholding")) == 0)
@@ -314,7 +310,7 @@ void cvl_wavelets_soft_thresholding(cvl_frame_t *dst, cvl_frame_t *src, int leve
     {
 	threshold[t] = T[t];
     }
-    float upper_bound = 1.0f / (float)mh_powi(2, level - 1);
+    float upper_bound = 1.0f / (float)cvl_powi(2, level - 1);
     float lower_bound = upper_bound / 2.0f;
     GLuint prg;
     if ((prg = cvl_gl_program_cache_get("cvl_wavelets_soft_thresholding")) == 0)

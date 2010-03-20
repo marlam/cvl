@@ -3,7 +3,7 @@
  * 
  * This file is part of CVL, a computer vision library.
  *
- * Copyright (C) 2007, 2008  Martin Lambers <marlam@marlam.de>
+ * Copyright (C) 2007, 2008, 2009, 2010  Martin Lambers <marlam@marlam.de>
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -22,11 +22,9 @@
 #ifndef CVL_FEATURES_H
 #define CVL_FEATURES_H
 
-#include "cvl_frame.h"
-
-void cvl_edge_sobel(cvl_frame_t *dst, cvl_frame_t *src, int channel);
-void cvl_edge_canny_nms(cvl_frame_t *dst, cvl_frame_t *src);
-void cvl_edge_canny_hysterese(cvl_frame_t *dst, cvl_frame_t *src, float tl, float th);
-void cvl_edge_canny(cvl_frame_t *dst, cvl_frame_t *src, int channel, float sigma, float tl, float th);
+extern CVL_EXPORT void cvl_edge_sobel(cvl_frame_t *dst, cvl_frame_t *src, int channel);
+extern CVL_EXPORT void cvl_edge_canny_nms(cvl_frame_t *dst, cvl_frame_t *src);
+extern CVL_EXPORT void cvl_edge_canny_hysterese(cvl_frame_t *dst, cvl_frame_t *src, float tl, float th);
+extern CVL_EXPORT void cvl_edge_canny(cvl_frame_t *dst, cvl_frame_t *src, int channel, float sigma, float tl, float th);
 
 #endif

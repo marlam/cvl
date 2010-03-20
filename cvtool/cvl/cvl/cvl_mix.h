@@ -3,7 +3,8 @@
  * 
  * This file is part of CVL, a computer vision library.
  *
- * Copyright (C) 2005, 2006, 2007, 2008  Martin Lambers <marlam@marlam.de>
+ * Copyright (C) 2005, 2006, 2007, 2008, 2009, 2010
+ * Martin Lambers <marlam@marlam.de>
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -22,8 +23,6 @@
 #ifndef CVL_MIX_H
 #define CVL_MIX_H
 
-#include "cvl_frame.h"
-
 typedef enum
 {
     CVL_LAYER_MIN 	= 0,
@@ -41,8 +40,8 @@ typedef enum
     CVL_LAYER_DIV 	= 12
 } cvl_layer_mode_t;
 
-void cvl_layer(cvl_frame_t *dst, cvl_frame_t **layers, int number_of_layers, cvl_layer_mode_t mode);
-void cvl_blend(cvl_frame_t *dst, int dst_x, int dst_y, cvl_frame_t *block, cvl_frame_t *block_alpha);
-void cvl_mix(cvl_frame_t *frame, cvl_frame_t **srcs, const float *w, int n);
+extern CVL_EXPORT void cvl_layer(cvl_frame_t *dst, cvl_frame_t **layers, int number_of_layers, cvl_layer_mode_t mode);
+extern CVL_EXPORT void cvl_blend(cvl_frame_t *dst, int dst_x, int dst_y, cvl_frame_t *block, cvl_frame_t *block_alpha);
+extern CVL_EXPORT void cvl_mix(cvl_frame_t *frame, cvl_frame_t **srcs, const float *w, int n);
 
 #endif

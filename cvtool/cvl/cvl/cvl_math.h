@@ -3,7 +3,8 @@
  * 
  * This file is part of CVL, a computer vision library.
  *
- * Copyright (C) 2007, 2008  Martin Lambers <marlam@marlam.de>
+ * Copyright (C) 2007, 2008, 2009, 2010
+ * Martin Lambers <marlam@marlam.de>
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -22,11 +23,9 @@
 #ifndef CVL_MATH_H
 #define CVL_MATH_H
 
-#include "cvl_frame.h"
-
-void cvl_add(cvl_frame_t *dst, cvl_frame_t *src, const float *summand);
-void cvl_mul(cvl_frame_t *dst, cvl_frame_t *src, const float *factor);
-void cvl_first_derivative(cvl_frame_t *dst, cvl_frame_t *src, int channel);
-void cvl_laplacian(cvl_frame_t *dst, cvl_frame_t *src, int channel);
+extern CVL_EXPORT void cvl_add(cvl_frame_t *dst, cvl_frame_t *src, const float *summand);
+extern CVL_EXPORT void cvl_mul(cvl_frame_t *dst, cvl_frame_t *src, const float *factor);
+extern CVL_EXPORT void cvl_first_derivative(cvl_frame_t *dst, cvl_frame_t *src, int channel);
+extern CVL_EXPORT void cvl_laplacian(cvl_frame_t *dst, cvl_frame_t *src, int channel);
 
 #endif

@@ -197,6 +197,7 @@ BUILT_SOURCES = $(nodist_libcvl_la_SOURCES)
 CLEANFILES = $(BUILT_SOURCES)
 
 libcvl_la_LDFLAGS = -version-info $(LT_CURRENT):$(LT_REVISION):$(LT_AGE)
-libcvl_la_LIBADD = $(LTLIBGLEW) $(top_builddir)/mhlib/libmh.la $(top_builddir)/gnulib/libgnu.la
+libcvl_la_LIBADD = $(LTLIBGLEW)
 
-AM_CPPFLAGS = -I$(top_builddir)/gnulib -I$(top_srcdir)/gnulib -I$(top_srcdir)/mhlib
+AM_CFLAGS = $(CFLAG_VISIBILITY_HIDDEN)
+AM_CPPFLAGS = -I$(top_builddir)/cvl/cvl

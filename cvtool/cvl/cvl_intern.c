@@ -3,7 +3,8 @@
  * 
  * This file is part of CVL, a computer vision library.
  *
- * Copyright (C) 2007, 2008  Martin Lambers <marlam@marlam.de>
+ * Copyright (C) 2007, 2008, 2009, 2010
+ * Martin Lambers <marlam@marlam.de>
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -30,7 +31,7 @@
 
 #include <GL/glew.h>
 
-#include "cvl/cvl_error.h"
+#define CVL_BUILD
 #include "cvl_intern.h"
 
 
@@ -113,4 +114,23 @@ char *cvl_asprintf(const char *format, ...)
     va_end(args);
     
     return strp;
+}
+
+void cvl_gauss_mask(int k, float s, float *mask, float *weight_sum)
+{
+    float gauss[k + 1];
+
+    float gauss_sum = 0.0f;
+    for (int i = 0; i <= k; i++)
+    {
+	gauss[i] = expf(- (float)(i * i) / (2.0f * s * s)) / (sqrtf(2.0f * (float)M_PI) * s);
+	gauss_sum += gauss[i];
+    }
+
+    for (int i = 0; i <= k; i++)
+	mask[i] = gauss[k - i];
+    for (int i = k + 1; i < 2 * k + 1; i++)
+	mask[i] = gauss[i - k];
+    if (weight_sum)
+	*weight_sum = 2.0f * gauss_sum - gauss[0];
 }

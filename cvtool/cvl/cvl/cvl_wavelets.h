@@ -3,7 +3,8 @@
  * 
  * This file is part of CVL, a computer vision library.
  *
- * Copyright (C) 2008  Martin Lambers <marlam@marlam.de>
+ * Copyright (C) 2008, 2009, 2010
+ * Martin Lambers <marlam@marlam.de>
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -22,11 +23,9 @@
 #ifndef CVL_WAVELETS_H
 #define CVL_WAVELETS_H
 
-#include "cvl_frame.h"
-
-void cvl_wavelets_dwt(cvl_frame_t *dst, cvl_frame_t *src, cvl_frame_t *tmp, int D, int level);
-void cvl_wavelets_idwt(cvl_frame_t *dst, cvl_frame_t *src, cvl_frame_t *tmp, int D, int level);
-void cvl_wavelets_hard_thresholding(cvl_frame_t *dst, cvl_frame_t *src, int level, const float *T);
-void cvl_wavelets_soft_thresholding(cvl_frame_t *dst, cvl_frame_t *src, int level, const float *T);
+extern CVL_EXPORT void cvl_wavelets_dwt(cvl_frame_t *dst, cvl_frame_t *src, cvl_frame_t *tmp, int D, int level);
+extern CVL_EXPORT void cvl_wavelets_idwt(cvl_frame_t *dst, cvl_frame_t *src, cvl_frame_t *tmp, int D, int level);
+extern CVL_EXPORT void cvl_wavelets_hard_thresholding(cvl_frame_t *dst, cvl_frame_t *src, int level, const float *T);
+extern CVL_EXPORT void cvl_wavelets_soft_thresholding(cvl_frame_t *dst, cvl_frame_t *src, int level, const float *T);
 
 #endif

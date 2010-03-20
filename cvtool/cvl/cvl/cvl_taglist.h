@@ -3,7 +3,8 @@
  * 
  * This file is part of CVL, a computer vision library.
  *
- * Copyright (C) 2007, 2008  Martin Lambers <marlam@marlam.de>
+ * Copyright (C) 2007, 2008, 2009, 2010
+ * Martin Lambers <marlam@marlam.de>
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -30,13 +31,13 @@ typedef struct
     char **values;
 } cvl_taglist_t;
 
-cvl_taglist_t *cvl_taglist_new(void);
-void cvl_taglist_clear(cvl_taglist_t *taglist);
-void cvl_taglist_free(cvl_taglist_t *taglist);
-int cvl_taglist_length(const cvl_taglist_t *taglist);
-void cvl_taglist_get_i(const cvl_taglist_t *taglist, int i, const char **name, const char **value);
-const char *cvl_taglist_get(const cvl_taglist_t *taglist, const char *name);
-void cvl_taglist_put(cvl_taglist_t *taglist, const char *name, const char *value);
-cvl_taglist_t *cvl_taglist_copy(const cvl_taglist_t *taglist);
+extern CVL_EXPORT cvl_taglist_t *cvl_taglist_new(void);
+extern CVL_EXPORT void cvl_taglist_clear(cvl_taglist_t *taglist);
+extern CVL_EXPORT void cvl_taglist_free(cvl_taglist_t *taglist);
+extern CVL_EXPORT int cvl_taglist_length(const cvl_taglist_t *taglist);
+extern CVL_EXPORT void cvl_taglist_get_i(const cvl_taglist_t *taglist, int i, const char **name, const char **value);
+extern CVL_EXPORT const char *cvl_taglist_get(const cvl_taglist_t *taglist, const char *name);
+extern CVL_EXPORT void cvl_taglist_put(cvl_taglist_t *taglist, const char *name, const char *value);
+extern CVL_EXPORT cvl_taglist_t *cvl_taglist_copy(const cvl_taglist_t *taglist);
 
 #endif

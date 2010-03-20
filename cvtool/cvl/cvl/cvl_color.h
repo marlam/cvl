@@ -3,7 +3,8 @@
  * 
  * This file is part of CVL, a computer vision library.
  *
- * Copyright (C) 2005, 2006, 2007, 2008  Martin Lambers <marlam@marlam.de>
+ * Copyright (C) 2005, 2006, 2007, 2008, 2009, 2010
+ * Martin Lambers <marlam@marlam.de>
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -23,8 +24,6 @@
 #define CVL_COLOR_H
 
 #include <stdbool.h>
-
-#include "cvl_frame.h"
 
 typedef enum
 {
@@ -178,31 +177,31 @@ typedef enum
     CVL_COLOR_INVALID		= ((255 << 16) + (255 << 8) + 255) + 1
 } cvl_color_t;
 
-cvl_color_t cvl_color_from_string(const char *s);
-void cvl_color_to_float(cvl_color_t c, cvl_format_t format, float *result);
-void cvl_gl_set_color(cvl_color_t c, cvl_format_t format);
+extern CVL_EXPORT cvl_color_t cvl_color_from_string(const char *s);
+extern CVL_EXPORT void cvl_color_to_float(cvl_color_t c, cvl_format_t format, float *result);
+extern CVL_EXPORT void cvl_gl_set_color(cvl_color_t c, cvl_format_t format);
 
-void cvl_channel_combine(cvl_frame_t *dst, 
+extern CVL_EXPORT void cvl_channel_combine(cvl_frame_t *dst, 
 	cvl_frame_t *c0, cvl_frame_t *c1, cvl_frame_t *c2, cvl_frame_t *c3);
-void cvl_channel_extract(cvl_frame_t *dst, cvl_frame_t *src, int channel);
+extern CVL_EXPORT void cvl_channel_extract(cvl_frame_t *dst, cvl_frame_t *src, int channel);
 
-void cvl_convert_format(cvl_frame_t *dst, cvl_frame_t *src);
-void cvl_convert_format_forced(cvl_frame_t *dst, cvl_frame_t *src, cvl_format_t src_format);
-void cvl_convert_format_inplace(cvl_frame_t *frame, cvl_format_t format);
+extern CVL_EXPORT void cvl_convert_format(cvl_frame_t *dst, cvl_frame_t *src);
+extern CVL_EXPORT void cvl_convert_format_forced(cvl_frame_t *dst, cvl_frame_t *src, cvl_format_t src_format);
+extern CVL_EXPORT void cvl_convert_format_inplace(cvl_frame_t *frame, cvl_format_t format);
 
-void cvl_invert(cvl_frame_t *dst, cvl_frame_t *src);
+extern CVL_EXPORT void cvl_invert(cvl_frame_t *dst, cvl_frame_t *src);
 
-void cvl_gamma_correct(cvl_frame_t *dst, cvl_frame_t *src, float gamma);
-void cvl_color_adjust(cvl_frame_t *dst, cvl_frame_t *src, 
+extern CVL_EXPORT void cvl_gamma_correct(cvl_frame_t *dst, cvl_frame_t *src, float gamma);
+extern CVL_EXPORT void cvl_color_adjust(cvl_frame_t *dst, cvl_frame_t *src, 
 	float hue, float saturation, float lightness, float contrast);
-void cvl_transform_linear(cvl_frame_t *dst, cvl_frame_t *src, 
+extern CVL_EXPORT void cvl_transform_linear(cvl_frame_t *dst, cvl_frame_t *src, 
 	int channel, float min, float max);
-void cvl_transform_log(cvl_frame_t *dst, cvl_frame_t *src, 
+extern CVL_EXPORT void cvl_transform_log(cvl_frame_t *dst, cvl_frame_t *src, 
 	int channel, float min, float max, float base);
-void cvl_luminance_range(cvl_frame_t *dst, cvl_frame_t *src, float lum_min, float lum_max);
-void cvl_pseudo_color(cvl_frame_t *dst, cvl_frame_t *src,
+extern CVL_EXPORT void cvl_luminance_range(cvl_frame_t *dst, cvl_frame_t *src, float lum_min, float lum_max);
+extern CVL_EXPORT void cvl_pseudo_color(cvl_frame_t *dst, cvl_frame_t *src,
 	int channel, float min, float max, 
 	float startcolor, float lightness, bool invert, bool cyclic);
-void cvl_threshold(cvl_frame_t *dst, cvl_frame_t *src, int channel, float threshold);
+extern CVL_EXPORT void cvl_threshold(cvl_frame_t *dst, cvl_frame_t *src, int channel, float threshold);
 
 #endif

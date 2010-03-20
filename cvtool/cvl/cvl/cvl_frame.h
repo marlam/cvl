@@ -3,7 +3,8 @@
  * 
  * This file is part of CVL, a computer vision library.
  *
- * Copyright (C) 2007, 2008  Martin Lambers <marlam@marlam.de>
+ * Copyright (C) 2007, 2008, 2009, 2010
+ * Martin Lambers <marlam@marlam.de>
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -23,8 +24,6 @@
 #define CVL_FRAME_H
 
 #include <GL/gl.h>
-
-#include "cvl_taglist.h"
 
 typedef enum
 {
@@ -61,27 +60,27 @@ typedef struct
     GLuint tex;
 } cvl_frame_t;
 
-cvl_frame_t *cvl_frame_new(int width, int height, int channels, cvl_format_t format, cvl_type_t type, cvl_storage_t storage);
-cvl_frame_t *cvl_frame_new_tpl(const cvl_frame_t *tpl);
-void cvl_frame_free(cvl_frame_t *frame);
+extern CVL_EXPORT cvl_frame_t *cvl_frame_new(int width, int height, int channels, cvl_format_t format, cvl_type_t type, cvl_storage_t storage);
+extern CVL_EXPORT cvl_frame_t *cvl_frame_new_tpl(const cvl_frame_t *tpl);
+extern CVL_EXPORT void cvl_frame_free(cvl_frame_t *frame);
 
-cvl_taglist_t *cvl_frame_taglist(const cvl_frame_t *frame);
-void cvl_frame_set_taglist(cvl_frame_t *frame, cvl_taglist_t *taglist);
+extern CVL_EXPORT cvl_taglist_t *cvl_frame_taglist(const cvl_frame_t *frame);
+extern CVL_EXPORT void cvl_frame_set_taglist(cvl_frame_t *frame, cvl_taglist_t *taglist);
 
-int cvl_frame_width(const cvl_frame_t *frame);
-int cvl_frame_height(const cvl_frame_t *frame);
-int cvl_frame_size(const cvl_frame_t *frame);
-int cvl_frame_channels(const cvl_frame_t *frame);
-const char *cvl_frame_channel_name(const cvl_frame_t *frame, int channel);
-void cvl_frame_set_channel_name(cvl_frame_t *frame, int channel, const char *name);
-cvl_format_t cvl_frame_format(const cvl_frame_t *frame);
-void cvl_frame_set_format(cvl_frame_t *frame, cvl_format_t format);
-cvl_type_t cvl_frame_type(const cvl_frame_t *frame);
-void cvl_frame_set_type(cvl_frame_t *frame, cvl_type_t type);
-void *cvl_frame_pointer(cvl_frame_t *frame);
-GLuint cvl_frame_texture(cvl_frame_t *frame);
+extern CVL_EXPORT int cvl_frame_width(const cvl_frame_t *frame);
+extern CVL_EXPORT int cvl_frame_height(const cvl_frame_t *frame);
+extern CVL_EXPORT int cvl_frame_size(const cvl_frame_t *frame);
+extern CVL_EXPORT int cvl_frame_channels(const cvl_frame_t *frame);
+extern CVL_EXPORT const char *cvl_frame_channel_name(const cvl_frame_t *frame, int channel);
+extern CVL_EXPORT void cvl_frame_set_channel_name(cvl_frame_t *frame, int channel, const char *name);
+extern CVL_EXPORT cvl_format_t cvl_frame_format(const cvl_frame_t *frame);
+extern CVL_EXPORT void cvl_frame_set_format(cvl_frame_t *frame, cvl_format_t format);
+extern CVL_EXPORT cvl_type_t cvl_frame_type(const cvl_frame_t *frame);
+extern CVL_EXPORT void cvl_frame_set_type(cvl_frame_t *frame, cvl_type_t type);
+extern CVL_EXPORT void *cvl_frame_pointer(cvl_frame_t *frame);
+extern CVL_EXPORT GLuint cvl_frame_texture(cvl_frame_t *frame);
 
-void cvl_transform(cvl_frame_t *dst, cvl_frame_t *src);
-void cvl_transform_multi(cvl_frame_t **dsts, int ndsts, cvl_frame_t **srcs, int nsrcs, const char *textures_name);
+extern CVL_EXPORT void cvl_transform(cvl_frame_t *dst, cvl_frame_t *src);
+extern CVL_EXPORT void cvl_transform_multi(cvl_frame_t **dsts, int ndsts, cvl_frame_t **srcs, int nsrcs, const char *textures_name);
 
 #endif

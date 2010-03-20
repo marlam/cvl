@@ -3,7 +3,8 @@
  * 
  * This file is part of CVL, a computer vision library.
  *
- * Copyright (C) 2005, 2006, 2007, 2008  Martin Lambers <marlam@marlam.de>
+ * Copyright (C) 2005, 2006, 2007, 2008, 2009, 2010
+ * Martin Lambers <marlam@marlam.de>
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -25,28 +26,26 @@
 #include <stdio.h>
 #include <stdbool.h>
 
-#include "cvl/cvl_frame.h"
-
 typedef enum
 {
     CVL_PNM = 0,
     CVL_PFS = 1
 } cvl_stream_type_t;
 
-void cvl_read(FILE *f, cvl_stream_type_t *type, cvl_frame_t **frame);
-void cvl_write(FILE *f, cvl_stream_type_t type, cvl_frame_t *frame);
+extern CVL_EXPORT void cvl_read(FILE *f, cvl_stream_type_t *type, cvl_frame_t **frame);
+extern CVL_EXPORT void cvl_write(FILE *f, cvl_stream_type_t type, cvl_frame_t *frame);
 
-void cvl_read_pnm(FILE *f, cvl_frame_t **frame);
-void cvl_write_pnm(FILE *f, cvl_frame_t *frame);
-void cvl_read_pfs(FILE *f, cvl_frame_t **frame);
-void cvl_write_pfs(FILE *f, cvl_frame_t *frame);
+extern CVL_EXPORT void cvl_read_pnm(FILE *f, cvl_frame_t **frame);
+extern CVL_EXPORT void cvl_write_pnm(FILE *f, cvl_frame_t *frame);
+extern CVL_EXPORT void cvl_read_pfs(FILE *f, cvl_frame_t **frame);
+extern CVL_EXPORT void cvl_write_pfs(FILE *f, cvl_frame_t *frame);
 
-void cvl_load(const char *filename, cvl_stream_type_t *type, cvl_frame_t **frame);
-void cvl_save(const char *filename, cvl_stream_type_t type, cvl_frame_t *frame);
+extern CVL_EXPORT void cvl_load(const char *filename, cvl_stream_type_t *type, cvl_frame_t **frame);
+extern CVL_EXPORT void cvl_save(const char *filename, cvl_stream_type_t type, cvl_frame_t *frame);
 
-void cvl_load_pnm(const char *filename, cvl_frame_t **frame);
-void cvl_save_pnm(const char *filename, cvl_frame_t *frame);
-void cvl_load_pfs(const char *filename, cvl_frame_t **frame);
-void cvl_save_pfs(const char *filename, cvl_frame_t *frame);
+extern CVL_EXPORT void cvl_load_pnm(const char *filename, cvl_frame_t **frame);
+extern CVL_EXPORT void cvl_save_pnm(const char *filename, cvl_frame_t *frame);
+extern CVL_EXPORT void cvl_load_pfs(const char *filename, cvl_frame_t **frame);
+extern CVL_EXPORT void cvl_save_pfs(const char *filename, cvl_frame_t *frame);
 
 #endif

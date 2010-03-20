@@ -3,7 +3,7 @@
  * 
  * This file is part of CVL, a computer vision library.
  *
- * Copyright (C) 2007, 2008  Martin Lambers <marlam@marlam.de>
+ * Copyright (C) 2007, 2008, 2009, 2010  Martin Lambers <marlam@marlam.de>
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -35,16 +35,16 @@ typedef enum
     CVL_ERROR_ASSERT	= 6
 } cvl_error_t;
 
-cvl_error_t cvl_error(void);
+extern CVL_EXPORT cvl_error_t cvl_error(void);
 
-const char *cvl_error_msg(void);
+extern CVL_EXPORT const char *cvl_error_msg(void);
 
 #ifdef __GNUC__
-void cvl_error_set(cvl_error_t e, const char *msg, ...) __attribute__ ((format (printf, 2, 3)));
+extern CVL_EXPORT void cvl_error_set(cvl_error_t e, const char *msg, ...) __attribute__ ((format (printf, 2, 3)));
 #else
-void cvl_error_set(cvl_error_t e, const char *msg, ...);
+extern CVL_EXPORT void cvl_error_set(cvl_error_t e, const char *msg, ...);
 #endif
 
-void cvl_error_reset(void);
+extern CVL_EXPORT void cvl_error_reset(void);
 
 #endif

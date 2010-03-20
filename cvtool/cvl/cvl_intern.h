@@ -3,7 +3,8 @@
  * 
  * This file is part of CVL, a computer vision library.
  *
- * Copyright (C) 2007, 2008  Martin Lambers <marlam@marlam.de>
+ * Copyright (C) 2007, 2008, 2009, 2010
+ * Martin Lambers <marlam@marlam.de>
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -22,6 +23,7 @@
 #ifndef CVL_INTERN_H
 #define CVL_INTERN_H
 
+#include <math.h>
 #include <stdarg.h>
 #include <stdbool.h>
 
@@ -32,7 +34,8 @@
 # include <GL/glx.h>
 #endif
 
-#include "cvl/cvl_error.h"
+#define CVL_BUILD
+#include "cvl/cvl.h"
 
 typedef struct
 {
@@ -95,5 +98,115 @@ char *cvl_asprintf(const char *format, ...) __attribute__ ((format (printf, 1, 2
 char *cvl_vasprintf(const char *format, va_list ap);
 char *cvl_asprintf(const char *format, ...);
 #endif
+
+static inline int cvl_iroundf(float x)
+{
+    return (int)lroundf(x);
+}
+
+static inline int cvl_powi(int x, int y)
+{
+    cvl_assert(y >= 0);
+
+    int result = 1;
+    if (x == 2 && y > 0)
+    {
+	result = x << (y - 1);
+    }
+    else
+    {
+	for (int i = 0; i < y; i++)
+	    result *= x;
+    }
+    return result;
+}
+
+static inline float cvl_minf(float a, float b)
+{
+    return fminf(a, b);
+}
+
+static inline float cvl_maxf(float a, float b)
+{
+    return fmaxf(a, b);
+}
+
+static inline float cvl_min3f(float a, float b, float c)
+{
+    return cvl_minf(cvl_minf(a, b), c);
+}
+
+static inline float cvl_max3f(float a, float b, float c)
+{
+    return cvl_maxf(cvl_maxf(a, b), c);
+}
+
+static inline float cvl_min4f(float a, float b, float c, float d)
+{
+    return cvl_minf(cvl_minf(a, b), cvl_minf(c, d));
+}
+
+static inline float cvl_max4f(float a, float b, float c, float d)
+{
+    return cvl_maxf(cvl_maxf(a, b), cvl_maxf(c, d));
+}
+
+static inline int cvl_mini(int a, int b)
+{
+    return a < b ? a : b;
+}
+
+static inline int cvl_maxi(int a, int b)
+{
+    return a > b ? a : b;
+}
+
+static inline int cvl_min3i(int a, int b, int c)
+{
+    return cvl_mini(cvl_mini(a, b), c);
+}
+
+static inline int cvl_max3i(int a, int b, int c)
+{
+    return cvl_maxi(cvl_maxi(a, b), c);
+}
+
+static inline int cvl_min4i(int a, int b, int c, int d)
+{
+    return cvl_mini(cvl_mini(a, b), cvl_mini(c, d));
+}
+
+static inline int cvl_max4i(int a, int b, int c, int d)
+{
+    return cvl_maxi(cvl_maxi(a, b), cvl_maxi(c, d));
+}
+
+static inline int cvl_clampi(int x, int min, int max)
+{
+    return cvl_mini(max, cvl_maxi(min, x));
+}
+
+static inline int cvl_next_power_of_two(int x)
+{
+    int p = 1;
+    while (p < x)
+	p *= 2;
+    return p;
+}
+
+static inline int cvl_log2(int x)
+{
+    cvl_assert(x > 0);
+
+    int log2 = 0;
+    while (x > 1)
+    {
+	x /= 2;
+	log2++;
+    }
+    return log2;
+}
+
+void cvl_gauss_mask(int k, float s, float *mask, float *weight_sum);
 
 #endif

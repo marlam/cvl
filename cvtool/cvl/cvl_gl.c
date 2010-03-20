@@ -3,7 +3,8 @@
  * 
  * This file is part of CVL, a computer vision library.
  *
- * Copyright (C) 2007, 2008  Martin Lambers <marlam@marlam.de>
+ * Copyright (C) 2007, 2008, 2009, 2010
+ * Martin Lambers <marlam@marlam.de>
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -41,11 +42,9 @@
 # include <GL/glx.h>
 #endif
 
-#include "mh.h"
-
+#define CVL_BUILD
 #include "cvl_intern.h"
-#include "cvl/cvl_error.h"
-#include "cvl/cvl_gl.h"
+#include "cvl/cvl.h"
 
 
 /**
@@ -317,8 +316,7 @@ void cvl_gl_check_fb(const char *what, ...)
 		break;
 	}
 	va_start(args, what);
-	if (vasprintf(&str, what, args) < 0)
-	    str = NULL;
+        str = cvl_vasprintf(what, args);
 	va_end(args);
 	if (estr)
 	    cvl_error_set(CVL_ERROR_GL, "%s: framebuffer error %s.", str, estr);
@@ -350,8 +348,7 @@ void cvl_gl_check_errors(const char *what, ...)
 	va_list args;
     
 	va_start(args, what);
-	if (vasprintf(&str, what, args) < 0)
-	    str = NULL;
+        str = cvl_vasprintf(what, args);
 	va_end(args);
 	cvl_error_set(CVL_ERROR_GL, "%s: GL error 0x%X: %s", 
 		str, (unsigned int)e, gluErrorString(e));
@@ -463,11 +460,7 @@ char *cvl_gl_srcprep(char *src, const char *defines, ...)
     va_list args;
     
     va_start(args, defines);
-    if (vasprintf(&str, defines, args) < 0)
-    {
-	cvl_error_set(CVL_ERROR_MEM, "%s", strerror(ENOMEM));
-	return NULL;
-    }
+    str = cvl_vasprintf(defines, args);
     va_end(args);
 
     int index = 0;

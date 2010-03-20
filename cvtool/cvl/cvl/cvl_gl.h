@@ -3,7 +3,7 @@
  * 
  * This file is part of CVL, a computer vision library.
  *
- * Copyright (C) 2007, 2008  Martin Lambers <marlam@marlam.de>
+ * Copyright (C) 2007, 2008, 2009, 2010  Martin Lambers <marlam@marlam.de>
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -28,32 +28,32 @@
 
 typedef unsigned long cvl_gl_context_t;
 
-cvl_gl_context_t *cvl_gl_context_new(const char *display_name);
-void cvl_gl_context_make_current(cvl_gl_context_t *ctx);
-void cvl_gl_context_free(cvl_gl_context_t *ctx);
+extern CVL_EXPORT cvl_gl_context_t *cvl_gl_context_new(const char *display_name);
+extern CVL_EXPORT void cvl_gl_context_make_current(cvl_gl_context_t *ctx);
+extern CVL_EXPORT void cvl_gl_context_free(cvl_gl_context_t *ctx);
 
-void cvl_gl_state_save(void);
-void cvl_gl_state_restore(void);
+extern CVL_EXPORT void cvl_gl_state_save(void);
+extern CVL_EXPORT void cvl_gl_state_restore(void);
 
 #ifdef __GNUC__
-void cvl_gl_check_fb(const char *what, ...) __attribute__ ((format (printf, 1, 2)));
-void cvl_gl_check_errors(const char *what, ...) __attribute__ ((format (printf, 1, 2)));
+extern CVL_EXPORT void cvl_gl_check_fb(const char *what, ...) __attribute__ ((format (printf, 1, 2)));
+extern CVL_EXPORT void cvl_gl_check_errors(const char *what, ...) __attribute__ ((format (printf, 1, 2)));
 #else
-void cvl_gl_check_fb(const char *what, ...);
-void cvl_gl_check_errors(const char *what, ...);
+extern CVL_EXPORT void cvl_gl_check_fb(const char *what, ...);
+extern CVL_EXPORT void cvl_gl_check_errors(const char *what, ...);
 #endif
 
 #ifdef __GNUC__
-char *cvl_gl_srcprep(char *src, const char *defines, ...) __attribute__ ((format (printf, 2, 3)));
+extern CVL_EXPORT char *cvl_gl_srcprep(char *src, const char *defines, ...) __attribute__ ((format (printf, 2, 3)));
 #else
-char *cvl_gl_srcprep(char *src, const char *defines, ...);
+extern CVL_EXPORT char *cvl_gl_srcprep(char *src, const char *defines, ...);
 #endif
-GLuint cvl_gl_shader(const char *name, GLenum type, const char *src);
-GLuint cvl_gl_program_new(const char *name, GLuint vshader, GLuint fshader);
-GLuint cvl_gl_program_new_src(const char *name, const char *vshader_src, const char *fshader_src);
-void cvl_gl_program_free(GLuint program);
+extern CVL_EXPORT GLuint cvl_gl_shader(const char *name, GLenum type, const char *src);
+extern CVL_EXPORT GLuint cvl_gl_program_new(const char *name, GLuint vshader, GLuint fshader);
+extern CVL_EXPORT GLuint cvl_gl_program_new_src(const char *name, const char *vshader_src, const char *fshader_src);
+extern CVL_EXPORT void cvl_gl_program_free(GLuint program);
 
-GLuint cvl_gl_program_cache_get(const char *name);
-void cvl_gl_program_cache_put(const char *name, GLuint program);
+extern CVL_EXPORT GLuint cvl_gl_program_cache_get(const char *name);
+extern CVL_EXPORT void cvl_gl_program_cache_put(const char *name, GLuint program);
 
 #endif

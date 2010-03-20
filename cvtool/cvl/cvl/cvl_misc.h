@@ -3,7 +3,8 @@
  * 
  * This file is part of CVL, a computer vision library.
  *
- * Copyright (C) 2007, 2008  Martin Lambers <marlam@marlam.de>
+ * Copyright (C) 2007, 2008, 2009, 2010
+ * Martin Lambers <marlam@marlam.de>
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -22,8 +23,6 @@
 #ifndef CVL_MISC_H
 #define CVL_MISC_H
 
-#include "cvl_frame.h"
-
 typedef enum
 {
     CVL_REDUCE_MIN			= 0,
@@ -35,23 +34,23 @@ typedef enum
     CVL_REDUCE_SUM			= 6
 } cvl_reduce_mode_t;
 
-void cvl_resize_seq(cvl_frame_t *dst, cvl_frame_t *src, const float *fillvalue);
+extern CVL_EXPORT void cvl_resize_seq(cvl_frame_t *dst, cvl_frame_t *src, const float *fillvalue);
 
-void cvl_reduce(cvl_frame_t *frame, cvl_reduce_mode_t mode, int channel, float *result);
+extern CVL_EXPORT void cvl_reduce(cvl_frame_t *frame, cvl_reduce_mode_t mode, int channel, float *result);
 
-void cvl_sort(cvl_frame_t *dst, cvl_frame_t *src, int channel);
+extern CVL_EXPORT void cvl_sort(cvl_frame_t *dst, cvl_frame_t *src, int channel);
 
-void cvl_quantil(cvl_frame_t *frame, int channel, float q, float *result);
+extern CVL_EXPORT void cvl_quantil(cvl_frame_t *frame, int channel, float q, float *result);
 
-void cvl_statistics(cvl_frame_t *frame, float *min, float *max, float *median, 
+extern CVL_EXPORT void cvl_statistics(cvl_frame_t *frame, float *min, float *max, float *median, 
 	float *mean, float *stddev, float *dynrange);
 
-void cvl_diff(cvl_frame_t *dst, cvl_frame_t *src1, cvl_frame_t *src2);
+extern CVL_EXPORT void cvl_diff(cvl_frame_t *dst, cvl_frame_t *src1, cvl_frame_t *src2);
 
-void cvl_pyramid_gaussian(cvl_frame_t *frame, int n, cvl_frame_t **pyramid);
+extern CVL_EXPORT void cvl_pyramid_gaussian(cvl_frame_t *frame, int n, cvl_frame_t **pyramid);
 
-void cvl_pyramid_laplacian(cvl_frame_t **gaussian_pyramid, int n, cvl_frame_t **laplacian_pyramid);
+extern CVL_EXPORT void cvl_pyramid_laplacian(cvl_frame_t **gaussian_pyramid, int n, cvl_frame_t **laplacian_pyramid);
 
-void cvl_histogram(cvl_frame_t *frame, int channel, int bins, const float *min, const float *max, int *histogram);
+extern CVL_EXPORT void cvl_histogram(cvl_frame_t *frame, int channel, int bins, const float *min, const float *max, int *histogram);
 
 #endif

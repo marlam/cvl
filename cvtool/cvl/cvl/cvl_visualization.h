@@ -3,7 +3,8 @@
  * 
  * This file is part of CVL, a computer vision library.
  *
- * Copyright (C) 2007, 2008  Martin Lambers <marlam@marlam.de>
+ * Copyright (C) 2007, 2008, 2009, 2010
+ * Martin Lambers <marlam@marlam.de>
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -22,8 +23,6 @@
 #ifndef CVL_VISUALIZATION_H
 #define CVL_VISUALIZATION_H
 
-#include "cvl_frame.h"
-
-void cvl_visualize_vector2_color(cvl_frame_t *dst, cvl_frame_t *src);
+extern CVL_EXPORT void cvl_visualize_vector2_color(cvl_frame_t *dst, cvl_frame_t *src);
 
 #endif

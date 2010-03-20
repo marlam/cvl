@@ -3,7 +3,8 @@
  * 
  * This file is part of CVL, a computer vision library.
  *
- * Copyright (C) 2007, 2008  Martin Lambers <marlam@marlam.de>
+ * Copyright (C) 2007, 2008, 2009, 2010
+ * Martin Lambers <marlam@marlam.de>
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -35,6 +36,7 @@
 
 #include "config.h"
 
+#include <stdlib.h>
 #include <math.h>
 #include <float.h>
 #include <string.h>
@@ -42,15 +44,9 @@
 
 #include <GL/glew.h>
 
-#include "mh.h"
-
+#define CVL_BUILD
 #include "cvl_intern.h"
-#include "cvl/cvl_error.h"
-#include "cvl/cvl_gl.h"
-#include "cvl/cvl_frame.h"
-#include "cvl/cvl_color.h"
-#include "cvl/cvl_misc.h"
-#include "cvl/cvl_hdr.h"
+#include "cvl/cvl.h"
 
 #include "glsl/hdr/log_avg_lum.glsl.h"
 #include "glsl/hdr/tonemap_schlick94.glsl.h"
@@ -374,10 +370,10 @@ void cvl_tonemap_ashikhmin02(cvl_frame_t *dst, cvl_frame_t *src,
     float mask3[2 * k[3] + 1];
     float mask3_weightsum;
 
-    mh_gauss_mask(k[0], sigma[0], mask0, &mask0_weightsum);
-    mh_gauss_mask(k[1], sigma[1], mask1, &mask1_weightsum);
-    mh_gauss_mask(k[2], sigma[2], mask2, &mask2_weightsum);
-    mh_gauss_mask(k[3], sigma[3], mask3, &mask3_weightsum);
+    cvl_gauss_mask(k[0], sigma[0], mask0, &mask0_weightsum);
+    cvl_gauss_mask(k[1], sigma[1], mask1, &mask1_weightsum);
+    cvl_gauss_mask(k[2], sigma[2], mask2, &mask2_weightsum);
+    cvl_gauss_mask(k[3], sigma[3], mask3, &mask3_weightsum);
     
     if ((prg = cvl_gl_program_cache_get("cvl_tonemap_ashikhmin02_step1")) == 0)
     {
@@ -482,7 +478,7 @@ void cvl_tonemap_durand02(cvl_frame_t *dst, cvl_frame_t *src, float max_abs_lum,
     char *prg_name;
     float mask[2 * k + 1];
 
-    mh_gauss_mask(k, sigma_spatial, mask, NULL);
+    cvl_gauss_mask(k, sigma_spatial, mask, NULL);
 
     prg_name = cvl_asprintf("cvl_tonemap_durand02_step1_k=%d", k);
     if ((prg = cvl_gl_program_cache_get(prg_name)) == 0)
@@ -582,10 +578,10 @@ void cvl_tonemap_reinhard02(cvl_frame_t *dst, cvl_frame_t *src,
     float mask3[2 * k[3] + 1];
     float mask3_weightsum;
 
-    mh_gauss_mask(k[0], sigma[0], mask0, &mask0_weightsum);
-    mh_gauss_mask(k[1], sigma[1], mask1, &mask1_weightsum);
-    mh_gauss_mask(k[2], sigma[2], mask2, &mask2_weightsum);
-    mh_gauss_mask(k[3], sigma[3], mask3, &mask3_weightsum);
+    cvl_gauss_mask(k[0], sigma[0], mask0, &mask0_weightsum);
+    cvl_gauss_mask(k[1], sigma[1], mask1, &mask1_weightsum);
+    cvl_gauss_mask(k[2], sigma[2], mask2, &mask2_weightsum);
+    cvl_gauss_mask(k[3], sigma[3], mask3, &mask3_weightsum);
     
     if ((prg = cvl_gl_program_cache_get("cvl_tonemap_reinhard02_step1")) == 0)
     {

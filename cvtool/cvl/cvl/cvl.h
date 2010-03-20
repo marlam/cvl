@@ -3,7 +3,8 @@
  * 
  * This file is part of CVL, a computer vision library.
  *
- * Copyright (C) 2005, 2006, 2007, 2008  Martin Lambers <marlam@marlam.de>
+ * Copyright (C) 2005, 2006, 2007, 2008, 2009, 2010
+ * Martin Lambers <marlam@marlam.de>
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -29,6 +30,12 @@
 
 #ifndef CVL_H
 #define CVL_H
+
+#if defined CVL_BUILD && defined HAVE_VISIBILITY
+#   define CVL_EXPORT __attribute__((visibility("default")))
+#else
+#   define CVL_EXPORT
+#endif
 
 #ifdef __cplusplus
 extern "C" 

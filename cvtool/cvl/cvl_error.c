@@ -3,7 +3,8 @@
  * 
  * This file is part of CVL, a computer vision library.
  *
- * Copyright (C) 2007, 2008  Martin Lambers <marlam@marlam.de>
+ * Copyright (C) 2007, 2008, 2009, 2010
+ * Martin Lambers <marlam@marlam.de>
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -34,8 +35,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#define CVL_BUILD
 #include "cvl_intern.h"
-#include "cvl/cvl_error.h"
+#include "cvl/cvl.h"
 
 
 /**
@@ -101,8 +103,7 @@ void cvl_error_set(cvl_error_t e, const char *msg, ...)
     cvl_context_t *ctx = cvl_context();
     ctx->error = e;
     va_start(args, msg);
-    if (vasprintf(&str, msg, args) < 0)
-	str = NULL;
+    str = cvl_vasprintf(msg, args);
     va_end(args);
     ctx->error_msg = str;
 }

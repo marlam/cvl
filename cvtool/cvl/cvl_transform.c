@@ -3,7 +3,8 @@
  * 
  * This file is part of CVL, a computer vision library.
  *
- * Copyright (C) 2007, 2008  Martin Lambers <marlam@marlam.de>
+ * Copyright (C) 2007, 2008, 2009, 2010
+ * Martin Lambers <marlam@marlam.de>
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -28,20 +29,15 @@
 
 #include "config.h"
 
+#include <stdlib.h>
 #include <math.h>
 #include <float.h>
 
 #include <GL/glew.h>
 
-#include "mh.h"
-
+#define CVL_BUILD
 #include "cvl_intern.h"
-#include "cvl/cvl_error.h"
-#include "cvl/cvl_frame.h"
-#include "cvl/cvl_color.h"
-#include "cvl/cvl_gl.h"
-#include "cvl/cvl_basic.h"
-#include "cvl/cvl_transform.h"
+#include "cvl/cvl.h"
 
 #include "glsl/transform/bilinear.glsl.h"
 #include "glsl/transform/biquadratic.glsl.h"
@@ -100,13 +96,13 @@ cvl_frame_t *cvl_affine(cvl_frame_t *frame, const float *matrix,
     float ep3y = h * matrix[3];
     /* Bounding box of the frame: 
      * (minx, maxy), (maxx, maxy), (maxx, miny), (minx, miny) */
-    float minx = mh_min4f(ep0x, ep1x, ep2x, ep3x);
-    float miny = mh_min4f(ep0y, ep1y, ep2y, ep3y);
-    float maxx = mh_max4f(ep0x, ep1x, ep2x, ep3x);
-    float maxy = mh_max4f(ep0y, ep1y, ep2y, ep3y);
+    float minx = cvl_min4f(ep0x, ep1x, ep2x, ep3x);
+    float miny = cvl_min4f(ep0y, ep1y, ep2y, ep3y);
+    float maxx = cvl_max4f(ep0x, ep1x, ep2x, ep3x);
+    float maxy = cvl_max4f(ep0y, ep1y, ep2y, ep3y);
 
-    int new_width = mh_maxi(1, mh_iroundf(maxx - minx));
-    int new_height = mh_maxi(1, mh_iroundf(maxy - miny));
+    int new_width = cvl_maxi(1, cvl_iroundf(maxx - minx));
+    int new_height = cvl_maxi(1, cvl_iroundf(maxy - miny));
     cvl_frame_t *transformed = cvl_frame_new(new_width, new_height, cvl_frame_channels(frame),
 	    cvl_frame_format(frame), cvl_frame_type(frame), CVL_TEXTURE);
     if (cvl_frame_format(frame) == CVL_UNKNOWN)

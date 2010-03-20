@@ -3,7 +3,8 @@
  * 
  * This file is part of CVL, a computer vision library.
  *
- * Copyright (C) 2005, 2006, 2007, 2008  Martin Lambers <marlam@marlam.de>
+ * Copyright (C) 2005, 2006, 2007, 2008, 2009, 2010
+ * Martin Lambers <marlam@marlam.de>
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -28,16 +29,13 @@
 
 #include "config.h"
 
+#include <stdlib.h>
+
 #include <GL/glew.h>
 
-#include "mh.h"
-
+#define CVL_BUILD
 #include "cvl_intern.h"
-#include "cvl/cvl_error.h"
-#include "cvl/cvl_frame.h"
-#include "cvl/cvl_gl.h"
-#include "cvl/cvl_basic.h"
-#include "cvl/cvl_filter.h"
+#include "cvl/cvl.h"
 
 #include "glsl/filter/convolve.glsl.h"
 #include "glsl/filter/convolve_separable.glsl.h"
@@ -443,7 +441,7 @@ float cvl_gauss_k_to_sigma(int k)
  */
 int cvl_gauss_sigma_to_k(float sigma)
 {
-    return mh_maxi(1, mh_iroundf(2.5f * sigma));
+    return cvl_maxi(1, cvl_iroundf(2.5f * sigma));
 }
 
 
@@ -472,9 +470,9 @@ void cvl_gauss(cvl_frame_t *dst, cvl_frame_t *src, int k_h, int k_v, float sigma
 	return;
     
     float m_h[2 * k_h + 1];
-    mh_gauss_mask(k_h, sigma_h, m_h, NULL);
+    cvl_gauss_mask(k_h, sigma_h, m_h, NULL);
     float m_v[2 * k_v + 1];
-    mh_gauss_mask(k_v, sigma_v, m_v, NULL);
+    cvl_gauss_mask(k_v, sigma_v, m_v, NULL);
     
     cvl_convolve_separable(dst, src, m_h, 2 * k_h + 1, m_v, 2 * k_v + 1);
 }
@@ -512,11 +510,11 @@ void cvl_gauss3d(cvl_frame_t *dst, cvl_frame_t **srcs,
 	return;
 
     float m_h[2 * k_h + 1];
-    mh_gauss_mask(k_h, sigma_h, m_h, NULL);
+    cvl_gauss_mask(k_h, sigma_h, m_h, NULL);
     float m_v[2 * k_v + 1];
-    mh_gauss_mask(k_v, sigma_v, m_v, NULL);
+    cvl_gauss_mask(k_v, sigma_v, m_v, NULL);
     float m_t[2 * k_t + 1];
-    mh_gauss_mask(k_t, sigma_t, m_t, NULL);
+    cvl_gauss_mask(k_t, sigma_t, m_t, NULL);
 
     cvl_convolve3d_separable(dst, srcs, m_h, 2 * k_h + 1, m_v, 2 * k_v + 1, m_t, 2 * k_t + 1);
 }
