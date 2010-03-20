@@ -3,7 +3,7 @@ dnl Process this file with autoconf to produce a configure script.
 #
 # This file is part of cvltonemap, a tone mapping tool using the CVL library.
 #
-# Copyright (C) 2007, 2008, 2009  Martin Lambers <marlam@marlam.de>
+# Copyright (C) 2007, 2008, 2009, 2010  Martin Lambers <marlam@marlam.de>
 #
 #   This program is free software; you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -19,24 +19,26 @@ dnl Process this file with autoconf to produce a configure script.
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-AC_PREREQ([2.61])
-AC_INIT([CVLTonemap], [0.2.3], [marlam@marlam.de])
+dnl Autotools init stuff
+AC_PREREQ([2.65])
+AC_INIT([CVLTonemap], [0.2.4], [marlam@marlam.de])
 AC_CONFIG_SRCDIR([src/cvltonemap.cpp])
 AC_CONFIG_AUX_DIR([build-aux])
-AC_CONFIG_MACRO_DIR([build-aux])
-AC_CANONICAL_SYSTEM
-
-AM_INIT_AUTOMAKE
-AM_CONFIG_HEADER([config.h])
-
-AC_GNU_SOURCE
+AC_CONFIG_MACRO_DIR([m4])
+AC_CONFIG_HEADERS([config.h])
+AC_CANONICAL_TARGET
+AC_USE_SYSTEM_EXTENSIONS
+AC_SYS_LARGEFILE
+AM_INIT_AUTOMAKE([1.11.1 color-tests silent-rules -Wall -Wno-portability])
+AM_SILENT_RULES([yes])
+LT_PREREQ([2.2.6])
+LT_INIT([disable-static])
 AC_PROG_CC
-gl_EARLY
 AC_PROG_CC_C99
-AM_PROG_CC_C_O
+gl_EARLY
 AC_PROG_CXX
 AC_PROG_INSTALL
-AC_SYS_LARGEFILE
+AC_C_BIGENDIAN
 
 dnl System
 case "${target}" in *-*-mingw32*) w32=yes ;; *) w32=no ;; esac
@@ -65,9 +67,9 @@ if test "$HAVE_LIBGLEW" != "yes"; then
 fi
 
 dnl CVL
-AM_CVL([0], [2], [5])
+AM_CVL([1], [0], [0])
 if test "$HAVE_LIBCVL" != "yes"; then
-	AC_MSG_ERROR([libcvl >= 0.2.5 not found])
+	AC_MSG_ERROR([libcvl >= 1.0.0 not found])
 fi
 
 dnl Qt4
@@ -98,7 +100,6 @@ AH_VERBATIM([W32_NATIVE],
 
 dnl Ouput
 AC_CONFIG_FILES([Makefile	\
-	build-aux/Makefile	\
 	gnulib/Makefile		\
 	mhlib/Makefile		\
 	src/Makefile		\
