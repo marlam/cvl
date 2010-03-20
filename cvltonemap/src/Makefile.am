@@ -47,8 +47,16 @@ cvltonemap_CPPFLAGS = \
 .ico.o:
 	echo "IDI_ICON1 ICON DISCARDABLE \"$<\"" | $(WINDRES) -o $@
 
-moc_%.cpp: %.h
-	$(MOC) -o $@ $<
+moc_verbose = $(moc_verbose_$(V))
+moc_verbose_ = $(moc_verbose_$(AM_DEFAULT_VERBOSITY))
+moc_verbose_0 = @echo "  MOC   " $@;
 
-rcc_%.cpp: %.qrc $(RESOURCES)
-	$(RCC) -o $@ $<
+moc_%.cpp: %.h
+	$(moc_verbose)$(MOC) -o $@ $<
+
+rcc_verbose = $(rcc_verbose_$(V))
+rcc_verbose_ = $(rcc_verbose_$(AM_DEFAULT_VERBOSITY))
+rcc_verbose_0 = @echo "  RCC   " $@;
+
+rcc_%.cpp: %.qrc
+	$(rcc_verbose)$(RCC) -o $@ $<
