@@ -25,6 +25,6 @@
 
 extern CVL_EXPORT void cvl_init(void);
 extern CVL_EXPORT void cvl_deinit(void);
-extern CVL_EXPORT const char *cvl_check_version(const char *req_version);
+extern CVL_EXPORT const char *cvl_version(int *major, int *minor, int *patch);
 
 #endif

@@ -219,20 +219,30 @@ void cvl_deinit(void)
     }
 }
 
-
 /**
- * \param req_version           The required version.
+ * \brief       Get the libcvl version.
+ * \param major Buffer for the major version number, or NULL.
+ * \param minor Buffer for the minor version number, or NULL.
+ * \param patch Buffer for the patch version number, or NULL.
+ * \return      The libcvl version string.
  *
- * Check that the version of the library is at minimum the requested one
- * and return the version string; return NULL if the condition is not
- * satisfied. If a NULL is passed to this function, no check is done,
- * but the version string is simply returned.
+ * This function returns the version string "MAJOR.MINOR.PATCH".
+ * If the pointers \a major, \a minor, \a patch are not NULL,
+ * the requested version number will be stored there.
  */
-const char *cvl_check_version(const char *req_version)
+const char *cvl_version(int *major, int *minor, int *patch)
 {
-    if (!req_version || strverscmp(req_version, PACKAGE_VERSION) <= 0)
+    if (major)
     {
-	return PACKAGE_VERSION;
+        *major = CVL_VERSION_MAJOR;
     }
-    return NULL;
+    if (minor)
+    {
+        *minor = CVL_VERSION_MINOR;
+    }
+    if (patch)
+    {
+        *patch = CVL_VERSION_PATCH;
+    }
+    return CVL_VERSION;
 }
