@@ -1,3 +1,7 @@
+Version 1.0.0:
+- Compatibility updates.
+- CVL: Replaced cvl_check_version() with cvl_version().
+
 Version 0.2.6:
 - Minor bug fixes.
 - CVL:
