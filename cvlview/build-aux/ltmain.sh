@@ -1,0 +1,1 @@
+/home/martin/install/Linux-x86_64/share/libtool/config/ltmain.sh

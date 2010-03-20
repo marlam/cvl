@@ -97,7 +97,6 @@ AH_VERBATIM([W32_NATIVE],
 
 dnl Ouput
 AC_CONFIG_FILES([Makefile	\
-	build-aux/Makefile	\
 	gnulib/Makefile		\
 	mhlib/Makefile		\
 	gllib/Makefile		\
