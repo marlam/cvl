@@ -67,9 +67,9 @@ if test "$HAVE_LIBGLEW" != "yes"; then
 fi
 
 dnl CVL
-AM_CVL([0], [2], [5])
+AM_CVL([1], [0], [0])
 if test "$HAVE_LIBCVL" != "yes"; then
-	AC_MSG_ERROR([libcvl >= 0.2.5 not found])
+	AC_MSG_ERROR([libcvl >= 1.0.0 not found])
 fi
 
 dnl Qt4
