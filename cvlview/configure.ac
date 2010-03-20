@@ -3,7 +3,7 @@ dnl Process this file with autoconf to produce a configure script.
 #
 # This file is part of cvlview, an image viewer using the CVL library.
 #
-# Copyright (C) 2007, 2008, 2009  Martin Lambers <marlam@marlam.de>
+# Copyright (C) 2007, 2008, 2009, 2010  Martin Lambers <marlam@marlam.de>
 #
 #   This program is free software; you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -19,23 +19,26 @@ dnl Process this file with autoconf to produce a configure script.
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-AC_PREREQ([2.61])
+dnl Autotools init stuff
+AC_PREREQ([2.65])
 AC_INIT([CVLView], [0.3.2], [marlam@marlam.de])
 AC_CONFIG_SRCDIR([src/cvlview.cpp])
 AC_CONFIG_AUX_DIR([build-aux])
-AC_CONFIG_MACRO_DIR([build-aux])
-AC_CANONICAL_SYSTEM
-
-AM_INIT_AUTOMAKE
-AM_CONFIG_HEADER([config.h])
-
-AC_GNU_SOURCE
+AC_CONFIG_MACRO_DIR([m4])
+AC_CONFIG_HEADERS([config.h])
+AC_CANONICAL_TARGET
+AC_USE_SYSTEM_EXTENSIONS
+AC_SYS_LARGEFILE
+AM_INIT_AUTOMAKE([1.11.1 color-tests silent-rules -Wall -Wno-portability])
+AM_SILENT_RULES([yes])
+LT_PREREQ([2.2.6])
+LT_INIT([disable-static])
 AC_PROG_CC
-gl_EARLY
 AC_PROG_CC_C99
+gl_EARLY
 AC_PROG_CXX
 AC_PROG_INSTALL
-AC_SYS_LARGEFILE
+AC_C_BIGENDIAN
 
 dnl System
 case "${target}" in *-*-mingw32*) w32=yes ;; *) w32=no ;; esac
