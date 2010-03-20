@@ -25,7 +25,6 @@ AC_DEFUN([gl_EARLY],
   m4_pattern_allow([^gl_LIBOBJS$])dnl a variable
   m4_pattern_allow([^gl_LTLIBOBJS$])dnl a variable
   AC_REQUIRE([AC_PROG_RANLIB])
-  # Code from module absolute-header:
   # Code from module alloca-opt:
   # Code from module arg-nonnull:
   # Code from module binary-io:
@@ -126,7 +125,6 @@ AC_DEFUN([gl_INIT],
   m4_pushdef([gl_LIBSOURCES_DIR], [])
   gl_COMMON
   gl_source_base='gnulib'
-  # Code from module absolute-header:
   # Code from module alloca-opt:
   gl_FUNC_ALLOCA
   # Code from module arg-nonnull:
@@ -616,7 +614,6 @@ AC_DEFUN([gl_FILE_LIST], [
   lib/xmalloc.c
   lib/xsize.h
   m4/00gnulib.m4
-  m4/absolute-header.m4
   m4/alloca.m4
   m4/cloexec.m4
   m4/codeset.m4
@@ -652,7 +649,6 @@ AC_DEFUN([gl_FILE_LIST], [
   m4/mmap-anon.m4
   m4/mode_t.m4
   m4/multiarch.m4
-  m4/onceonly.m4
   m4/open.m4
   m4/pipe.m4
   m4/pipe2.m4

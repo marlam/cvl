@@ -19,22 +19,27 @@ dnl Process this file with autoconf to produce a configure script.
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+dnl Autotools init stuff
+AC_PREREQ([2.65])
 AC_INIT([cvtool], [0.2.6], [marlam@marlam.de])
 AC_CONFIG_SRCDIR([cvtool/cvtool.c])
 AC_CONFIG_AUX_DIR([build-aux])
-AC_CONFIG_MACRO_DIR([build-aux])
-AC_CANONICAL_SYSTEM
-
-AM_INIT_AUTOMAKE
-AM_CONFIG_HEADER([config.h])
-
-AC_GNU_SOURCE
+AC_CONFIG_MACRO_DIR([m4])
+AC_CONFIG_HEADERS([config.h])
+AC_CANONICAL_TARGET
+AC_USE_SYSTEM_EXTENSIONS
+AC_SYS_LARGEFILE
+AM_INIT_AUTOMAKE([1.11.1 color-tests silent-rules -Wall -Wno-portability])
+AM_SILENT_RULES([yes])
+LT_PREREQ([2.2.6])
+LT_INIT([disable-static])
 AC_PROG_CC
-gl_EARLY
 AC_PROG_CC_C99
+gl_EARLY
 AC_PROG_LIBTOOL
 AC_PROG_INSTALL
-AC_SYS_LARGEFILE
+AC_LANG([C])
+AC_C_BIGENDIAN
 
 dnl System
 case "${target}" in *-*-mingw32*) w32=yes ;; *) w32=no ;; esac
@@ -69,29 +74,11 @@ dnl GLEW (used only by CVL)
 AM_GLEW()
 
 dnl CAIRO (used only by the optional cvtool draw command)
-dnl Determine include directory. Cairo >= 1.8.0 has <cairo/cairo-version.h>,
-dnl earlier versions have <cairo/cairo-features.h> instead.
-AC_CHECK_HEADER([cairo/cairo-version.h], 
-	[ gl_ABSOLUTE_HEADER([cairo/cairo-version.h])
-	  CAIRO_INCLUDE_DIR=`echo $gl_cv_absolute_cairo_cairo_version_h \
-	  | sed -e 's/\/cairo-version.h$//' -e 's/"//g' -e 's/^\/\/\//\//'`
-	],
-	[ AC_CHECK_HEADER([cairo/cairo-features.h],
-		[ gl_ABSOLUTE_HEADER([cairo/cairo-features.h])
-		  CAIRO_INCLUDE_DIR=`echo $gl_cv_absolute_cairo_cairo_features_h \
-		  | sed -e 's/\/cairo-features.h$//' -e 's/"//g' -e 's/^\/\/\//\//'`
-		],
-		[ CAIRO_INCLUDE_DIR="no" ])
-	])
-if test "$CAIRO_INCLUDE_DIR" != "no"; then
-	AC_LIB_APPENDTOVAR([CPPFLAGS], [-I$CAIRO_INCLUDE_DIR])
-	AC_LIB_HAVE_LINKFLAGS([cairo], [], 
-	  [#include <cairo.h>
-	   #if CAIRO_VERSION_MAJOR < 1 || (CAIRO_VERSION_MAJOR == 1 && CAIRO_VERSION_MINOR < 2)
-	   #error CAIRO version too old
-	   #endif],
-	  [char *s = CAIRO_VERSION_STRING;])
-fi
+PKG_CHECK_MODULES([CAIRO], [cairo],
+	[have_cairo=0],
+	[have_cairo=1
+	 AC_MSG_WARN([Disabled the draw command because libcairo was not found.])])
+AC_DEFINE_UNQUOTED([HAVE_LIBCAIRO], [$have_cairo], [Do we have libcairo?])
 
 dnl Global #defines for all source files
 AH_VERBATIM([UNUSED],
