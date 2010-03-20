@@ -3,7 +3,8 @@ dnl Process this file with autoconf to produce a configure script.
 #
 # This file is part of cvtool, a computer vision tool.
 #
-# Copyright (C) 2005, 2006, 2007, 2008  Martin Lambers <marlam@marlam.de>
+# Copyright (C) 2005, 2006, 2007, 2008, 2009, 2010
+# Martin Lambers <marlam@marlam.de>
 #
 #   This program is free software; you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -21,7 +22,7 @@ dnl Process this file with autoconf to produce a configure script.
 
 dnl Autotools init stuff
 AC_PREREQ([2.65])
-AC_INIT([cvtool], [0.2.6], [marlam@marlam.de])
+AC_INIT([cvtool], [1.0.0], [marlam@marlam.de])
 AC_CONFIG_SRCDIR([cvtool/cvtool.c])
 AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_MACRO_DIR([m4])
@@ -56,7 +57,7 @@ dnl Library code modified:		REVISION++
 dnl Interfaces changed/added/removed:   CURRENT++	REVISION=0
 dnl Interfaces added: 			AGE++
 dnl Interfaces removed:			AGE=0
-AC_SUBST([LT_CURRENT], [9])
+AC_SUBST([LT_CURRENT], [10])
 AC_SUBST([LT_REVISION], [0])
 AC_SUBST([LT_AGE], [0])
 
