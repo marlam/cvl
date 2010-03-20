@@ -3,7 +3,7 @@
  *
  * This file is part of cvlview, an image viewer using the CVL library.
  *
- * Copyright (C) 2007, 2008, 2009  Martin Lambers <marlam@marlam.de>
+ * Copyright (C) 2007, 2008, 2009, 2010  Martin Lambers <marlam@marlam.de>
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -626,7 +626,7 @@ void CVLView::show_aboutbox()
 {
     QMessageBox::about(this, tr("About " PACKAGE_NAME), tr(
 		"<p>This is %1 version %2, using CVL version %3.</p>"
-		"<p>Copyright (C) 2009  Martin Lambers and others.<br>"
+		"<p>Copyright (C) 2010  Martin Lambers and others.<br>"
 		"This is free software. You may redistribute copies of it under the terms of "
 		"the <a href=\"http://www.gnu.org/licenses/gpl.html\">"
 		"GNU General Public License</a>.<br>"
