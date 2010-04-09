@@ -1,3 +1,11 @@
+- Sometimes the documentation fails to build, with an error similar to the
+  following: "/usr/bin/texi2dvi: pdfetex exited with bad status, quitting."
+
+
+
+
+Old TODO list:
+
 Bugfixes
 =========
 
