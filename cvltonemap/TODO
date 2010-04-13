@@ -2,3 +2,8 @@
   It needs to be rewritten.
 
 - The parameter selector should have a "reset to default" button.
+- It should be documented that the parameters in the bottom half are
+  for postprocessing and applied after tonemapping.
+- Add basic preprocessing filters: linear/gamma/log mapping with min/max
+  clamping. This can replace the "maximum luminance" parameter of some
+  tonemapping methods, which already effectively did a linear scaling.
