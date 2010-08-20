@@ -116,6 +116,7 @@ AC_DEFUN([gl_INIT],
 [
   AM_CONDITIONAL([GL_COND_LIBTOOL], [true])
   gl_cond_libtool=true
+  gl_m4_base='gnulib/m4'
   m4_pushdef([AC_LIBOBJ], m4_defn([gl_LIBOBJ]))
   m4_pushdef([AC_REPLACE_FUNCS], m4_defn([gl_REPLACE_FUNCS]))
   m4_pushdef([AC_LIBSOURCES], m4_defn([gl_LIBSOURCES]))
@@ -132,7 +133,7 @@ AC_DEFUN([gl_INIT],
   # Code from module c-strcase:
   # Code from module cloexec:
   gl_CLOEXEC
-  gl_MODULE_INDICATOR([cloexec])
+  gl_MODULE_INDICATOR_FOR_TESTS([cloexec])
   # Code from module configmake:
   # Code from module dup2:
   gl_FUNC_DUP2
@@ -165,7 +166,7 @@ AC_DEFUN([gl_INIT],
   gl_UNISTD_MODULE_INDICATOR([getdtablesize])
   # Code from module getopt-gnu:
   gl_FUNC_GETOPT_GNU
-  gl_MODULE_INDICATOR([getopt-gnu])
+  gl_MODULE_INDICATOR_FOR_TESTS([getopt-gnu])
   # Code from module getopt-posix:
   gl_FUNC_GETOPT_POSIX
   # Code from module gettext-h:
@@ -196,7 +197,6 @@ AC_DEFUN([gl_INIT],
   gl_MULTIARCH
   # Code from module open:
   gl_FUNC_OPEN
-  gl_MODULE_INDICATOR([open])
   gl_FCNTL_MODULE_INDICATOR([open])
   # Code from module pipe:
   gl_PIPE
@@ -395,6 +395,13 @@ AC_DEFUN([gl_INIT],
   m4_pushdef([gltests_LIBSOURCES_DIR], [])
   gl_COMMON
   gl_source_base='tests'
+changequote(,)dnl
+  gltests_WITNESS=IN_`echo "${PACKAGE-$PACKAGE_TARNAME}" | LC_ALL=C tr abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ | LC_ALL=C sed -e 's/[^A-Z0-9_]/_/g'`_GNULIB_TESTS
+changequote([, ])dnl
+  AC_SUBST([gltests_WITNESS])
+  gl_module_indicator_condition=$gltests_WITNESS
+  m4_pushdef([gl_MODULE_INDICATOR_CONDITION], [$gl_module_indicator_condition])
+  m4_popdef([gl_MODULE_INDICATOR_CONDITION])
   m4_ifval(gltests_LIBSOURCES_LIST, [
     m4_syscmd([test ! -d ]m4_defn([gltests_LIBSOURCES_DIR])[ ||
       for gl_file in ]gltests_LIBSOURCES_LIST[ ; do
@@ -489,6 +496,7 @@ AC_DEFUN([gl_FILE_LIST], [
   build-aux/config.rpath
   build-aux/warn-on-use.h
   lib/alloca.in.h
+  lib/anytostr.c
   lib/asnprintf.c
   lib/asprintf.c
   lib/binary-io.h
@@ -607,6 +615,7 @@ AC_DEFUN([gl_FILE_LIST], [
   lib/xsize.h
   m4/00gnulib.m4
   m4/alloca.m4
+  m4/asm-underscore.m4
   m4/cloexec.m4
   m4/codeset.m4
   m4/dos.m4
@@ -645,6 +654,7 @@ AC_DEFUN([gl_FILE_LIST], [
   m4/pipe.m4
   m4/pipe2.m4
   m4/posix_spawn.m4
+  m4/printf.m4
   m4/rawmemchr.m4
   m4/sched_h.m4
   m4/sig_atomic_t.m4
