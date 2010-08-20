@@ -52,10 +52,7 @@ AC_DEFUN([AM_QTGUI],
         fi
     fi
     if test "$RCC" != ":" -a "$MOC" != ":" -a "$HAVE_QTINC" = "yes"; then
-        AC_LIB_APPENDTOVAR([CXXFLAGS], [-I$QT_INCLUDE_DIR])
-        AC_LIB_APPENDTOVAR([CXXFLAGS], [-I$QT_INCLUDE_DIR/Qt])
-        AC_LIB_APPENDTOVAR([CXXFLAGS], [-I$QT_INCLUDE_DIR/QtCore])
-        AC_LIB_APPENDTOVAR([CXXFLAGS], [-I$QT_INCLUDE_DIR/QtGui])
+	CPPFLAGS="$CPPFLAGS -isystem $QT_INCLUDE_DIR -isystem $QT_INCLUDE_DIR/Qt -isystem $QT_INCLUDE_DIR/QtCore -isystem $QT_INCLUDE_DIR/QtGui"
         AC_LIB_FROMPACKAGE([QtGui], [qt])
         case "${target}" in
         *-*-mingw32*)
@@ -92,7 +89,7 @@ AC_DEFUN([AM_QTOPENGL],
     AM_QTGUI([$1], [$2], [$3])
     if test "$HAVE_LIBQTGUI" = "yes"; then
         AC_LANG_PUSH([C++])
-        AC_LIB_APPENDTOVAR([CXXFLAGS], [-I$QT_INCLUDE_DIR/QtOpenGL])
+	CPPFLAGS="$CPPFLAGS -isystem $QT_INCLUDE_DIR/QtOpenGL"
         AC_LIB_FROMPACKAGE([QtOpenGL], [qt])
         case "${target}" in
         *-*-mingw32*)
