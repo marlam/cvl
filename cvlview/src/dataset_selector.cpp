@@ -103,7 +103,15 @@ void DatasetSelector::set_nr(int nr)
     _lock = true;
 
     nr--;
-    (*_datafile)->set_index(nr);
+    try
+    {
+        (*_datafile)->set_index(nr);
+    }
+    catch (err e)
+    {
+        // Ignore the error here. The application will get it when
+        // trying to read the frame.
+    }
     emit make_gl_context_current();
     while ((*_datafile)->index() < nr)
     {
