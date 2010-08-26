@@ -3,7 +3,8 @@
  *
  * This file is part of cvlview, an image viewer using the CVL library.
  *
- * Copyright (C) 2007, 2008  Martin Lambers <marlam@marlam.de>
+ * Copyright (C) 2007, 2008, 2009, 2010
+ * Martin Lambers <marlam@marlam.de>
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -27,6 +28,7 @@
  */
 
 #include <cstdio>
+#include <ctime>
 
 #include <cvl/cvl.h>
 
@@ -40,12 +42,15 @@ class DataFile
 {
     private:
 	char *_filename;
-	FILE *_f;
+        time_t _mtime;
 	bool _eof_seen;
 	int _known_datasets;
 	int _offsets_buflen;
 	off_t *_offsets;
 	int _index;
+
+        FILE *open(const char *filename, time_t *mtime) throw (err);
+        void invalidate();
 
     public:
 	DataFile(const char *filename) throw (err);

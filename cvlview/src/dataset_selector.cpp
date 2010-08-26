@@ -3,7 +3,8 @@
  *
  * This file is part of cvlview, an image viewer using the CVL library.
  *
- * Copyright (C) 2007, 2008  Martin Lambers <marlam@marlam.de>
+ * Copyright (C) 2007, 2008, 2009, 2010
+ * Martin Lambers <marlam@marlam.de>
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -70,6 +71,11 @@ DatasetSelector::DatasetSelector(DataFile **datafile, QWidget *parent)
     _total_label->setVisible(false);
     _total_label_was_set = false;
 
+    _reload_button = new QPushButton("Reload");
+    connect(_reload_button, SIGNAL(clicked()), this, SLOT(reload_button_clicked()));
+    _reload_button->setFixedWidth(_reload_button->sizeHint().width() / 3 * 2);
+    layout->addWidget(_reload_button, 0, 3);
+
     layout->setRowStretch(1, 1);
     setLayout(layout);
 }
@@ -91,89 +97,95 @@ void DatasetSelector::set_nr(int nr)
 {
     if (!*_datafile)
 	return;
+    if (_lock)
+        return;
 
-    if (!_lock)
+    _lock = true;
+
+    nr--;
+    (*_datafile)->set_index(nr);
+    emit make_gl_context_current();
+    while ((*_datafile)->index() < nr)
     {
-	_lock = true;
-	
-	nr--;
-	if ((*_datafile)->total() == -1)
-	{
-	    if (nr < (*_datafile)->index())
-	    {
-		(*_datafile)->set_index(nr);
-	    }
-	    else
-	    {
-		emit make_gl_context_current();
-		while ((*_datafile)->index() < nr)
-    		{
-		    cvl_frame_t *dummy = NULL;
-    		    try
-    		    {
-			dummy = (*_datafile)->read();
-    		    }
-    		    catch (err e)
-    		    {
-    			// Ignore the error here. The application will get it when
-    			// trying to read the frame.
-    		    }
-		    if (!dummy)
-		    {
-			break;
-		    }
-		    cvl_frame_free(dummy);
-		}
-		// Test for corner case: we are at EOF but don't know it yet.
-		if ((*_datafile)->total() == -1)
-		{
-		    try
-		    {
-			cvl_frame_free((*_datafile)->read());
-			(*_datafile)->prev();
-		    }
-		    catch (err e)
-		    {
-			// Ignore the error here. The application will get it when
-			// trying to read the frame.
-		    }
-		}
-	    }
-	}
-	else
-	{
-	    (*_datafile)->set_index(nr);
-	}
-
-	if ((*_datafile)->index() == (*_datafile)->total() - 1)
-    	{
-	    try
-	    {
-		(*_datafile)->prev();
-	    }
-	    catch (err e)
-	    {
-		// Ignore the error here. The application will get it when
-		// trying to read the frame.
-	    }
-	}
-
-	emit dataset_changed();
-	_nr_spinbox->setValue((*_datafile)->index());
-	if ((*_datafile)->total() != -1 && !_total_label_was_set)
-	{
-	    _total_label->setText(mh_string("/ %4d", (*_datafile)->total() - 1).c_str());
-	    _scan_button->setVisible(false);
-	    _total_label->setVisible(true);
-	    _total_label_was_set = true;
-	}
-	_lock = false;
+        cvl_frame_t *dummy = NULL;
+        try
+        {
+            dummy = (*_datafile)->read();
+        }
+        catch (err e)
+        {
+            // Ignore the error here. The application will get it when
+            // trying to read the frame.
+        }
+        if (!dummy)
+        {
+            break;
+        }
+        cvl_frame_free(dummy);
     }
+    // Test for corner case: we are at EOF but don't know it yet.
+    if ((*_datafile)->total() == -1)
+    {
+        try
+        {
+            cvl_frame_free((*_datafile)->read());
+            (*_datafile)->prev();
+        }
+        catch (err e)
+        {
+            // Ignore the error here. The application will get it when
+            // trying to read the frame.
+        }
+    }
+
+    if ((*_datafile)->index() == (*_datafile)->total() - 1)
+    {
+        try
+        {
+            (*_datafile)->prev();
+        }
+        catch (err e)
+        {
+            // Ignore the error here. The application will get it when
+            // trying to read the frame.
+        }
+    }
+
+    if ((*_datafile)->total() != -1)
+    {
+        if (!_total_label_was_set)
+        {
+            _total_label->setText(mh_string("/ %4d", (*_datafile)->total() - 1).c_str());
+            _scan_button->setVisible(false);
+            _total_label->setVisible(true);
+            _total_label_was_set = true;
+        }
+    }
+    else
+    {
+        if (_total_label_was_set)
+        {
+            reset();
+        }
+    }
+
+    emit dataset_changed();
+    _nr_spinbox->setValue((*_datafile)->index());
+    _lock = false;
 }
 
 void DatasetSelector::scan_button_clicked()
 {
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+    int nr = _nr_spinbox->value();
     set_nr(INT_MAX);
+    set_nr(nr);
+    QApplication::restoreOverrideCursor();
+}
+
+void DatasetSelector::reload_button_clicked()
+{
+    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+    set_nr(_nr_spinbox->value());
     QApplication::restoreOverrideCursor();
 }

@@ -3,7 +3,8 @@
  *
  * This file is part of cvlview, an image viewer using the CVL library.
  *
- * Copyright (C) 2007, 2008  Martin Lambers <marlam@marlam.de>
+ * Copyright (C) 2007, 2008, 2009, 2010
+ * Martin Lambers <marlam@marlam.de>
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -40,6 +41,7 @@ class DatasetSelector : public QWidget
 	DataFile **_datafile;
 	QSpinBox *_nr_spinbox;
 	QPushButton *_scan_button;
+        QPushButton *_reload_button;
 	QLabel *_total_label;
 	bool _total_label_was_set;
 	bool _lock;
@@ -47,6 +49,7 @@ class DatasetSelector : public QWidget
     private slots:
 	void set_nr(int nr);
         void scan_button_clicked();
+        void reload_button_clicked();
 
     public:
 	DatasetSelector(DataFile **datafile, QWidget *parent = NULL);	

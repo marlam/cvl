@@ -3,7 +3,8 @@
  *
  * This file is part of cvlview, an image viewer using the CVL library.
  *
- * Copyright (C) 2007, 2008  Martin Lambers <marlam@marlam.de>
+ * Copyright (C) 2007, 2008, 2009, 2010
+ * Martin Lambers <marlam@marlam.de>
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -41,21 +42,22 @@ ChannelSelector::ChannelSelector(cvl_frame_t **frame, QWidget *parent)
     
     _channel_button[0] = new QPushButton(tr("&0"));
     _channel_button[0]->setShortcut(tr("0"));
-    _channel_button[0]->setFixedSize(QSize(_channel_button[0]->sizeHint().width() / 2, _channel_button[0]->sizeHint().height()));
+    _channel_button[0]->setFixedSize(QSize(_channel_button[0]->sizeHint().width() / 3, _channel_button[0]->sizeHint().height()));
     layout->addWidget(_channel_button[0], 0, 0);
     _channel_button[1] = new QPushButton(tr("&1"));
     _channel_button[1]->setShortcut(tr("1"));
-    _channel_button[1]->setFixedSize(QSize(_channel_button[1]->sizeHint().width() / 2, _channel_button[1]->sizeHint().height()));
+    _channel_button[1]->setFixedSize(QSize(_channel_button[1]->sizeHint().width() / 3, _channel_button[1]->sizeHint().height()));
     layout->addWidget(_channel_button[1], 0, 1);
     _channel_button[2] = new QPushButton(tr("&2"));
     _channel_button[2]->setShortcut(tr("2"));
-    _channel_button[2]->setFixedSize(QSize(_channel_button[2]->sizeHint().width() / 2, _channel_button[2]->sizeHint().height()));
+    _channel_button[2]->setFixedSize(QSize(_channel_button[2]->sizeHint().width() / 3, _channel_button[2]->sizeHint().height()));
     layout->addWidget(_channel_button[2], 0, 2);
     _channel_button[3] = new QPushButton(tr("&3"));
     _channel_button[3]->setShortcut(tr("3"));
-    _channel_button[3]->setFixedSize(QSize(_channel_button[3]->sizeHint().width() / 2, _channel_button[3]->sizeHint().height()));
+    _channel_button[3]->setFixedSize(QSize(_channel_button[3]->sizeHint().width() / 3, _channel_button[3]->sizeHint().height()));
     layout->addWidget(_channel_button[3], 0, 3);
     _color_button = new QPushButton(tr("&Color"));
+    _color_button->setFixedWidth(_color_button->sizeHint().width() / 3 * 2);
     _color_button->setShortcut(tr("C"));
     layout->addWidget(_color_button, 0, 4, 1, 2);
 
