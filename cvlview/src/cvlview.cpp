@@ -109,7 +109,7 @@ CVLView::CVLView()
 
     _widget = new QWidget;
     setCentralWidget(_widget);
-    const int tools_width = 256;
+    const int tools_width = 280;
     
     _dataset_selector = new DatasetSelector(&_datafile, _widget);
     connect(_dataset_selector, SIGNAL(dataset_changed()), this, SLOT(open_frame()));
