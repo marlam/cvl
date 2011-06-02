@@ -197,7 +197,7 @@ BUILT_SOURCES = $(nodist_libcvl_la_SOURCES)
 CLEANFILES = $(BUILT_SOURCES)
 
 libcvl_la_LDFLAGS = -version-info $(LT_CURRENT):$(LT_REVISION):$(LT_AGE)
-libcvl_la_LIBADD = $(LTLIBGLEW)
+libcvl_la_LIBADD = $(GLEW_LIBS)
 
 AM_CFLAGS = $(CFLAG_VISIBILITY_HIDDEN)
-AM_CPPFLAGS = -I$(top_builddir)/cvl/cvl
+AM_CPPFLAGS = -I$(top_builddir)/cvl/cvl $(GLEW_CFLAGS)

@@ -43,7 +43,7 @@ cvtool_SOURCES = cvtool.c 	\
 	cmd_wavelets.c
 
 cvtool_LDADD = $(top_builddir)/cvl/libcvl.la		\
-	$(LTLIBGLEW) $(CAIRO_LIBS) $(LTLIBICONV)	\
+	$(CAIRO_LIBS) $(LTLIBICONV)			\
 	$(top_builddir)/mhlib/libmh.la			\
 	$(top_builddir)/gnulib/libgnu.la
 

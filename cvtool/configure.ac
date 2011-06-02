@@ -72,10 +72,7 @@ dnl Math library
 AC_SEARCH_LIBS([sqrtf], [m])
 
 dnl GLEW (used only by CVL)
-AM_GLEW()
-if test "$HAVE_LIBGLEW" != "yes"; then
-	AC_MSG_ERROR([libglew not found])
-fi
+PKG_CHECK_MODULES([GLEW], [glew >= 1.5.0])
 
 dnl CAIRO (used only by the optional cvtool draw command)
 PKG_CHECK_MODULES([CAIRO], [cairo],
