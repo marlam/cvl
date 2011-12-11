@@ -30,7 +30,7 @@ AC_CONFIG_HEADERS([config.h])
 AC_CANONICAL_TARGET
 AC_USE_SYSTEM_EXTENSIONS
 AC_SYS_LARGEFILE
-AM_INIT_AUTOMAKE([1.11.1 color-tests silent-rules -Wall -Wno-portability])
+AM_INIT_AUTOMAKE([1.11.1 color-tests silent-rules no-texinfo.tex -Wall -Wno-portability])
 AM_SILENT_RULES([yes])
 LT_PREREQ([2.2.6])
 LT_INIT([disable-static])
