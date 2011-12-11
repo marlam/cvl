@@ -74,6 +74,12 @@ AC_SEARCH_LIBS([sqrtf], [m])
 dnl GLEW (used only by CVL)
 PKG_CHECK_MODULES([GLEW], [glew >= 1.5.0])
 
+dnl GLU
+PKG_CHECK_MODULES([GLU], [glu >= 0.0], [HAVE_GLU=1], [HAVE_GLU=0])
+
+dnl OpenGL
+PKG_CHECK_MODULES([GL], [gl >= 0.0], [HAVE_GL=1], [HAVE_GL=0])
+
 dnl CAIRO (used only by the optional cvtool draw command)
 PKG_CHECK_MODULES([CAIRO], [cairo],
 	[have_cairo=1],
