@@ -29,7 +29,7 @@ AC_CONFIG_HEADERS([config.h])
 AC_CANONICAL_TARGET
 AC_USE_SYSTEM_EXTENSIONS
 AC_SYS_LARGEFILE
-AM_INIT_AUTOMAKE([1.11.1 color-tests silent-rules -Wall -Wno-portability])
+AM_INIT_AUTOMAKE([1.11.1 color-tests silent-rules no-texinfo.tex -Wall -Wno-portability])
 AM_SILENT_RULES([yes])
 LT_PREREQ([2.2.6])
 LT_INIT([disable-static])
@@ -60,11 +60,8 @@ AC_SEARCH_LIBS([clock_gettime], [rt])
 dnl Math library
 AC_SEARCH_LIBS([sqrtf], [m])
 
-dnl GLEW
-AM_GLEW()
-if test "$HAVE_LIBGLEW" != "yes"; then
-	AC_MSG_ERROR([libglew not found])
-fi
+dnl GLEW (used only by CVL)
+PKG_CHECK_MODULES([GLEW], [glew >= 1.5.0])
 
 dnl CVL
 AM_CVL([1], [0], [0])
@@ -73,10 +70,13 @@ if test "$HAVE_LIBCVL" != "yes"; then
 fi
 
 dnl Qt4
-AM_QTOPENGL([4], [4], [0])
-if test "$HAVE_LIBQTOPENGL" != "yes"; then
-	AC_MSG_ERROR([Qt >= 4.4.0 not found])
-fi
+PKG_CHECK_MODULES([QTOPENGL], [QtOpenGL >= 0.0])
+RCC=""
+AC_ARG_VAR([RCC], [rcc command])
+MOC=""
+AC_ARG_VAR([MOC], [moc command])
+AC_CHECK_TOOLS([RCC], [rcc-qt4 rcc])
+AC_CHECK_TOOLS([MOC], [moc-qt4 moc])
 
 dnl Global #defines for all source files
 AH_VERBATIM([UNUSED],

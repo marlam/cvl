@@ -65,12 +65,13 @@ cvlview_LDADD = \
 	$(top_builddir)/gllib/libgl.a		\
 	$(top_builddir)/mhlib/libmh.a		\
 	$(top_builddir)/gnulib/libgnu.a		\
-	$(LIBQTOPENGL) $(LIBCVL) $(LIBGLEW)
+	$(QTOPENGL_LIBS) $(LIBCVL) $(GLEW_LIBS)
 
 cvlview_CPPFLAGS = \
 	-I$(top_builddir)/gnulib -I$(top_srcdir)/gnulib	\
 	-I$(top_srcdir)/mhlib				\
-	-I$(top_srcdir)/gllib
+	-I$(top_srcdir)/gllib				\
+	$(QTOPENGL_CFLAGS) $(GLEW_CFLAGS)
 
 .ico.o:
 	echo "IDI_ICON1 ICON DISCARDABLE \"$<\"" | $(WINDRES) -o $@
