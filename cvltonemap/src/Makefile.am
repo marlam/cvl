@@ -38,11 +38,12 @@ CLEANFILES = $(BUILT_SOURCES)
 cvltonemap_LDADD = \
 	$(top_builddir)/mhlib/libmh.a	\
 	$(top_builddir)/gnulib/libgnu.a	\
-	$(LIBQTOPENGL) $(LIBCVL) $(LIBGLEW)
+	$(QTOPENGL_LIBS) $(LIBCVL) $(GLEW_LIBS)
 
 cvltonemap_CPPFLAGS = \
 	-I$(top_builddir)/gnulib -I$(top_srcdir)/gnulib	\
-	-I$(top_srcdir)/mhlib
+	-I$(top_srcdir)/mhlib				\
+	$(QTOPENGL_CFLAGS) $(GLEW_CFLAGS)
 
 .ico.o:
 	echo "IDI_ICON1 ICON DISCARDABLE \"$<\"" | $(WINDRES) -o $@
