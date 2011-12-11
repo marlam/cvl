@@ -1,5 +1,5 @@
-# ftello.m4 serial 7
-dnl Copyright (C) 2007-2010 Free Software Foundation, Inc.
+# ftello.m4 serial 10
+dnl Copyright (C) 2007-2011 Free Software Foundation, Inc.
 dnl This file is free software; the Free Software Foundation
 dnl gives unlimited permission to copy and/or distribute it,
 dnl with or without modifications, as long as this notice is preserved.
@@ -13,10 +13,19 @@ AC_DEFUN([gl_FUNC_FTELLO],
   dnl Persuade glibc <stdio.h> to declare ftello().
   AC_REQUIRE([AC_USE_SYSTEM_EXTENSIONS])
 
+  AC_CHECK_DECLS_ONCE([ftello])
+  if test $ac_cv_have_decl_ftello = no; then
+    HAVE_DECL_FTELLO=0
+  fi
+
   AC_CACHE_CHECK([for ftello], [gl_cv_func_ftello],
     [
-      AC_TRY_LINK([#include <stdio.h>], [ftello (stdin);],
-        [gl_cv_func_ftello=yes], [gl_cv_func_ftello=no])
+      AC_LINK_IFELSE(
+        [AC_LANG_PROGRAM(
+           [[#include <stdio.h>]],
+           [[ftello (stdin);]])],
+        [gl_cv_func_ftello=yes],
+        [gl_cv_func_ftello=no])
     ])
   if test $gl_cv_func_ftello = no; then
     HAVE_FTELLO=0
@@ -43,7 +52,8 @@ changequote(,)dnl
             *)        gl_cv_func_ftello_works="guessing yes" ;;
           esac
 changequote([,])dnl
-          AC_TRY_RUN([
+          AC_RUN_IFELSE(
+            [AC_LANG_SOURCE([[
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -100,7 +110,9 @@ main (void)
   /* The file's contents is now "foogarsh!".  */
 
   return 0;
-}], [gl_cv_func_ftello_works=yes], [gl_cv_func_ftello_works=no], [:])
+}]])],
+            [gl_cv_func_ftello_works=yes],
+            [gl_cv_func_ftello_works=no], [:])
         ])
       case "$gl_cv_func_ftello_works" in
         *yes) ;;
@@ -112,12 +124,4 @@ main (void)
       esac
     fi
   fi
-  if test $HAVE_FTELLO = 0 || test $REPLACE_FTELLO = 1; then
-    gl_REPLACE_FTELLO
-  fi
-])
-
-AC_DEFUN([gl_REPLACE_FTELLO],
-[
-  AC_LIBOBJ([ftello])
 ])
