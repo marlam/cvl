@@ -44,7 +44,7 @@
 #define GLVM_H
 
 /* Define to 1 if you have C++0x math functions in the std namespace */
-#define GLVM_HAVE_CXX0X_MATH 0
+#define GLVM_HAVE_CXX0X_MATH 1
 
 #include <cmath>
 #include <cstdlib>
