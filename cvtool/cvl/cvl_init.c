@@ -3,7 +3,7 @@
  * 
  * This file is part of CVL, a computer vision library.
  *
- * Copyright (C) 2007, 2008, 2009, 2010
+ * Copyright (C) 2007, 2008, 2009, 2010, 2017
  * Martin Lambers <marlam@marlam.de>
  *
  *   This program is free software; you can redistribute it and/or modify
@@ -114,30 +114,30 @@ void cvl_init(void)
     {
 	ctx->cvl_gl_texture_formats[0][0] = GL_R8;
 	ctx->cvl_gl_texture_formats[0][1] = GL_RG8;
-	ctx->cvl_gl_texture_formats[0][2] = GL_RGB;
+	ctx->cvl_gl_texture_formats[0][2] = GL_RGBA;
 	ctx->cvl_gl_texture_formats[0][3] = GL_RGBA;
 	ctx->cvl_gl_texture_formats[1][0] = GL_R32F;
 	ctx->cvl_gl_texture_formats[1][1] = GL_RG32F;
-	ctx->cvl_gl_texture_formats[1][2] = GL_RGB32F_ARB;
+	ctx->cvl_gl_texture_formats[1][2] = GL_RGBA32F_ARB;
 	ctx->cvl_gl_texture_formats[1][3] = GL_RGBA32F_ARB;
 	ctx->cvl_gl_texture_formats[2][0] = GL_R16F;
 	ctx->cvl_gl_texture_formats[2][1] = GL_RG16F;
-	ctx->cvl_gl_texture_formats[2][2] = GL_RGB16F_ARB;
+	ctx->cvl_gl_texture_formats[2][2] = GL_RGBA16F_ARB;
 	ctx->cvl_gl_texture_formats[2][3] = GL_RGBA16F_ARB;
     }
     else
     {
-	ctx->cvl_gl_texture_formats[0][0] = GL_RGB;
-	ctx->cvl_gl_texture_formats[0][1] = GL_RGB;
-	ctx->cvl_gl_texture_formats[0][2] = GL_RGB;
+	ctx->cvl_gl_texture_formats[0][0] = GL_RGBA;
+	ctx->cvl_gl_texture_formats[0][1] = GL_RGBA;
+	ctx->cvl_gl_texture_formats[0][2] = GL_RGBA;
 	ctx->cvl_gl_texture_formats[0][3] = GL_RGBA;
-	ctx->cvl_gl_texture_formats[1][0] = GL_RGB32F_ARB;
-	ctx->cvl_gl_texture_formats[1][1] = GL_RGB32F_ARB;
-	ctx->cvl_gl_texture_formats[1][2] = GL_RGB32F_ARB;
+	ctx->cvl_gl_texture_formats[1][0] = GL_RGBA32F_ARB;
+	ctx->cvl_gl_texture_formats[1][1] = GL_RGBA32F_ARB;
+	ctx->cvl_gl_texture_formats[1][2] = GL_RGBA32F_ARB;
 	ctx->cvl_gl_texture_formats[1][3] = GL_RGBA32F_ARB;
-	ctx->cvl_gl_texture_formats[2][0] = GL_RGB16F_ARB;
-	ctx->cvl_gl_texture_formats[2][1] = GL_RGB16F_ARB;
-	ctx->cvl_gl_texture_formats[2][2] = GL_RGB16F_ARB;
+	ctx->cvl_gl_texture_formats[2][0] = GL_RGBA16F_ARB;
+	ctx->cvl_gl_texture_formats[2][1] = GL_RGBA16F_ARB;
+	ctx->cvl_gl_texture_formats[2][2] = GL_RGBA16F_ARB;
 	ctx->cvl_gl_texture_formats[2][3] = GL_RGBA16F_ARB;
     }
 
