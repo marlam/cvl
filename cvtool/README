@@ -9,5 +9,4 @@ CVL is bundled with cvtool, a command line tool that aims to make all of CVL's
 functionality available as filters. It integrates well with other tools like
 netpbm and pfstools.
 
-For more information, read the documentation in the doc subdirectory, or visit
-the homepage: http://cvtool.sourceforge.net/.
+For more information, read the documentation in the doc subdirectory.

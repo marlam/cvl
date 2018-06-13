@@ -562,8 +562,8 @@ void CVLTonemap::show_aboutbox()
 		"the <a href=\"http://www.gnu.org/licenses/gpl.html\">"
 		"GNU General Public License</a>.<br>"
 		"There is NO WARRANTY, to the extent permitted by law.</p>"
-		"See <a href=\"http://cvtool.sourceforge.net/cvltonemap.html\">"
-		"http://cvtool.sourceforge.net/cvltonemap.html</a> "
+		"See <a href=\"https://gitlab.marlam.de/marlam/cvl\">"
+		"https://gitlab.marlam.de/marlam/cvl</a> "
 		"for more information on this software.</p>")
 	    .arg(PACKAGE_NAME).arg(VERSION).arg(cvl_version(NULL, NULL, NULL)));
 }

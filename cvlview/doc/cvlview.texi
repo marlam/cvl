@@ -60,7 +60,7 @@ Documentation License''.
 CVLView is a viewer for arbritrary data that is stored in pfs files.
 It is based on the CVL library.
 
-The program’s homepage is @url{http://cvtool.sourceforge.net/cvlview.html}.
+The program’s homepage is @url{https://gitlab.marlam.de/marlam/cvl}.
 
 
 @node Copying Information
