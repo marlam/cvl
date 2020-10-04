@@ -22,7 +22,7 @@ dnl Process this file with autoconf to produce a configure script.
 
 dnl Autotools init stuff
 AC_PREREQ([2.65])
-AC_INIT([cvtool], [1.0.0], [marlam@marlam.de])
+AC_INIT([cvtool], [1.0.1], [marlam@marlam.de])
 AC_CONFIG_SRCDIR([cvtool/cvtool.c])
 AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_MACRO_DIR([m4])
